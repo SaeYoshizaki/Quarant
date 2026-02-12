@@ -1,0 +1,148 @@
+{
+  "name": "quarant",
+  "type": "clab",
+  "clab": {
+    "config": {
+      "prefix": "clab",
+      "mgmt": {
+        "network": "clab",
+        "bridge": "br-583cb660839d",
+        "ipv4-subnet": "172.20.20.0/24",
+        "ipv4-gw": "172.20.20.1",
+        "ipv6-subnet": "3fff:172:20:20::/64",
+        "ipv6-gw": "3fff:172:20:20::1",
+        "external-access": true
+      }
+    }
+  },
+  "ssh-pub-keys": [],
+  "nodes": {
+    "pc1": {
+      "index": "0",
+      "shortname": "pc1",
+      "longname": "clab-quarant-pc1",
+      "fqdn": "pc1.quarant.io",
+      "group": "",
+      "labdir": "/home/kali/club-test/clab-quarant/pc1",
+      "kind": "linux",
+      "image": "alpine:latest",
+      "mgmt-net": "",
+      "mgmt-intf": "",
+      "mgmt-ipv4-address": "172.20.20.4",
+      "mgmt-ipv4-prefix-length": 24,
+      "mgmt-ipv6-address": "3fff:172:20:20::4",
+      "mgmt-ipv6-prefix-length": 64,
+      "mac-address": "",
+      "labels": {
+        "clab-mgmt-net-bridge": "br-583cb660839d",
+        "clab-node-group": "",
+        "clab-node-kind": "linux",
+        "clab-node-lab-dir": "/home/kali/club-test/clab-quarant/pc1",
+        "clab-node-longname": "clab-quarant-pc1",
+        "clab-node-name": "pc1",
+        "clab-node-type": "",
+        "clab-owner": "kali",
+        "clab-topo-file": "/home/kali/club-test/topo.yaml",
+        "containerlab": "quarant"
+      },
+      "port-bindings": [
+      ]
+    },
+    "pc2": {
+      "index": "1",
+      "shortname": "pc2",
+      "longname": "clab-quarant-pc2",
+      "fqdn": "pc2.quarant.io",
+      "group": "",
+      "labdir": "/home/kali/club-test/clab-quarant/pc2",
+      "kind": "linux",
+      "image": "alpine:latest",
+      "mgmt-net": "",
+      "mgmt-intf": "",
+      "mgmt-ipv4-address": "172.20.20.3",
+      "mgmt-ipv4-prefix-length": 24,
+      "mgmt-ipv6-address": "3fff:172:20:20::3",
+      "mgmt-ipv6-prefix-length": 64,
+      "mac-address": "",
+      "labels": {
+        "clab-mgmt-net-bridge": "br-583cb660839d",
+        "clab-node-group": "",
+        "clab-node-kind": "linux",
+        "clab-node-lab-dir": "/home/kali/club-test/clab-quarant/pc2",
+        "clab-node-longname": "clab-quarant-pc2",
+        "clab-node-name": "pc2",
+        "clab-node-type": "",
+        "clab-owner": "kali",
+        "clab-topo-file": "/home/kali/club-test/topo.yaml",
+        "containerlab": "quarant"
+      },
+      "port-bindings": [
+      ]
+    },
+    "quarant": {
+      "index": "2",
+      "shortname": "quarant",
+      "longname": "clab-quarant-quarant",
+      "fqdn": "quarant.quarant.io",
+      "group": "",
+      "labdir": "/home/kali/club-test/clab-quarant/quarant",
+      "kind": "linux",
+      "image": "golang:1.24-alpine",
+      "mgmt-net": "",
+      "mgmt-intf": "",
+      "mgmt-ipv4-address": "172.20.20.6",
+      "mgmt-ipv4-prefix-length": 24,
+      "mgmt-ipv6-address": "3fff:172:20:20::6",
+      "mgmt-ipv6-prefix-length": 64,
+      "mac-address": "",
+      "labels": {
+        "clab-mgmt-net-bridge": "br-583cb660839d",
+        "clab-node-group": "",
+        "clab-node-kind": "linux",
+        "clab-node-lab-dir": "/home/kali/club-test/clab-quarant/quarant",
+        "clab-node-longname": "clab-quarant-quarant",
+        "clab-node-name": "quarant",
+        "clab-node-type": "",
+        "clab-owner": "kali",
+        "clab-topo-file": "/home/kali/club-test/topo.yaml",
+        "containerlab": "quarant"
+      },
+      "port-bindings": [
+      ]
+    }
+  },
+  "links": [
+    {
+      "endpoints": {
+        "a": {
+          "node": "pc1",
+          "interface": "eth1",
+          "mac": "aa:c1:ab:2c:f4:d0",
+          "peer": "z"
+        },
+        "z": {
+          "node": "quarant",
+          "interface": "eth1",
+          "mac": "aa:c1:ab:28:46:fa",
+          "peer": "a"
+        }
+      }
+    },
+    {
+      "endpoints": {
+        "a": {
+          "node": "quarant",
+          "interface": "eth2",
+          "mac": "aa:c1:ab:58:e5:62",
+          "peer": "z"
+        },
+        "z": {
+          "node": "pc2",
+          "interface": "eth1",
+          "mac": "aa:c1:ab:17:14:df",
+          "peer": "a"
+        }
+      }
+    }
+  ]
+}

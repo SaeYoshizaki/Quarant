@@ -1,0 +1,12 @@
+quarant-exe
+
+*.test
+*.out
+
+.tls/
+**/authorized_keys
+nornir-simple-inventory.yml
+ansible-inventory.yml
+
+# OS固有のゴミファイル
+.DS_Store
