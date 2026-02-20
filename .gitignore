@@ -8,5 +8,4 @@ quarant-exe
 nornir-simple-inventory.yml
 ansible-inventory.yml
 
-# OS固有のゴミファイル
 .DS_Store

@@ -9,5 +9,6 @@ require (
 
 require (
 	github.com/anknown/darts v0.0.0-20151216065714-83ff685239e6 // indirect
+	github.com/cloudflare/ahocorasick v0.0.0-20240916140611-054963ec9396 // indirect
 	golang.org/x/sys v0.0.0-20190412213103-97732733099d // indirect
 )
