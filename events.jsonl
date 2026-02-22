@@ -1,9 +1,5 @@
-{"ts":"2026-02-20T02:41:15.444205342Z","type":"FLOW_DETECTED","severity":"INFO","sec_ip":"10.0.1.2","src_port":39232,"dst_ip":"10.0.2.2","dst_port":80,"message":"TCP flow detexted"}
-{"ts":"2026-02-20T02:41:16.466752511Z","type":"FLOW_DETECTED","severity":"INFO","sec_ip":"10.0.1.2","src_port":39232,"dst_ip":"10.0.2.2","dst_port":80,"message":"TCP flow detexted"}
-{"ts":"2026-02-20T02:41:17.491111851Z","type":"FLOW_DETECTED","severity":"INFO","sec_ip":"10.0.1.2","src_port":39232,"dst_ip":"10.0.2.2","dst_port":80,"message":"TCP flow detexted"}
-{"ts":"2026-02-20T02:41:18.503098307Z","type":"FLOW_DETECTED","severity":"INFO","sec_ip":"10.0.1.2","src_port":39232,"dst_ip":"10.0.2.2","dst_port":80,"message":"TCP flow detexted"}
-{"ts":"2026-02-20T02:41:19.530581233Z","type":"FLOW_DETECTED","severity":"INFO","sec_ip":"10.0.1.2","src_port":39232,"dst_ip":"10.0.2.2","dst_port":80,"message":"TCP flow detexted"}
-{"ts":"2026-02-20T02:41:20.560024031Z","type":"FLOW_DETECTED","severity":"INFO","sec_ip":"10.0.1.2","src_port":39232,"dst_ip":"10.0.2.2","dst_port":80,"message":"TCP flow detexted"}
-{"ts":"2026-02-20T02:41:22.580742234Z","type":"FLOW_DETECTED","severity":"INFO","sec_ip":"10.0.1.2","src_port":39232,"dst_ip":"10.0.2.2","dst_port":80,"message":"TCP flow detexted"}
-{"ts":"2026-02-20T02:41:26.800781744Z","type":"FLOW_DETECTED","severity":"INFO","sec_ip":"10.0.1.2","src_port":39232,"dst_ip":"10.0.2.2","dst_port":80,"message":"TCP flow detexted"}
-{"ts":"2026-02-20T02:41:34.997173809Z","type":"FLOW_DETECTED","severity":"INFO","sec_ip":"10.0.1.2","src_port":39232,"dst_ip":"10.0.2.2","dst_port":80,"message":"TCP flow detexted"}
+{"ts":"2026-02-22T06:12:12.20077512Z","type":"FLOW_DETECTED","severity":"INFO","src_ip":"10.0.1.2","src_port":55732,"dst_ip":"10.0.2.2","dst_port":80,"message":"TCP flow detected"}
+{"ts":"2026-02-22T06:12:12.201298385Z","type":"FLOW_DETECTED","severity":"INFO","src_ip":"10.0.2.2","src_port":80,"dst_ip":"10.0.1.2","dst_port":55732,"message":"TCP flow detected"}
+{"ts":"2026-02-22T06:12:12.201338553Z","type":"INSECURE_HTTP","severity":"WARNING","src_ip":"10.0.1.2","src_port":55732,"dst_ip":"10.0.2.2","dst_port":80,"message":"Plaintext HTTP detected (first 16KB)"}
+{"ts":"2026-02-22T06:12:12.20134897Z","type":"PAYLOAD_DEBUG","severity":"INFO","src_ip":"10.0.1.2","src_port":55732,"dst_ip":"10.0.2.2","dst_port":80,"message":"payload=\"GET / HTTP/1.1\\r\\nHost: 10.0.2.2\\r\\nUser-Agent: Wget\\r\\nAccept: */*\\r\\nConnection: close\\r\\n\\r\\n\""}
+{"ts":"2026-02-22T06:12:12.222311697Z","type":"INSECURE_HTTP","severity":"WARNING","src_ip":"10.0.2.2","src_port":80,"dst_ip":"10.0.1.2","dst_port":55732,"message":"Plaintext HTTP detected (first 16KB)"}

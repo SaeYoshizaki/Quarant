@@ -85,4 +85,19 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 	if now.Unix()%10 == 0 {
 		h.cache.Cleanup(now)
 	}
+	payload := tcp.Payload
+	if len(payload) > 0 {
+		if uint16(tcp.DstPort) == 80 && len(tcp.Payload) > 0 {
+			h.sink.Write(Event{
+				Timestamp: time.Now(),
+				Type:      "PAYLOAD_DEBUG",
+				Severity:  SeverityInfo,
+				SrcIP:     ip.SrcIP.String(),
+				SrcPort:   uint16(tcp.SrcPort),
+				DstIP:     ip.DstIP.String(),
+				DstPort:   uint16(tcp.DstPort),
+				Message:   fmt.Sprintf("payload=%q", string(tcp.Payload)),
+			})
+		}
+	}
 }
