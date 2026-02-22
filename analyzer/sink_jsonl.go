@@ -7,7 +7,7 @@ import (
 )
 
 type JSONLSink struct {
-	mu sync.Mutex
+	mu   sync.Mutex
 	file *os.File
 }
 
@@ -29,7 +29,7 @@ func (s *JSONLSink) Write(event Event) error {
 	if err != nil {
 		return err
 	}
-	
+
 	_, err = s.file.Write(append(data, '\n'))
 	return err
 }

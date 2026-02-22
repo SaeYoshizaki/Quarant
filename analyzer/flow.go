@@ -1,44 +1,88 @@
 package analyzer
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/layers"
+
+	"quarant/analyzer/rules"
 )
 
 type FlowHandler struct {
-	sink *JSONLSink
+	sink  *JSONLSink
+	cache *FlowCache
 }
 
 func NewFlowHandler(sink *JSONLSink) *FlowHandler {
 	return &FlowHandler{
-		sink: sink,
+		sink:  sink,
+		cache: NewFlowCache(16*1024, 1*time.Hour),
 	}
 }
 
 func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 	ipLayer := packet.Layer(layers.LayerTypeIPv4)
 	tcpLayer := packet.Layer(layers.LayerTypeTCP)
-
 	if ipLayer == nil || tcpLayer == nil {
 		return
 	}
+
 	ip := ipLayer.(*layers.IPv4)
 	tcp := tcpLayer.(*layers.TCP)
 
-	event := Event {
-		Timestamp: time.Now(),
-		Type: "FLOW_DETECTED",
-		Severity: SeverityInfo,
+	now := time.Now()
 
-		SrcIP: ip.SrcIP.String(),
-		SrcPort: uint16(tcp.SrcPort),
+	flowKey := fmt.Sprintf(
+		"tcp|%s:%d->%s:%d",
+		ip.SrcIP.String(),
+		uint16(tcp.SrcPort),
+		ip.DstIP.String(),
+		uint16(tcp.DstPort),
+	)
 
-		DstIP: ip.DstIP.String(),
-		DstPort: uint16(tcp.DstPort),
+	st := h.cache.GetOrCreate(flowKey, now)
 
-		Message: "TCP flow detexted",
+	if !st.FlowReported {
+		ev := Event{
+			Timestamp: now,
+			Type:      "FLOW_DETECTED",
+			Severity:  SeverityInfo,
+
+			SrcIP:   ip.SrcIP.String(),
+			SrcPort: uint16(tcp.SrcPort),
+
+			DstIP:   ip.DstIP.String(),
+			DstPort: uint16(tcp.DstPort),
+
+			Message: "TCP flow detected",
+		}
+		_ = h.sink.Write(ev)
+		st.FlowReported = true
 	}
-	h.sink.Write(event)
+
+	h.cache.AppendUpToLimit(st, tcp.Payload)
+
+	if !st.HTTPReported && rules.LooksLikeHTTP(st.Data) {
+		ev := Event{
+			Timestamp: now,
+			Type:      "INSECURE_HTTP",
+			Severity:  SeverityWarning,
+
+			SrcIP:   ip.SrcIP.String(),
+			SrcPort: uint16(tcp.SrcPort),
+
+			DstIP:   ip.DstIP.String(),
+			DstPort: uint16(tcp.DstPort),
+
+			Message: "Plaintext HTTP detected (first 16KB)",
+		}
+		_ = h.sink.Write(ev)
+		st.HTTPReported = true
+	}
+
+	if now.Unix()%10 == 0 {
+		h.cache.Cleanup(now)
+	}
 }

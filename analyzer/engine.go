@@ -12,7 +12,7 @@ type Engine struct {
 }
 
 func NewEngine(handler *FlowHandler) *Engine {
-	return &Engine {
+	return &Engine{
 		handler: handler,
 	}
 }
