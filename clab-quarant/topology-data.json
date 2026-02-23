@@ -28,9 +28,9 @@
       "image": "alpine:latest",
       "mgmt-net": "",
       "mgmt-intf": "",
-      "mgmt-ipv4-address": "172.20.20.6",
+      "mgmt-ipv4-address": "172.20.20.4",
       "mgmt-ipv4-prefix-length": 24,
-      "mgmt-ipv6-address": "3fff:172:20:20::6",
+      "mgmt-ipv6-address": "3fff:172:20:20::4",
       "mgmt-ipv6-prefix-length": 64,
       "mac-address": "",
       "labels": {
@@ -90,9 +90,9 @@
       "image": "golang:1.24-alpine",
       "mgmt-net": "",
       "mgmt-intf": "",
-      "mgmt-ipv4-address": "172.20.20.5",
+      "mgmt-ipv4-address": "172.20.20.6",
       "mgmt-ipv4-prefix-length": 24,
-      "mgmt-ipv6-address": "3fff:172:20:20::5",
+      "mgmt-ipv6-address": "3fff:172:20:20::6",
       "mgmt-ipv6-prefix-length": 64,
       "mac-address": "",
       "labels": {
@@ -117,13 +117,13 @@
         "a": {
           "node": "pc1",
           "interface": "eth1",
-          "mac": "aa:c1:ab:83:cf:c1",
+          "mac": "aa:c1:ab:94:ae:13",
           "peer": "z"
         },
         "z": {
           "node": "quarant",
           "interface": "eth1",
-          "mac": "aa:c1:ab:15:0d:c9",
+          "mac": "aa:c1:ab:3d:fc:4b",
           "peer": "a"
         }
       }
@@ -133,13 +133,13 @@
         "a": {
           "node": "quarant",
           "interface": "eth2",
-          "mac": "aa:c1:ab:b8:43:b4",
+          "mac": "aa:c1:ab:6a:e9:15",
           "peer": "z"
         },
         "z": {
           "node": "pc2",
           "interface": "eth1",
-          "mac": "aa:c1:ab:33:f3:71",
+          "mac": "aa:c1:ab:93:b5:fb",
           "peer": "a"
         }
       }
