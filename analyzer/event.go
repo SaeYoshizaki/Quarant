@@ -15,11 +15,9 @@ type Event struct {
 	Type      string    `json:"type"`
 	Severity  Severity  `json:"severity"`
 
-	SrcIP   string `json:"src_ip"`
-	SrcPort uint16 `json:"src_port"`
-
-	DstIP   string `json:"dst_ip"`
-	DstPort uint16 `json:"dst_port"`
-
-	Message string `json:"message"`
+	SrcIP   string `json:"src_ip,omitempty"`
+	SrcPort uint16 `json:"src_port,omitempty"`
+	DstIP   string `json:"dst_ip,omitempty"`
+	DstPort uint16 `json:"dst_port,omitempty"`
+	Message string `json:"message,omitempty"`
 }
