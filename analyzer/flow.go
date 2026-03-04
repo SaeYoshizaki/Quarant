@@ -1,9 +1,10 @@
 package analyzer
 
 import (
-	"bytes"
 	"fmt"
 	"time"
+
+	"quarant/analyzer/rules"
 
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/layers"
@@ -15,14 +16,6 @@ type FlowHandler struct {
 	debug bool
 }
 
-func NewFlowHandler(sink *JSONLSink, debug bool) *FlowHandler {
-	return &FlowHandler{
-		sink:  sink,
-		cache: NewFlowCache(16*1024, 1*time.Hour),
-		debug: debug,
-	}
-}
-
 func flowKeyTCP(ipSrc string, srcPort uint16, ipDst string, dstPort uint16) string {
 	a := fmt.Sprintf("%s:%d", ipSrc, srcPort)
 	b := fmt.Sprintf("%s:%d", ipDst, dstPort)
@@ -30,6 +23,15 @@ func flowKeyTCP(ipSrc string, srcPort uint16, ipDst string, dstPort uint16) stri
 		return "tcp|" + a + "<->" + b
 	}
 	return "tcp|" + b + "<->" + a
+}
+
+func isTLSPort(p uint16) bool {
+	switch p {
+	case 443, 8443, 9443, 10443, 8883:
+		return true
+	default:
+		return false
+	}
 }
 
 func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
@@ -41,68 +43,85 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 
 	ip := ipLayer.(*layers.IPv4)
 	tcp := tcpLayer.(*layers.TCP)
-
 	now := time.Now()
 
 	key := flowKeyTCP(
 		ip.SrcIP.String(), uint16(tcp.SrcPort),
 		ip.DstIP.String(), uint16(tcp.DstPort),
 	)
-
 	st := h.cache.GetOrCreate(key, now)
 
-	isClientToServer := uint16(tcp.DstPort) == 80
+	dstPort := uint16(tcp.DstPort)
+	isHTTPClientToServer := dstPort == 80
+	isTLSClientToServer := isTLSPort(dstPort)
 
-	if len(tcp.Payload) > 0 {
+	// payload蓄積
+	if (isHTTPClientToServer || isTLSClientToServer) && len(tcp.Payload) > 0 {
 		h.cache.AppendUpToLimit(st, tcp.Payload)
 	}
 
-	if isClientToServer && !st.HTTPReported {
-		// Appendした結果から先頭だけ見て「リクエスト行」を確定させる
-		if bytes.HasPrefix(st.Data, []byte("GET ")) ||
-			bytes.HasPrefix(st.Data, []byte("POST ")) ||
-			bytes.HasPrefix(st.Data, []byte("PUT ")) ||
-			bytes.HasPrefix(st.Data, []byte("DELETE ")) ||
-			bytes.HasPrefix(st.Data, []byte("HEAD ")) ||
-			bytes.HasPrefix(st.Data, []byte("OPTIONS ")) ||
-			bytes.HasPrefix(st.Data, []byte("PATCH ")) {
+	// ルール実行（重複防止のゲートは flow が持つ：まずはこれでOK）
+	shouldRunTLS := isTLSClientToServer && !st.TLSReported
+	shouldRunHTTP := isHTTPClientToServer && !st.HTTPReported
 
-			// デバッグ（任意）
-			if h.debug {
-				prefixLen := 32
-				if len(st.Data) < prefixLen {
-					prefixLen = len(st.Data)
-				}
-				_ = h.sink.Write(Event{
-					Timestamp: now,
-					Type:      "HTTP_DEBUG_KEY",
-					Severity:  SeverityInfo,
-					SrcIP:     ip.SrcIP.String(),
-					SrcPort:   uint16(tcp.SrcPort),
-					DstIP:     ip.DstIP.String(),
-					DstPort:   uint16(tcp.DstPort),
-					Message:   fmt.Sprintf("key=%s prefix=%q", key, string(st.Data[:prefixLen])),
-				})
+	if shouldRunTLS || shouldRunHTTP {
+		ctx := &rules.Context{
+			NowUnix: now.Unix(),
+			FlowKey: key,
+			SrcIP:   ip.SrcIP.String(),
+			SrcPort: uint16(tcp.SrcPort),
+			DstIP:   ip.DstIP.String(),
+			DstPort: dstPort,
+			Payload: st.Data,
+			Debug:   h.debug,
+		}
+
+		matches := rules.Run(ctx)
+
+		for _, m := range matches {
+			// ゲート条件に合わないものは捨てる（今は2系統だけ運用）
+			if m.Type == "TLS_CLIENT_HELLO" && !shouldRunTLS {
+				continue
+			}
+			if m.Type == "INSECURE_HTTP" && !shouldRunHTTP {
+				continue
 			}
 
 			_ = h.sink.Write(Event{
 				Timestamp: now,
-				Type:      "INSECURE_HTTP",
-				Severity:  SeverityWarning,
-				SrcIP:     ip.SrcIP.String(),
-				SrcPort:   uint16(tcp.SrcPort),
-				DstIP:     ip.DstIP.String(),
-				DstPort:   uint16(tcp.DstPort),
-				Message:   "Plaintext HTTP detected (first 16KB)",
+				Type:      m.Type,
+				Severity:  Severity(m.Severity),
+
+				RuleID:   m.RuleID,
+				Category: m.Category,
+				FlowKey:  key,
+				Evidence: m.Evidence,
+
+				SrcIP:   ip.SrcIP.String(),
+				SrcPort: uint16(tcp.SrcPort),
+				DstIP:   ip.DstIP.String(),
+				DstPort: dstPort,
+
+				Message: m.Message,
 			})
-			st.HTTPReported = true
+
+			// 1回だけ出すフラグ
+			if m.Type == "TLS_CLIENT_HELLO" {
+				st.TLSReported = true
+			}
+			if m.Type == "INSECURE_HTTP" {
+				st.HTTPReported = true
+			}
 		}
 	}
 
+	// cleanup
 	if now.Unix()%10 == 0 {
 		h.cache.Cleanup(now)
 	}
-	if h.debug && uint16(tcp.DstPort) == 80 && len(tcp.Payload) > 0 {
+
+	// payload debug（これは好み。残してOK）
+	if h.debug && (isHTTPClientToServer || isTLSClientToServer) && len(tcp.Payload) > 0 {
 		p := tcp.Payload
 		if len(p) > 256 {
 			p = p[:256]
@@ -114,7 +133,7 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 			SrcIP:     ip.SrcIP.String(),
 			SrcPort:   uint16(tcp.SrcPort),
 			DstIP:     ip.DstIP.String(),
-			DstPort:   uint16(tcp.DstPort),
+			DstPort:   dstPort,
 			Message:   fmt.Sprintf("payload_head=%q", string(p)),
 		})
 	}

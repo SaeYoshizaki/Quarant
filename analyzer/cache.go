@@ -12,6 +12,7 @@ type FlowState struct {
 	Data         []byte
 	FlowReported bool
 	HTTPReported bool
+	TLSReported  bool
 }
 
 type FlowCache struct {

@@ -16,9 +16,7 @@ func NewJSONSink(path string) (*JSONLSink, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &JSONLSink{
-		file: f,
-	}, nil
+	return &JSONLSink{file: f}, nil
 }
 
 func (s *JSONLSink) Write(event Event) error {
@@ -29,7 +27,6 @@ func (s *JSONLSink) Write(event Event) error {
 	if err != nil {
 		return err
 	}
-
 	_, err = s.file.Write(append(data, '\n'))
 	return err
 }
