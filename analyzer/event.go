@@ -1,4 +1,3 @@
-// analyzer/event.go
 package analyzer
 
 import "time"

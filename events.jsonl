@@ -1,3 +1,0 @@
-{"ts":"2026-02-26T07:32:51.150583577Z","type":"HTTP_DEBUG_KEY","severity":"INFO","src_ip":"10.0.1.2","src_port":46984,"dst_ip":"10.0.2.2","dst_port":80,"message":"key=tcp|10.0.1.2:46984\u003c-\u003e10.0.2.2:80 prefix=\"GET / HTTP/1.1\\r\\nHost: 10.0.2.2\\r\\n\""}
-{"ts":"2026-02-26T07:32:51.150583577Z","type":"INSECURE_HTTP","severity":"WARNING","src_ip":"10.0.1.2","src_port":46984,"dst_ip":"10.0.2.2","dst_port":80,"message":"Plaintext HTTP detected (first 16KB)"}
-{"ts":"2026-02-26T07:32:51.150793546Z","type":"PAYLOAD_DEBUG","severity":"INFO","src_ip":"10.0.1.2","src_port":46984,"dst_ip":"10.0.2.2","dst_port":80,"message":"payload_head=\"GET / HTTP/1.1\\r\\nHost: 10.0.2.2\\r\\nUser-Agent: Wget\\r\\nAccept: */*\\r\\nConnection: close\\r\\n\\r\\n\""}

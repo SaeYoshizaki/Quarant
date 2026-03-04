@@ -16,6 +16,14 @@ type FlowHandler struct {
 	debug bool
 }
 
+func NewFlowHandler(sink *JSONLSink, debug bool) *FlowHandler {
+	return &FlowHandler{
+		sink:  sink,
+		cache: NewFlowCache(16*1024, 1*time.Hour),
+		debug: debug,
+	}
+}
+
 func flowKeyTCP(ipSrc string, srcPort uint16, ipDst string, dstPort uint16) string {
 	a := fmt.Sprintf("%s:%d", ipSrc, srcPort)
 	b := fmt.Sprintf("%s:%d", ipDst, dstPort)
@@ -55,16 +63,11 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 	isHTTPClientToServer := dstPort == 80
 	isTLSClientToServer := isTLSPort(dstPort)
 
-	// payload蓄積
 	if (isHTTPClientToServer || isTLSClientToServer) && len(tcp.Payload) > 0 {
 		h.cache.AppendUpToLimit(st, tcp.Payload)
 	}
 
-	// ルール実行（重複防止のゲートは flow が持つ：まずはこれでOK）
-	shouldRunTLS := isTLSClientToServer && !st.TLSReported
-	shouldRunHTTP := isHTTPClientToServer && !st.HTTPReported
-
-	if shouldRunTLS || shouldRunHTTP {
+	if isHTTPClientToServer || isTLSClientToServer {
 		ctx := &rules.Context{
 			NowUnix: now.Unix(),
 			FlowKey: key,
@@ -79,11 +82,7 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 		matches := rules.Run(ctx)
 
 		for _, m := range matches {
-			// ゲート条件に合わないものは捨てる（今は2系統だけ運用）
-			if m.Type == "TLS_CLIENT_HELLO" && !shouldRunTLS {
-				continue
-			}
-			if m.Type == "INSECURE_HTTP" && !shouldRunHTTP {
+			if m.RuleID != "" && st.Reported[m.RuleID] {
 				continue
 			}
 
@@ -105,22 +104,16 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 				Message: m.Message,
 			})
 
-			// 1回だけ出すフラグ
-			if m.Type == "TLS_CLIENT_HELLO" {
-				st.TLSReported = true
-			}
-			if m.Type == "INSECURE_HTTP" {
-				st.HTTPReported = true
+			if m.RuleID != "" {
+				st.Reported[m.RuleID] = true
 			}
 		}
 	}
 
-	// cleanup
 	if now.Unix()%10 == 0 {
 		h.cache.Cleanup(now)
 	}
 
-	// payload debug（これは好み。残してOK）
 	if h.debug && (isHTTPClientToServer || isTLSClientToServer) && len(tcp.Payload) > 0 {
 		p := tcp.Payload
 		if len(p) > 256 {

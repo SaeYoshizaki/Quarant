@@ -21,7 +21,7 @@ func extractSNI(exts []byte) string {
 		body := exts[j : j+l]
 		j += l
 
-		if typ != 0 { // server_name extension
+		if typ != 0 {
 			continue
 		}
 
@@ -45,7 +45,7 @@ func extractSNI(exts []byte) string {
 				return ""
 			}
 
-			if nameType == 0 { // host_name
+			if nameType == 0 {
 				return string(body[k : k+nameLen])
 			}
 

@@ -9,10 +9,8 @@ type FlowState struct {
 	FirstSeen time.Time
 	LastSeen  time.Time
 
-	Data         []byte
-	FlowReported bool
-	HTTPReported bool
-	TLSReported  bool
+	Data     []byte
+	Reported map[string]bool
 }
 
 type FlowCache struct {
@@ -39,7 +37,7 @@ func (c *FlowCache) GetOrCreate(key string, now time.Time) *FlowState {
 		st = &FlowState{
 			FirstSeen: now,
 			LastSeen:  now,
-			Data:      make([]byte, 0, 1024),
+			Reported:  make(map[string]bool),
 		}
 		c.m[key] = st
 		return st

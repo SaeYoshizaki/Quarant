@@ -9,3 +9,6 @@ nornir-simple-inventory.yml
 ansible-inventory.yml
 
 .DS_Store
+
+events.jsonl
+build/
