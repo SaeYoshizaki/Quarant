@@ -1,0 +1,71 @@
+{
+  "window": {
+    "start": "2026-03-04T07:06:48.049625947Z",
+    "end": "2026-03-04T07:33:24.852883323Z"
+  },
+  "total_events": 27,
+  "severity": [
+    {
+      "key": "INFO",
+      "count": 15
+    },
+    {
+      "key": "WARNING",
+      "count": 10
+    },
+    {
+      "key": "CRITICAL",
+      "count": 2
+    }
+  ],
+  "rules": [
+    {
+      "key": "PAYLOAD_DEBUG",
+      "count": 9
+    },
+    {
+      "key": "HTTP_DEBUG_KEY",
+      "count": 6
+    },
+    {
+      "key": "INSECURE_HTTP",
+      "count": 6
+    },
+    {
+      "key": "I7_HTTP_PLAINTEXT",
+      "count": 3
+    },
+    {
+      "key": "I7_HTTP_AUTH",
+      "count": 1
+    },
+    {
+      "key": "I7_HTTP_COOKIE",
+      "count": 1
+    },
+    {
+      "key": "I7_HTTP_TOKEN",
+      "count": 1
+    }
+  ],
+  "src_ip": [
+    {
+      "key": "10.0.1.2",
+      "count": 27
+    }
+  ],
+  "flows": [
+    {
+      "key": "tcp|10.0.1.2:35636\u003c-\u003e10.0.2.2:80",
+      "count": 2
+    },
+    {
+      "key": "tcp|10.0.1.2:35650\u003c-\u003e10.0.2.2:80",
+      "count": 2
+    },
+    {
+      "key": "tcp|10.0.1.2:35658\u003c-\u003e10.0.2.2:80",
+      "count": 2
+    }
+  ]
+}
