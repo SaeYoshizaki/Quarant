@@ -1,7 +1,5 @@
 package rules
 
-import "strings"
-
 type I7HTTPCookieRule struct{}
 
 func (r *I7HTTPCookieRule) ID() string         { return "I7_HTTP_COOKIE" }
@@ -10,27 +8,22 @@ func (r *I7HTTPCookieRule) Severity() Severity { return SeverityWarning }
 func (r *I7HTTPCookieRule) Type() string       { return "INSECURE_HTTP_COOKIE" }
 
 func (r *I7HTTPCookieRule) Apply(ctx *Context) (Match, bool) {
+	if ctx.HTTP == nil {
+		return Match{}, false
+	}
 
-	s := string(ctx.Payload)
-	lower := strings.ToLower(s)
-
-	if strings.Contains(lower, "\ncookie:") || strings.Contains(lower, "\r\ncookie:") || strings.HasPrefix(lower, "cookie:") {
+	if _, ok := ctx.HTTP.Headers["cookie"]; ok {
 		return Match{
 			Message:  "Cookie header sent over plaintext HTTP",
 			Evidence: "Cookie: ***",
 		}, true
 	}
-	if strings.Contains(lower, "\nset-cookie:") || strings.Contains(lower, "\r\nset-cookie:") || strings.HasPrefix(lower, "set-cookie:") {
+	if _, ok := ctx.HTTP.Headers["set-cookie"]; ok {
 		return Match{
-			RuleID:   r.ID(),
-			Category: r.Category(),
-			Severity: r.Severity(),
-			Type:     r.Type(),
-			Message:  "Cookie header sent over plaintext HTTP",
-			Evidence: "Cookie: ***",
+			Message:  "Set-Cookie header observed over plaintext HTTP",
+			Evidence: "Set-Cookie: ***",
 		}, true
 	}
-
 	return Match{}, false
 }
 

@@ -68,6 +68,13 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 	}
 
 	if isHTTPClientToServer || isTLSClientToServer {
+		var httpInfo *rules.HTTPInfo
+		if rules.LooksLikeHTTP(st.Data) {
+			if hi, ok := rules.ParseHTTP(st.Data); ok {
+				httpInfo = hi
+			}
+		}
+
 		ctx := &rules.Context{
 			NowUnix: now.Unix(),
 			FlowKey: key,
@@ -77,6 +84,7 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 			DstPort: dstPort,
 			Payload: st.Data,
 			Debug:   h.debug,
+			HTTP:    httpInfo,
 		}
 
 		matches := rules.Run(ctx)

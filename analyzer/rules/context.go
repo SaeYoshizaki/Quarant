@@ -12,4 +12,6 @@ type Context struct {
 
 	Payload []byte
 	Debug   bool
+
+	HTTP *HTTPInfo
 }
