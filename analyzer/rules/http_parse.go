@@ -12,8 +12,10 @@ type HTTPInfo struct {
 	Query   url.Values
 	Version string
 
-	Headers map[string]string
-	RawLine string
+	Headers     map[string]string
+	RawLine     string
+	Body        []byte
+	ContentType string
 }
 
 func ParseHTTP(payload []byte) (*HTTPInfo, bool) {
@@ -26,6 +28,7 @@ func ParseHTTP(payload []byte) (*HTTPInfo, bool) {
 	}
 
 	head := payload[:i]
+
 	lines := strings.Split(string(head), "\n")
 	if len(lines) == 0 {
 		return nil, false
@@ -71,12 +74,26 @@ func ParseHTTP(payload []byte) (*HTTPInfo, bool) {
 		}
 	}
 
+	var body []byte
+	if i+4 <= len(payload) && string(payload[i:i+4]) == "\r\n\r\n" {
+		body = payload[i+4:]
+	} else if i+2 <= len(payload) && string(payload[i:i+2]) == "\n\n" {
+		body = payload[i+2:]
+	}
+
+	ct := ""
+	if v, ok := h["content-type"]; ok {
+		ct = strings.ToLower(strings.TrimSpace(strings.Split(v, ";")[0]))
+	}
+
 	return &HTTPInfo{
-		Method:  method,
-		Path:    path,
-		Query:   qv,
-		Version: version,
-		Headers: h,
-		RawLine: reqLine,
+		Method:      method,
+		Path:        path,
+		Query:       qv,
+		Version:     version,
+		Headers:     h,
+		RawLine:     reqLine,
+		Body:        body,
+		ContentType: ct,
 	}, true
 }
