@@ -19,14 +19,28 @@ func (r *TLSClientHelloRule) Apply(ctx *Context) (Match, bool) {
 		return Match{}, false
 	}
 
+	ja3 := BuildJA3Hash(info)
+
 	msg := fmt.Sprintf(
 		"TLS ClientHello detected (record_ver=0x%04x client_ver=0x%04x)",
-		info.RecordVersion, info.ClientVersion,
+		info.RecordVersion,
+		info.ClientVersion,
 	)
+
 	evidence := ""
+
+	if ja3 != "" {
+		msg += fmt.Sprintf(" ja3=%s", ja3)
+		evidence = fmt.Sprintf("ja3=%s", ja3)
+	}
+
 	if info.SNI != "" {
-		msg += fmt.Sprintf(" sni=%q", info.SNI)
-		evidence = info.SNI
+		msg += fmt.Sprintf(" sni=%s", info.SNI)
+		if ja3 != "" {
+			evidence = fmt.Sprintf("sni=%s ja3=%s", info.SNI, ja3)
+		} else {
+			evidence = fmt.Sprintf("sni=%s", info.SNI)
+		}
 	}
 
 	return Match{

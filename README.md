@@ -13,3 +13,6 @@
 - [ ] I8: Lack of Device Management
 - [ ] I9: Insecure Default Settings
 - [ ] I10: Lack of Physical Hardening
+
+
+Goの変更が反映されない時は go clean -cache && go build -a を試す

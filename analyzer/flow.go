@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"quarant/analyzer/device"
 	"quarant/analyzer/rules"
 
 	"github.com/google/gopacket"
@@ -11,16 +12,18 @@ import (
 )
 
 type FlowHandler struct {
-	sink  *JSONLSink
-	cache *FlowCache
-	debug bool
+	sink    *JSONLSink
+	cache   *FlowCache
+	debug   bool
+	devices *device.Store
 }
 
 func NewFlowHandler(sink *JSONLSink, debug bool) *FlowHandler {
 	return &FlowHandler{
-		sink:  sink,
-		cache: NewFlowCache(16*1024, 1*time.Hour),
-		debug: debug,
+		sink:    sink,
+		cache:   NewFlowCache(16*1024, 1*time.Hour),
+		debug:   debug,
+		devices: device.NewStore(),
 	}
 }
 
@@ -72,6 +75,52 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 		if rules.LooksLikeHTTP(st.Data) {
 			if hi, ok := rules.ParseHTTP(st.Data); ok {
 				httpInfo = hi
+			}
+		}
+		if isTLSClientToServer {
+			if tlsInfo, ok := rules.DetectTLSClientHello(st.Data); ok {
+				d := h.devices.GetOrCreate(ip.SrcIP.String())
+				device.EnrichFromTLS(d, tlsInfo)
+
+				if h.debug {
+					_ = h.sink.Write(Event{
+						Timestamp: now,
+						Type:      "DEVICE_DEBUG",
+						Severity:  SeverityInfo,
+						SrcIP:     ip.SrcIP.String(),
+						Message: fmt.Sprintf(
+							"device_type=%s vendor=%s model=%s confidence=%.2f ja3=%s evidence=%v",
+							d.DeviceType,
+							d.Vendor,
+							d.Model,
+							d.Confidence,
+							d.JA3,
+							d.Evidence,
+						),
+					})
+				}
+			}
+		}
+
+		if httpInfo != nil {
+			d := h.devices.GetOrCreate(ip.SrcIP.String())
+			device.EnrichFromHTTP(d, httpInfo.Headers)
+
+			if h.debug {
+				_ = h.sink.Write(Event{
+					Timestamp: now,
+					Type:      "DEVICE_DEBUG",
+					Severity:  SeverityInfo,
+					SrcIP:     ip.SrcIP.String(),
+					Message: fmt.Sprintf(
+						"device_type=%s vendor=%s model=%s confidence=%.2f evidence=%v",
+						d.DeviceType,
+						d.Vendor,
+						d.Model,
+						d.Confidence,
+						d.Evidence,
+					),
+				})
 			}
 		}
 

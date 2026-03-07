@@ -1,11 +1,70 @@
 package rules
 
-import "encoding/binary"
+import (
+	"crypto/md5"
+	"encoding/binary"
+	"encoding/hex"
+	"strconv"
+	"strings"
+)
 
 type TLSClientHelloInfo struct {
 	RecordVersion uint16
 	ClientVersion uint16
 	SNI           string
+
+	CipherSuites    []uint16
+	Extensions      []uint16
+	SupportedGroups []uint16
+	ECPointFormats  []uint8
+}
+
+func isGREASE(v uint16) bool {
+	return (v&0x0f0f) == 0x0a0a && ((v>>8)&0xff) == (v&0xff)
+}
+
+func joinUint16(vals []uint16) string {
+	if len(vals) == 0 {
+		return ""
+	}
+	out := make([]string, 0, len(vals))
+	for _, v := range vals {
+		if isGREASE(v) {
+			continue
+		}
+		out = append(out, strconv.Itoa(int(v)))
+	}
+	return strings.Join(out, "-")
+}
+
+func joinUint8(vals []uint8) string {
+	if len(vals) == 0 {
+		return ""
+	}
+	out := make([]string, 0, len(vals))
+	for _, v := range vals {
+		out = append(out, strconv.Itoa(int(v)))
+	}
+	return strings.Join(out, "-")
+}
+
+func BuildJA3String(info TLSClientHelloInfo) string {
+	return strings.Join([]string{
+		strconv.Itoa(int(info.ClientVersion)),
+		joinUint16(info.CipherSuites),
+		joinUint16(info.Extensions),
+		joinUint16(info.SupportedGroups),
+		joinUint8(info.ECPointFormats),
+	}, ",")
+}
+
+func BuildJA3Hash(info TLSClientHelloInfo) string {
+	s := BuildJA3String(info)
+	if s == "" {
+		return ""
+	}
+	sum := md5.Sum([]byte(s))
+	return hex.EncodeToString(sum[:])
 }
 
 func extractSNI(exts []byte) string {
@@ -54,6 +113,46 @@ func extractSNI(exts []byte) string {
 		return ""
 	}
 	return ""
+}
+
+func parseExtensions(exts []byte, info *TLSClientHelloInfo) {
+	for j := 0; j+4 <= len(exts); {
+		typ := binary.BigEndian.Uint16(exts[j : j+2])
+		l := int(binary.BigEndian.Uint16(exts[j+2 : j+4]))
+		j += 4
+
+		if l < 0 || j+l > len(exts) {
+			return
+		}
+
+		body := exts[j : j+l]
+		j += l
+
+		info.Extensions = append(info.Extensions, typ)
+
+		switch typ {
+		case 10:
+			if len(body) < 2 {
+				continue
+			}
+			n := int(binary.BigEndian.Uint16(body[:2]))
+			if 2+n > len(body) {
+				continue
+			}
+			for k := 2; k+2 <= 2+n; k += 2 {
+				info.SupportedGroups = append(info.SupportedGroups, binary.BigEndian.Uint16(body[k:k+2]))
+			}
+		case 11:
+			if len(body) < 1 {
+				continue
+			}
+			n := int(body[0])
+			if 1+n > len(body) {
+				continue
+			}
+			info.ECPointFormats = append(info.ECPointFormats, body[1:1+n]...)
+		}
+	}
 }
 
 func DetectTLSClientHello(data []byte) (TLSClientHelloInfo, bool) {
@@ -106,8 +205,11 @@ func DetectTLSClientHello(data []byte) (TLSClientHelloInfo, bool) {
 		}
 		csLen := int(binary.BigEndian.Uint16(ch[i : i+2]))
 		i += 2
-		if csLen < 2 || i+csLen > len(ch) {
+		if csLen < 2 || i+csLen > len(ch) || csLen%2 != 0 {
 			continue
+		}
+		for k := i; k < i+csLen; k += 2 {
+			info.CipherSuites = append(info.CipherSuites, binary.BigEndian.Uint16(ch[k:k+2]))
 		}
 		i += csLen
 
@@ -135,6 +237,7 @@ func DetectTLSClientHello(data []byte) (TLSClientHelloInfo, bool) {
 		exts := ch[i : i+extLen]
 
 		info.SNI = extractSNI(exts)
+		parseExtensions(exts, &info)
 		return info, true
 	}
 
