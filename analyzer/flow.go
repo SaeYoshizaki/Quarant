@@ -36,13 +36,96 @@ func flowKeyTCP(ipSrc string, srcPort uint16, ipDst string, dstPort uint16) stri
 	return "tcp|" + b + "<->" + a
 }
 
-func isTLSPort(p uint16) bool {
-	switch p {
-	case 443, 8443, 9443, 10443, 8883:
+func isI2RiskEvent(eventType string) bool {
+	switch eventType {
+	case "I2_TELNET_SERVICE_OBSERVED",
+		"I2_FTP_SERVICE_OBSERVED",
+		"I2_RTSP_SERVICE_OBSERVED",
+		"I2_MQTT_SERVICE_OBSERVED",
+		"I2_COAP_SERVICE_OBSERVED",
+		"I2_HTTP_ADMIN_INTERFACE_SUSPECTED",
+		"I2_INSECURE_SERVICE_TO_PUBLIC_NETWORK",
+		"I2_HTTP_ADMIN_EXTERNAL_ACCESS_SUSPECTED":
 		return true
 	default:
 		return false
 	}
+}
+
+func (h *FlowHandler) updateDeviceRiskFromMatch(srcIP string, m rules.Match) {
+	d := h.devices.GetOrCreate(srcIP)
+
+	switch m.Type {
+	case "I2_TELNET_SERVICE_OBSERVED":
+		d.AddObservedService("telnet")
+		d.AddInsecureService("telnet")
+		d.AddRiskReason("telnet observed")
+
+	case "I2_FTP_SERVICE_OBSERVED":
+		d.AddObservedService("ftp")
+		d.AddInsecureService("ftp")
+		d.AddRiskReason("ftp observed")
+
+	case "I2_RTSP_SERVICE_OBSERVED":
+		d.AddObservedService("rtsp")
+		d.AddInsecureService("rtsp")
+		d.AddRiskReason("rtsp observed")
+
+	case "I2_MQTT_SERVICE_OBSERVED":
+		d.AddObservedService("mqtt")
+		d.AddInsecureService("mqtt")
+		d.AddRiskReason("mqtt observed")
+
+	case "I2_COAP_SERVICE_OBSERVED":
+		d.AddObservedService("coap")
+		d.AddInsecureService("coap")
+		d.AddRiskReason("coap observed")
+
+	case "I2_HTTP_ADMIN_INTERFACE_SUSPECTED":
+		d.AddObservedService("http")
+		d.MarkAdminSuspected()
+		d.AddRiskReason("http admin interface suspected")
+
+	case "I2_INSECURE_SERVICE_TO_PUBLIC_NETWORK":
+		d.MarkExternalExposure()
+		d.AddRiskReason("insecure service toward public network")
+
+	case "I2_HTTP_ADMIN_EXTERNAL_ACCESS_SUSPECTED":
+		d.AddObservedService("http")
+		d.MarkAdminSuspected()
+		d.MarkExternalExposure()
+		d.AddRiskReason("http admin interface over public network")
+	}
+
+	d.RecalculateRiskScore()
+}
+
+func (h *FlowHandler) writeDeviceDebug(now time.Time, srcIP string, d *device.DeviceProfile) {
+	if !h.debug {
+		return
+	}
+
+	_ = h.sink.Write(Event{
+		Timestamp: now,
+		Type:      "DEVICE_DEBUG",
+		Severity:  SeverityInfo,
+		SrcIP:     srcIP,
+		Message: fmt.Sprintf(
+			"device_type=%s vendor=%s model=%s confidence=%.2f ja3=%s evidence=%v risk_score=%d observed=%v insecure=%v admin=%t external=%t reasons=%v",
+			d.DeviceType,
+			d.Vendor,
+			d.Model,
+			d.Confidence,
+			d.JA3,
+			d.Evidence,
+			d.RiskScore,
+			d.ObservedServices,
+			d.InsecureServices,
+			d.AdminSuspected,
+			d.ExternalExposureSuspected,
+			d.RiskReasons,
+		),
+	})
 }
 
 func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
@@ -56,114 +139,88 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 	tcp := tcpLayer.(*layers.TCP)
 	now := time.Now()
 
-	key := flowKeyTCP(
-		ip.SrcIP.String(), uint16(tcp.SrcPort),
-		ip.DstIP.String(), uint16(tcp.DstPort),
-	)
+	srcIP := ip.SrcIP.String()
+	dstIP := ip.DstIP.String()
+	srcPort := uint16(tcp.SrcPort)
+	dstPort := uint16(tcp.DstPort)
+
+	key := flowKeyTCP(srcIP, srcPort, dstIP, dstPort)
 	st := h.cache.GetOrCreate(key, now)
 
-	dstPort := uint16(tcp.DstPort)
-	isHTTPClientToServer := dstPort == 80
-	isTLSClientToServer := isTLSPort(dstPort)
+	capturePayload := rules.NeedsPayloadCapture(dstPort)
+	isHTTPClientToServer := rules.IsHTTPPort(dstPort)
+	isTLSClientToServer := rules.IsTLSPort(dstPort)
 
-	if (isHTTPClientToServer || isTLSClientToServer) && len(tcp.Payload) > 0 {
+	if capturePayload && len(tcp.Payload) > 0 {
 		h.cache.AppendUpToLimit(st, tcp.Payload)
 	}
 
-	if isHTTPClientToServer || isTLSClientToServer {
-		var httpInfo *rules.HTTPInfo
-		if rules.LooksLikeHTTP(st.Data) {
-			if hi, ok := rules.ParseHTTP(st.Data); ok {
-				httpInfo = hi
-			}
+	var httpInfo *rules.HTTPInfo
+	if isHTTPClientToServer && rules.LooksLikeHTTP(st.Data) {
+		if hi, ok := rules.ParseHTTP(st.Data); ok {
+			httpInfo = hi
 		}
-		if isTLSClientToServer {
-			if tlsInfo, ok := rules.DetectTLSClientHello(st.Data); ok {
-				d := h.devices.GetOrCreate(ip.SrcIP.String())
-				device.EnrichFromTLS(d, tlsInfo)
+	}
 
-				if h.debug {
-					_ = h.sink.Write(Event{
-						Timestamp: now,
-						Type:      "DEVICE_DEBUG",
-						Severity:  SeverityInfo,
-						SrcIP:     ip.SrcIP.String(),
-						Message: fmt.Sprintf(
-							"device_type=%s vendor=%s model=%s confidence=%.2f ja3=%s evidence=%v",
-							d.DeviceType,
-							d.Vendor,
-							d.Model,
-							d.Confidence,
-							d.JA3,
-							d.Evidence,
-						),
-					})
-				}
-			}
+	if isTLSClientToServer {
+		if tlsInfo, ok := rules.DetectTLSClientHello(st.Data); ok {
+			d := h.devices.GetOrCreate(srcIP)
+			device.EnrichFromTLS(d, tlsInfo)
+			h.writeDeviceDebug(now, srcIP, d)
 		}
+	}
 
-		if httpInfo != nil {
-			d := h.devices.GetOrCreate(ip.SrcIP.String())
-			device.EnrichFromHTTP(d, httpInfo.Headers)
+	if httpInfo != nil {
+		d := h.devices.GetOrCreate(srcIP)
+		device.EnrichFromHTTP(d, httpInfo.Headers)
+		h.writeDeviceDebug(now, srcIP, d)
+	}
 
-			if h.debug {
-				_ = h.sink.Write(Event{
-					Timestamp: now,
-					Type:      "DEVICE_DEBUG",
-					Severity:  SeverityInfo,
-					SrcIP:     ip.SrcIP.String(),
-					Message: fmt.Sprintf(
-						"device_type=%s vendor=%s model=%s confidence=%.2f evidence=%v",
-						d.DeviceType,
-						d.Vendor,
-						d.Model,
-						d.Confidence,
-						d.Evidence,
-					),
-				})
-			}
+	ctx := &rules.Context{
+		NowUnix: now.Unix(),
+		FlowKey: key,
+		SrcIP:   srcIP,
+		SrcPort: srcPort,
+		DstIP:   dstIP,
+		DstPort: dstPort,
+		Payload: st.Data,
+		Debug:   h.debug,
+		HTTP:    httpInfo,
+		TLS:     isTLSClientToServer,
+	}
+
+	matches := rules.Run(ctx)
+
+	for _, m := range matches {
+		if m.RuleID != "" && st.Reported[m.RuleID] {
+			continue
 		}
 
-		ctx := &rules.Context{
-			NowUnix: now.Unix(),
-			FlowKey: key,
-			SrcIP:   ip.SrcIP.String(),
-			SrcPort: uint16(tcp.SrcPort),
-			DstIP:   ip.DstIP.String(),
+		_ = h.sink.Write(Event{
+			Timestamp: now,
+			Type:      m.Type,
+			Severity:  Severity(m.Severity),
+
+			RuleID:   m.RuleID,
+			Category: m.Category,
+			FlowKey:  key,
+			Evidence: m.Evidence,
+
+			SrcIP:   srcIP,
+			SrcPort: srcPort,
+			DstIP:   dstIP,
 			DstPort: dstPort,
-			Payload: st.Data,
-			Debug:   h.debug,
-			HTTP:    httpInfo,
+
+			Message: m.Message,
+		})
+
+		if isI2RiskEvent(m.Type) {
+			h.updateDeviceRiskFromMatch(srcIP, m)
+			h.writeDeviceDebug(now, srcIP, h.devices.GetOrCreate(srcIP))
 		}
 
-		matches := rules.Run(ctx)
-
-		for _, m := range matches {
-			if m.RuleID != "" && st.Reported[m.RuleID] {
-				continue
-			}
-
-			_ = h.sink.Write(Event{
-				Timestamp: now,
-				Type:      m.Type,
-				Severity:  Severity(m.Severity),
-
-				RuleID:   m.RuleID,
-				Category: m.Category,
-				FlowKey:  key,
-				Evidence: m.Evidence,
-
-				SrcIP:   ip.SrcIP.String(),
-				SrcPort: uint16(tcp.SrcPort),
-				DstIP:   ip.DstIP.String(),
-				DstPort: dstPort,
-
-				Message: m.Message,
-			})
-
-			if m.RuleID != "" {
-				st.Reported[m.RuleID] = true
-			}
+		if m.RuleID != "" {
+			st.Reported[m.RuleID] = true
 		}
 	}
 
@@ -171,18 +228,18 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 		h.cache.Cleanup(now)
 	}
 
-	if h.debug && (isHTTPClientToServer || isTLSClientToServer) && len(tcp.Payload) > 0 {
+	if h.debug && capturePayload && len(tcp.Payload) > 0 {
 		p := tcp.Payload
 		if len(p) > 256 {
 			p = p[:256]
 		}
 		_ = h.sink.Write(Event{
-			Timestamp: time.Now(),
+			Timestamp: now,
 			Type:      "PAYLOAD_DEBUG",
 			Severity:  SeverityInfo,
-			SrcIP:     ip.SrcIP.String(),
-			SrcPort:   uint16(tcp.SrcPort),
-			DstIP:     ip.DstIP.String(),
+			SrcIP:     srcIP,
+			SrcPort:   srcPort,
+			DstIP:     dstIP,
 			DstPort:   dstPort,
 			Message:   fmt.Sprintf("payload_head=%q", string(p)),
 		})

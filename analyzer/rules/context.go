@@ -14,4 +14,6 @@ type Context struct {
 	Debug   bool
 
 	HTTP *HTTPInfo
+
+	TLS bool
 }
