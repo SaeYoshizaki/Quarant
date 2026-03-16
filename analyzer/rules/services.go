@@ -1,6 +1,7 @@
 package rules
 
 import (
+	"bytes"
 	"net"
 	"strings"
 )
@@ -32,8 +33,21 @@ func IsTLSPort(p uint16) bool {
 	}
 }
 
+func IsInsecureServicePort(p uint16) bool {
+	_, ok := insecureServicePorts[p]
+	return ok
+}
+
 func NeedsPayloadCapture(p uint16) bool {
-	return IsHTTPPort(p) || IsTLSPort(p)
+	if IsHTTPPort(p) || IsTLSPort(p) {
+		return true
+	}
+
+	if _, ok := insecureServicePorts[p]; ok {
+		return true
+	}
+
+	return false
 }
 
 func InsecureServiceNameByPort(p uint16) (string, bool) {
@@ -75,10 +89,23 @@ func DetectHTTPAdminIndicators(http *HTTPInfo) ([]string, bool) {
 		return nil, false
 	}
 
-	indicators := make([]string, 0, 4)
+	indicators := make([]string, 0, 6)
 
 	pathLower := strings.ToLower(http.Path)
-	for _, needle := range []string{"/admin", "/login", "/setup", "/config", "/manage", "/management", "/system"} {
+	for _, needle := range []string{
+		"/admin",
+		"/login",
+		"/setup",
+		"/config",
+		"/manage",
+		"/management",
+		"/system",
+		"/webui",
+		"/cgi-bin",
+		"/manager",
+		"/control",
+		"/dashboard",
+	} {
 		if strings.Contains(pathLower, needle) {
 			indicators = append(indicators, "path="+needle)
 		}
@@ -106,4 +133,107 @@ func DetectHTTPAdminIndicators(http *HTTPInfo) ([]string, bool) {
 	}
 
 	return indicators, len(indicators) > 0
+}
+
+func DetectTelnetIndicators(payload []byte) []string {
+	if len(payload) == 0 {
+		return nil
+	}
+
+	s := strings.ToLower(string(payload))
+	indicators := make([]string, 0, 6)
+
+	for _, needle := range []string{
+		"login:",
+		"password:",
+		"username:",
+		"last login",
+		"busybox",
+		"welcome to",
+	} {
+		if strings.Contains(s, needle) {
+			indicators = append(indicators, needle)
+		}
+	}
+
+	return indicators
+}
+
+func DetectFTPIndicators(payload []byte) []string {
+	if len(payload) == 0 {
+		return nil
+	}
+
+	s := strings.ToUpper(string(payload))
+	indicators := make([]string, 0, 5)
+
+	for _, needle := range []string{
+		"220 ",
+		"USER ",
+		"PASS ",
+		"230 ",
+		"530 ",
+	} {
+		if strings.Contains(s, needle) {
+			indicators = append(indicators, strings.TrimSpace(needle))
+		}
+	}
+
+	return indicators
+}
+
+func DetectRTSPIndicators(payload []byte) []string {
+	if len(payload) == 0 {
+		return nil
+	}
+
+	s := strings.ToUpper(string(payload))
+	indicators := make([]string, 0, 5)
+
+	for _, needle := range []string{
+		"RTSP/1.0",
+		"OPTIONS ",
+		"DESCRIBE ",
+		"SETUP ",
+		"PLAY ",
+	} {
+		if strings.Contains(s, needle) {
+			indicators = append(indicators, strings.TrimSpace(needle))
+		}
+	}
+
+	return indicators
+}
+
+func DetectMQTTIndicators(payload []byte) []string {
+	if len(payload) == 0 {
+		return nil
+	}
+
+	indicators := make([]string, 0, 2)
+
+	if bytes.Contains(payload, []byte("MQTT")) {
+		indicators = append(indicators, "MQTT")
+	}
+
+	if len(payload) > 0 && payload[0] == 0x10 {
+		indicators = append(indicators, "CONNECT")
+	}
+
+	return indicators
+}
+
+func DetectServiceIndicators(service string, payload []byte) []string {
+	switch service {
+	case "telnet":
+		return DetectTelnetIndicators(payload)
+	case "ftp":
+		return DetectFTPIndicators(payload)
+	case "rtsp":
+		return DetectRTSPIndicators(payload)
+	case "mqtt":
+		return DetectMQTTIndicators(payload)
+	default:
+		return nil
+	}
 }

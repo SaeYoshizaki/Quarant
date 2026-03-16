@@ -19,12 +19,26 @@ func (r *I2InsecureServiceRule) Apply(ctx *Context) (Match, bool) {
 	}
 
 	upper := strings.ToUpper(service)
+	indicators := DetectServiceIndicators(service, ctx.Payload)
+
+	if len(indicators) > 0 {
+		return Match{
+			RuleID:   "I2_" + upper + "_PROTOCOL_EVIDENCE",
+			Type:     "I2_" + upper + "_PROTOCOL_EVIDENCE",
+			Category: "I2",
+			Severity: SeverityWarning,
+			Message:  upper + " protocol evidence observed",
+			Evidence: fmt.Sprintf("service=%s port=%d indicators=[%s]", service, ctx.DstPort, strings.Join(indicators, ",")),
+		}, true
+	}
 
 	return Match{
 		RuleID:   "I2_" + upper + "_SERVICE_OBSERVED",
 		Type:     "I2_" + upper + "_SERVICE_OBSERVED",
+		Category: "I2",
+		Severity: SeverityWarning,
 		Message:  upper + " service observed",
-		Evidence: fmt.Sprintf("service=%s dst_port=%d", service, ctx.DstPort),
+		Evidence: fmt.Sprintf("service=%s port=%d", service, ctx.DstPort),
 	}, true
 }
 

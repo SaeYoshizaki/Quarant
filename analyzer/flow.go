@@ -43,6 +43,10 @@ func isI2RiskEvent(eventType string) bool {
 		"I2_RTSP_SERVICE_OBSERVED",
 		"I2_MQTT_SERVICE_OBSERVED",
 		"I2_COAP_SERVICE_OBSERVED",
+		"I2_TELNET_PROTOCOL_EVIDENCE",
+		"I2_FTP_PROTOCOL_EVIDENCE",
+		"I2_RTSP_PROTOCOL_EVIDENCE",
+		"I2_MQTT_PROTOCOL_EVIDENCE",
 		"I2_HTTP_ADMIN_INTERFACE_SUSPECTED",
 		"I2_INSECURE_SERVICE_TO_PUBLIC_NETWORK",
 		"I2_HTTP_ADMIN_EXTERNAL_ACCESS_SUSPECTED":
@@ -56,22 +60,22 @@ func (h *FlowHandler) updateDeviceRiskFromMatch(srcIP string, m rules.Match) {
 	d := h.devices.GetOrCreate(srcIP)
 
 	switch m.Type {
-	case "I2_TELNET_SERVICE_OBSERVED":
+	case "I2_TELNET_SERVICE_OBSERVED", "I2_TELNET_PROTOCOL_EVIDENCE":
 		d.AddObservedService("telnet")
 		d.AddInsecureService("telnet")
 		d.AddRiskReason("telnet observed")
 
-	case "I2_FTP_SERVICE_OBSERVED":
+	case "I2_FTP_SERVICE_OBSERVED", "I2_FTP_PROTOCOL_EVIDENCE":
 		d.AddObservedService("ftp")
 		d.AddInsecureService("ftp")
 		d.AddRiskReason("ftp observed")
 
-	case "I2_RTSP_SERVICE_OBSERVED":
+	case "I2_RTSP_SERVICE_OBSERVED", "I2_RTSP_PROTOCOL_EVIDENCE":
 		d.AddObservedService("rtsp")
 		d.AddInsecureService("rtsp")
 		d.AddRiskReason("rtsp observed")
 
-	case "I2_MQTT_SERVICE_OBSERVED":
+	case "I2_MQTT_SERVICE_OBSERVED", "I2_MQTT_PROTOCOL_EVIDENCE":
 		d.AddObservedService("mqtt")
 		d.AddInsecureService("mqtt")
 		d.AddRiskReason("mqtt observed")
