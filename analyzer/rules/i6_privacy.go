@@ -35,7 +35,61 @@ func (r *I6PrivacyRule) Apply(ctx *Context) (Match, bool) {
 		return Match{}, false
 	}
 
-	deviceCategory := "unknown"
+	category := strings.TrimSpace(ctx.DeviceCategory)
+	if category == "" {
+		category = "unknown"
+	}
+
+	if category != "unknown" && r.db.IsKnownCategory(category) {
+		for _, hit := range hits {
+			if r.db.IsSuspiciousCombination(category, commType, hit.Type) {
+				return Match{
+					RuleID:   "I6_HTTP_PRIVACY_POLICY_VIOLATION",
+					Type:     "I6_HTTP_PRIVACY_POLICY_VIOLATION",
+					Category: "I6",
+					Severity: SeverityWarning,
+					Message:  "Privacy-related information violates device category policy",
+					Evidence: fmt.Sprintf(
+						"category=%s comm_type=%s pii_type=%s source=%s %s",
+						category, commType, hit.Type, hit.Source, hit.Evidence,
+					),
+				}, true
+			}
+		}
+
+		if !r.db.IsAllowedCommunicationType(category, commType) {
+			hit := hits[0]
+			return Match{
+				RuleID:   "I6_HTTP_UNEXPECTED_COMMUNICATION",
+				Type:     "I6_HTTP_UNEXPECTED_COMMUNICATION",
+				Category: "I6",
+				Severity: SeverityWarning,
+				Message:  "Privacy-related information observed in unexpected communication type",
+				Evidence: fmt.Sprintf(
+					"category=%s comm_type=%s pii_type=%s source=%s %s",
+					category, commType, hit.Type, hit.Source, hit.Evidence,
+				),
+			}, true
+		}
+
+		for _, hit := range hits {
+			if !r.db.IsAllowedPIIType(category, hit.Type) {
+				return Match{
+					RuleID:   "I6_HTTP_UNEXPECTED_PII",
+					Type:     "I6_HTTP_UNEXPECTED_PII",
+					Category: "I6",
+					Severity: SeverityWarning,
+					Message:  "Unexpected privacy-related information observed for device category",
+					Evidence: fmt.Sprintf(
+						"category=%s comm_type=%s pii_type=%s source=%s %s",
+						category, commType, hit.Type, hit.Source, hit.Evidence,
+					),
+				}, true
+			}
+		}
+
+		return Match{}, false
+	}
 
 	for _, hit := range hits {
 		if commType == "analytics" || commType == "tracking" {
@@ -45,7 +99,10 @@ func (r *I6PrivacyRule) Apply(ctx *Context) (Match, bool) {
 				Category: "I6",
 				Severity: SeverityWarning,
 				Message:  "Privacy-related information observed in suspicious HTTP communication",
-				Evidence: fmt.Sprintf("comm_type=%s pii_type=%s source=%s %s category=%s", commType, hit.Type, hit.Source, hit.Evidence, deviceCategory),
+				Evidence: fmt.Sprintf(
+					"comm_type=%s pii_type=%s source=%s %s category=%s",
+					commType, hit.Type, hit.Source, hit.Evidence, category,
+				),
 			}, true
 		}
 	}
@@ -60,7 +117,6 @@ func DetectCommunicationType(http *HTTPInfo) string {
 
 	path := strings.ToLower(http.Path)
 	host := strings.ToLower(http.Headers["host"])
-
 	combined := host + " " + path
 
 	switch {

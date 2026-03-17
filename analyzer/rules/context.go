@@ -2,7 +2,6 @@ package rules
 
 type Context struct {
 	NowUnix int64
-
 	FlowKey string
 
 	SrcIP   string
@@ -14,6 +13,7 @@ type Context struct {
 	Debug   bool
 
 	HTTP *HTTPInfo
+	TLS  bool
 
-	TLS bool
+	DeviceCategory string
 }

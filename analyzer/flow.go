@@ -182,18 +182,38 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 		device.EnrichFromHTTP(d, httpInfo.Headers)
 		h.writeDeviceDebug(now, srcIP, d)
 	}
+		deviceCategory := "SmartPlugLight"
 
 	ctx := &rules.Context{
-		NowUnix: now.Unix(),
-		FlowKey: key,
-		SrcIP:   srcIP,
-		SrcPort: srcPort,
-		DstIP:   dstIP,
-		DstPort: dstPort,
-		Payload: st.Data,
-		Debug:   h.debug,
-		HTTP:    httpInfo,
-		TLS:     isTLSClientToServer,
+		NowUnix:        now.Unix(),
+		FlowKey:        key,
+		SrcIP:          srcIP,
+		SrcPort:        srcPort,
+		DstIP:          dstIP,
+		DstPort:        dstPort,
+		Payload:        st.Data,
+		Debug:          h.debug,
+		HTTP:           httpInfo,
+		TLS:            isTLSClientToServer,
+		DeviceCategory: deviceCategory,
+	}
+
+	if h.debug {
+		_ = h.sink.Write(Event{
+			Timestamp: now,
+			Type:      "I6_DEBUG",
+			Severity:  SeverityInfo,
+			SrcIP:     srcIP,
+			SrcPort:   srcPort,
+			DstIP:     dstIP,
+			DstPort:   dstPort,
+			Message: fmt.Sprintf(
+				"local_device_category=%q ctx_device_category=%q device_type=%q",
+				deviceCategory,
+				ctx.DeviceCategory,
+				h.devices.GetOrCreate(srcIP).DeviceType,
+			),
+		})
 	}
 
 	matches := rules.Run(ctx)
