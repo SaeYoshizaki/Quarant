@@ -1,0 +1,16 @@
+{
+  "communication_types": [
+    "cloud_control",
+    "device_status",
+    "sensor_upload",
+    "event_report",
+    "video_stream",
+    "voice_stream",
+    "firmware_update",
+    "time_sync",
+    "cloud_api",
+    "error_report",
+    "analytics",
+    "tracking"
+  ]
+}

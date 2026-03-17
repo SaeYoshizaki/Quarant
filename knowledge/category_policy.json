@@ -1,0 +1,158 @@
+{
+  "Camera": {
+    "allowed_communication_types": [
+      "video_stream",
+      "event_report",
+      "cloud_control",
+      "firmware_update",
+      "time_sync",
+      "cloud_api"
+    ],
+    "allowed_pii_types": [
+      "device_identifier",
+      "user_identifier",
+      "media_metadata"
+    ],
+    "suspicious_combinations": [
+      {
+        "communication_type": "analytics",
+        "pii_type": "email"
+      },
+      {
+        "communication_type": "tracking",
+        "pii_type": "location"
+      }
+    ]
+  },
+
+  "VoiceAssistant": {
+    "allowed_communication_types": [
+      "voice_stream",
+      "cloud_control",
+      "cloud_api",
+      "device_status",
+      "firmware_update",
+      "time_sync"
+    ],
+    "allowed_pii_types": [
+      "user_identifier",
+      "account_info",
+      "device_identifier",
+      "usage_data"
+    ],
+    "suspicious_combinations": [
+      {
+        "communication_type": "tracking",
+        "pii_type": "location"
+      }
+    ]
+  },
+
+  "SmartPlugLight": {
+    "allowed_communication_types": [
+      "cloud_control",
+      "device_status",
+      "firmware_update",
+      "time_sync"
+    ],
+    "allowed_pii_types": [
+      "device_identifier"
+    ],
+    "suspicious_combinations": [
+      {
+        "communication_type": "analytics",
+        "pii_type": "location"
+      },
+      {
+        "communication_type": "tracking",
+        "pii_type": "email"
+      }
+    ]
+  },
+
+  "Sensor": {
+    "allowed_communication_types": [
+      "sensor_upload",
+      "event_report",
+      "device_status",
+      "firmware_update",
+      "time_sync"
+    ],
+    "allowed_pii_types": [
+      "device_identifier",
+      "usage_data"
+    ],
+    "suspicious_combinations": [
+      {
+        "communication_type": "tracking",
+        "pii_type": "location"
+      },
+      {
+        "communication_type": "analytics",
+        "pii_type": "email"
+      }
+    ]
+  },
+
+  "Hub": {
+    "allowed_communication_types": [
+      "cloud_control",
+      "device_status",
+      "cloud_api",
+      "firmware_update",
+      "time_sync",
+      "error_report"
+    ],
+    "allowed_pii_types": [
+      "device_identifier",
+      "user_identifier",
+      "usage_data"
+    ],
+    "suspicious_combinations": [
+      {
+        "communication_type": "tracking",
+        "pii_type": "location"
+      }
+    ]
+  },
+
+  "Wearable": {
+    "allowed_communication_types": [
+      "sensor_upload",
+      "cloud_api",
+      "device_status",
+      "firmware_update",
+      "time_sync"
+    ],
+    "allowed_pii_types": [
+      "device_identifier",
+      "user_identifier",
+      "usage_data"
+    ],
+    "suspicious_combinations": [
+      {
+        "communication_type": "analytics",
+        "pii_type": "email"
+      }
+    ]
+  },
+
+  "Appliance": {
+    "allowed_communication_types": [
+      "cloud_control",
+      "device_status",
+      "cloud_api",
+      "firmware_update",
+      "time_sync"
+    ],
+    "allowed_pii_types": [
+      "device_identifier"
+    ],
+    "suspicious_combinations": [
+      {
+        "communication_type": "tracking",
+        "pii_type": "location"
+      }
+    ]
+  }
+}

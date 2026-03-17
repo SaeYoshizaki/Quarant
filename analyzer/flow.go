@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"quarant/analyzer/device"
+	"quarant/analyzer/knowledge"
 	"quarant/analyzer/rules"
 
 	"github.com/google/gopacket"
@@ -12,18 +13,20 @@ import (
 )
 
 type FlowHandler struct {
-	sink    *JSONLSink
-	cache   *FlowCache
-	debug   bool
-	devices *device.Store
+	sink      *JSONLSink
+	cache     *FlowCache
+	debug     bool
+	devices   *device.Store
+	knowledge *knowledge.DB
 }
 
-func NewFlowHandler(sink *JSONLSink, debug bool) *FlowHandler {
+func NewFlowHandler(sink *JSONLSink, debug bool, db *knowledge.DB) *FlowHandler {
 	return &FlowHandler{
-		sink:    sink,
-		cache:   NewFlowCache(16*1024, 1*time.Hour),
-		debug:   debug,
-		devices: device.NewStore(),
+		sink:      sink,
+		cache:     NewFlowCache(16*1024, 1*time.Hour),
+		debug:     debug,
+		devices:   device.NewStore(),
+		knowledge: db,
 	}
 }
 
@@ -195,6 +198,13 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 
 	matches := rules.Run(ctx)
 
+	if h.knowledge != nil {
+		i6Rule := rules.NewI6PrivacyRule(h.knowledge)
+		if m, ok := i6Rule.Apply(ctx); ok {
+			matches = append(matches, m)
+		}
+	}
+
 	for _, m := range matches {
 		if m.RuleID != "" && st.Reported[m.RuleID] {
 			continue
@@ -204,18 +214,15 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 			Timestamp: now,
 			Type:      m.Type,
 			Severity:  Severity(m.Severity),
-
-			RuleID:   m.RuleID,
-			Category: m.Category,
-			FlowKey:  key,
-			Evidence: m.Evidence,
-
-			SrcIP:   srcIP,
-			SrcPort: srcPort,
-			DstIP:   dstIP,
-			DstPort: dstPort,
-
-			Message: m.Message,
+			RuleID:    m.RuleID,
+			Category:  m.Category,
+			FlowKey:   key,
+			Evidence:  m.Evidence,
+			SrcIP:     srcIP,
+			SrcPort:   srcPort,
+			DstIP:     dstIP,
+			DstPort:   dstPort,
+			Message:   m.Message,
 		})
 
 		if isI2RiskEvent(m.Type) {

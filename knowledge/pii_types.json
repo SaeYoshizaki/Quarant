@@ -1,0 +1,12 @@
+{
+  "pii_types": [
+    "email",
+    "phone",
+    "location",
+    "account_info",
+    "user_identifier",
+    "device_identifier",
+    "usage_data",
+    "media_metadata"
+  ]
+}
