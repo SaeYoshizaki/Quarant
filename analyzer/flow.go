@@ -182,7 +182,12 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 		device.EnrichFromHTTP(d, httpInfo.Headers)
 		h.writeDeviceDebug(now, srcIP, d)
 	}
-		deviceCategory := "SmartPlugLight"
+		d := h.devices.GetOrCreate(srcIP)
+
+		deviceCategory := rules.MapDeviceTypeToCategory(d.DeviceType)
+		if deviceCategory == "Unknown" {
+			deviceCategory = "GenericIoT"
+		}
 
 	ctx := &rules.Context{
 		NowUnix:        now.Unix(),
