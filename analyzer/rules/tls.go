@@ -2,6 +2,7 @@ package rules
 
 import (
 	"crypto/md5"
+	"crypto/x509"
 	"encoding/binary"
 	"encoding/hex"
 	"strconv"
@@ -17,6 +18,151 @@ type TLSClientHelloInfo struct {
 	Extensions      []uint16
 	SupportedGroups []uint16
 	ECPointFormats  []uint8
+}
+
+type TLSCertificateInfo struct {
+	Subject    string
+	Issuer     string
+	SANs       []string
+	SelfSigned bool
+}
+
+type TLSServerInfo struct {
+	ServerVersion  uint16
+	SelectedCipher uint16
+
+	Cert *TLSCertificateInfo
+}
+
+func DetectTLSServerHello(data []byte) (*TLSServerInfo, bool) {
+	for off := 0; off+5 <= len(data); off++ {
+		if data[off] != 22 {
+			continue
+		}
+
+		recVer := binary.BigEndian.Uint16(data[off+1 : off+3])
+		recLen := int(binary.BigEndian.Uint16(data[off+3 : off+5]))
+		if recLen <= 0 || off+5+recLen > len(data) {
+			continue
+		}
+
+		rec := data[off+5 : off+5+recLen]
+		if len(rec) < 4 {
+			continue
+		}
+
+		hsType := rec[0]
+		if hsType != 2 {
+			continue
+		}
+
+		hsLen := int(rec[1])<<16 | int(rec[2])<<8 | int(rec[3])
+		if hsLen <= 0 || 4+hsLen > len(rec) {
+			continue
+		}
+
+		sh := rec[4 : 4+hsLen]
+		if len(sh) < 2+32+1 {
+			continue
+		}
+
+		info := &TLSServerInfo{
+			ServerVersion: binary.BigEndian.Uint16(sh[0:2]),
+			Cert:          nil,
+		}
+
+		i := 2 + 32
+
+		sidLen := int(sh[i])
+		i++
+		if i+sidLen > len(sh) {
+			continue
+		}
+		i += sidLen
+
+		if i+2 > len(sh) {
+			continue
+		}
+		info.SelectedCipher = binary.BigEndian.Uint16(sh[i : i+2])
+
+		if info.ServerVersion == 0 {
+			info.ServerVersion = recVer
+		}
+
+		if cert, ok := DetectTLSCertificate(data); ok {
+			info.Cert = cert
+		}
+
+		return info, true
+	}
+
+	return nil, false
+}
+
+func DetectTLSCertificate(data []byte) (*TLSCertificateInfo, bool) {
+	for off := 0; off+5 <= len(data); off++ {
+		if data[off] != 22 {
+			continue
+		}
+
+		recLen := int(binary.BigEndian.Uint16(data[off+3 : off+5]))
+		if recLen <= 0 || off+5+recLen > len(data) {
+			continue
+		}
+
+		rec := data[off+5 : off+5+recLen]
+		if len(rec) < 4 {
+			continue
+		}
+
+		hsType := rec[0]
+		if hsType != 11 {
+			continue
+		}
+
+		hsLen := int(rec[1])<<16 | int(rec[2])<<8 | int(rec[3])
+		if hsLen <= 0 || 4+hsLen > len(rec) {
+			continue
+		}
+
+		body := rec[4 : 4+hsLen]
+		if len(body) < 3 {
+			continue
+		}
+
+		certListLen := int(body[0])<<16 | int(body[1])<<8 | int(body[2])
+		if certListLen <= 0 || 3+certListLen > len(body) {
+			continue
+		}
+
+		certs := body[3 : 3+certListLen]
+		if len(certs) < 3 {
+			continue
+		}
+
+		certLen := int(certs[0])<<16 | int(certs[1])<<8 | int(certs[2])
+		if certLen <= 0 || 3+certLen > len(certs) {
+			continue
+		}
+
+		certBytes := certs[3 : 3+certLen]
+
+		parsed, err := x509.ParseCertificate(certBytes)
+		if err != nil {
+			continue
+		}
+
+		info := &TLSCertificateInfo{
+			Subject:    parsed.Subject.CommonName,
+			Issuer:     parsed.Issuer.CommonName,
+			SANs:       append([]string(nil), parsed.DNSNames...),
+			SelfSigned: parsed.Subject.String() == parsed.Issuer.String(),
+		}
+
+		return info, true
+	}
+
+	return nil, false
 }
 
 func isGREASE(v uint16) bool {

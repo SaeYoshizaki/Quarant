@@ -3,14 +3,29 @@ package analyzer
 import (
 	"sync"
 	"time"
+
+	"quarant/analyzer/rules"
 )
 
 type FlowState struct {
 	FirstSeen time.Time
 	LastSeen  time.Time
 
-	Data     []byte
+	ClientData []byte
+	ServerData []byte
+
 	Reported map[string]bool
+
+	DstIP   string
+	DstPort uint16
+
+	TLSClientSeen bool
+	TLSClientInfo *rules.TLSClientHelloInfo
+
+	TLSServerSeen bool
+	TLSServerInfo *rules.TLSServerInfo
+
+	DNSNames []string
 }
 
 type FlowCache struct {
@@ -42,23 +57,37 @@ func (c *FlowCache) GetOrCreate(key string, now time.Time) *FlowState {
 		c.m[key] = st
 		return st
 	}
+
 	st.LastSeen = now
 	return st
 }
 
-func (c *FlowCache) AppendUpToLimit(st *FlowState, chunk []byte) {
+func (c *FlowCache) AppendClientUpToLimit(st *FlowState, chunk []byte) {
 	if len(chunk) == 0 {
 		return
 	}
-	remain := c.maxSize - len(st.Data)
+	remain := c.maxSize - len(st.ClientData)
 	if remain <= 0 {
 		return
 	}
-
 	if len(chunk) > remain {
 		chunk = chunk[:remain]
 	}
-	st.Data = append(st.Data, chunk...)
+	st.ClientData = append(st.ClientData, chunk...)
+}
+
+func (c *FlowCache) AppendServerUpToLimit(st *FlowState, chunk []byte) {
+	if len(chunk) == 0 {
+		return
+	}
+	remain := c.maxSize - len(st.ServerData)
+	if remain <= 0 {
+		return
+	}
+	if len(chunk) > remain {
+		chunk = chunk[:remain]
+	}
+	st.ServerData = append(st.ServerData, chunk...)
 }
 
 func (c *FlowCache) Cleanup(now time.Time) {

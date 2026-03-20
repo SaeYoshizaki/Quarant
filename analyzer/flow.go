@@ -153,24 +153,75 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 
 	key := flowKeyTCP(srcIP, srcPort, dstIP, dstPort)
 	st := h.cache.GetOrCreate(key, now)
+	if st.DstIP == "" {
+		st.DstIP = dstIP
+		st.DstPort = dstPort
+	}
 
-	capturePayload := rules.NeedsPayloadCapture(dstPort)
+	capturePayload := rules.NeedsPayloadCapture(dstPort) || rules.NeedsPayloadCapture(srcPort)
 	isHTTPClientToServer := rules.IsHTTPPort(dstPort)
 	isTLSClientToServer := rules.IsTLSPort(dstPort)
+	isTLSServerToClient := rules.IsTLSPort(srcPort)
 
-	if capturePayload && len(tcp.Payload) > 0 {
-		h.cache.AppendUpToLimit(st, tcp.Payload)
+	if len(tcp.Payload) > 0 {
+		if rules.NeedsPayloadCapture(dstPort) {
+			h.cache.AppendClientUpToLimit(st, tcp.Payload)
+		}
+		if rules.NeedsPayloadCapture(srcPort) {
+			h.cache.AppendServerUpToLimit(st, tcp.Payload)
+		}
+	}
+
+	if isTLSServerToClient && !st.TLSServerSeen {
+		if serverInfo, ok := rules.DetectTLSServerHello(st.ServerData); ok {
+			st.TLSServerSeen = true
+			st.TLSServerInfo = serverInfo
+
+			if h.debug {
+				msg := fmt.Sprintf(
+					"tls_server version=0x%04x cipher=0x%04x",
+					serverInfo.ServerVersion,
+					serverInfo.SelectedCipher,
+				)
+
+				if serverInfo.Cert != nil {
+					msg += fmt.Sprintf(
+						" subject=%q issuer=%q sans=%v self_signed=%t",
+						serverInfo.Cert.Subject,
+						serverInfo.Cert.Issuer,
+						serverInfo.Cert.SANs,
+						serverInfo.Cert.SelfSigned,
+					)
+				} else {
+					msg += " cert=nil"
+				}
+
+				_ = h.sink.Write(Event{
+					Timestamp: now,
+					Type:      "TLS_SERVER_DEBUG",
+					Severity:  SeverityInfo,
+					SrcIP:     srcIP,
+					SrcPort:   srcPort,
+					DstIP:     dstIP,
+					DstPort:   dstPort,
+					Message:   msg,
+				})
+			}
+		}
 	}
 
 	var httpInfo *rules.HTTPInfo
-	if isHTTPClientToServer && rules.LooksLikeHTTP(st.Data) {
-		if hi, ok := rules.ParseHTTP(st.Data); ok {
+	if isHTTPClientToServer && rules.LooksLikeHTTP(st.ClientData) {
+		if hi, ok := rules.ParseHTTP(st.ClientData); ok {
 			httpInfo = hi
 		}
 	}
 
-	if isTLSClientToServer {
-		if tlsInfo, ok := rules.DetectTLSClientHello(st.Data); ok {
+	if isTLSClientToServer && !st.TLSClientSeen {
+		if tlsInfo, ok := rules.DetectTLSClientHello(st.ClientData); ok {
+			st.TLSClientSeen = true
+			st.TLSClientInfo = &tlsInfo
+
 			d := h.devices.GetOrCreate(srcIP)
 			device.EnrichFromTLS(d, tlsInfo)
 			h.writeDeviceDebug(now, srcIP, d)
@@ -182,12 +233,13 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 		device.EnrichFromHTTP(d, httpInfo.Headers)
 		h.writeDeviceDebug(now, srcIP, d)
 	}
-		d := h.devices.GetOrCreate(srcIP)
 
-		deviceCategory := rules.MapDeviceTypeToCategory(d.DeviceType)
-		if deviceCategory == "Unknown" {
-			deviceCategory = "GenericIoT"
-		}
+	d := h.devices.GetOrCreate(srcIP)
+
+	deviceCategory := rules.MapDeviceTypeToCategory(d.DeviceType)
+	if deviceCategory == "Unknown" {
+		deviceCategory = "GenericIoT"
+	}
 
 	ctx := &rules.Context{
 		NowUnix:        now.Unix(),
@@ -196,7 +248,7 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 		SrcPort:        srcPort,
 		DstIP:          dstIP,
 		DstPort:        dstPort,
-		Payload:        st.Data,
+		Payload:        st.ClientData,
 		Debug:          h.debug,
 		HTTP:           httpInfo,
 		TLS:            isTLSClientToServer,
