@@ -1,0 +1,164 @@
+{
+  "version": "0.1",
+  "description": "Normalized intermediate device knowledge database for Quarant",
+  "records": [
+    {
+      "source": {
+        "source_name": "example_source",
+        "source_type": "device_fingerprint_db",
+        "source_record_id": "example-001",
+        "source_url": "",
+        "source_version": "",
+        "collected_at": "2026-03-18",
+        "normalized_at": "2026-03-18"
+      },
+      "raw_identity": {
+        "vendor": "ExampleVendor",
+        "product_name": "Example Smart Plug",
+        "model": "SP-100",
+        "model_family": "",
+        "manufacturer": "ExampleVendor",
+        "product_line": "",
+        "raw_device_type": "smart plug",
+        "raw_description": "Wi-Fi enabled smart plug device",
+        "release_year": null,
+        "region": ""
+      },
+      "normalized_profile": {
+        "normalized_category": "SmartPlugLight",
+        "normalized_subcategory": "SmartPlug",
+        "confidence": 0.85,
+        "expected_functions": [
+          "power control",
+          "device status reporting",
+          "firmware update"
+        ],
+        "deployment_context": "home",
+        "mobility": "fixed",
+        "requires_user_account": true,
+        "requires_cloud_backend": true,
+        "stores_media": false,
+        "captures_environment": false
+      },
+      "communication_profile": {
+        "allowed_communication_types": [
+          "cloud_control",
+          "device_status",
+          "firmware_update",
+          "time_sync",
+          "cloud_api"
+        ],
+        "optional_communication_types": [
+          "error_report"
+        ],
+        "unexpected_communication_types": [
+          "video_stream",
+          "voice_stream",
+          "tracking"
+        ],
+        "expected_domains": [
+          "api.examplevendor.com",
+          "fw.examplevendor.com"
+        ],
+        "expected_domain_keywords": [
+          "examplevendor",
+          "cloud",
+          "fw"
+        ],
+        "expected_path_keywords": [
+          "api",
+          "status",
+          "update"
+        ],
+        "expected_ports": [
+          80,
+          443
+        ],
+        "expected_protocols": [
+          "http",
+          "tls"
+        ],
+        "expected_headers": [],
+        "expected_methods": [
+          "GET",
+          "POST"
+        ],
+        "telemetry_keywords": [
+          "telemetry",
+          "metrics"
+        ],
+        "tracking_keywords": [
+          "track",
+          "collect",
+          "analytics"
+        ],
+        "update_keywords": [
+          "update",
+          "upgrade",
+          "firmware"
+        ]
+      },
+      "privacy_profile": {
+        "allowed_pii_types": [
+          "device_identifier"
+        ],
+        "optional_pii_types": [
+          "user_identifier"
+        ],
+        "disallowed_pii_types": [
+          "location",
+          "email",
+          "phone",
+          "media_metadata"
+        ],
+        "suspicious_combinations": [
+          {
+            "communication_type": "tracking",
+            "pii_type": "device_identifier",
+            "severity": "medium",
+            "reason": "tracking is not required for core smart plug functionality"
+          },
+          {
+            "communication_type": "tracking",
+            "pii_type": "location",
+            "severity": "high",
+            "reason": "smart plug devices do not require location information"
+          }
+        ],
+        "high_risk_combinations": [
+          {
+            "communication_type": "tracking",
+            "pii_type": "location",
+            "severity": "high",
+            "reason": "location data is unnecessary for this category"
+          }
+        ],
+        "requires_explicit_user_consent": [
+          "location",
+          "account_info"
+        ],
+        "privacy_rationale": [
+          "device identifiers may be required for pairing and cloud management",
+          "location is not required for the core function of a smart plug"
+        ],
+        "retention_risk": "unknown",
+        "sharing_risk": "medium",
+        "tracking_risk": "medium"
+      },
+      "evidence": {
+        "normalization_notes": "normalized from raw device type 'smart plug'",
+        "policy_notes": "initial draft based on common smart plug behavior",
+        "assumptions": [
+          "core smart plug functionality does not require location data"
+        ],
+        "review_status": "draft",
+        "reviewed_by": "",
+        "reviewed_at": "",
+        "evidence_examples": [
+          "observed cloud API communication",
+          "firmware update endpoint observed in source dataset"
+        ]
+      }
+    }
+  ]
+}

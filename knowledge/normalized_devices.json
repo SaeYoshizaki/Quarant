@@ -1,0 +1,211 @@
+[
+  {
+    "name": "Test Camera A",
+    "vendor": "Ayecom Technology Co., Ltd.",
+    "mac": "00:1A:2B:11:22:33",
+    "raw_category": "camera",
+    "category": "Camera",
+    "domains": [
+      "tplinkcloud.com"
+    ],
+    "domain_keywords": [
+      "tplinkcloud"
+    ],
+    "communication_patterns": [
+      "cloud_api",
+      "local_api",
+      "video_stream"
+    ],
+    "pii_types": [
+      "device_identifier"
+    ]
+  },
+  {
+    "name": "Test Camera B",
+    "vendor": "Xiaomi",
+    "mac": "",
+    "raw_category": "camera",
+    "category": "Camera",
+    "domains": [
+      "camera.mi.com"
+    ],
+    "domain_keywords": [
+      "camera",
+      "mi"
+    ],
+    "communication_patterns": [
+      "encrypted_comm",
+      "video_stream"
+    ],
+    "pii_types": [
+      "device_identifier"
+    ]
+  },
+  {
+    "name": "Test Voice A",
+    "vendor": "Amazon",
+    "mac": "",
+    "raw_category": "voice_assistant",
+    "category": "VoiceAssistant",
+    "domains": [
+      "alexa.amazon.com"
+    ],
+    "domain_keywords": [
+      "alexa",
+      "amazon"
+    ],
+    "communication_patterns": [
+      "cloud_api",
+      "encrypted_comm"
+    ],
+    "pii_types": [
+      "media_metadata",
+      "user_identifier"
+    ]
+  },
+  {
+    "name": "Test Voice B",
+    "vendor": "",
+    "mac": "AA:BB:CC:44:55:66",
+    "raw_category": "voice_assistant",
+    "category": "VoiceAssistant",
+    "domains": [
+      "assistant.google.com"
+    ],
+    "domain_keywords": [
+      "assistant",
+      "google"
+    ],
+    "communication_patterns": [
+      "encrypted_comm"
+    ],
+    "pii_types": [
+      "user_identifier"
+    ]
+  },
+  {
+    "name": "Test Controller A",
+    "vendor": "Ayecom Technology Co., Ltd.",
+    "mac": "00:1A:2B:AA:BB:CC",
+    "raw_category": "plug",
+    "category": "Controller",
+    "domains": [
+      "tplinkcloud.com"
+    ],
+    "domain_keywords": [
+      "tplinkcloud"
+    ],
+    "communication_patterns": [
+      "cloud_api",
+      "encrypted_comm",
+      "local_api"
+    ],
+    "pii_types": [
+      "device_identifier"
+    ]
+  },
+  {
+    "name": "Test Controller B",
+    "vendor": "SwitchBot",
+    "mac": "",
+    "raw_category": "plug",
+    "category": "Controller",
+    "domains": [
+      "switch-bot.com"
+    ],
+    "domain_keywords": [
+      "bot",
+      "switch"
+    ],
+    "communication_patterns": [
+      "local_api"
+    ],
+    "pii_types": [
+      "device_identifier"
+    ]
+  },
+  {
+    "name": "Test Sensor A",
+    "vendor": "Aqara",
+    "mac": "",
+    "raw_category": "sensor",
+    "category": "Sensor",
+    "domains": [
+      "aqara.com"
+    ],
+    "domain_keywords": [
+      "aqara"
+    ],
+    "communication_patterns": [
+      "device_status",
+      "encrypted_comm"
+    ],
+    "pii_types": [
+      "device_identifier",
+      "usage_data"
+    ]
+  },
+  {
+    "name": "Test Sensor B",
+    "vendor": "Ayecom Technology Co., Ltd.",
+    "mac": "00:1A:2B:77:88:99",
+    "raw_category": "sensor",
+    "category": "Sensor",
+    "domains": [
+      "sensorcloud.example.com"
+    ],
+    "domain_keywords": [
+      "example",
+      "sensorcloud"
+    ],
+    "communication_patterns": [
+      "cloud_api",
+      "device_status"
+    ],
+    "pii_types": [
+      "usage_data"
+    ]
+  },
+  {
+    "name": "Test Hub A",
+    "vendor": "Philips",
+    "mac": "",
+    "raw_category": "hub",
+    "category": "Hub",
+    "domains": [
+      "meethue.com"
+    ],
+    "domain_keywords": [
+      "meethue"
+    ],
+    "communication_patterns": [
+      "device_status",
+      "encrypted_comm",
+      "local_api"
+    ],
+    "pii_types": [
+      "device_identifier",
+      "user_identifier"
+    ]
+  },
+  {
+    "name": "Test Appliance A",
+    "vendor": "",
+    "mac": "",
+    "raw_category": "appliance",
+    "category": "Appliance",
+    "domains": [
+      "lgsmart.com"
+    ],
+    "domain_keywords": [
+      "lgsmart"
+    ],
+    "communication_patterns": [
+      "encrypted_comm",
+      "local_api"
+    ],
+    "pii_types": [
+      "device_identifier"
+    ]
+  }
+]

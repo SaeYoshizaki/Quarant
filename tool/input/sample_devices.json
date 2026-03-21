@@ -1,0 +1,96 @@
+[
+  {
+    "name": "Test Camera A",
+    "vendor": "",
+    "mac": "00:1A:2B:11:22:33",
+    "category": "camera",
+    "protocols": ["http", "rtsp"],
+    "domains": ["tplinkcloud.com"],
+    "pii": ["device_id"]
+  },
+  {
+    "name": "Test Camera B",
+    "vendor": "Xiaomi",
+    "mac": "",
+    "category": "camera",
+    "protocols": ["rtsp", "tls"],
+    "domains": ["camera.mi.com"],
+    "pii": ["device_id"]
+  },
+
+  {
+    "name": "Test Voice A",
+    "vendor": "Amazon",
+    "mac": "",
+    "category": "voice_assistant",
+    "protocols": ["tls", "http2"],
+    "domains": ["alexa.amazon.com"],
+    "pii": ["user_id", "voice"]
+  },
+  {
+    "name": "Test Voice B",
+    "vendor": "",
+    "mac": "AA:BB:CC:44:55:66",
+    "category": "voice_assistant",
+    "protocols": ["tls"],
+    "domains": ["assistant.google.com"],
+    "pii": ["user_id"]
+  },
+
+  {
+    "name": "Test Controller A",
+    "vendor": "",
+    "mac": "00:1A:2B:AA:BB:CC",
+    "category": "plug",
+    "protocols": ["http", "tls"],
+    "domains": ["tplinkcloud.com"],
+    "pii": ["device_id"]
+  },
+  {
+    "name": "Test Controller B",
+    "vendor": "SwitchBot",
+    "mac": "",
+    "category": "plug",
+    "protocols": ["http"],
+    "domains": ["switch-bot.com"],
+    "pii": ["device_id"]
+  },
+
+  {
+    "name": "Test Sensor A",
+    "vendor": "Aqara",
+    "mac": "",
+    "category": "sensor",
+    "protocols": ["mqtt", "tls"],
+    "domains": ["aqara.com"],
+    "pii": ["device_id", "usage"]
+  },
+  {
+    "name": "Test Sensor B",
+    "vendor": "",
+    "mac": "00:1A:2B:77:88:99",
+    "category": "sensor",
+    "protocols": ["mqtt"],
+    "domains": ["sensorcloud.example.com"],
+    "pii": ["usage"]
+  },
+
+  {
+    "name": "Test Hub A",
+    "vendor": "Philips",
+    "mac": "",
+    "category": "hub",
+    "protocols": ["http", "mqtt", "tls"],
+    "domains": ["meethue.com"],
+    "pii": ["device_id", "user_id"]
+  },
+  {
+    "name": "Test Appliance A",
+    "vendor": "",
+    "mac": "",
+    "category": "appliance",
+    "protocols": ["http", "tls"],
+    "domains": ["lgsmart.com"],
+    "pii": ["device_id"]
+  }
+]

@@ -1,0 +1,134 @@
+{
+  "Camera": {
+    "count": 2,
+    "vendors": {
+      "Ayecom Technology Co., Ltd.": 1,
+      "Xiaomi": 1
+    },
+    "raw_categories": {
+      "camera": 2
+    },
+    "communication_patterns": {
+      "video_stream": 2,
+      "cloud_api": 1,
+      "local_api": 1,
+      "encrypted_comm": 1
+    },
+    "domain_keywords": {
+      "tplinkcloud": 1,
+      "camera": 1,
+      "mi": 1
+    },
+    "pii_types": {
+      "device_identifier": 2
+    }
+  },
+  "VoiceAssistant": {
+    "count": 2,
+    "vendors": {
+      "Amazon": 1
+    },
+    "raw_categories": {
+      "voice_assistant": 2
+    },
+    "communication_patterns": {
+      "encrypted_comm": 2,
+      "cloud_api": 1
+    },
+    "domain_keywords": {
+      "alexa": 1,
+      "amazon": 1,
+      "assistant": 1,
+      "google": 1
+    },
+    "pii_types": {
+      "user_identifier": 2,
+      "media_metadata": 1
+    }
+  },
+  "Controller": {
+    "count": 2,
+    "vendors": {
+      "Ayecom Technology Co., Ltd.": 1,
+      "SwitchBot": 1
+    },
+    "raw_categories": {
+      "plug": 2
+    },
+    "communication_patterns": {
+      "local_api": 2,
+      "cloud_api": 1,
+      "encrypted_comm": 1
+    },
+    "domain_keywords": {
+      "tplinkcloud": 1,
+      "bot": 1,
+      "switch": 1
+    },
+    "pii_types": {
+      "device_identifier": 2
+    }
+  },
+  "Sensor": {
+    "count": 2,
+    "vendors": {
+      "Aqara": 1,
+      "Ayecom Technology Co., Ltd.": 1
+    },
+    "raw_categories": {
+      "sensor": 2
+    },
+    "communication_patterns": {
+      "device_status": 2,
+      "encrypted_comm": 1,
+      "cloud_api": 1
+    },
+    "domain_keywords": {
+      "aqara": 1,
+      "example": 1,
+      "sensorcloud": 1
+    },
+    "pii_types": {
+      "usage_data": 2,
+      "device_identifier": 1
+    }
+  },
+  "Hub": {
+    "count": 1,
+    "vendors": {
+      "Philips": 1
+    },
+    "raw_categories": {
+      "hub": 1
+    },
+    "communication_patterns": {
+      "device_status": 1,
+      "encrypted_comm": 1,
+      "local_api": 1
+    },
+    "domain_keywords": {
+      "meethue": 1
+    },
+    "pii_types": {
+      "device_identifier": 1,
+      "user_identifier": 1
+    }
+  },
+  "Appliance": {
+    "count": 1,
+    "vendors": {},
+    "raw_categories": {
+      "appliance": 1
+    },
+    "communication_patterns": {
+      "encrypted_comm": 1,
+      "local_api": 1
+    },
+    "domain_keywords": {
+      "lgsmart": 1
+    },
+    "pii_types": {
+      "device_identifier": 1
+    }
+  }
+}
