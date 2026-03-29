@@ -11,7 +11,7 @@ func MapDeviceTypeToCategory(deviceType string) string {
 
 	case strings.Contains(t, "plug"),
 		strings.Contains(t, "light"):
-		return "SmartPlugLight"
+		return "Controller"
 
 	case strings.Contains(t, "sensor"):
 		return "Sensor"

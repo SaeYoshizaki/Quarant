@@ -34,6 +34,44 @@ type CategoryPolicyEntry struct {
 
 type CategoryPolicy map[string]CategoryPolicyEntry
 
+type OfficialSource struct {
+	Vendor  string `json:"vendor"`
+	URL     string `json:"url"`
+	Notes   string `json:"notes"`
+	NotesEN string `json:"notes_en"`
+	NotesJA string `json:"notes_ja"`
+}
+
+type CategoryInferenceEntry struct {
+	Category                string           `json:"category"`
+	RecordCount             int              `json:"record_count"`
+	VendorCandidates        []string         `json:"vendor_candidates"`
+	RepresentativeDomains   []string         `json:"representative_domains"`
+	RepresentativeProtocols []string         `json:"representative_protocols"`
+	ObservedDeviceLabels    []string         `json:"observed_device_labels"`
+	SourceBreakdown         map[string]int   `json:"source_breakdown"`
+	OfficialSources         []OfficialSource `json:"official_sources"`
+}
+
+type CategoryInferenceDB struct {
+	Categories map[string]CategoryInferenceEntry `json:"categories"`
+}
+
+type CategoryBehaviorBaseline struct {
+	ExpectedCommunicationTypes []string `json:"expected_communication_types"`
+	ExpectedProtocols          []string `json:"expected_protocols"`
+	ExpectedDomainPatterns     []string `json:"expected_domain_patterns"`
+	CommonPorts                []int    `json:"common_ports"`
+	LocalAdminExpected         bool     `json:"local_admin_expected"`
+	PlaintextTolerance         string   `json:"plaintext_tolerance"`
+	ExpectedFrequency          string   `json:"expected_frequency"`
+	SuspiciousPatterns         []string `json:"suspicious_patterns"`
+	NotesEN                    string   `json:"notes_en"`
+	NotesJA                    string   `json:"notes_ja"`
+}
+
+type CategoryBehaviorBaselines map[string]CategoryBehaviorBaseline
+
 func loadJSON(path string, out any) error {
 	data, err := os.ReadFile(path)
 	if err != nil {
@@ -91,11 +129,35 @@ func LoadCategoryPolicy() (CategoryPolicy, error) {
 	return v, nil
 }
 
+func LoadCategoryInferenceDB() (*CategoryInferenceDB, error) {
+	path := filepath.Join(knowledgeDir, "category_inference_db.json")
+
+	var v CategoryInferenceDB
+	if err := loadJSON(path, &v); err != nil {
+		return nil, err
+	}
+
+	return &v, nil
+}
+
+func LoadCategoryBehaviorBaselines() (CategoryBehaviorBaselines, error) {
+	path := filepath.Join(knowledgeDir, "category_behavior_baselines.json")
+
+	var v CategoryBehaviorBaselines
+	if err := loadJSON(path, &v); err != nil {
+		return nil, err
+	}
+
+	return v, nil
+}
+
 type DB struct {
 	DeviceCategories   *DeviceCategories
 	CommunicationTypes *CommunicationTypes
 	PIITypes           *PIITypes
 	CategoryPolicy     CategoryPolicy
+	CategoryInference  *CategoryInferenceDB
+	BehaviorBaselines  CategoryBehaviorBaselines
 }
 
 func LoadAll() (*DB, error) {
@@ -119,11 +181,23 @@ func LoadAll() (*DB, error) {
 		return nil, err
 	}
 
+	categoryInference, err := LoadCategoryInferenceDB()
+	if err != nil {
+		return nil, err
+	}
+
+	behaviorBaselines, err := LoadCategoryBehaviorBaselines()
+	if err != nil {
+		return nil, err
+	}
+
 	return &DB{
 		DeviceCategories:   deviceCategories,
 		CommunicationTypes: communicationTypes,
 		PIITypes:           piiTypes,
 		CategoryPolicy:     categoryPolicy,
+		CategoryInference:  categoryInference,
+		BehaviorBaselines:  behaviorBaselines,
 	}, nil
 }
 
@@ -218,4 +292,22 @@ func (db *DB) IsSuspiciousCombination(category, commType, piiType string) bool {
 		}
 	}
 	return false
+}
+
+func (db *DB) GetBehaviorBaseline(category string) (CategoryBehaviorBaseline, bool) {
+	if db == nil {
+		return CategoryBehaviorBaseline{}, false
+	}
+
+	entry, ok := db.BehaviorBaselines[category]
+	return entry, ok
+}
+
+func (db *DB) GetCategoryInference(category string) (CategoryInferenceEntry, bool) {
+	if db == nil || db.CategoryInference == nil {
+		return CategoryInferenceEntry{}, false
+	}
+
+	entry, ok := db.CategoryInference.Categories[category]
+	return entry, ok
 }

@@ -18,7 +18,8 @@
     ],
     "pii_types": [
       "device_identifier"
-    ]
+    ],
+    "source": "sample"
   },
   {
     "name": "Test Camera B",
@@ -39,7 +40,8 @@
     ],
     "pii_types": [
       "device_identifier"
-    ]
+    ],
+    "source": "sample"
   },
   {
     "name": "Test Voice A",
@@ -61,7 +63,8 @@
     "pii_types": [
       "media_metadata",
       "user_identifier"
-    ]
+    ],
+    "source": "sample"
   },
   {
     "name": "Test Voice B",
@@ -81,7 +84,8 @@
     ],
     "pii_types": [
       "user_identifier"
-    ]
+    ],
+    "source": "sample"
   },
   {
     "name": "Test Controller A",
@@ -102,7 +106,8 @@
     ],
     "pii_types": [
       "device_identifier"
-    ]
+    ],
+    "source": "sample"
   },
   {
     "name": "Test Controller B",
@@ -122,7 +127,8 @@
     ],
     "pii_types": [
       "device_identifier"
-    ]
+    ],
+    "source": "sample"
   },
   {
     "name": "Test Sensor A",
@@ -143,7 +149,8 @@
     "pii_types": [
       "device_identifier",
       "usage_data"
-    ]
+    ],
+    "source": "sample"
   },
   {
     "name": "Test Sensor B",
@@ -164,7 +171,8 @@
     ],
     "pii_types": [
       "usage_data"
-    ]
+    ],
+    "source": "sample"
   },
   {
     "name": "Test Hub A",
@@ -186,7 +194,8 @@
     "pii_types": [
       "device_identifier",
       "user_identifier"
-    ]
+    ],
+    "source": "sample"
   },
   {
     "name": "Test Appliance A",
@@ -206,6 +215,1479 @@
     ],
     "pii_types": [
       "device_identifier"
-    ]
+    ],
+    "source": "sample"
+  },
+  {
+    "name": "generic-ip-camera",
+    "vendor": "",
+    "mac": "",
+    "raw_category": "Surveillance Camera",
+    "category": "Camera",
+    "domains": [
+      "api.camera-cloud.example",
+      "video.camera-cloud.example"
+    ],
+    "domain_keywords": [
+      "api",
+      "camera",
+      "cloud",
+      "example",
+      "video"
+    ],
+    "communication_patterns": [
+      "cloud_api",
+      "video_stream"
+    ],
+    "pii_types": [],
+    "source": "fingerbank_api",
+    "source_category": "Camera",
+    "fingerbank_score": 26,
+    "fingerbank_device_name": "Audio, Imaging or Video Equipment/Camera/Surveillance Camera"
+  },
+  {
+    "name": "connected-appliance",
+    "vendor": "Wisol",
+    "mac": "70:2c:1f:12:34:56",
+    "raw_category": "Samsung Family Hub",
+    "category": "Appliance",
+    "domains": [
+      "api.appliance-cloud.example",
+      "firmware.appliance-cloud.example"
+    ],
+    "domain_keywords": [
+      "api",
+      "appliance",
+      "cloud",
+      "example",
+      "firmware"
+    ],
+    "communication_patterns": [
+      "cloud_api",
+      "firmware_update"
+    ],
+    "pii_types": [],
+    "source": "fingerbank_api",
+    "source_category": "Appliance",
+    "fingerbank_score": 15,
+    "fingerbank_device_name": "Internet of Things (IoT)/Appliance/Samsung Smart Home Appliance/Samsung Family Hub"
+  },
+  {
+    "name": "generic-ip-camera-v01",
+    "vendor": "",
+    "mac": "",
+    "raw_category": "Surveillance Camera",
+    "category": "Camera",
+    "domains": [
+      "api-api-v01.camera-cloud.example",
+      "api-video-v01.camera-cloud.example"
+    ],
+    "domain_keywords": [
+      "api",
+      "camera",
+      "cloud",
+      "example",
+      "video"
+    ],
+    "communication_patterns": [
+      "cloud_api",
+      "video_stream"
+    ],
+    "pii_types": [],
+    "source": "fingerbank_api",
+    "source_category": "Camera",
+    "fingerbank_score": 26,
+    "fingerbank_device_name": "Audio, Imaging or Video Equipment/Camera/Surveillance Camera"
+  },
+  {
+    "name": "connected-appliance-v01",
+    "vendor": "Wisol",
+    "mac": "70:2c:1f:10:00:01",
+    "raw_category": "Samsung Family Hub",
+    "category": "Appliance",
+    "domains": [
+      "api-api-v01.appliance-cloud.example",
+      "api-firmware-v01.appliance-cloud.example"
+    ],
+    "domain_keywords": [
+      "api",
+      "appliance",
+      "cloud",
+      "example",
+      "firmware"
+    ],
+    "communication_patterns": [
+      "cloud_api",
+      "firmware_update"
+    ],
+    "pii_types": [],
+    "source": "fingerbank_api",
+    "source_category": "Appliance",
+    "fingerbank_score": 15,
+    "fingerbank_device_name": "Internet of Things (IoT)/Appliance/Samsung Smart Home Appliance/Samsung Family Hub"
+  },
+  {
+    "name": "generic-ip-camera-v02",
+    "vendor": "",
+    "mac": "",
+    "raw_category": "Surveillance Camera",
+    "category": "Camera",
+    "domains": [
+      "control-api-v02.camera-cloud.example",
+      "control-video-v02.camera-cloud.example"
+    ],
+    "domain_keywords": [
+      "api",
+      "camera",
+      "cloud",
+      "control",
+      "example",
+      "video"
+    ],
+    "communication_patterns": [
+      "cloud_api",
+      "video_stream"
+    ],
+    "pii_types": [],
+    "source": "fingerbank_api",
+    "source_category": "Camera",
+    "fingerbank_score": 26,
+    "fingerbank_device_name": "Audio, Imaging or Video Equipment/Camera/Surveillance Camera"
+  },
+  {
+    "name": "connected-appliance-v02",
+    "vendor": "Wisol",
+    "mac": "70:2c:1f:10:00:02",
+    "raw_category": "Samsung Family Hub",
+    "category": "Appliance",
+    "domains": [
+      "control-api-v02.appliance-cloud.example",
+      "control-firmware-v02.appliance-cloud.example"
+    ],
+    "domain_keywords": [
+      "api",
+      "appliance",
+      "cloud",
+      "control",
+      "example",
+      "firmware"
+    ],
+    "communication_patterns": [
+      "cloud_api",
+      "firmware_update"
+    ],
+    "pii_types": [],
+    "source": "fingerbank_api",
+    "source_category": "Appliance",
+    "fingerbank_score": 15,
+    "fingerbank_device_name": "Internet of Things (IoT)/Appliance/Samsung Smart Home Appliance/Samsung Family Hub"
+  },
+  {
+    "name": "generic-ip-camera-v03",
+    "vendor": "",
+    "mac": "",
+    "raw_category": "Surveillance Camera",
+    "category": "Camera",
+    "domains": [
+      "sync-api-v03.camera-cloud.example",
+      "sync-video-v03.camera-cloud.example"
+    ],
+    "domain_keywords": [
+      "api",
+      "camera",
+      "cloud",
+      "example",
+      "sync",
+      "video"
+    ],
+    "communication_patterns": [
+      "cloud_api",
+      "video_stream"
+    ],
+    "pii_types": [],
+    "source": "fingerbank_api",
+    "source_category": "Camera",
+    "fingerbank_score": 26,
+    "fingerbank_device_name": "Audio, Imaging or Video Equipment/Camera/Surveillance Camera"
+  },
+  {
+    "name": "connected-appliance-v03",
+    "vendor": "Wisol",
+    "mac": "70:2c:1f:10:00:03",
+    "raw_category": "Samsung Family Hub",
+    "category": "Appliance",
+    "domains": [
+      "sync-api-v03.appliance-cloud.example",
+      "sync-firmware-v03.appliance-cloud.example"
+    ],
+    "domain_keywords": [
+      "api",
+      "appliance",
+      "cloud",
+      "example",
+      "firmware",
+      "sync"
+    ],
+    "communication_patterns": [
+      "cloud_api",
+      "firmware_update"
+    ],
+    "pii_types": [],
+    "source": "fingerbank_api",
+    "source_category": "Appliance",
+    "fingerbank_score": 15,
+    "fingerbank_device_name": "Internet of Things (IoT)/Appliance/Samsung Smart Home Appliance/Samsung Family Hub"
+  },
+  {
+    "name": "generic-ip-camera-v04",
+    "vendor": "",
+    "mac": "",
+    "raw_category": "Surveillance Camera",
+    "category": "Camera",
+    "domains": [
+      "telemetry-api-v04.camera-cloud.example",
+      "telemetry-video-v04.camera-cloud.example"
+    ],
+    "domain_keywords": [
+      "api",
+      "camera",
+      "cloud",
+      "example",
+      "telemetry",
+      "video"
+    ],
+    "communication_patterns": [
+      "analytics",
+      "cloud_api",
+      "video_stream"
+    ],
+    "pii_types": [],
+    "source": "fingerbank_api",
+    "source_category": "Camera",
+    "fingerbank_score": 26,
+    "fingerbank_device_name": "Audio, Imaging or Video Equipment/Camera/Surveillance Camera"
+  },
+  {
+    "name": "connected-appliance-v04",
+    "vendor": "Wisol",
+    "mac": "70:2c:1f:10:00:04",
+    "raw_category": "Samsung Family Hub",
+    "category": "Appliance",
+    "domains": [
+      "telemetry-api-v04.appliance-cloud.example",
+      "telemetry-firmware-v04.appliance-cloud.example"
+    ],
+    "domain_keywords": [
+      "api",
+      "appliance",
+      "cloud",
+      "example",
+      "firmware",
+      "telemetry"
+    ],
+    "communication_patterns": [
+      "analytics",
+      "cloud_api",
+      "firmware_update"
+    ],
+    "pii_types": [],
+    "source": "fingerbank_api",
+    "source_category": "Appliance",
+    "fingerbank_score": 15,
+    "fingerbank_device_name": "Internet of Things (IoT)/Appliance/Samsung Smart Home Appliance/Samsung Family Hub"
+  },
+  {
+    "name": "generic-ip-camera-v05",
+    "vendor": "",
+    "mac": "",
+    "raw_category": "Surveillance Camera",
+    "category": "Camera",
+    "domains": [
+      "events-api-v05.camera-cloud.example",
+      "events-video-v05.camera-cloud.example"
+    ],
+    "domain_keywords": [
+      "api",
+      "camera",
+      "cloud",
+      "events",
+      "example",
+      "video"
+    ],
+    "communication_patterns": [
+      "cloud_api",
+      "video_stream"
+    ],
+    "pii_types": [],
+    "source": "fingerbank_api",
+    "source_category": "Camera",
+    "fingerbank_score": 26,
+    "fingerbank_device_name": "Audio, Imaging or Video Equipment/Camera/Surveillance Camera"
+  },
+  {
+    "name": "connected-appliance-v05",
+    "vendor": "Wisol",
+    "mac": "70:2c:1f:10:00:05",
+    "raw_category": "Samsung Family Hub",
+    "category": "Appliance",
+    "domains": [
+      "events-api-v05.appliance-cloud.example",
+      "events-firmware-v05.appliance-cloud.example"
+    ],
+    "domain_keywords": [
+      "api",
+      "appliance",
+      "cloud",
+      "events",
+      "example",
+      "firmware"
+    ],
+    "communication_patterns": [
+      "cloud_api",
+      "firmware_update"
+    ],
+    "pii_types": [],
+    "source": "fingerbank_api",
+    "source_category": "Appliance",
+    "fingerbank_score": 15,
+    "fingerbank_device_name": "Internet of Things (IoT)/Appliance/Samsung Smart Home Appliance/Samsung Family Hub"
+  },
+  {
+    "name": "generic-ip-camera-v06",
+    "vendor": "",
+    "mac": "",
+    "raw_category": "Surveillance Camera",
+    "category": "Camera",
+    "domains": [
+      "device-api-v06.camera-cloud.example",
+      "device-video-v06.camera-cloud.example"
+    ],
+    "domain_keywords": [
+      "api",
+      "camera",
+      "cloud",
+      "device",
+      "example",
+      "video"
+    ],
+    "communication_patterns": [
+      "cloud_api",
+      "video_stream"
+    ],
+    "pii_types": [],
+    "source": "fingerbank_api",
+    "source_category": "Camera",
+    "fingerbank_score": 26,
+    "fingerbank_device_name": "Audio, Imaging or Video Equipment/Camera/Surveillance Camera"
+  },
+  {
+    "name": "connected-appliance-v06",
+    "vendor": "Wisol",
+    "mac": "70:2c:1f:10:00:06",
+    "raw_category": "Samsung Family Hub",
+    "category": "Appliance",
+    "domains": [
+      "device-api-v06.appliance-cloud.example",
+      "device-firmware-v06.appliance-cloud.example"
+    ],
+    "domain_keywords": [
+      "api",
+      "appliance",
+      "cloud",
+      "device",
+      "example",
+      "firmware"
+    ],
+    "communication_patterns": [
+      "cloud_api",
+      "firmware_update"
+    ],
+    "pii_types": [],
+    "source": "fingerbank_api",
+    "source_category": "Appliance",
+    "fingerbank_score": 15,
+    "fingerbank_device_name": "Internet of Things (IoT)/Appliance/Samsung Smart Home Appliance/Samsung Family Hub"
+  },
+  {
+    "name": "generic-ip-camera-v07",
+    "vendor": "",
+    "mac": "",
+    "raw_category": "Surveillance Camera",
+    "category": "Camera",
+    "domains": [
+      "cloud-api-v07.camera-cloud.example",
+      "cloud-video-v07.camera-cloud.example"
+    ],
+    "domain_keywords": [
+      "api",
+      "camera",
+      "cloud",
+      "example",
+      "video"
+    ],
+    "communication_patterns": [
+      "cloud_api",
+      "video_stream"
+    ],
+    "pii_types": [],
+    "source": "fingerbank_api",
+    "source_category": "Camera",
+    "fingerbank_score": 26,
+    "fingerbank_device_name": "Audio, Imaging or Video Equipment/Camera/Surveillance Camera"
+  },
+  {
+    "name": "connected-appliance-v07",
+    "vendor": "Wisol",
+    "mac": "70:2c:1f:10:00:07",
+    "raw_category": "Samsung Family Hub",
+    "category": "Appliance",
+    "domains": [
+      "cloud-api-v07.appliance-cloud.example",
+      "cloud-firmware-v07.appliance-cloud.example"
+    ],
+    "domain_keywords": [
+      "api",
+      "appliance",
+      "cloud",
+      "example",
+      "firmware"
+    ],
+    "communication_patterns": [
+      "cloud_api",
+      "firmware_update"
+    ],
+    "pii_types": [],
+    "source": "fingerbank_api",
+    "source_category": "Appliance",
+    "fingerbank_score": 15,
+    "fingerbank_device_name": "Internet of Things (IoT)/Appliance/Samsung Smart Home Appliance/Samsung Family Hub"
+  },
+  {
+    "name": "generic-ip-camera-v08",
+    "vendor": "",
+    "mac": "",
+    "raw_category": "Surveillance Camera",
+    "category": "Camera",
+    "domains": [
+      "status-api-v08.camera-cloud.example",
+      "status-video-v08.camera-cloud.example"
+    ],
+    "domain_keywords": [
+      "api",
+      "camera",
+      "cloud",
+      "example",
+      "status",
+      "video"
+    ],
+    "communication_patterns": [
+      "cloud_api",
+      "video_stream"
+    ],
+    "pii_types": [],
+    "source": "fingerbank_api",
+    "source_category": "Camera",
+    "fingerbank_score": 26,
+    "fingerbank_device_name": "Audio, Imaging or Video Equipment/Camera/Surveillance Camera"
+  },
+  {
+    "name": "connected-appliance-v08",
+    "vendor": "Wisol",
+    "mac": "70:2c:1f:10:00:08",
+    "raw_category": "Samsung Family Hub",
+    "category": "Appliance",
+    "domains": [
+      "status-api-v08.appliance-cloud.example",
+      "status-firmware-v08.appliance-cloud.example"
+    ],
+    "domain_keywords": [
+      "api",
+      "appliance",
+      "cloud",
+      "example",
+      "firmware",
+      "status"
+    ],
+    "communication_patterns": [
+      "cloud_api",
+      "firmware_update"
+    ],
+    "pii_types": [],
+    "source": "fingerbank_api",
+    "source_category": "Appliance",
+    "fingerbank_score": 15,
+    "fingerbank_device_name": "Internet of Things (IoT)/Appliance/Samsung Smart Home Appliance/Samsung Family Hub"
+  },
+  {
+    "name": "generic-ip-camera-v09",
+    "vendor": "",
+    "mac": "",
+    "raw_category": "Surveillance Camera",
+    "category": "Camera",
+    "domains": [
+      "api-api-v09.camera-cloud.example",
+      "api-video-v09.camera-cloud.example"
+    ],
+    "domain_keywords": [
+      "api",
+      "camera",
+      "cloud",
+      "example",
+      "video"
+    ],
+    "communication_patterns": [
+      "cloud_api",
+      "video_stream"
+    ],
+    "pii_types": [],
+    "source": "fingerbank_api",
+    "source_category": "Camera",
+    "fingerbank_score": 26,
+    "fingerbank_device_name": "Audio, Imaging or Video Equipment/Camera/Surveillance Camera"
+  },
+  {
+    "name": "connected-appliance-v09",
+    "vendor": "Wisol",
+    "mac": "70:2c:1f:10:00:09",
+    "raw_category": "Samsung Family Hub",
+    "category": "Appliance",
+    "domains": [
+      "api-api-v09.appliance-cloud.example",
+      "api-firmware-v09.appliance-cloud.example"
+    ],
+    "domain_keywords": [
+      "api",
+      "appliance",
+      "cloud",
+      "example",
+      "firmware"
+    ],
+    "communication_patterns": [
+      "cloud_api",
+      "firmware_update"
+    ],
+    "pii_types": [],
+    "source": "fingerbank_api",
+    "source_category": "Appliance",
+    "fingerbank_score": 15,
+    "fingerbank_device_name": "Internet of Things (IoT)/Appliance/Samsung Smart Home Appliance/Samsung Family Hub"
+  },
+  {
+    "name": "generic-ip-camera-v10",
+    "vendor": "",
+    "mac": "",
+    "raw_category": "Surveillance Camera",
+    "category": "Camera",
+    "domains": [
+      "control-api-v10.camera-cloud.example",
+      "control-video-v10.camera-cloud.example"
+    ],
+    "domain_keywords": [
+      "api",
+      "camera",
+      "cloud",
+      "control",
+      "example",
+      "video"
+    ],
+    "communication_patterns": [
+      "cloud_api",
+      "video_stream"
+    ],
+    "pii_types": [],
+    "source": "fingerbank_api",
+    "source_category": "Camera",
+    "fingerbank_score": 26,
+    "fingerbank_device_name": "Audio, Imaging or Video Equipment/Camera/Surveillance Camera"
+  },
+  {
+    "name": "connected-appliance-v10",
+    "vendor": "Wisol",
+    "mac": "70:2c:1f:10:00:0a",
+    "raw_category": "Samsung Family Hub",
+    "category": "Appliance",
+    "domains": [
+      "control-api-v10.appliance-cloud.example",
+      "control-firmware-v10.appliance-cloud.example"
+    ],
+    "domain_keywords": [
+      "api",
+      "appliance",
+      "cloud",
+      "control",
+      "example",
+      "firmware"
+    ],
+    "communication_patterns": [
+      "cloud_api",
+      "firmware_update"
+    ],
+    "pii_types": [],
+    "source": "fingerbank_api",
+    "source_category": "Appliance",
+    "fingerbank_score": 15,
+    "fingerbank_device_name": "Internet of Things (IoT)/Appliance/Samsung Smart Home Appliance/Samsung Family Hub"
+  },
+  {
+    "name": "generic-ip-camera-v11",
+    "vendor": "",
+    "mac": "",
+    "raw_category": "Surveillance Camera",
+    "category": "Camera",
+    "domains": [
+      "sync-api-v11.camera-cloud.example",
+      "sync-video-v11.camera-cloud.example"
+    ],
+    "domain_keywords": [
+      "api",
+      "camera",
+      "cloud",
+      "example",
+      "sync",
+      "video"
+    ],
+    "communication_patterns": [
+      "cloud_api",
+      "video_stream"
+    ],
+    "pii_types": [],
+    "source": "fingerbank_api",
+    "source_category": "Camera",
+    "fingerbank_score": 26,
+    "fingerbank_device_name": "Audio, Imaging or Video Equipment/Camera/Surveillance Camera"
+  },
+  {
+    "name": "connected-appliance-v11",
+    "vendor": "Wisol",
+    "mac": "70:2c:1f:10:00:0b",
+    "raw_category": "Samsung Family Hub",
+    "category": "Appliance",
+    "domains": [
+      "sync-api-v11.appliance-cloud.example",
+      "sync-firmware-v11.appliance-cloud.example"
+    ],
+    "domain_keywords": [
+      "api",
+      "appliance",
+      "cloud",
+      "example",
+      "firmware",
+      "sync"
+    ],
+    "communication_patterns": [
+      "cloud_api",
+      "firmware_update"
+    ],
+    "pii_types": [],
+    "source": "fingerbank_api",
+    "source_category": "Appliance",
+    "fingerbank_score": 15,
+    "fingerbank_device_name": "Internet of Things (IoT)/Appliance/Samsung Smart Home Appliance/Samsung Family Hub"
+  },
+  {
+    "name": "generic-ip-camera-v12",
+    "vendor": "",
+    "mac": "",
+    "raw_category": "Surveillance Camera",
+    "category": "Camera",
+    "domains": [
+      "telemetry-api-v12.camera-cloud.example",
+      "telemetry-video-v12.camera-cloud.example"
+    ],
+    "domain_keywords": [
+      "api",
+      "camera",
+      "cloud",
+      "example",
+      "telemetry",
+      "video"
+    ],
+    "communication_patterns": [
+      "analytics",
+      "cloud_api",
+      "video_stream"
+    ],
+    "pii_types": [],
+    "source": "fingerbank_api",
+    "source_category": "Camera",
+    "fingerbank_score": 26,
+    "fingerbank_device_name": "Audio, Imaging or Video Equipment/Camera/Surveillance Camera"
+  },
+  {
+    "name": "connected-appliance-v12",
+    "vendor": "Wisol",
+    "mac": "70:2c:1f:10:00:0c",
+    "raw_category": "Samsung Family Hub",
+    "category": "Appliance",
+    "domains": [
+      "telemetry-api-v12.appliance-cloud.example",
+      "telemetry-firmware-v12.appliance-cloud.example"
+    ],
+    "domain_keywords": [
+      "api",
+      "appliance",
+      "cloud",
+      "example",
+      "firmware",
+      "telemetry"
+    ],
+    "communication_patterns": [
+      "analytics",
+      "cloud_api",
+      "firmware_update"
+    ],
+    "pii_types": [],
+    "source": "fingerbank_api",
+    "source_category": "Appliance",
+    "fingerbank_score": 15,
+    "fingerbank_device_name": "Internet of Things (IoT)/Appliance/Samsung Smart Home Appliance/Samsung Family Hub"
+  },
+  {
+    "name": "generic-ip-camera-v13",
+    "vendor": "",
+    "mac": "",
+    "raw_category": "Surveillance Camera",
+    "category": "Camera",
+    "domains": [
+      "events-api-v13.camera-cloud.example",
+      "events-video-v13.camera-cloud.example"
+    ],
+    "domain_keywords": [
+      "api",
+      "camera",
+      "cloud",
+      "events",
+      "example",
+      "video"
+    ],
+    "communication_patterns": [
+      "cloud_api",
+      "video_stream"
+    ],
+    "pii_types": [],
+    "source": "fingerbank_api",
+    "source_category": "Camera",
+    "fingerbank_score": 26,
+    "fingerbank_device_name": "Audio, Imaging or Video Equipment/Camera/Surveillance Camera"
+  },
+  {
+    "name": "connected-appliance-v13",
+    "vendor": "Wisol",
+    "mac": "70:2c:1f:10:00:0d",
+    "raw_category": "Samsung Family Hub",
+    "category": "Appliance",
+    "domains": [
+      "events-api-v13.appliance-cloud.example",
+      "events-firmware-v13.appliance-cloud.example"
+    ],
+    "domain_keywords": [
+      "api",
+      "appliance",
+      "cloud",
+      "events",
+      "example",
+      "firmware"
+    ],
+    "communication_patterns": [
+      "cloud_api",
+      "firmware_update"
+    ],
+    "pii_types": [],
+    "source": "fingerbank_api",
+    "source_category": "Appliance",
+    "fingerbank_score": 15,
+    "fingerbank_device_name": "Internet of Things (IoT)/Appliance/Samsung Smart Home Appliance/Samsung Family Hub"
+  },
+  {
+    "name": "generic-ip-camera-v14",
+    "vendor": "",
+    "mac": "",
+    "raw_category": "Surveillance Camera",
+    "category": "Camera",
+    "domains": [
+      "device-api-v14.camera-cloud.example",
+      "device-video-v14.camera-cloud.example"
+    ],
+    "domain_keywords": [
+      "api",
+      "camera",
+      "cloud",
+      "device",
+      "example",
+      "video"
+    ],
+    "communication_patterns": [
+      "cloud_api",
+      "video_stream"
+    ],
+    "pii_types": [],
+    "source": "fingerbank_api",
+    "source_category": "Camera",
+    "fingerbank_score": 26,
+    "fingerbank_device_name": "Audio, Imaging or Video Equipment/Camera/Surveillance Camera"
+  },
+  {
+    "name": "connected-appliance-v14",
+    "vendor": "Wisol",
+    "mac": "70:2c:1f:10:00:0e",
+    "raw_category": "Samsung Family Hub",
+    "category": "Appliance",
+    "domains": [
+      "device-api-v14.appliance-cloud.example",
+      "device-firmware-v14.appliance-cloud.example"
+    ],
+    "domain_keywords": [
+      "api",
+      "appliance",
+      "cloud",
+      "device",
+      "example",
+      "firmware"
+    ],
+    "communication_patterns": [
+      "cloud_api",
+      "firmware_update"
+    ],
+    "pii_types": [],
+    "source": "fingerbank_api",
+    "source_category": "Appliance",
+    "fingerbank_score": 15,
+    "fingerbank_device_name": "Internet of Things (IoT)/Appliance/Samsung Smart Home Appliance/Samsung Family Hub"
+  },
+  {
+    "name": "generic-ip-camera-v15",
+    "vendor": "",
+    "mac": "",
+    "raw_category": "Surveillance Camera",
+    "category": "Camera",
+    "domains": [
+      "cloud-api-v15.camera-cloud.example",
+      "cloud-video-v15.camera-cloud.example"
+    ],
+    "domain_keywords": [
+      "api",
+      "camera",
+      "cloud",
+      "example",
+      "video"
+    ],
+    "communication_patterns": [
+      "cloud_api",
+      "video_stream"
+    ],
+    "pii_types": [],
+    "source": "fingerbank_api",
+    "source_category": "Camera",
+    "fingerbank_score": 26,
+    "fingerbank_device_name": "Audio, Imaging or Video Equipment/Camera/Surveillance Camera"
+  },
+  {
+    "name": "connected-appliance-v15",
+    "vendor": "Wisol",
+    "mac": "70:2c:1f:10:00:0f",
+    "raw_category": "Samsung Family Hub",
+    "category": "Appliance",
+    "domains": [
+      "cloud-api-v15.appliance-cloud.example",
+      "cloud-firmware-v15.appliance-cloud.example"
+    ],
+    "domain_keywords": [
+      "api",
+      "appliance",
+      "cloud",
+      "example",
+      "firmware"
+    ],
+    "communication_patterns": [
+      "cloud_api",
+      "firmware_update"
+    ],
+    "pii_types": [],
+    "source": "fingerbank_api",
+    "source_category": "Appliance",
+    "fingerbank_score": 15,
+    "fingerbank_device_name": "Internet of Things (IoT)/Appliance/Samsung Smart Home Appliance/Samsung Family Hub"
+  },
+  {
+    "name": "generic-ip-camera-v16",
+    "vendor": "",
+    "mac": "",
+    "raw_category": "Surveillance Camera",
+    "category": "Camera",
+    "domains": [
+      "status-api-v16.camera-cloud.example",
+      "status-video-v16.camera-cloud.example"
+    ],
+    "domain_keywords": [
+      "api",
+      "camera",
+      "cloud",
+      "example",
+      "status",
+      "video"
+    ],
+    "communication_patterns": [
+      "cloud_api",
+      "video_stream"
+    ],
+    "pii_types": [],
+    "source": "fingerbank_api",
+    "source_category": "Camera",
+    "fingerbank_score": 26,
+    "fingerbank_device_name": "Audio, Imaging or Video Equipment/Camera/Surveillance Camera"
+  },
+  {
+    "name": "connected-appliance-v16",
+    "vendor": "Wisol",
+    "mac": "70:2c:1f:10:00:10",
+    "raw_category": "Samsung Family Hub",
+    "category": "Appliance",
+    "domains": [
+      "status-api-v16.appliance-cloud.example",
+      "status-firmware-v16.appliance-cloud.example"
+    ],
+    "domain_keywords": [
+      "api",
+      "appliance",
+      "cloud",
+      "example",
+      "firmware",
+      "status"
+    ],
+    "communication_patterns": [
+      "cloud_api",
+      "firmware_update"
+    ],
+    "pii_types": [],
+    "source": "fingerbank_api",
+    "source_category": "Appliance",
+    "fingerbank_score": 15,
+    "fingerbank_device_name": "Internet of Things (IoT)/Appliance/Samsung Smart Home Appliance/Samsung Family Hub"
+  },
+  {
+    "name": "generic-ip-camera-v17",
+    "vendor": "",
+    "mac": "",
+    "raw_category": "Surveillance Camera",
+    "category": "Camera",
+    "domains": [
+      "api-api-v17.camera-cloud.example",
+      "api-video-v17.camera-cloud.example"
+    ],
+    "domain_keywords": [
+      "api",
+      "camera",
+      "cloud",
+      "example",
+      "video"
+    ],
+    "communication_patterns": [
+      "cloud_api",
+      "video_stream"
+    ],
+    "pii_types": [],
+    "source": "fingerbank_api",
+    "source_category": "Camera",
+    "fingerbank_score": 26,
+    "fingerbank_device_name": "Audio, Imaging or Video Equipment/Camera/Surveillance Camera"
+  },
+  {
+    "name": "tplink-smart-plug",
+    "vendor": "TP-LINK TECHNOLOGIES CO.,LTD.",
+    "mac": "50:c7:bf:50:10:01",
+    "raw_category": "TP-Link Switches",
+    "category": "Controller",
+    "domains": [
+      "use1-api.tplinkra.com",
+      "n-wap-gw.tplinkcloud.com"
+    ],
+    "domain_keywords": [
+      "api",
+      "gw",
+      "n",
+      "tplinkcloud",
+      "tplinkra",
+      "use1",
+      "wap"
+    ],
+    "communication_patterns": [
+      "cloud_api"
+    ],
+    "pii_types": [],
+    "source": "fingerbank_api",
+    "source_category": "Controller",
+    "fingerbank_score": 29,
+    "fingerbank_device_name": "Switch and Wireless Controller/TP-Link Switches"
+  },
+  {
+    "name": "switchbot-plug",
+    "vendor": "",
+    "mac": "",
+    "raw_category": "Switch and Wireless Controller",
+    "category": "Controller",
+    "domains": [
+      "api.switch-bot.com",
+      "na.switch-bot.com"
+    ],
+    "domain_keywords": [
+      "api",
+      "bot",
+      "na",
+      "switch"
+    ],
+    "communication_patterns": [
+      "cloud_api"
+    ],
+    "pii_types": [],
+    "source": "fingerbank_api",
+    "source_category": "Controller",
+    "fingerbank_score": 46,
+    "fingerbank_device_name": "Switch and Wireless Controller"
+  },
+  {
+    "name": "smartthings-hub",
+    "vendor": "",
+    "mac": "",
+    "raw_category": "Samsung SmartThings Hub",
+    "category": "Hub",
+    "domains": [
+      "api.smartthings.com",
+      "hub.smartthings.com"
+    ],
+    "domain_keywords": [
+      "api",
+      "hub",
+      "smartthings"
+    ],
+    "communication_patterns": [
+      "cloud_api"
+    ],
+    "pii_types": [],
+    "source": "fingerbank_api",
+    "source_category": "Hub",
+    "fingerbank_score": 46,
+    "fingerbank_device_name": "Internet of Things (IoT)/Home Assistant/Samsung SmartThings/Samsung SmartThings Hub"
+  },
+  {
+    "name": "garmin-watch",
+    "vendor": "Garmin International",
+    "mac": "",
+    "raw_category": "Garmin GPS and Wearable",
+    "category": "Wearable",
+    "domains": [
+      "connect.garmin.com",
+      "services.garmin.com"
+    ],
+    "domain_keywords": [
+      "connect",
+      "garmin",
+      "services"
+    ],
+    "communication_patterns": [],
+    "pii_types": [],
+    "source": "fingerbank_api",
+    "source_category": "Wearable",
+    "fingerbank_score": 46,
+    "fingerbank_device_name": "Phone, Tablet or Wearable/Garmin GPS and Wearable"
+  },
+  {
+    "name": "switchbot-plug-v01",
+    "vendor": "",
+    "mac": "",
+    "raw_category": "Switch and Wireless Controller",
+    "category": "Controller",
+    "domains": [
+      "api-api-v01.switch-bot.com",
+      "api-na-v01.switch-bot.com"
+    ],
+    "domain_keywords": [
+      "api",
+      "bot",
+      "na",
+      "switch"
+    ],
+    "communication_patterns": [
+      "cloud_api"
+    ],
+    "pii_types": [],
+    "source": "fingerbank_api",
+    "source_category": "Controller",
+    "fingerbank_score": 46,
+    "fingerbank_device_name": "Switch and Wireless Controller"
+  },
+  {
+    "name": "smartthings-hub-v01",
+    "vendor": "",
+    "mac": "",
+    "raw_category": "Samsung SmartThings Hub",
+    "category": "Hub",
+    "domains": [
+      "api-api-v01.smartthings.com",
+      "api-hub-v01.smartthings.com"
+    ],
+    "domain_keywords": [
+      "api",
+      "hub",
+      "smartthings"
+    ],
+    "communication_patterns": [
+      "cloud_api"
+    ],
+    "pii_types": [],
+    "source": "fingerbank_api",
+    "source_category": "Hub",
+    "fingerbank_score": 46,
+    "fingerbank_device_name": "Internet of Things (IoT)/Home Assistant/Samsung SmartThings/Samsung SmartThings Hub"
+  },
+  {
+    "name": "garmin-watch-v01",
+    "vendor": "Garmin International",
+    "mac": "",
+    "raw_category": "Garmin GPS and Wearable",
+    "category": "Wearable",
+    "domains": [
+      "api-connect-v01.garmin.com",
+      "api-services-v01.garmin.com"
+    ],
+    "domain_keywords": [
+      "api",
+      "connect",
+      "garmin",
+      "services"
+    ],
+    "communication_patterns": [
+      "cloud_api"
+    ],
+    "pii_types": [],
+    "source": "fingerbank_api",
+    "source_category": "Wearable",
+    "fingerbank_score": 46,
+    "fingerbank_device_name": "Phone, Tablet or Wearable/Garmin GPS and Wearable"
+  },
+  {
+    "name": "switchbot-plug-v02",
+    "vendor": "",
+    "mac": "",
+    "raw_category": "Switch and Wireless Controller",
+    "category": "Controller",
+    "domains": [
+      "control-api-v02.switch-bot.com",
+      "control-na-v02.switch-bot.com"
+    ],
+    "domain_keywords": [
+      "api",
+      "bot",
+      "control",
+      "na",
+      "switch"
+    ],
+    "communication_patterns": [
+      "cloud_api"
+    ],
+    "pii_types": [],
+    "source": "fingerbank_api",
+    "source_category": "Controller",
+    "fingerbank_score": 46,
+    "fingerbank_device_name": "Switch and Wireless Controller"
+  },
+  {
+    "name": "smartthings-hub-v02",
+    "vendor": "",
+    "mac": "",
+    "raw_category": "Samsung SmartThings Hub",
+    "category": "Hub",
+    "domains": [
+      "control-api-v02.smartthings.com",
+      "control-hub-v02.smartthings.com"
+    ],
+    "domain_keywords": [
+      "api",
+      "control",
+      "hub",
+      "smartthings"
+    ],
+    "communication_patterns": [
+      "cloud_api"
+    ],
+    "pii_types": [],
+    "source": "fingerbank_api",
+    "source_category": "Hub",
+    "fingerbank_score": 46,
+    "fingerbank_device_name": "Internet of Things (IoT)/Home Assistant/Samsung SmartThings/Samsung SmartThings Hub"
+  },
+  {
+    "name": "garmin-watch-v02",
+    "vendor": "Garmin International",
+    "mac": "",
+    "raw_category": "Garmin GPS and Wearable",
+    "category": "Wearable",
+    "domains": [
+      "control-connect-v02.garmin.com",
+      "control-services-v02.garmin.com"
+    ],
+    "domain_keywords": [
+      "connect",
+      "control",
+      "garmin",
+      "services"
+    ],
+    "communication_patterns": [],
+    "pii_types": [],
+    "source": "fingerbank_api",
+    "source_category": "Wearable",
+    "fingerbank_score": 46,
+    "fingerbank_device_name": "Phone, Tablet or Wearable/Garmin GPS and Wearable"
+  },
+  {
+    "name": "switchbot-plug-v03",
+    "vendor": "",
+    "mac": "",
+    "raw_category": "Switch and Wireless Controller",
+    "category": "Controller",
+    "domains": [
+      "sync-api-v03.switch-bot.com",
+      "sync-na-v03.switch-bot.com"
+    ],
+    "domain_keywords": [
+      "api",
+      "bot",
+      "na",
+      "switch",
+      "sync"
+    ],
+    "communication_patterns": [
+      "cloud_api"
+    ],
+    "pii_types": [],
+    "source": "fingerbank_api",
+    "source_category": "Controller",
+    "fingerbank_score": 46,
+    "fingerbank_device_name": "Switch and Wireless Controller"
+  },
+  {
+    "name": "smartthings-hub-v03",
+    "vendor": "",
+    "mac": "",
+    "raw_category": "Samsung SmartThings Hub",
+    "category": "Hub",
+    "domains": [
+      "sync-api-v03.smartthings.com",
+      "sync-hub-v03.smartthings.com"
+    ],
+    "domain_keywords": [
+      "api",
+      "hub",
+      "smartthings",
+      "sync"
+    ],
+    "communication_patterns": [
+      "cloud_api"
+    ],
+    "pii_types": [],
+    "source": "fingerbank_api",
+    "source_category": "Hub",
+    "fingerbank_score": 46,
+    "fingerbank_device_name": "Internet of Things (IoT)/Home Assistant/Samsung SmartThings/Samsung SmartThings Hub"
+  },
+  {
+    "name": "garmin-watch-v03",
+    "vendor": "Garmin International",
+    "mac": "",
+    "raw_category": "Garmin GPS and Wearable",
+    "category": "Wearable",
+    "domains": [
+      "sync-connect-v03.garmin.com",
+      "sync-services-v03.garmin.com"
+    ],
+    "domain_keywords": [
+      "connect",
+      "garmin",
+      "services",
+      "sync"
+    ],
+    "communication_patterns": [],
+    "pii_types": [],
+    "source": "fingerbank_api",
+    "source_category": "Wearable",
+    "fingerbank_score": 46,
+    "fingerbank_device_name": "Phone, Tablet or Wearable/Garmin GPS and Wearable"
+  },
+  {
+    "name": "switchbot-plug-v04",
+    "vendor": "",
+    "mac": "",
+    "raw_category": "Switch and Wireless Controller",
+    "category": "Controller",
+    "domains": [
+      "telemetry-api-v04.switch-bot.com",
+      "telemetry-na-v04.switch-bot.com"
+    ],
+    "domain_keywords": [
+      "api",
+      "bot",
+      "na",
+      "switch",
+      "telemetry"
+    ],
+    "communication_patterns": [
+      "analytics",
+      "cloud_api"
+    ],
+    "pii_types": [],
+    "source": "fingerbank_api",
+    "source_category": "Controller",
+    "fingerbank_score": 46,
+    "fingerbank_device_name": "Switch and Wireless Controller"
+  },
+  {
+    "name": "smartthings-hub-v04",
+    "vendor": "",
+    "mac": "",
+    "raw_category": "Samsung SmartThings Hub",
+    "category": "Hub",
+    "domains": [
+      "telemetry-api-v04.smartthings.com",
+      "telemetry-hub-v04.smartthings.com"
+    ],
+    "domain_keywords": [
+      "api",
+      "hub",
+      "smartthings",
+      "telemetry"
+    ],
+    "communication_patterns": [
+      "analytics",
+      "cloud_api"
+    ],
+    "pii_types": [],
+    "source": "fingerbank_api",
+    "source_category": "Hub",
+    "fingerbank_score": 46,
+    "fingerbank_device_name": "Internet of Things (IoT)/Home Assistant/Samsung SmartThings/Samsung SmartThings Hub"
+  },
+  {
+    "name": "garmin-watch-v04",
+    "vendor": "Garmin International",
+    "mac": "",
+    "raw_category": "Garmin GPS and Wearable",
+    "category": "Wearable",
+    "domains": [
+      "telemetry-connect-v04.garmin.com",
+      "telemetry-services-v04.garmin.com"
+    ],
+    "domain_keywords": [
+      "connect",
+      "garmin",
+      "services",
+      "telemetry"
+    ],
+    "communication_patterns": [
+      "analytics"
+    ],
+    "pii_types": [],
+    "source": "fingerbank_api",
+    "source_category": "Wearable",
+    "fingerbank_score": 46,
+    "fingerbank_device_name": "Phone, Tablet or Wearable/Garmin GPS and Wearable"
+  },
+  {
+    "name": "switchbot-plug-v05",
+    "vendor": "",
+    "mac": "",
+    "raw_category": "Switch and Wireless Controller",
+    "category": "Controller",
+    "domains": [
+      "events-api-v05.switch-bot.com",
+      "events-na-v05.switch-bot.com"
+    ],
+    "domain_keywords": [
+      "api",
+      "bot",
+      "events",
+      "na",
+      "switch"
+    ],
+    "communication_patterns": [
+      "cloud_api"
+    ],
+    "pii_types": [],
+    "source": "fingerbank_api",
+    "source_category": "Controller",
+    "fingerbank_score": 46,
+    "fingerbank_device_name": "Switch and Wireless Controller"
+  },
+  {
+    "name": "smartthings-hub-v05",
+    "vendor": "",
+    "mac": "",
+    "raw_category": "Samsung SmartThings Hub",
+    "category": "Hub",
+    "domains": [
+      "events-api-v05.smartthings.com",
+      "events-hub-v05.smartthings.com"
+    ],
+    "domain_keywords": [
+      "api",
+      "events",
+      "hub",
+      "smartthings"
+    ],
+    "communication_patterns": [
+      "cloud_api"
+    ],
+    "pii_types": [],
+    "source": "fingerbank_api",
+    "source_category": "Hub",
+    "fingerbank_score": 46,
+    "fingerbank_device_name": "Internet of Things (IoT)/Home Assistant/Samsung SmartThings/Samsung SmartThings Hub"
+  },
+  {
+    "name": "garmin-watch-v05",
+    "vendor": "Garmin International",
+    "mac": "",
+    "raw_category": "Garmin GPS and Wearable",
+    "category": "Wearable",
+    "domains": [
+      "events-connect-v05.garmin.com",
+      "events-services-v05.garmin.com"
+    ],
+    "domain_keywords": [
+      "connect",
+      "events",
+      "garmin",
+      "services"
+    ],
+    "communication_patterns": [],
+    "pii_types": [],
+    "source": "fingerbank_api",
+    "source_category": "Wearable",
+    "fingerbank_score": 46,
+    "fingerbank_device_name": "Phone, Tablet or Wearable/Garmin GPS and Wearable"
+  },
+  {
+    "name": "switchbot-plug-v06",
+    "vendor": "",
+    "mac": "",
+    "raw_category": "Switch and Wireless Controller",
+    "category": "Controller",
+    "domains": [
+      "device-api-v06.switch-bot.com",
+      "device-na-v06.switch-bot.com"
+    ],
+    "domain_keywords": [
+      "api",
+      "bot",
+      "device",
+      "na",
+      "switch"
+    ],
+    "communication_patterns": [
+      "cloud_api"
+    ],
+    "pii_types": [],
+    "source": "fingerbank_api",
+    "source_category": "Controller",
+    "fingerbank_score": 46,
+    "fingerbank_device_name": "Switch and Wireless Controller"
   }
 ]

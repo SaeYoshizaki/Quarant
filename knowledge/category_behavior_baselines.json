@@ -1,0 +1,246 @@
+{
+  "Camera": {
+    "expected_communication_types": [
+      "video_stream",
+      "cloud_api",
+      "firmware_update",
+      "device_status",
+      "time_sync"
+    ],
+    "expected_protocols": [
+      "https",
+      "rtsp",
+      "tls"
+    ],
+    "expected_domain_patterns": [
+      "camera vendor cloud",
+      "video stream endpoint",
+      "firmware update service"
+    ],
+    "common_ports": [
+      443,
+      554,
+      123
+    ],
+    "local_admin_expected": true,
+    "plaintext_tolerance": "limited",
+    "expected_frequency": "periodic cloud sync plus optional continuous video activity",
+    "suspicious_patterns": [
+      "camera sends tracking or advertising traffic unrelated to video or device management",
+      "camera opens plaintext external management endpoints",
+      "camera communicates with many unrelated third-party domains"
+    ],
+    "notes_en": "Cameras commonly maintain cloud API access, device status updates, firmware checks, and may use RTSP or vendor-specific streaming endpoints.",
+    "notes_ja": "カメラはクラウド API、状態送信、ファーム更新確認を行い、RTSP やベンダ独自の映像配信先を使うことがある。"
+  },
+  "Hub": {
+    "expected_communication_types": [
+      "cloud_api",
+      "device_status",
+      "cloud_control",
+      "firmware_update",
+      "error_report",
+      "time_sync"
+    ],
+    "expected_protocols": [
+      "https",
+      "mqtt",
+      "coap",
+      "tls"
+    ],
+    "expected_domain_patterns": [
+      "hub cloud service",
+      "device orchestration endpoint",
+      "bridge discovery or pairing service"
+    ],
+    "common_ports": [
+      443,
+      8883,
+      5683,
+      123
+    ],
+    "local_admin_expected": true,
+    "plaintext_tolerance": "limited",
+    "expected_frequency": "steady orchestration traffic with bursts during device events or pairing",
+    "suspicious_patterns": [
+      "hub communicates directly with unrelated consumer content or advertising services",
+      "hub exposes plaintext admin access to external networks",
+      "hub generates large outbound traffic without matching automation or device activity"
+    ],
+    "notes_en": "Hubs usually coordinate local devices and cloud services, so they show steady orchestration traffic and occasional pairing or automation bursts.",
+    "notes_ja": "ハブはローカル機器とクラウドを仲介するため、定常的な制御通信とペアリング時のバースト通信が発生しやすい。"
+  },
+  "Sensor": {
+    "expected_communication_types": [
+      "sensor_upload",
+      "device_status",
+      "event_report",
+      "firmware_update",
+      "time_sync"
+    ],
+    "expected_protocols": [
+      "https",
+      "mqtt",
+      "coap",
+      "tls"
+    ],
+    "expected_domain_patterns": [
+      "telemetry endpoint",
+      "event ingestion service",
+      "sensor cloud service"
+    ],
+    "common_ports": [
+      443,
+      8883,
+      5683,
+      123
+    ],
+    "local_admin_expected": false,
+    "plaintext_tolerance": "low",
+    "expected_frequency": "low-rate periodic updates with bursts only on state changes",
+    "suspicious_patterns": [
+      "sensor streams large volumes of data continuously without a matching sensing purpose",
+      "sensor communicates with unrelated media, advertising, or social domains",
+      "sensor exposes plaintext admin or file-transfer services externally"
+    ],
+    "notes_en": "Sensors generally send small periodic telemetry and event-driven updates, often over MQTT, CoAP, or HTTPS.",
+    "notes_ja": "センサーは小さい定期テレメトリとイベント発生時の更新が中心で、MQTT、CoAP、HTTPS を使うことが多い。"
+  },
+  "Controller": {
+    "expected_communication_types": [
+      "cloud_control",
+      "device_status",
+      "cloud_api",
+      "firmware_update",
+      "time_sync"
+    ],
+    "expected_protocols": [
+      "https",
+      "tls",
+      "http"
+    ],
+    "expected_domain_patterns": [
+      "device control API",
+      "smart home app cloud endpoint",
+      "firmware delivery service"
+    ],
+    "common_ports": [
+      443,
+      80,
+      123
+    ],
+    "local_admin_expected": true,
+    "plaintext_tolerance": "limited",
+    "expected_frequency": "mostly idle with bursts when users toggle or automate devices",
+    "suspicious_patterns": [
+      "controller sends high-volume analytics or unrelated outbound traffic",
+      "controller uses plaintext external APIs for management",
+      "controller communicates with many unrelated destinations outside its vendor ecosystem"
+    ],
+    "notes_en": "Controllers are usually quiet until user actions or automations occur, then they talk to vendor APIs or local peers for state changes.",
+    "notes_ja": "コントローラは通常は静かで、ユーザー操作や自動化のタイミングでベンダ API やローカル機器と通信する。"
+  },
+  "Appliance": {
+    "expected_communication_types": [
+      "cloud_api",
+      "device_status",
+      "firmware_update",
+      "cloud_control",
+      "time_sync"
+    ],
+    "expected_protocols": [
+      "https",
+      "tls",
+      "http"
+    ],
+    "expected_domain_patterns": [
+      "vendor appliance cloud",
+      "firmware update service",
+      "remote control or diagnostics endpoint"
+    ],
+    "common_ports": [
+      443,
+      80,
+      123
+    ],
+    "local_admin_expected": false,
+    "plaintext_tolerance": "limited",
+    "expected_frequency": "low background traffic with spikes during remote control, diagnostics, or firmware updates",
+    "suspicious_patterns": [
+      "appliance communicates with unrelated tracking or advertising services",
+      "appliance exposes unexpected external admin or file-sharing services",
+      "appliance sustains continuous outbound traffic without user interaction or device activity"
+    ],
+    "notes_en": "Connected appliances usually maintain light background cloud connectivity and only spike during remote control, diagnostics, or updates.",
+    "notes_ja": "接続家電は通常は軽いバックグラウンド通信が中心で、遠隔操作、診断、更新時に通信量が増える。"
+  },
+  "VoiceAssistant": {
+    "expected_communication_types": [
+      "voice_stream",
+      "cloud_api",
+      "cloud_control",
+      "device_status",
+      "firmware_update",
+      "time_sync"
+    ],
+    "expected_protocols": [
+      "https",
+      "tls"
+    ],
+    "expected_domain_patterns": [
+      "assistant service endpoint",
+      "speech processing service",
+      "vendor cloud sync"
+    ],
+    "common_ports": [
+      443,
+      123
+    ],
+    "local_admin_expected": false,
+    "plaintext_tolerance": "low",
+    "expected_frequency": "steady cloud connectivity with higher activity during wake-word or command processing",
+    "suspicious_patterns": [
+      "voice assistant sends plaintext traffic carrying command or user data externally",
+      "voice assistant talks to unrelated third-party domains outside the assistant ecosystem",
+      "voice assistant exposes local admin interfaces not required for pairing"
+    ],
+    "notes_en": "Voice assistants are highly cloud-dependent and typically keep steady HTTPS/TLS sessions for command handling, account sync, and firmware updates.",
+    "notes_ja": "音声アシスタントはクラウド依存が強く、コマンド処理、アカウント同期、更新のために HTTPS/TLS 通信を継続しやすい。"
+  },
+  "Wearable": {
+    "expected_communication_types": [
+      "sensor_upload",
+      "cloud_api",
+      "device_status",
+      "firmware_update",
+      "time_sync"
+    ],
+    "expected_protocols": [
+      "https",
+      "tls"
+    ],
+    "expected_domain_patterns": [
+      "wearable sync service",
+      "fitness or health cloud endpoint",
+      "vendor account service"
+    ],
+    "common_ports": [
+      443,
+      123
+    ],
+    "local_admin_expected": false,
+    "plaintext_tolerance": "low",
+    "expected_frequency": "mostly sync-oriented bursts when paired apps upload health or activity data",
+    "suspicious_patterns": [
+      "wearable sends large outbound traffic continuously without sync activity",
+      "wearable uses plaintext channels for health or account-related data",
+      "wearable communicates with unrelated domains outside its vendor ecosystem"
+    ],
+    "notes_en": "Wearables are usually app-paired devices that sync health or activity data to vendor clouds over HTTPS/TLS.",
+    "notes_ja": "ウェアラブルはアプリ連携型が多く、健康・活動データをベンダクラウドへ HTTPS/TLS で同期することが多い。"
+  },
+  "metadata": {
+    "description": "Behavior baseline database for Quarant. Each category describes what network behavior is usually expected before anomaly or risk evaluation.",
+    "description_ja": "Quarant 向けの挙動ベースラインDB。異常判定やリスク照合の前に、カテゴリごとの通常通信を定義する。"
+  }
+}

@@ -19,11 +19,13 @@ func main() {
 	}
 
 	log.Printf(
-		"knowledge db loaded: categories=%d communication_types=%d pii_types=%d policies=%d",
+		"knowledge db loaded: categories=%d communication_types=%d pii_types=%d policies=%d inference_categories=%d behavior_baselines=%d",
 		len(db.DeviceCategories.Categories),
 		len(db.CommunicationTypes.CommunicationTypes),
 		len(db.PIITypes.PIITypes),
 		len(db.CategoryPolicy),
+		len(db.CategoryInference.Categories),
+		len(db.BehaviorBaselines)-1,
 	)
 
 	sink, err := analyzer.NewJSONSink("events.jsonl")

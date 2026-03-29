@@ -1,26 +1,42 @@
 {
   "Camera": {
-    "count": 2,
+    "count": 20,
     "vendors": {
       "Ayecom Technology Co., Ltd.": 1,
       "Xiaomi": 1
     },
     "raw_categories": {
+      "Surveillance Camera": 18,
       "camera": 2
     },
     "communication_patterns": {
-      "video_stream": 2,
-      "cloud_api": 1,
+      "video_stream": 20,
+      "cloud_api": 19,
+      "analytics": 2,
       "local_api": 1,
       "encrypted_comm": 1
     },
     "domain_keywords": {
+      "camera": 19,
+      "api": 18,
+      "cloud": 18,
+      "example": 18,
+      "video": 18,
+      "control": 2,
+      "sync": 2,
+      "telemetry": 2,
+      "events": 2,
+      "device": 2,
+      "status": 2,
       "tplinkcloud": 1,
-      "camera": 1,
       "mi": 1
     },
     "pii_types": {
       "device_identifier": 2
+    },
+    "sources": {
+      "fingerbank_api": 18,
+      "sample": 2
     }
   },
   "VoiceAssistant": {
@@ -44,29 +60,52 @@
     "pii_types": {
       "user_identifier": 2,
       "media_metadata": 1
+    },
+    "sources": {
+      "sample": 2
     }
   },
   "Controller": {
-    "count": 2,
+    "count": 10,
     "vendors": {
       "Ayecom Technology Co., Ltd.": 1,
-      "SwitchBot": 1
+      "SwitchBot": 1,
+      "TP-LINK TECHNOLOGIES CO.,LTD.": 1
     },
     "raw_categories": {
-      "plug": 2
+      "Switch and Wireless Controller": 7,
+      "plug": 2,
+      "TP-Link Switches": 1
     },
     "communication_patterns": {
+      "cloud_api": 9,
       "local_api": 2,
-      "cloud_api": 1,
-      "encrypted_comm": 1
+      "encrypted_comm": 1,
+      "analytics": 1
     },
     "domain_keywords": {
-      "tplinkcloud": 1,
-      "bot": 1,
-      "switch": 1
+      "bot": 8,
+      "switch": 8,
+      "api": 8,
+      "na": 7,
+      "tplinkcloud": 2,
+      "gw": 1,
+      "n": 1,
+      "tplinkra": 1,
+      "use1": 1,
+      "wap": 1,
+      "control": 1,
+      "sync": 1,
+      "telemetry": 1,
+      "events": 1,
+      "device": 1
     },
     "pii_types": {
       "device_identifier": 2
+    },
+    "sources": {
+      "fingerbank_api": 8,
+      "sample": 2
     }
   },
   "Sensor": {
@@ -91,44 +130,109 @@
     "pii_types": {
       "usage_data": 2,
       "device_identifier": 1
+    },
+    "sources": {
+      "sample": 2
     }
   },
   "Hub": {
-    "count": 1,
+    "count": 7,
     "vendors": {
       "Philips": 1
     },
     "raw_categories": {
+      "Samsung SmartThings Hub": 6,
       "hub": 1
     },
     "communication_patterns": {
+      "cloud_api": 6,
       "device_status": 1,
       "encrypted_comm": 1,
-      "local_api": 1
+      "local_api": 1,
+      "analytics": 1
     },
     "domain_keywords": {
-      "meethue": 1
+      "api": 6,
+      "hub": 6,
+      "smartthings": 6,
+      "meethue": 1,
+      "control": 1,
+      "sync": 1,
+      "telemetry": 1,
+      "events": 1
     },
     "pii_types": {
       "device_identifier": 1,
       "user_identifier": 1
+    },
+    "sources": {
+      "fingerbank_api": 6,
+      "sample": 1
     }
   },
   "Appliance": {
-    "count": 1,
-    "vendors": {},
+    "count": 18,
+    "vendors": {
+      "Wisol": 17
+    },
     "raw_categories": {
+      "Samsung Family Hub": 17,
       "appliance": 1
     },
     "communication_patterns": {
+      "cloud_api": 17,
+      "firmware_update": 17,
+      "analytics": 2,
       "encrypted_comm": 1,
       "local_api": 1
     },
     "domain_keywords": {
+      "api": 17,
+      "appliance": 17,
+      "cloud": 17,
+      "example": 17,
+      "firmware": 17,
+      "control": 2,
+      "sync": 2,
+      "telemetry": 2,
+      "events": 2,
+      "device": 2,
+      "status": 2,
       "lgsmart": 1
     },
     "pii_types": {
       "device_identifier": 1
+    },
+    "sources": {
+      "fingerbank_api": 17,
+      "sample": 1
+    }
+  },
+  "Wearable": {
+    "count": 6,
+    "vendors": {
+      "Garmin International": 6
+    },
+    "raw_categories": {
+      "Garmin GPS and Wearable": 6
+    },
+    "communication_patterns": {
+      "cloud_api": 1,
+      "analytics": 1
+    },
+    "domain_keywords": {
+      "connect": 6,
+      "garmin": 6,
+      "services": 6,
+      "api": 1,
+      "control": 1,
+      "sync": 1,
+      "telemetry": 1,
+      "events": 1
+    },
+    "pii_types": {},
+    "sources": {
+      "fingerbank_api": 6
     }
   }
 }

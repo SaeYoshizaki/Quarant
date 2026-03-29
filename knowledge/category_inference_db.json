@@ -1,0 +1,424 @@
+{
+  "categories": {
+    "Camera": {
+      "category": "Camera",
+      "record_count": 20,
+      "vendor_candidates": [
+        "Xiaomi",
+        "TP-Link / Tapo",
+        "Reolink",
+        "Ayecom Technology Co., Ltd."
+      ],
+      "representative_domains": [
+        "camera.mi.com",
+        "tplinkcloud.com",
+        "reolink.com"
+      ],
+      "representative_protocols": [
+        "https",
+        "rtsp",
+        "tls",
+        "http"
+      ],
+      "observed_device_labels": [
+        "Surveillance Camera",
+        "camera"
+      ],
+      "source_breakdown": {
+        "fingerbank_api": 18,
+        "sample": 2
+      },
+      "official_sources": [
+        {
+          "vendor": "Xiaomi",
+          "url": "https://www.mi.com/global/product/xiaomi-smart-camera-c301/",
+          "notes": "Official Xiaomi smart camera product page used to confirm Xiaomi camera branding and camera.mi.com-related ecosystem context.",
+          "notes_en": "Official Xiaomi smart camera product page used to confirm Xiaomi camera branding and camera.mi.com-related ecosystem context.",
+          "notes_ja": "Xiaomi のカメラ製品系統と camera.mi.com 系エコシステムの文脈を確認するために使った公式製品ページ。"
+        },
+        {
+          "vendor": "TP-Link / Tapo",
+          "url": "https://www.tapo.com/en/",
+          "notes": "Official Tapo smart home site used to confirm Tapo as a camera/smart-home brand and tplinkcloud-related ecosystem context.",
+          "notes_en": "Official Tapo smart home site used to confirm Tapo as a camera/smart-home brand and tplinkcloud-related ecosystem context.",
+          "notes_ja": "Tapo をカメラ/スマートホームブランドとして確認し、tplinkcloud 系エコシステムの文脈を補強するために使った公式サイト。"
+        },
+        {
+          "vendor": "Reolink",
+          "url": "https://reolink.com/",
+          "notes": "Official Reolink site used to confirm Reolink as a camera-focused vendor and reolink.com as a representative domain.",
+          "notes_en": "Official Reolink site used to confirm Reolink as a camera-focused vendor and reolink.com as a representative domain.",
+          "notes_ja": "Reolink をカメラ系ベンダとして確認し、reolink.com を代表ドメイン候補として採用するために使った公式サイト。"
+        }
+      ]
+    },
+    "Hub": {
+      "category": "Hub",
+      "record_count": 7,
+      "vendor_candidates": [
+        "Philips Hue",
+        "SmartThings",
+        "Aqara",
+        "Philips"
+      ],
+      "representative_domains": [
+        "meethue.com",
+        "smartthings.com",
+        "aqara.com",
+        "hub.smartthings.com"
+      ],
+      "representative_protocols": [
+        "https",
+        "tls",
+        "mqtt",
+        "coap",
+        "http"
+      ],
+      "observed_device_labels": [
+        "Samsung SmartThings Hub",
+        "hub"
+      ],
+      "source_breakdown": {
+        "fingerbank_api": 6,
+        "sample": 1
+      },
+      "official_sources": [
+        {
+          "vendor": "Philips Hue",
+          "url": "https://developers.meethue.com/develop/get-started-2/",
+          "notes": "Official Philips Hue developer page used to confirm bridge-based hub behavior and meethue.com as a representative ecosystem domain.",
+          "notes_en": "Official Philips Hue developer page used to confirm bridge-based hub behavior and meethue.com as a representative ecosystem domain.",
+          "notes_ja": "Hue Bridge を中心としたハブ型構成と meethue.com を代表ドメイン候補として確認するために使った公式開発者ページ。"
+        },
+        {
+          "vendor": "SmartThings",
+          "url": "https://developer.smartthings.com/docs/devices/capabilities/",
+          "notes": "Official SmartThings device documentation used to confirm SmartThings hub/device ecosystem and smartthings.com-related domains.",
+          "notes_en": "Official SmartThings device documentation used to confirm SmartThings hub/device ecosystem and smartthings.com-related domains.",
+          "notes_ja": "SmartThings の hub/device エコシステムと smartthings.com 系ドメインを確認するために使った公式デバイス文書。"
+        },
+        {
+          "vendor": "Aqara",
+          "url": "https://www.aqara.com/en/",
+          "notes": "Official Aqara site used to confirm Aqara hub products and aqara.com as a representative smart-home domain.",
+          "notes_en": "Official Aqara site used to confirm Aqara hub products and aqara.com as a representative smart-home domain.",
+          "notes_ja": "Aqara のハブ製品系統と aqara.com を代表ドメイン候補として確認するために使った公式サイト。"
+        }
+      ]
+    },
+    "Sensor": {
+      "category": "Sensor",
+      "record_count": 2,
+      "vendor_candidates": [
+        "Aqara",
+        "SwitchBot",
+        "TP-Link / Tapo",
+        "Philips Hue",
+        "Ayecom Technology Co., Ltd."
+      ],
+      "representative_domains": [
+        "aqara.com",
+        "switch-bot.com",
+        "tapo.com",
+        "meethue.com"
+      ],
+      "representative_protocols": [
+        "https",
+        "mqtt",
+        "coap",
+        "tls"
+      ],
+      "observed_device_labels": [
+        "sensor"
+      ],
+      "source_breakdown": {
+        "sample": 2
+      },
+      "official_sources": [
+        {
+          "vendor": "Aqara",
+          "url": "https://www.aqara.com/en/",
+          "notes": "Official Aqara smart home site used to confirm Aqara as a sensor-focused smart home brand and aqara.com as a representative ecosystem domain.",
+          "notes_en": "Official Aqara smart home site used to confirm Aqara as a sensor-focused smart home brand and aqara.com as a representative ecosystem domain.",
+          "notes_ja": "Aqara をセンサー系スマートホームブランドとして確認し、aqara.com を代表ドメイン候補として採用するために使った公式サイト。"
+        },
+        {
+          "vendor": "SwitchBot",
+          "url": "https://www.switch-bot.com/",
+          "notes": "Official SwitchBot smart home site used to confirm SwitchBot as a sensor/control product family and switch-bot.com as a representative domain.",
+          "notes_en": "Official SwitchBot smart home site used to confirm SwitchBot as a sensor/control product family and switch-bot.com as a representative domain.",
+          "notes_ja": "SwitchBot をセンサー/コントローラ系製品ファミリとして確認し、switch-bot.com を代表ドメイン候補として採用するために使った公式サイト。"
+        },
+        {
+          "vendor": "TP-Link / Tapo",
+          "url": "https://www.tapo.com/en/",
+          "notes": "Official Tapo smart home site used to confirm Tapo as a sensor-capable smart home brand and tapo.com as a representative domain.",
+          "notes_en": "Official Tapo smart home site used to confirm Tapo as a sensor-capable smart home brand and tapo.com as a representative domain.",
+          "notes_ja": "Tapo をセンサーを含むスマートホームブランドとして確認し、tapo.com を代表ドメイン候補として採用するために使った公式サイト。"
+        },
+        {
+          "vendor": "Philips Hue",
+          "url": "https://developers.meethue.com/develop/get-started-2/",
+          "notes": "Official Philips Hue developer page used to confirm Hue sensors as part of the Hue ecosystem and meethue.com as a representative domain.",
+          "notes_en": "Official Philips Hue developer page used to confirm Hue sensors as part of the Hue ecosystem and meethue.com as a representative domain.",
+          "notes_ja": "Hue センサーが Hue エコシステムに属することを確認し、meethue.com を代表ドメイン候補として採用するために使った公式開発者ページ。"
+        }
+      ]
+    },
+    "Controller": {
+      "category": "Controller",
+      "record_count": 10,
+      "vendor_candidates": [
+        "TP-Link / Kasa",
+        "SwitchBot",
+        "Meross",
+        "Ayecom Technology Co., Ltd.",
+        "TP-LINK TECHNOLOGIES CO.,LTD."
+      ],
+      "representative_domains": [
+        "tplinkcloud.com",
+        "switch-bot.com",
+        "meross.com",
+        "use1.tplinkra.com",
+        "n-wap-gw.tplinkcloud.com",
+        "na.switch-bot.com"
+      ],
+      "representative_protocols": [
+        "https",
+        "tls",
+        "http"
+      ],
+      "observed_device_labels": [
+        "Switch and Wireless Controller",
+        "plug",
+        "TP-Link Switches"
+      ],
+      "source_breakdown": {
+        "fingerbank_api": 8,
+        "sample": 2
+      },
+      "official_sources": [
+        {
+          "vendor": "TP-Link / Kasa",
+          "url": "https://www.tp-link.com/us/kasa-smart/",
+          "notes": "Official Kasa smart home site used to confirm TP-Link / Kasa as a controller family and tplinkcloud-related ecosystem context.",
+          "notes_en": "Official Kasa smart home site used to confirm TP-Link / Kasa as a controller family and tplinkcloud-related ecosystem context.",
+          "notes_ja": "TP-Link / Kasa をコントローラ系製品ファミリとして確認し、tplinkcloud 系エコシステムの文脈を補強するために使った公式サイト。"
+        },
+        {
+          "vendor": "SwitchBot",
+          "url": "https://www.switch-bot.com/",
+          "notes": "Official SwitchBot smart home site used to confirm SwitchBot controller products and switch-bot.com as a representative domain.",
+          "notes_en": "Official SwitchBot smart home site used to confirm SwitchBot controller products and switch-bot.com as a representative domain.",
+          "notes_ja": "SwitchBot のコントローラ製品系統と switch-bot.com を代表ドメイン候補として確認するために使った公式サイト。"
+        },
+        {
+          "vendor": "Meross",
+          "url": "https://www.meross.com/",
+          "notes": "Official Meross site used to confirm Meross as a controller-focused smart home brand and meross.com as a representative domain.",
+          "notes_en": "Official Meross site used to confirm Meross as a controller-focused smart home brand and meross.com as a representative domain.",
+          "notes_ja": "Meross をコントローラ系スマートホームブランドとして確認し、meross.com を代表ドメイン候補として採用するために使った公式サイト。"
+        }
+      ]
+    },
+    "Appliance": {
+      "category": "Appliance",
+      "record_count": 18,
+      "vendor_candidates": [
+        "Samsung",
+        "LG",
+        "Midea",
+        "Panasonic",
+        "Daikin",
+        "Wisol"
+      ],
+      "representative_domains": [
+        "samsung.com",
+        "lgsmart.com",
+        "midea.com",
+        "panasonic.com",
+        "daikin.com"
+      ],
+      "representative_protocols": [
+        "https",
+        "tls",
+        "http"
+      ],
+      "observed_device_labels": [
+        "Samsung Family Hub",
+        "appliance"
+      ],
+      "source_breakdown": {
+        "fingerbank_api": 17,
+        "sample": 1
+      },
+      "official_sources": [
+        {
+          "vendor": "Samsung",
+          "url": "https://developer.samsung.com/smartthings",
+          "notes": "Official Samsung SmartThings developer site used to confirm Samsung smart-home ecosystem context for connected appliances.",
+          "notes_en": "Official Samsung SmartThings developer site used to confirm Samsung smart-home ecosystem context for connected appliances.",
+          "notes_ja": "Samsung の接続家電が SmartThings エコシステムに属する文脈を確認するために使った公式開発者サイト。"
+        },
+        {
+          "vendor": "LG",
+          "url": "https://www.lg.com/us/discover/thinq",
+          "notes": "Official LG ThinQ page used to confirm LG connected appliance ecosystem and lgsmart.com-related context.",
+          "notes_en": "Official LG ThinQ page used to confirm LG connected appliance ecosystem and lgsmart.com-related context.",
+          "notes_ja": "LG の接続家電エコシステムと lgsmart.com 系の文脈を確認するために使った公式 ThinQ ページ。"
+        },
+        {
+          "vendor": "Midea",
+          "url": "https://www.midea.com/global/smarthome",
+          "notes": "Official Midea SmartHome page used to confirm Midea as a connected appliance brand and midea.com as a representative domain.",
+          "notes_en": "Official Midea SmartHome page used to confirm Midea as a connected appliance brand and midea.com as a representative domain.",
+          "notes_ja": "Midea を接続家電ブランドとして確認し、midea.com を代表ドメイン候補として採用するために使った公式 SmartHome ページ。"
+        },
+        {
+          "vendor": "Panasonic",
+          "url": "https://www.panasonic.com/global/consumer/home.html",
+          "notes": "Official Panasonic home appliances page used to confirm Panasonic as a home appliance vendor.",
+          "notes_en": "Official Panasonic home appliances page used to confirm Panasonic as a home appliance vendor.",
+          "notes_ja": "Panasonic を家電ベンダとして確認するために使った公式ホームアプライアンスページ。"
+        },
+        {
+          "vendor": "Daikin",
+          "url": "https://www.daikin.com/products/ac",
+          "notes": "Official Daikin air conditioning page used to confirm Daikin as an appliance/HVAC vendor.",
+          "notes_en": "Official Daikin air conditioning page used to confirm Daikin as an appliance/HVAC vendor.",
+          "notes_ja": "Daikin を空調・家電系ベンダとして確認するために使った公式エアコン製品ページ。"
+        }
+      ]
+    },
+    "VoiceAssistant": {
+      "category": "VoiceAssistant",
+      "record_count": 2,
+      "vendor_candidates": [
+        "Amazon",
+        "Google",
+        "Apple"
+      ],
+      "representative_domains": [
+        "amazon.com",
+        "alexa.amazon.com",
+        "googleapis.com",
+        "assistant.google.com",
+        "apple.com"
+      ],
+      "representative_protocols": [
+        "https",
+        "tls"
+      ],
+      "observed_device_labels": [
+        "voice_assistant"
+      ],
+      "source_breakdown": {
+        "sample": 2
+      },
+      "official_sources": [
+        {
+          "vendor": "Amazon",
+          "url": "https://developer.amazon.com/en-US/alexa/",
+          "notes": "Official Alexa developer site used to confirm Amazon Alexa / Echo ecosystem and Amazon-managed assistant services.",
+          "notes_en": "Official Alexa developer site used to confirm Amazon Alexa / Echo ecosystem and Amazon-managed assistant services.",
+          "notes_ja": "Amazon Alexa / Echo エコシステムと Amazon 管理の音声アシスタント系サービスを確認するために使った公式開発者サイト。"
+        },
+        {
+          "vendor": "Google",
+          "url": "https://developers.home.google.com/",
+          "notes": "Official Google Home developer site used to confirm Google Assistant / Nest ecosystem and Google-managed smart-home services.",
+          "notes_en": "Official Google Home developer site used to confirm Google Assistant / Nest ecosystem and Google-managed smart-home services.",
+          "notes_ja": "Google Assistant / Nest エコシステムと Google 管理のスマートホーム系サービスを確認するために使った公式開発者サイト。"
+        },
+        {
+          "vendor": "Apple",
+          "url": "https://developer.apple.com/apple-home/",
+          "notes": "Official Apple Home developer page used to confirm Apple Home / Siri ecosystem context for voice-assistant-capable devices.",
+          "notes_en": "Official Apple Home developer page used to confirm Apple Home / Siri ecosystem context for voice-assistant-capable devices.",
+          "notes_ja": "Apple Home / Siri エコシステムの文脈を確認し、音声アシスタント対応機器との関連を整理するために使った公式開発者ページ。"
+        }
+      ]
+    },
+    "Wearable": {
+      "category": "Wearable",
+      "record_count": 6,
+      "vendor_candidates": [
+        "Garmin",
+        "Fitbit",
+        "Apple",
+        "Samsung",
+        "Xiaomi",
+        "Garmin International"
+      ],
+      "representative_domains": [
+        "garmin.com",
+        "connect.garmin.com",
+        "fitbit.com",
+        "apple.com",
+        "samsung.com",
+        "mi.com",
+        "services.garmin.com"
+      ],
+      "representative_protocols": [
+        "https",
+        "tls"
+      ],
+      "observed_device_labels": [
+        "Garmin GPS and Wearable"
+      ],
+      "source_breakdown": {
+        "fingerbank_api": 6
+      },
+      "official_sources": [
+        {
+          "vendor": "Garmin",
+          "url": "https://developer.garmin.com/gc-developer-program/overview/",
+          "notes": "Official Garmin Connect developer overview used to confirm Garmin wearable cloud-sync ecosystem and garmin.com domains.",
+          "notes_en": "Official Garmin Connect developer overview used to confirm Garmin wearable cloud-sync ecosystem and garmin.com domains.",
+          "notes_ja": "Garmin のウェアラブル向けクラウド同期エコシステムと garmin.com 系ドメインを確認するために使った公式開発者概要。"
+        },
+        {
+          "vendor": "Fitbit",
+          "url": "https://dev.fitbit.com/",
+          "notes": "Official Fitbit developer portal used to confirm Fitbit wearable ecosystem and Fitbit-managed cloud services.",
+          "notes_en": "Official Fitbit developer portal used to confirm Fitbit wearable ecosystem and Fitbit-managed cloud services.",
+          "notes_ja": "Fitbit のウェアラブルエコシステムと Fitbit 管理のクラウドサービスを確認するために使った公式開発者ポータル。"
+        },
+        {
+          "vendor": "Apple",
+          "url": "https://developer.apple.com/apple-home/",
+          "notes": "Official Apple Home developer page used as an Apple ecosystem reference when classifying wearable-related Apple devices.",
+          "notes_en": "Official Apple Home developer page used as an Apple ecosystem reference when classifying wearable-related Apple devices.",
+          "notes_ja": "Apple 系ウェアラブル関連機器を分類する際の Apple エコシステム参照先として使った公式開発者ページ。"
+        },
+        {
+          "vendor": "Samsung",
+          "url": "https://developer.samsung.com/smartthings",
+          "notes": "Official Samsung SmartThings developer site used as a Samsung smart-device ecosystem reference for wearable-adjacent devices.",
+          "notes_en": "Official Samsung SmartThings developer site used as a Samsung smart-device ecosystem reference for wearable-adjacent devices.",
+          "notes_ja": "Samsung 系ウェアラブル周辺機器を整理する際の Samsung スマートデバイス参照先として使った公式開発者サイト。"
+        },
+        {
+          "vendor": "Xiaomi",
+          "url": "https://www.mi.com/global/",
+          "notes": "Official Xiaomi global site used as a Xiaomi ecosystem reference for wearable devices such as smart bands.",
+          "notes_en": "Official Xiaomi global site used as a Xiaomi ecosystem reference for wearable devices such as smart bands.",
+          "notes_ja": "スマートバンドなど Xiaomi 系ウェアラブル機器を整理する際のエコシステム参照先として使った公式グローバルサイト。"
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "categories_order": [
+      "Camera",
+      "Hub",
+      "Sensor",
+      "Controller",
+      "Appliance",
+      "VoiceAssistant",
+      "Wearable"
+    ],
+    "description": "Category inference database for Quarant built from normalized device observations.",
+    "official_overrides_loaded": true
+  }
+}

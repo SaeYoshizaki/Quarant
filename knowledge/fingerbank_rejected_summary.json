@@ -1,0 +1,27 @@
+{
+  "VoiceAssistant": {
+    "Amazon Android": 17,
+    "Apple OS": 7,
+    "Amazon Fire TV Stick 4K": 7
+  },
+  "Controller": {
+    "iOS": 17,
+    "iGet Smart": 6
+  },
+  "Sensor": {
+    "Xbox One": 24,
+    "Neuimage android": 17,
+    "Android OS": 7
+  },
+  "Hub": {
+    "Espressif Inc.": 17,
+    "Philips Hue Smart Lighting": 7,
+    "Xiaomi Home Assistant": 1
+  },
+  "Wearable": {
+    "Apple iPhone": 23
+  },
+  "Appliance": {
+    "Linux OS": 17
+  }
+}
