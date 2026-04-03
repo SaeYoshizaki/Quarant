@@ -21,8 +21,16 @@ func (r *I6PrivacyRule) Severity() Severity { return SeverityWarning }
 func (r *I6PrivacyRule) Type() string       { return "I6_PRIVACY" }
 
 func (r *I6PrivacyRule) Apply(ctx *Context) (Match, bool) {
-	if r.db == nil || ctx == nil || ctx.HTTP == nil {
+	matches := r.ApplyAll(ctx)
+	if len(matches) == 0 {
 		return Match{}, false
+	}
+	return matches[0], true
+}
+
+func (r *I6PrivacyRule) ApplyAll(ctx *Context) []Match {
+	if r.db == nil || ctx == nil || ctx.HTTP == nil {
+		return nil
 	}
 
 	commType := DetectCommunicationType(ctx.HTTP)
@@ -31,25 +39,25 @@ func (r *I6PrivacyRule) Apply(ctx *Context) (Match, bool) {
 		category = "unknown"
 	}
 
+	out := make([]Match, 0, 4)
+
 	if category != "unknown" && r.db.IsKnownCategory(category) {
-		if m, ok := r.applyBehaviorBaseline(ctx, category, commType); ok {
-			return m, true
-		}
+		out = append(out, r.applyBehaviorBaselineAll(ctx, category, commType)...)
 	}
 
 	if commType == "" {
-		return Match{}, false
+		return out
 	}
 
 	hits := DetectPIIHits(ctx.HTTP, ctx.Payload)
 	if len(hits) == 0 {
-		return Match{}, false
+		return out
 	}
 
 	if category != "unknown" && r.db.IsKnownCategory(category) {
 		for _, hit := range hits {
 			if r.db.IsSuspiciousCombination(category, commType, hit.Type) {
-				return Match{
+				out = append(out, Match{
 					RuleID:   "I6_HTTP_PRIVACY_POLICY_VIOLATION",
 					Type:     "I6_HTTP_PRIVACY_POLICY_VIOLATION",
 					Category: "I6",
@@ -59,13 +67,13 @@ func (r *I6PrivacyRule) Apply(ctx *Context) (Match, bool) {
 						"category=%s comm_type=%s pii_type=%s source=%s %s",
 						category, commType, hit.Type, hit.Source, hit.Evidence,
 					),
-				}, true
+				})
 			}
 		}
 
 		if !r.db.IsAllowedCommunicationType(category, commType) {
 			hit := hits[0]
-			return Match{
+			out = append(out, Match{
 				RuleID:   "I6_HTTP_UNEXPECTED_COMMUNICATION",
 				Type:     "I6_HTTP_UNEXPECTED_COMMUNICATION",
 				Category: "I6",
@@ -75,12 +83,12 @@ func (r *I6PrivacyRule) Apply(ctx *Context) (Match, bool) {
 					"category=%s comm_type=%s pii_type=%s source=%s %s",
 					category, commType, hit.Type, hit.Source, hit.Evidence,
 				),
-			}, true
+			})
 		}
 
 		for _, hit := range hits {
 			if !r.db.IsAllowedPIIType(category, hit.Type) {
-				return Match{
+				out = append(out, Match{
 					RuleID:   "I6_HTTP_UNEXPECTED_PII",
 					Type:     "I6_HTTP_UNEXPECTED_PII",
 					Category: "I6",
@@ -90,16 +98,16 @@ func (r *I6PrivacyRule) Apply(ctx *Context) (Match, bool) {
 						"category=%s comm_type=%s pii_type=%s source=%s %s",
 						category, commType, hit.Type, hit.Source, hit.Evidence,
 					),
-				}, true
+				})
 			}
 		}
 
-		return Match{}, false
+		return dedupeMatches(out)
 	}
 
 	for _, hit := range hits {
 		if commType == "analytics" || commType == "tracking" {
-			return Match{
+			out = append(out, Match{
 				RuleID:   "I6_HTTP_PRIVACY_EXPOSURE",
 				Type:     "I6_HTTP_PRIVACY_EXPOSURE",
 				Category: "I6",
@@ -109,17 +117,17 @@ func (r *I6PrivacyRule) Apply(ctx *Context) (Match, bool) {
 					"comm_type=%s pii_type=%s source=%s %s category=%s",
 					commType, hit.Type, hit.Source, hit.Evidence, category,
 				),
-			}, true
+			})
 		}
 	}
 
-	return Match{}, false
+	return dedupeMatches(out)
 }
 
-func (r *I6PrivacyRule) applyBehaviorBaseline(ctx *Context, category, commType string) (Match, bool) {
+func (r *I6PrivacyRule) applyBehaviorBaselineAll(ctx *Context, category, commType string) []Match {
 	baseline, ok := r.db.GetBehaviorBaseline(category)
 	if !ok {
-		return Match{}, false
+		return nil
 	}
 
 	host := strings.ToLower(strings.TrimSpace(ctx.HTTP.Headers["host"]))
@@ -128,14 +136,21 @@ func (r *I6PrivacyRule) applyBehaviorBaseline(ctx *Context, category, commType s
 	suspicious := suspiciousPatternSummary(baseline.SuspiciousPatterns)
 	inference, hasInference := r.db.GetCategoryInference(category)
 	var representativeDomains []string
+	var ecosystemDomains []string
+	categoryConfidence := ""
+	categoryConfidenceLevel := ""
 	if hasInference {
 		representativeDomains = inference.RepresentativeDomains
+		ecosystemDomains = inference.EcosystemDomains
+		categoryConfidence = formatConfidence(inference.Confidence, inference.ConfidenceLevel)
+		categoryConfidenceLevel = strings.ToLower(strings.TrimSpace(inference.ConfidenceLevel))
 	}
-	riskSignals := collectRiskSignals(baseline, ctx, commType, host, path, isExternal, representativeDomains)
+	riskSignals := collectRiskSignals(baseline, ctx, commType, host, path, isExternal, representativeDomains, ecosystemDomains, categoryConfidenceLevel)
 	riskSummary := strings.Join(riskSignals, ",")
+	out := make([]Match, 0, 4)
 
 	if isExternal && !ctx.TLS && baseline.PlaintextTolerance == "low" {
-		return Match{
+		out = append(out, Match{
 			RuleID:   "I6_HTTP_BASELINE_PLAINTEXT",
 			Type:     "I6_HTTP_BASELINE_PLAINTEXT",
 			Category: "I6",
@@ -144,16 +159,17 @@ func (r *I6PrivacyRule) applyBehaviorBaseline(ctx *Context, category, commType s
 				"Category baseline expects encrypted external communication",
 				suspicious,
 				riskSummary,
+				categoryConfidence,
 			),
 			Evidence: fmt.Sprintf(
-				"category=%s host=%s dst_ip=%s dst_port=%d suspicious_patterns=%s risk_signals=%s",
-				category, host, ctx.DstIP, ctx.DstPort, suspicious, riskSummary,
+				"category=%s host=%s dst_ip=%s dst_port=%d suspicious_patterns=%s risk_signals=%s category_confidence=%s",
+				category, host, ctx.DstIP, ctx.DstPort, suspicious, riskSummary, categoryConfidence,
 			),
-		}, true
+		})
 	}
 
 	if indicators, hasAdmin := DetectHTTPAdminIndicators(ctx.HTTP); hasAdmin && isExternal && !baseline.LocalAdminExpected {
-		return Match{
+		out = append(out, Match{
 			RuleID:   "I6_HTTP_BASELINE_UNEXPECTED_ADMIN",
 			Type:     "I6_HTTP_BASELINE_UNEXPECTED_ADMIN",
 			Category: "I6",
@@ -162,16 +178,17 @@ func (r *I6PrivacyRule) applyBehaviorBaseline(ctx *Context, category, commType s
 				"Category baseline does not expect external admin-style HTTP access",
 				suspicious,
 				riskSummary,
+				categoryConfidence,
 			),
 			Evidence: fmt.Sprintf(
-				"category=%s host=%s path=%s indicators=%s suspicious_patterns=%s risk_signals=%s",
-				category, host, path, strings.Join(indicators, ","), suspicious, riskSummary,
+				"category=%s host=%s path=%s indicators=%s suspicious_patterns=%s risk_signals=%s category_confidence=%s",
+				category, host, path, strings.Join(indicators, ","), suspicious, riskSummary, categoryConfidence,
 			),
-		}, true
+		})
 	}
 
 	if commType != "" && isExternal && !matchesExpectedProtocol(baseline.ExpectedProtocols, ctx) {
-		return Match{
+		out = append(out, Match{
 			RuleID:   "I6_HTTP_BASELINE_PROTOCOL_MISMATCH",
 			Type:     "I6_HTTP_BASELINE_PROTOCOL_MISMATCH",
 			Category: "I6",
@@ -180,17 +197,18 @@ func (r *I6PrivacyRule) applyBehaviorBaseline(ctx *Context, category, commType s
 				"Observed protocol usage does not fit the category baseline",
 				suspicious,
 				riskSummary,
+				categoryConfidence,
 			),
 			Evidence: fmt.Sprintf(
-				"category=%s host=%s dst_port=%d expected_protocols=%s suspicious_patterns=%s risk_signals=%s",
-				category, host, ctx.DstPort, strings.Join(baseline.ExpectedProtocols, ","), suspicious, riskSummary,
+				"category=%s host=%s dst_port=%d expected_protocols=%s suspicious_patterns=%s risk_signals=%s category_confidence=%s",
+				category, host, ctx.DstPort, strings.Join(baseline.ExpectedProtocols, ","), suspicious, riskSummary, categoryConfidence,
 			),
-		}, true
+		})
 	}
 
 	if commType == "analytics" || commType == "tracking" || commType == "cloud_api" {
-		if hasInference && host != "" && isExternal && !hostMatchesRepresentativeDomains(host, representativeDomains) {
-			return Match{
+		if hasInference && host != "" && isExternal && !hostMatchesExpectedDomains(host, representativeDomains, ecosystemDomains) {
+			out = append(out, Match{
 				RuleID:   "I6_HTTP_BASELINE_UNEXPECTED_DOMAIN",
 				Type:     "I6_HTTP_BASELINE_UNEXPECTED_DOMAIN",
 				Category: "I6",
@@ -199,16 +217,17 @@ func (r *I6PrivacyRule) applyBehaviorBaseline(ctx *Context, category, commType s
 					"Observed external domain does not fit the category baseline",
 					suspicious,
 					riskSummary,
+					categoryConfidence,
 				),
 				Evidence: fmt.Sprintf(
-					"category=%s host=%s representative_domains=%s suspicious_patterns=%s risk_signals=%s",
-					category, host, strings.Join(inference.RepresentativeDomains, ","), suspicious, riskSummary,
+					"category=%s host=%s representative_domains=%s ecosystem_domains=%s suspicious_patterns=%s risk_signals=%s category_confidence=%s",
+					category, host, strings.Join(inference.RepresentativeDomains, ","), strings.Join(inference.EcosystemDomains, ","), suspicious, riskSummary, categoryConfidence,
 				),
-			}, true
+			})
 		}
 	}
 
-	return Match{}, false
+	return dedupeMatches(out)
 }
 
 func DetectCommunicationType(http *HTTPInfo) string {
@@ -301,7 +320,7 @@ func suspiciousPatternSummary(patterns []string) string {
 	return strings.Join(patterns, " | ")
 }
 
-func formatBaselineMessage(base, suspicious, riskSignals string) string {
+func formatBaselineMessage(base, suspicious, riskSignals, categoryConfidence string) string {
 	msg := base
 	if suspicious != "" {
 		msg += " | suspicious: " + suspicious
@@ -309,10 +328,13 @@ func formatBaselineMessage(base, suspicious, riskSignals string) string {
 	if riskSignals != "" {
 		msg += " | risk: " + riskSignals
 	}
+	if categoryConfidence != "" {
+		msg += " | category confidence: " + categoryConfidence
+	}
 	return msg
 }
 
-func collectRiskSignals(baseline knowledge.CategoryBehaviorBaseline, ctx *Context, commType, host, path string, isExternal bool, representativeDomains []string) []string {
+func collectRiskSignals(baseline knowledge.CategoryBehaviorBaseline, ctx *Context, commType, host, path string, isExternal bool, representativeDomains []string, ecosystemDomains []string, categoryConfidenceLevel string) []string {
 	signals := make([]string, 0, 4)
 
 	if isExternal && !ctx.TLS && baseline.PlaintextTolerance == "low" {
@@ -329,7 +351,7 @@ func collectRiskSignals(baseline knowledge.CategoryBehaviorBaseline, ctx *Contex
 	}
 
 	if (commType == "analytics" || commType == "tracking" || commType == "cloud_api") && host != "" && isExternal {
-		if len(representativeDomains) > 0 && !hostMatchesRepresentativeDomains(host, representativeDomains) {
+		if !hostMatchesExpectedDomains(host, representativeDomains, ecosystemDomains) {
 			signals = append(signals, "unexpected_domain")
 		}
 	}
@@ -338,7 +360,28 @@ func collectRiskSignals(baseline knowledge.CategoryBehaviorBaseline, ctx *Contex
 		signals = append(signals, "admin_like_path")
 	}
 
+	if categoryConfidenceLevel == "low" {
+		signals = append(signals, "category_confidence_low")
+	}
+
 	return uniqueStrings(signals)
+}
+
+func hostMatchesExpectedDomains(host string, representativeDomains []string, ecosystemDomains []string) bool {
+	if hostMatchesRepresentativeDomains(host, representativeDomains) {
+		return true
+	}
+	if hostMatchesRepresentativeDomains(host, ecosystemDomains) {
+		return true
+	}
+	return false
+}
+
+func formatConfidence(score float64, level string) string {
+	if level == "" {
+		level = "unknown"
+	}
+	return fmt.Sprintf("%s(%.2f)", level, score)
 }
 
 func uniqueStrings(values []string) []string {
@@ -358,6 +401,24 @@ func uniqueStrings(values []string) []string {
 		}
 		seen[v] = struct{}{}
 		out = append(out, v)
+	}
+	return out
+}
+
+func dedupeMatches(matches []Match) []Match {
+	if len(matches) == 0 {
+		return matches
+	}
+
+	seen := make(map[string]struct{}, len(matches))
+	out := make([]Match, 0, len(matches))
+	for _, m := range matches {
+		key := m.RuleID + "|" + m.Type + "|" + m.Evidence
+		if _, ok := seen[key]; ok {
+			continue
+		}
+		seen[key] = struct{}{}
+		out = append(out, m)
 	}
 	return out
 }

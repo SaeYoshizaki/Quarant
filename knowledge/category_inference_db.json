@@ -3,10 +3,16 @@
     "Camera": {
       "category": "Camera",
       "record_count": 20,
+      "confidence": 1.0,
+      "confidence_level": "high",
       "vendor_candidates": [
         "Xiaomi",
         "TP-Link / Tapo",
         "Reolink",
+        "Ring",
+        "Arlo",
+        "Eufy Security",
+        "Wyze",
         "Ayecom Technology Co., Ltd."
       ],
       "representative_domains": [
@@ -14,10 +20,21 @@
         "tplinkcloud.com",
         "reolink.com"
       ],
+      "ecosystem_domains": [
+        "mi.com",
+        "tp-link.com",
+        "tapo.com",
+        "amazon.com",
+        "amazonaws.com",
+        "ring.com",
+        "arlo.com",
+        "eufy.com",
+        "wyze.com"
+      ],
       "representative_protocols": [
         "https",
-        "rtsp",
         "tls",
+        "rtsp",
         "http"
       ],
       "observed_device_labels": [
@@ -29,6 +46,34 @@
         "sample": 2
       },
       "official_sources": [
+        {
+          "vendor": "Ring",
+          "url": "https://ring.com/jp/ja/home-security-cameras",
+          "notes": "Official Ring security camera page used to anchor the Ring home-security camera ecosystem.",
+          "notes_en": "Official Ring security camera page used to anchor the Ring home-security camera ecosystem.",
+          "notes_ja": "Ring のホームセキュリティカメラ系エコシステムを位置づけるための公式カメラ製品ページ。"
+        },
+        {
+          "vendor": "Arlo",
+          "url": "https://jp.arlo.com/jp/cameras",
+          "notes": "Official Arlo camera page used to anchor the Arlo home-security camera ecosystem.",
+          "notes_en": "Official Arlo camera page used to anchor the Arlo home-security camera ecosystem.",
+          "notes_ja": "Arlo のホームセキュリティカメラ系エコシステムを位置づけるための公式カメラ製品ページ。"
+        },
+        {
+          "vendor": "Eufy Security",
+          "url": "https://www.eufy.com/eu-en/collections/security-camera",
+          "notes": "Official Eufy security camera page used as a reference for the Eufy home-security camera ecosystem.",
+          "notes_en": "Official Eufy security camera page used as a reference for the Eufy home-security camera ecosystem.",
+          "notes_ja": "Eufy のホームセキュリティカメラ系エコシステムの参照先として使った公式カメラ製品ページ。"
+        },
+        {
+          "vendor": "Wyze",
+          "url": "https://www.wyze.com/collections/smart-cameras",
+          "notes": "Official Wyze smart cameras page used as a reference for the Wyze home-security camera ecosystem.",
+          "notes_en": "Official Wyze smart cameras page used as a reference for the Wyze home-security camera ecosystem.",
+          "notes_ja": "Wyze のホームセキュリティカメラ系エコシステムの参照先として使った公式カメラ製品ページ。"
+        },
         {
           "vendor": "Xiaomi",
           "url": "https://www.mi.com/global/product/xiaomi-smart-camera-c301/",
@@ -55,6 +100,8 @@
     "Hub": {
       "category": "Hub",
       "record_count": 7,
+      "confidence": 0.82,
+      "confidence_level": "high",
       "vendor_candidates": [
         "Philips Hue",
         "SmartThings",
@@ -63,9 +110,15 @@
       ],
       "representative_domains": [
         "meethue.com",
+        "api.smartthings.com",
+        "aqara.com"
+      ],
+      "ecosystem_domains": [
+        "meethue.com",
         "smartthings.com",
         "aqara.com",
-        "hub.smartthings.com"
+        "philips.com",
+        "samsung.com"
       ],
       "representative_protocols": [
         "https",
@@ -86,41 +139,60 @@
         {
           "vendor": "Philips Hue",
           "url": "https://developers.meethue.com/develop/get-started-2/",
-          "notes": "Official Philips Hue developer page used to confirm bridge-based hub behavior and meethue.com as a representative ecosystem domain.",
-          "notes_en": "Official Philips Hue developer page used to confirm bridge-based hub behavior and meethue.com as a representative ecosystem domain.",
-          "notes_ja": "Hue Bridge を中心としたハブ型構成と meethue.com を代表ドメイン候補として確認するために使った公式開発者ページ。"
+          "notes": "Official Philips Hue developer page used as a reference for bridge-based hub behavior and the Hue ecosystem.",
+          "notes_en": "Official Philips Hue developer page used as a reference for bridge-based hub behavior and the Hue ecosystem.",
+          "notes_ja": "Hue Bridge を中心としたハブ型構成と Hue エコシステムの参照先として使った公式開発者ページ。"
         },
         {
           "vendor": "SmartThings",
-          "url": "https://developer.smartthings.com/docs/devices/capabilities/",
-          "notes": "Official SmartThings device documentation used to confirm SmartThings hub/device ecosystem and smartthings.com-related domains.",
-          "notes_en": "Official SmartThings device documentation used to confirm SmartThings hub/device ecosystem and smartthings.com-related domains.",
-          "notes_ja": "SmartThings の hub/device エコシステムと smartthings.com 系ドメインを確認するために使った公式デバイス文書。"
+          "url": "https://developer.smartthings.com/docs/devices/hub-connected/get-started",
+          "notes": "Official SmartThings hub-connected documentation used as a reference for hub-based device integration and ecosystem behavior.",
+          "notes_en": "Official SmartThings hub-connected documentation used as a reference for hub-based device integration and ecosystem behavior.",
+          "notes_ja": "SmartThings のハブ接続デバイス構成とエコシステム挙動の参照先として使った公式ドキュメント。"
         },
         {
           "vendor": "Aqara",
-          "url": "https://www.aqara.com/en/",
-          "notes": "Official Aqara site used to confirm Aqara hub products and aqara.com as a representative smart-home domain.",
-          "notes_en": "Official Aqara site used to confirm Aqara hub products and aqara.com as a representative smart-home domain.",
-          "notes_ja": "Aqara のハブ製品系統と aqara.com を代表ドメイン候補として確認するために使った公式サイト。"
+          "url": "https://www.aqara.com/en/product/smart-home-hub/",
+          "notes": "Official Aqara hub product page used as a reference for Aqara hub devices and smart-home ecosystem.",
+          "notes_en": "Official Aqara hub product page used as a reference for Aqara hub devices and smart-home ecosystem.",
+          "notes_ja": "Aqara のハブ製品とスマートホームエコシステムの参照先として使った公式製品ページ。"
         }
       ]
     },
     "Sensor": {
       "category": "Sensor",
       "record_count": 2,
+      "confidence": 0.73,
+      "confidence_level": "medium",
       "vendor_candidates": [
         "Aqara",
         "SwitchBot",
         "TP-Link / Tapo",
         "Philips Hue",
+        "Ring",
+        "Xiaomi",
+        "Tuya",
+        "Sonoff / eWeLink",
+        "Shelly",
         "Ayecom Technology Co., Ltd."
       ],
       "representative_domains": [
         "aqara.com",
         "switch-bot.com",
+        "ewelink.cc",
+        "shelly.cloud",
+        "tuyaus.com"
+      ],
+      "ecosystem_domains": [
+        "aqara.com",
+        "switch-bot.com",
+        "tp-link.com",
         "tapo.com",
-        "meethue.com"
+        "meethue.com",
+        "mi.com",
+        "tuya.com",
+        "ewelink.cc",
+        "shelly.com"
       ],
       "representative_protocols": [
         "https",
@@ -162,26 +234,78 @@
           "notes": "Official Philips Hue developer page used to confirm Hue sensors as part of the Hue ecosystem and meethue.com as a representative domain.",
           "notes_en": "Official Philips Hue developer page used to confirm Hue sensors as part of the Hue ecosystem and meethue.com as a representative domain.",
           "notes_ja": "Hue センサーが Hue エコシステムに属することを確認し、meethue.com を代表ドメイン候補として採用するために使った公式開発者ページ。"
+        },
+        {
+          "vendor": "Ring",
+          "url": "https://ring.com/",
+          "notes": "Official Ring site used to confirm Ring sensor products and ring.com as a representative domain for home security sensors.",
+          "notes_en": "Official Ring site used to confirm Ring sensor products and ring.com as a representative domain for home security sensors.",
+          "notes_ja": "Ring のセンサー製品系統と、ホームセキュリティ系センサーの代表ドメイン候補として ring.com を確認するために使った公式サイト。"
+        },
+        {
+          "vendor": "Xiaomi",
+          "url": "https://www.mi.com/global/",
+          "notes": "Official Xiaomi global site used to anchor the Xiaomi sensor and smart-home ecosystem context.",
+          "notes_en": "Official Xiaomi global site used to anchor the Xiaomi sensor and smart-home ecosystem context.",
+          "notes_ja": "Xiaomi のセンサー系スマートホーム文脈を位置づけるために使った公式グローバルサイト。"
+        },
+        {
+          "vendor": "Tuya",
+          "url": "https://developer.tuya.com/en/",
+          "notes": "Official Tuya developer site used as a reference for the Tuya smart-home sensor ecosystem and related cloud domains.",
+          "notes_en": "Official Tuya developer site used as a reference for the Tuya smart-home sensor ecosystem and related cloud domains.",
+          "notes_ja": "Tuya のスマートホームセンサー系エコシステムと関連クラウドドメインの参照先として使った公式開発者サイト。"
+        },
+        {
+          "vendor": "Sonoff / eWeLink",
+          "url": "https://ewelink.cc/",
+          "notes": "Official eWeLink site used as a reference for the Sonoff / eWeLink smart-home sensor and controller ecosystem.",
+          "notes_en": "Official eWeLink site used as a reference for the Sonoff / eWeLink smart-home sensor and controller ecosystem.",
+          "notes_ja": "Sonoff / eWeLink のスマートホームセンサー・コントローラ系エコシステムの参照先として使った公式サイト。"
+        },
+        {
+          "vendor": "Shelly",
+          "url": "https://www.shelly.com/",
+          "notes": "Official Shelly site used as a reference for the Shelly smart-home sensor and automation ecosystem.",
+          "notes_en": "Official Shelly site used as a reference for the Shelly smart-home sensor and automation ecosystem.",
+          "notes_ja": "Shelly のスマートホームセンサー・自動化系エコシステムの参照先として使った公式サイト。"
         }
       ]
     },
     "Controller": {
       "category": "Controller",
       "record_count": 10,
+      "confidence": 0.9,
+      "confidence_level": "high",
       "vendor_candidates": [
         "TP-Link / Kasa",
         "SwitchBot",
         "Meross",
+        "Shelly",
+        "Sonoff / eWeLink",
+        "Tuya",
+        "Aqara",
         "Ayecom Technology Co., Ltd.",
         "TP-LINK TECHNOLOGIES CO.,LTD."
       ],
       "representative_domains": [
         "tplinkcloud.com",
         "switch-bot.com",
+        "api.meross.com",
+        "shelly.cloud",
+        "ewelink.cc",
+        "tuyaus.com",
+        "aqara.com"
+      ],
+      "ecosystem_domains": [
+        "tp-link.com",
+        "kasasmart.com",
+        "switch-bot.com",
         "meross.com",
-        "use1.tplinkra.com",
-        "n-wap-gw.tplinkcloud.com",
-        "na.switch-bot.com"
+        "shelly.com",
+        "ewelink.cc",
+        "tuya.com",
+        "aqara.com"
       ],
       "representative_protocols": [
         "https",
@@ -218,12 +342,42 @@
           "notes": "Official Meross site used to confirm Meross as a controller-focused smart home brand and meross.com as a representative domain.",
           "notes_en": "Official Meross site used to confirm Meross as a controller-focused smart home brand and meross.com as a representative domain.",
           "notes_ja": "Meross をコントローラ系スマートホームブランドとして確認し、meross.com を代表ドメイン候補として採用するために使った公式サイト。"
+        },
+        {
+          "vendor": "Shelly",
+          "url": "https://www.shelly.com/",
+          "notes": "Official Shelly site used as a reference for the Shelly smart-home controller and automation ecosystem.",
+          "notes_en": "Official Shelly site used as a reference for the Shelly smart-home controller and automation ecosystem.",
+          "notes_ja": "Shelly のスマートホームコントローラ・自動化系エコシステムの参照先として使った公式サイト。"
+        },
+        {
+          "vendor": "Sonoff / eWeLink",
+          "url": "https://ewelink.cc/",
+          "notes": "Official eWeLink site used as a reference for the Sonoff / eWeLink smart-home controller ecosystem.",
+          "notes_en": "Official eWeLink site used as a reference for the Sonoff / eWeLink smart-home controller ecosystem.",
+          "notes_ja": "Sonoff / eWeLink のスマートホームコントローラ系エコシステムの参照先として使った公式サイト。"
+        },
+        {
+          "vendor": "Tuya",
+          "url": "https://developer.tuya.com/en/",
+          "notes": "Official Tuya developer site used as a reference for the Tuya smart-home controller ecosystem and related cloud domains.",
+          "notes_en": "Official Tuya developer site used as a reference for the Tuya smart-home controller ecosystem and related cloud domains.",
+          "notes_ja": "Tuya のスマートホームコントローラ系エコシステムと関連クラウドドメインの参照先として使った公式開発者サイト。"
+        },
+        {
+          "vendor": "Aqara",
+          "url": "https://www.aqara.com/en/",
+          "notes": "Official Aqara site used as a reference for the Aqara smart-home controller and automation ecosystem.",
+          "notes_en": "Official Aqara site used as a reference for the Aqara smart-home controller and automation ecosystem.",
+          "notes_ja": "Aqara のスマートホームコントローラ・自動化系エコシステムの参照先として使った公式サイト。"
         }
       ]
     },
     "Appliance": {
       "category": "Appliance",
       "record_count": 18,
+      "confidence": 1.0,
+      "confidence_level": "high",
       "vendor_candidates": [
         "Samsung",
         "LG",
@@ -234,6 +388,15 @@
       ],
       "representative_domains": [
         "samsung.com",
+        "lgsmart.com",
+        "midea.com",
+        "panasonic.com",
+        "daikin.com"
+      ],
+      "ecosystem_domains": [
+        "smartthings.com",
+        "samsung.com",
+        "lg.com",
         "lgsmart.com",
         "midea.com",
         "panasonic.com",
@@ -293,17 +456,37 @@
     "VoiceAssistant": {
       "category": "VoiceAssistant",
       "record_count": 2,
+      "confidence": 0.73,
+      "confidence_level": "medium",
       "vendor_candidates": [
+        "Amazon Alexa / Echo",
+        "Google Assistant / Nest",
+        "Apple Siri / HomePod",
+        "Xiaomi XiaoAI",
+        "Alibaba AliGenie / Tmall Genie",
+        "Baidu DuerOS",
         "Amazon",
         "Google",
         "Apple"
       ],
       "representative_domains": [
-        "amazon.com",
         "alexa.amazon.com",
-        "googleapis.com",
         "assistant.google.com",
-        "apple.com"
+        "genie.alibaba.com",
+        "dueros.baidu.com",
+        "siri.apple.com"
+      ],
+      "ecosystem_domains": [
+        "amazon.com",
+        "google.com",
+        "apple.com",
+        "mi.com",
+        "xiaomi.com",
+        "tmall.com",
+        "alibaba.com",
+        "baidu.com",
+        "googleapis.com",
+        "icloud.com"
       ],
       "representative_protocols": [
         "https",
@@ -317,31 +500,54 @@
       },
       "official_sources": [
         {
-          "vendor": "Amazon",
+          "vendor": "Amazon Alexa / Echo",
           "url": "https://developer.amazon.com/en-US/alexa/",
-          "notes": "Official Alexa developer site used to confirm Amazon Alexa / Echo ecosystem and Amazon-managed assistant services.",
-          "notes_en": "Official Alexa developer site used to confirm Amazon Alexa / Echo ecosystem and Amazon-managed assistant services.",
-          "notes_ja": "Amazon Alexa / Echo エコシステムと Amazon 管理の音声アシスタント系サービスを確認するために使った公式開発者サイト。"
+          "notes": "Official Alexa developer site used to anchor the Amazon Alexa / Echo product family as the primary voice-assistant ecosystem.",
+          "notes_en": "Official Alexa developer site used to anchor the Amazon Alexa / Echo product family as the primary voice-assistant ecosystem.",
+          "notes_ja": "Amazon Alexa / Echo 製品ファミリを主要な音声アシスタント系エコシステムとして位置づけるための公式開発者サイト。"
         },
         {
-          "vendor": "Google",
+          "vendor": "Google Assistant / Nest",
           "url": "https://developers.home.google.com/",
-          "notes": "Official Google Home developer site used to confirm Google Assistant / Nest ecosystem and Google-managed smart-home services.",
-          "notes_en": "Official Google Home developer site used to confirm Google Assistant / Nest ecosystem and Google-managed smart-home services.",
-          "notes_ja": "Google Assistant / Nest エコシステムと Google 管理のスマートホーム系サービスを確認するために使った公式開発者サイト。"
+          "notes": "Official Google Home developer site used to anchor the Google Assistant / Nest voice-assistant ecosystem.",
+          "notes_en": "Official Google Home developer site used to anchor the Google Assistant / Nest voice-assistant ecosystem.",
+          "notes_ja": "Google Assistant / Nest の音声アシスタント系エコシステムを位置づけるための公式開発者サイト。"
         },
         {
-          "vendor": "Apple",
+          "vendor": "Apple Siri / HomePod",
           "url": "https://developer.apple.com/apple-home/",
-          "notes": "Official Apple Home developer page used to confirm Apple Home / Siri ecosystem context for voice-assistant-capable devices.",
-          "notes_en": "Official Apple Home developer page used to confirm Apple Home / Siri ecosystem context for voice-assistant-capable devices.",
-          "notes_ja": "Apple Home / Siri エコシステムの文脈を確認し、音声アシスタント対応機器との関連を整理するために使った公式開発者ページ。"
+          "notes": "Official Apple Home developer page used to anchor the Apple Siri / HomePod voice-assistant ecosystem.",
+          "notes_en": "Official Apple Home developer page used to anchor the Apple Siri / HomePod voice-assistant ecosystem.",
+          "notes_ja": "Apple Siri / HomePod の音声アシスタント系エコシステムを位置づけるための公式開発者ページ。"
+        },
+        {
+          "vendor": "Xiaomi XiaoAI",
+          "url": "https://www.mi.com/global/",
+          "notes": "Official Xiaomi global site used as a reference for the Xiaomi smart-speaker and XiaoAI ecosystem.",
+          "notes_en": "Official Xiaomi global site used as a reference for the Xiaomi smart-speaker and XiaoAI ecosystem.",
+          "notes_ja": "Xiaomi のスマートスピーカーおよび XiaoAI 系エコシステムの参照先として使った公式グローバルサイト。"
+        },
+        {
+          "vendor": "Alibaba AliGenie / Tmall Genie",
+          "url": "https://www.tmall.com/",
+          "notes": "Official Tmall site used as a reference for the Tmall Genie and AliGenie voice-assistant ecosystem.",
+          "notes_en": "Official Tmall site used as a reference for the Tmall Genie and AliGenie voice-assistant ecosystem.",
+          "notes_ja": "Tmall Genie / AliGenie 音声アシスタント系エコシステムの参照先として使った公式 Tmall サイト。"
+        },
+        {
+          "vendor": "Baidu DuerOS",
+          "url": "https://dueros.baidu.com/",
+          "notes": "Official DuerOS site used as a reference for the Baidu voice-assistant ecosystem.",
+          "notes_en": "Official DuerOS site used as a reference for the Baidu voice-assistant ecosystem.",
+          "notes_ja": "Baidu DuerOS 音声アシスタント系エコシステムの参照先として使った公式サイト。"
         }
       ]
     },
     "Wearable": {
       "category": "Wearable",
       "record_count": 6,
+      "confidence": 0.8,
+      "confidence_level": "high",
       "vendor_candidates": [
         "Garmin",
         "Fitbit",
@@ -351,13 +557,16 @@
         "Garmin International"
       ],
       "representative_domains": [
-        "garmin.com",
         "connect.garmin.com",
+        "fitbit.com"
+      ],
+      "ecosystem_domains": [
+        "garmin.com",
+        "services.garmin.com",
         "fitbit.com",
         "apple.com",
         "samsung.com",
-        "mi.com",
-        "services.garmin.com"
+        "mi.com"
       ],
       "representative_protocols": [
         "https",
@@ -373,36 +582,36 @@
         {
           "vendor": "Garmin",
           "url": "https://developer.garmin.com/gc-developer-program/overview/",
-          "notes": "Official Garmin Connect developer overview used to confirm Garmin wearable cloud-sync ecosystem and garmin.com domains.",
-          "notes_en": "Official Garmin Connect developer overview used to confirm Garmin wearable cloud-sync ecosystem and garmin.com domains.",
-          "notes_ja": "Garmin のウェアラブル向けクラウド同期エコシステムと garmin.com 系ドメインを確認するために使った公式開発者概要。"
+          "notes": "Official Garmin Connect developer overview used to confirm Garmin wearable cloud-sync ecosystem.",
+          "notes_en": "Official Garmin Connect developer overview used to confirm Garmin wearable cloud-sync ecosystem.",
+          "notes_ja": "Garmin のウェアラブル向けクラウド同期エコシステムを確認するために使った公式開発者概要。"
         },
         {
           "vendor": "Fitbit",
           "url": "https://dev.fitbit.com/",
-          "notes": "Official Fitbit developer portal used to confirm Fitbit wearable ecosystem and Fitbit-managed cloud services.",
-          "notes_en": "Official Fitbit developer portal used to confirm Fitbit wearable ecosystem and Fitbit-managed cloud services.",
-          "notes_ja": "Fitbit のウェアラブルエコシステムと Fitbit 管理のクラウドサービスを確認するために使った公式開発者ポータル。"
+          "notes": "Official Fitbit developer site used as a reference for the Fitbit wearable ecosystem and related cloud services.",
+          "notes_en": "Official Fitbit developer site used as a reference for the Fitbit wearable ecosystem and related cloud services.",
+          "notes_ja": "Fitbit のウェアラブルエコシステムと関連クラウドサービスの参照先として使った公式開発者サイト。"
         },
         {
           "vendor": "Apple",
-          "url": "https://developer.apple.com/apple-home/",
-          "notes": "Official Apple Home developer page used as an Apple ecosystem reference when classifying wearable-related Apple devices.",
-          "notes_en": "Official Apple Home developer page used as an Apple ecosystem reference when classifying wearable-related Apple devices.",
-          "notes_ja": "Apple 系ウェアラブル関連機器を分類する際の Apple エコシステム参照先として使った公式開発者ページ。"
+          "url": "https://developer.apple.com/documentation/healthkit",
+          "notes": "Official Apple developer documentation used as an Apple wearable and health ecosystem reference.",
+          "notes_en": "Official Apple developer documentation used as an Apple wearable and health ecosystem reference.",
+          "notes_ja": "Apple のウェアラブル・ヘルス系エコシステム参照先として使った公式開発者ドキュメント。"
         },
         {
           "vendor": "Samsung",
-          "url": "https://developer.samsung.com/smartthings",
-          "notes": "Official Samsung SmartThings developer site used as a Samsung smart-device ecosystem reference for wearable-adjacent devices.",
-          "notes_en": "Official Samsung SmartThings developer site used as a Samsung smart-device ecosystem reference for wearable-adjacent devices.",
-          "notes_ja": "Samsung 系ウェアラブル周辺機器を整理する際の Samsung スマートデバイス参照先として使った公式開発者サイト。"
+          "url": "https://developer.samsung.com/health",
+          "notes": "Official Samsung Health developer site used as a Samsung wearable and health ecosystem reference.",
+          "notes_en": "Official Samsung Health developer site used as a Samsung wearable and health ecosystem reference.",
+          "notes_ja": "Samsung のウェアラブル・ヘルス系エコシステム参照先として使った公式開発者サイト。"
         },
         {
           "vendor": "Xiaomi",
           "url": "https://www.mi.com/global/",
-          "notes": "Official Xiaomi global site used as a Xiaomi ecosystem reference for wearable devices such as smart bands.",
-          "notes_en": "Official Xiaomi global site used as a Xiaomi ecosystem reference for wearable devices such as smart bands.",
+          "notes": "Official Xiaomi global site used as a Xiaomi wearable ecosystem reference for devices such as smart bands.",
+          "notes_en": "Official Xiaomi global site used as a Xiaomi wearable ecosystem reference for devices such as smart bands.",
           "notes_ja": "スマートバンドなど Xiaomi 系ウェアラブル機器を整理する際のエコシステム参照先として使った公式グローバルサイト。"
         }
       ]

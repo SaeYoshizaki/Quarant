@@ -202,12 +202,47 @@ def build_category_entry(category, devices):
     return {
         "category": category,
         "record_count": len(devices),
+        "confidence": 0.0,
+        "confidence_level": "low",
         "vendor_candidates": [vendor for vendor, _count in vendor_counter.most_common(8)],
         "representative_domains": representative_domains,
+        "ecosystem_domains": [],
         "representative_protocols": representative_protocols,
         "observed_device_labels": [label for label, _count in raw_category_counter.most_common(8)],
         "source_breakdown": dict(source_counter.most_common()),
     }
+
+
+def compute_confidence(entry):
+    record_count = int(entry.get("record_count", 0) or 0)
+    vendor_count = len(entry.get("vendor_candidates", []) or [])
+    domain_count = len(entry.get("representative_domains", []) or [])
+    protocol_count = len(entry.get("representative_protocols", []) or [])
+    official_count = len(entry.get("official_sources", []) or [])
+    source_breakdown = entry.get("source_breakdown", {}) or {}
+    source_type_count = len(source_breakdown)
+
+    score = 0.0
+    score += min(record_count / 40.0, 0.35)
+    score += min(official_count / 6.0, 0.25)
+    score += min(vendor_count / 10.0, 0.12)
+    score += min(domain_count / 10.0, 0.10)
+    score += min(protocol_count / 6.0, 0.05)
+    score += min(source_type_count / 4.0, 0.13)
+
+    if official_count > 0 and record_count <= 2:
+        score += 0.03
+
+    score = max(0.0, min(score, 1.0))
+
+    if score >= 0.75:
+        level = "high"
+    elif score >= 0.45:
+        level = "medium"
+    else:
+        level = "low"
+
+    return round(score, 2), level
 
 
 def build_category_inference_db(devices):
@@ -256,10 +291,26 @@ def apply_official_overrides(db, overrides):
             override.get("vendor_candidates", []),
             entry.get("vendor_candidates", []),
         )
-        entry["representative_domains"] = merge_unique_preserving_order(
-            override.get("representative_domains", []),
-            entry.get("representative_domains", []),
-        )
+        if "representative_domains" in override:
+            entry["representative_domains"] = merge_unique_preserving_order(
+                override.get("representative_domains", []),
+                [],
+            )
+        else:
+            entry["representative_domains"] = merge_unique_preserving_order(
+                entry.get("representative_domains", []),
+                [],
+            )
+        if "ecosystem_domains" in override:
+            entry["ecosystem_domains"] = merge_unique_preserving_order(
+                override.get("ecosystem_domains", []),
+                [],
+            )
+        else:
+            entry["ecosystem_domains"] = merge_unique_preserving_order(
+                entry.get("ecosystem_domains", []),
+                [],
+            )
         entry["representative_protocols"] = merge_unique_preserving_order(
             override.get("representative_protocols", []),
             entry.get("representative_protocols", []),
@@ -268,6 +319,10 @@ def apply_official_overrides(db, overrides):
         official_sources = override.get("official_sources", [])
         if official_sources:
             entry["official_sources"] = official_sources
+
+        confidence, confidence_level = compute_confidence(entry)
+        entry["confidence"] = confidence
+        entry["confidence_level"] = confidence_level
 
     if overrides.get("metadata"):
         db["metadata"]["official_overrides_loaded"] = True

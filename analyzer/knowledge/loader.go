@@ -45,8 +45,11 @@ type OfficialSource struct {
 type CategoryInferenceEntry struct {
 	Category                string           `json:"category"`
 	RecordCount             int              `json:"record_count"`
+	Confidence              float64          `json:"confidence"`
+	ConfidenceLevel         string           `json:"confidence_level"`
 	VendorCandidates        []string         `json:"vendor_candidates"`
 	RepresentativeDomains   []string         `json:"representative_domains"`
+	EcosystemDomains        []string         `json:"ecosystem_domains"`
 	RepresentativeProtocols []string         `json:"representative_protocols"`
 	ObservedDeviceLabels    []string         `json:"observed_device_labels"`
 	SourceBreakdown         map[string]int   `json:"source_breakdown"`

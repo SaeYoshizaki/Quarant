@@ -277,8 +277,8 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 
 	if h.knowledge != nil {
 		i6Rule := rules.NewI6PrivacyRule(h.knowledge)
-		if m, ok := i6Rule.Apply(ctx); ok {
-			matches = append(matches, m)
+		if i6Matches := i6Rule.ApplyAll(ctx); len(i6Matches) > 0 {
+			matches = append(matches, i6Matches...)
 		}
 	}
 

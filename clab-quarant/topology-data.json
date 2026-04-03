@@ -90,9 +90,9 @@
       "image": "golang:1.24-alpine",
       "mgmt-net": "",
       "mgmt-intf": "",
-      "mgmt-ipv4-address": "172.20.20.3",
+      "mgmt-ipv4-address": "172.20.20.6",
       "mgmt-ipv4-prefix-length": 24,
-      "mgmt-ipv6-address": "3fff:172:20:20::3",
+      "mgmt-ipv6-address": "3fff:172:20:20::6",
       "mgmt-ipv6-prefix-length": 64,
       "mac-address": "",
       "labels": {
@@ -117,13 +117,13 @@
         "a": {
           "node": "pc1",
           "interface": "eth1",
-          "mac": "aa:c1:ab:92:1e:9d",
+          "mac": "aa:c1:ab:67:91:0c",
           "peer": "z"
         },
         "z": {
           "node": "quarant",
           "interface": "eth1",
-          "mac": "aa:c1:ab:bf:13:0a",
+          "mac": "aa:c1:ab:f8:35:31",
           "peer": "a"
         }
       }
@@ -133,13 +133,13 @@
         "a": {
           "node": "quarant",
           "interface": "eth2",
-          "mac": "aa:c1:ab:29:65:7a",
+          "mac": "aa:c1:ab:0a:e1:c3",
           "peer": "z"
         },
         "z": {
           "node": "pc2",
           "interface": "eth1",
-          "mac": "aa:c1:ab:5e:ac:e8",
+          "mac": "aa:c1:ab:90:40:88",
           "peer": "a"
         }
       }
