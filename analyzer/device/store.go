@@ -14,19 +14,24 @@ func NewStore() *Store {
 	}
 }
 
+func NewProfile(ip string) *DeviceProfile {
+	return &DeviceProfile{
+		IP:         ip,
+		Hosts:      map[string]bool{},
+		UserAgents: map[string]bool{},
+		Servers:    map[string]bool{},
+		SNIValues:  map[string]bool{},
+		TypeScores: map[string]float64{},
+	}
+}
+
 func (s *Store) GetOrCreate(ip string) *DeviceProfile {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
 	d, ok := s.devices[ip]
 	if !ok {
-		d = &DeviceProfile{
-			IP:         ip,
-			Hosts:      map[string]bool{},
-			UserAgents: map[string]bool{},
-			Servers:    map[string]bool{},
-			SNIValues:  map[string]bool{},
-		}
+		d = NewProfile(ip)
 		s.devices[ip] = d
 	}
 

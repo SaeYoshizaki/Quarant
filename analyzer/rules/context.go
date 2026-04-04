@@ -15,5 +15,7 @@ type Context struct {
 	HTTP *HTTPInfo
 	TLS  bool
 
-	DeviceCategory string
+	DeviceCategory      string
+	LocalDeviceCategory string
+	FlowDeviceCategory  string
 }

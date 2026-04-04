@@ -41,6 +41,10 @@ func (r *I6PrivacyRule) ApplyAll(ctx *Context) []Match {
 
 	out := make([]Match, 0, 4)
 
+	if mismatch := r.applyCategoryMismatch(ctx); mismatch != nil {
+		out = append(out, *mismatch)
+	}
+
 	if category != "unknown" && r.db.IsKnownCategory(category) {
 		out = append(out, r.applyBehaviorBaselineAll(ctx, category, commType)...)
 	}
@@ -122,6 +126,62 @@ func (r *I6PrivacyRule) ApplyAll(ctx *Context) []Match {
 	}
 
 	return dedupeMatches(out)
+}
+
+func (r *I6PrivacyRule) applyCategoryMismatch(ctx *Context) *Match {
+	localCategory := strings.TrimSpace(ctx.LocalDeviceCategory)
+	flowCategory := strings.TrimSpace(ctx.FlowDeviceCategory)
+
+	if localCategory == "" || flowCategory == "" {
+		return nil
+	}
+	if localCategory == "GenericIoT" || flowCategory == "GenericIoT" {
+		return nil
+	}
+	if localCategory == flowCategory {
+		return nil
+	}
+	if !r.db.IsKnownCategory(localCategory) || !r.db.IsKnownCategory(flowCategory) {
+		return nil
+	}
+
+	host := strings.ToLower(strings.TrimSpace(ctx.HTTP.Headers["host"]))
+	commType := DetectCommunicationType(ctx.HTTP)
+	if commType == "" {
+		commType = "unknown"
+	}
+
+	localConfidence := ""
+	if inference, ok := r.db.GetCategoryInference(localCategory); ok {
+		localConfidence = formatConfidence(inference.Confidence, inference.ConfidenceLevel)
+	}
+
+	flowConfidence := ""
+	if inference, ok := r.db.GetCategoryInference(flowCategory); ok {
+		flowConfidence = formatConfidence(inference.Confidence, inference.ConfidenceLevel)
+	}
+
+	return &Match{
+		RuleID:   "I6_DEVICE_FLOW_CATEGORY_MISMATCH",
+		Type:     "I6_DEVICE_FLOW_CATEGORY_MISMATCH",
+		Category: "I6",
+		Severity: SeverityWarning,
+		Message: fmt.Sprintf(
+			"Observed flow category does not match the learned device category | local: %s | flow: %s | comm_type: %s",
+			localCategory,
+			flowCategory,
+			commType,
+		),
+		Evidence: fmt.Sprintf(
+			"host=%s local_category=%s flow_category=%s local_confidence=%s flow_confidence=%s path=%s",
+			host,
+			localCategory,
+			flowCategory,
+			localConfidence,
+			flowConfidence,
+			strings.ToLower(strings.TrimSpace(ctx.HTTP.Path)),
+		),
+	}
 }
 
 func (r *I6PrivacyRule) applyBehaviorBaselineAll(ctx *Context, category, commType string) []Match {

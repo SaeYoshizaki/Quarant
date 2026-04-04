@@ -1,11 +1,6 @@
 package device
 
-import (
-	"fmt"
-	"strings"
-
-	"quarant/analyzer/rules"
-)
+import "quarant/analyzer/rules"
 
 func appendUnique(slice []string, s string) []string {
 	for _, v := range slice {
@@ -32,22 +27,11 @@ func EnrichFromTLS(d *DeviceProfile, info rules.TLSClientHelloInfo) {
 		d.Evidence = appendUnique(d.Evidence, "JA3="+ja3)
 	}
 
-	inferFromTLS(d, info)
+	recomputeDeviceIdentity(d)
 }
 
-func inferFromTLS(d *DeviceProfile, info rules.TLSClientHelloInfo) {
-	sni := strings.ToLower(info.SNI)
-
-	if strings.Contains(sni, "hikvision") {
-		d.Vendor = "Hikvision"
-		d.DeviceType = "IP Camera"
-		d.Confidence += 0.4
-	}
-	if strings.Contains(sni, "tplink") || strings.Contains(sni, "tapo") {
-		d.Vendor = "TP-Link"
-		d.DeviceType = "IP Camera"
-		d.Confidence += 0.4
-	}
-
-	_ = fmt.Sprintf
+func InferFlowFromTLS(info rules.TLSClientHelloInfo) *DeviceProfile {
+	d := NewProfile("")
+	EnrichFromTLS(d, info)
+	return d
 }

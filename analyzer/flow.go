@@ -235,24 +235,48 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 	}
 
 	d := h.devices.GetOrCreate(srcIP)
+	localDeviceCategory := rules.MapDeviceTypeToCategory(d.DeviceType)
+	if localDeviceCategory == "Unknown" {
+		localDeviceCategory = "GenericIoT"
+	}
 
-	deviceCategory := rules.MapDeviceTypeToCategory(d.DeviceType)
-	if deviceCategory == "Unknown" {
-		deviceCategory = "GenericIoT"
+	flowDeviceCategory := "GenericIoT"
+	flowDeviceType := ""
+	if httpInfo != nil {
+		flowProfile := device.InferFlowFromHTTP(httpInfo.Headers)
+		flowDeviceType = flowProfile.DeviceType
+		mapped := rules.MapDeviceTypeToCategory(flowProfile.DeviceType)
+		if mapped != "Unknown" {
+			flowDeviceCategory = mapped
+		}
+	} else if st.TLSClientSeen && st.TLSClientInfo != nil {
+		flowProfile := device.InferFlowFromTLS(*st.TLSClientInfo)
+		flowDeviceType = flowProfile.DeviceType
+		mapped := rules.MapDeviceTypeToCategory(flowProfile.DeviceType)
+		if mapped != "Unknown" {
+			flowDeviceCategory = mapped
+		}
+	}
+
+	deviceCategory := flowDeviceCategory
+	if deviceCategory == "GenericIoT" {
+		deviceCategory = localDeviceCategory
 	}
 
 	ctx := &rules.Context{
-		NowUnix:        now.Unix(),
-		FlowKey:        key,
-		SrcIP:          srcIP,
-		SrcPort:        srcPort,
-		DstIP:          dstIP,
-		DstPort:        dstPort,
-		Payload:        st.ClientData,
-		Debug:          h.debug,
-		HTTP:           httpInfo,
-		TLS:            isTLSClientToServer,
-		DeviceCategory: deviceCategory,
+		NowUnix:             now.Unix(),
+		FlowKey:             key,
+		SrcIP:               srcIP,
+		SrcPort:             srcPort,
+		DstIP:               dstIP,
+		DstPort:             dstPort,
+		Payload:             st.ClientData,
+		Debug:               h.debug,
+		HTTP:                httpInfo,
+		TLS:                 isTLSClientToServer,
+		DeviceCategory:      deviceCategory,
+		LocalDeviceCategory: localDeviceCategory,
+		FlowDeviceCategory:  flowDeviceCategory,
 	}
 
 	if h.debug {
@@ -265,10 +289,12 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 			DstIP:     dstIP,
 			DstPort:   dstPort,
 			Message: fmt.Sprintf(
-				"local_device_category=%q ctx_device_category=%q device_type=%q",
-				deviceCategory,
+				"local_device_category=%q flow_device_category=%q ctx_device_category=%q local_device_type=%q flow_device_type=%q",
+				localDeviceCategory,
+				flowDeviceCategory,
 				ctx.DeviceCategory,
 				h.devices.GetOrCreate(srcIP).DeviceType,
+				flowDeviceType,
 			),
 		})
 	}

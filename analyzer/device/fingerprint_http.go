@@ -1,88 +1,122 @@
 package device
 
-import "strings"
+import (
+	"sort"
+	"strings"
+)
 
-func inferDevice(d *DeviceProfile) {
+func addScore(scores map[string]float64, key string, delta float64) {
+	if key == "" || delta <= 0 {
+		return
+	}
+	scores[key] += delta
+}
+
+func bestScoredLabel(scores map[string]float64, prefer string) (string, float64) {
+	bestLabel := ""
+	bestScore := 0.0
+
+	labels := make([]string, 0, len(scores))
+	for label := range scores {
+		labels = append(labels, label)
+	}
+	sort.Strings(labels)
+
+	for _, label := range labels {
+		score := scores[label]
+		if score > bestScore || (score == bestScore && label == prefer) {
+			bestLabel = label
+			bestScore = score
+		}
+	}
+
+	return bestLabel, bestScore
+}
+
+func recomputeDeviceIdentity(d *DeviceProfile) {
+	typeScores := map[string]float64{}
+	vendorScores := map[string]float64{}
+
 	for s := range d.Servers {
 		server := strings.ToLower(s)
 
 		if strings.Contains(server, "goahead") {
-			d.DeviceType = "IP Camera"
-			d.Confidence += 0.2
+			addScore(typeScores, "IP Camera", 0.2)
 		}
-
 		if strings.Contains(server, "boa") {
-			d.DeviceType = "IoT Device"
-			d.Confidence += 0.1
+			addScore(typeScores, "IoT Device", 0.1)
 		}
 	}
 
 	for h := range d.Hosts {
 		host := strings.ToLower(h)
 
-		if strings.Contains(host, "tplink") || strings.Contains(host, "tapo") {
-			d.Vendor = "TP-Link"
-			d.Confidence += 0.4
-			if d.DeviceType == "" {
-				d.DeviceType = "IP Camera"
-			}
+		switch {
+		case strings.Contains(host, "tplink") || strings.Contains(host, "tapo"):
+			addScore(vendorScores, "TP-Link", 0.4)
+			addScore(typeScores, "IP Camera", 0.4)
+		case strings.Contains(host, "hikvision"):
+			addScore(vendorScores, "Hikvision", 0.4)
+			addScore(typeScores, "IP Camera", 0.4)
+		case strings.Contains(host, "reolink"):
+			addScore(vendorScores, "Reolink", 0.3)
+			addScore(typeScores, "IP Camera", 0.4)
+		case strings.Contains(host, "alexa") || strings.Contains(host, "assistant.google") || strings.Contains(host, "siri.apple"):
+			addScore(typeScores, "Voice Assistant Speaker", 0.4)
+		case strings.Contains(host, "aqara") || strings.Contains(host, "sensor"):
+			addScore(typeScores, "Sensor", 0.3)
 		}
+	}
 
-		if strings.Contains(host, "hikvision") {
-			d.Vendor = "Hikvision"
-			d.DeviceType = "IP Camera"
-			d.Confidence += 0.4
-		}
+	for sni := range d.SNIValues {
+		value := strings.ToLower(sni)
 
-		if strings.Contains(host, "alexa") || strings.Contains(host, "assistant.google") {
-			d.DeviceType = "Voice Assistant Speaker"
-			d.Confidence += 0.3
-		}
-
-		if strings.Contains(host, "aqara") || strings.Contains(host, "sensor") {
-			d.DeviceType = "Sensor"
-			d.Confidence += 0.2
+		switch {
+		case strings.Contains(value, "hikvision"):
+			addScore(vendorScores, "Hikvision", 0.4)
+			addScore(typeScores, "IP Camera", 0.4)
+		case strings.Contains(value, "tplink") || strings.Contains(value, "tapo"):
+			addScore(vendorScores, "TP-Link", 0.4)
+			addScore(typeScores, "IP Camera", 0.4)
+		case strings.Contains(value, "reolink"):
+			addScore(vendorScores, "Reolink", 0.3)
+			addScore(typeScores, "IP Camera", 0.4)
 		}
 	}
 
 	for ua := range d.UserAgents {
 		agent := strings.ToLower(strings.TrimSpace(ua))
 
-		if strings.Contains(agent, "tapo") ||
-		strings.Contains(agent, "camera") ||
-		strings.Contains(agent, "ipcam") {
-
-			d.DeviceType = "IP Camera"
-			if d.Vendor == "" && strings.Contains(agent, "tapo") {
-				d.Vendor = "TP-Link"
-			}
-			d.Confidence += 0.6
-		}
-
 		switch {
 		case strings.Contains(agent, "tapo-camera"),
 			strings.Contains(agent, "ipcamera"),
+			strings.Contains(agent, "ipcam"),
 			strings.Contains(agent, "camera"):
-			d.DeviceType = "IP Camera"
-			if d.Vendor == "" && (strings.Contains(agent, "tapo") || strings.Contains(agent, "tplink")) {
-				d.Vendor = "TP-Link"
+			addScore(typeScores, "IP Camera", 0.6)
+			if strings.Contains(agent, "tapo") || strings.Contains(agent, "tplink") {
+				addScore(vendorScores, "TP-Link", 0.3)
 			}
-			d.Confidence += 0.6
 
 		case strings.Contains(agent, "alexa"),
 			strings.Contains(agent, "echo"),
 			strings.Contains(agent, "assistant"),
 			strings.Contains(agent, "homepod"):
-			d.DeviceType = "Voice Assistant Speaker"
-			d.Confidence += 0.4
+			addScore(typeScores, "Voice Assistant Speaker", 0.4)
 
 		case strings.Contains(agent, "sensor"),
 			strings.Contains(agent, "aqara"),
 			strings.Contains(agent, "switchbot-meter"):
-			d.DeviceType = "Sensor"
-			d.Confidence += 0.3
+			addScore(typeScores, "Sensor", 0.3)
 		}
 	}
+
+	bestType, bestTypeScore := bestScoredLabel(typeScores, d.DeviceType)
+	bestVendor, bestVendorScore := bestScoredLabel(vendorScores, d.Vendor)
+
+	d.TypeScores = typeScores
+	d.DeviceType = bestType
+	d.Vendor = bestVendor
+	d.Confidence = bestTypeScore + bestVendorScore
 }
 
 func EnrichFromHTTP(d *DeviceProfile, headers map[string]string) {
@@ -101,5 +135,11 @@ func EnrichFromHTTP(d *DeviceProfile, headers map[string]string) {
 		d.Evidence = appendUnique(d.Evidence, "Server="+srv)
 	}
 
-	inferDevice(d)
+	recomputeDeviceIdentity(d)
+}
+
+func InferFlowFromHTTP(headers map[string]string) *DeviceProfile {
+	d := NewProfile("")
+	EnrichFromHTTP(d, headers)
+	return d
 }

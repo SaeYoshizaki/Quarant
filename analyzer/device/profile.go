@@ -14,6 +14,7 @@ type DeviceProfile struct {
 
 	Confidence float64
 	Evidence   []string
+	TypeScores map[string]float64
 
 	JA3 string
 
