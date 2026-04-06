@@ -308,6 +308,10 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 		}
 	}
 
+	if composite := buildCompositeRiskMatch(ctx, matches); composite != nil {
+		matches = append(matches, *composite)
+	}
+
 	for _, m := range matches {
 		if m.RuleID != "" && st.Reported[m.RuleID] {
 			continue
