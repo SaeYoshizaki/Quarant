@@ -52,7 +52,18 @@ func recomputeDeviceIdentity(d *DeviceProfile) {
 		host := strings.ToLower(h)
 
 		switch {
-		case strings.Contains(host, "tplink") || strings.Contains(host, "tapo"):
+		case strings.Contains(host, "tplinkcloud") || strings.Contains(host, "kasa"):
+			addScore(vendorScores, "TP-Link", 0.4)
+			addScore(typeScores, "Smart Home Controller", 0.5)
+		case strings.Contains(host, "smartthings") || strings.Contains(host, "meethue"):
+			addScore(typeScores, "Smart Home Hub", 0.5)
+		case strings.Contains(host, "switch-bot") ||
+			strings.Contains(host, "ewelink") ||
+			strings.Contains(host, "shelly") ||
+			strings.Contains(host, "tuyaus") ||
+			strings.Contains(host, "meross"):
+			addScore(typeScores, "Smart Home Controller", 0.4)
+		case strings.Contains(host, "tapo"):
 			addScore(vendorScores, "TP-Link", 0.4)
 			addScore(typeScores, "IP Camera", 0.4)
 		case strings.Contains(host, "hikvision"):
@@ -72,10 +83,15 @@ func recomputeDeviceIdentity(d *DeviceProfile) {
 		value := strings.ToLower(sni)
 
 		switch {
+		case strings.Contains(value, "tplinkcloud") || strings.Contains(value, "kasa"):
+			addScore(vendorScores, "TP-Link", 0.4)
+			addScore(typeScores, "Smart Home Controller", 0.5)
+		case strings.Contains(value, "smartthings") || strings.Contains(value, "meethue"):
+			addScore(typeScores, "Smart Home Hub", 0.5)
 		case strings.Contains(value, "hikvision"):
 			addScore(vendorScores, "Hikvision", 0.4)
 			addScore(typeScores, "IP Camera", 0.4)
-		case strings.Contains(value, "tplink") || strings.Contains(value, "tapo"):
+		case strings.Contains(value, "tapo"):
 			addScore(vendorScores, "TP-Link", 0.4)
 			addScore(typeScores, "IP Camera", 0.4)
 		case strings.Contains(value, "reolink"):
@@ -96,6 +112,18 @@ func recomputeDeviceIdentity(d *DeviceProfile) {
 			if strings.Contains(agent, "tapo") || strings.Contains(agent, "tplink") {
 				addScore(vendorScores, "TP-Link", 0.3)
 			}
+
+		case strings.Contains(agent, "kasa"),
+			strings.Contains(agent, "tplink-smartplug"),
+			strings.Contains(agent, "tplink controller"):
+			addScore(typeScores, "Smart Home Controller", 0.6)
+			addScore(vendorScores, "TP-Link", 0.3)
+
+		case strings.Contains(agent, "smartthingshub"),
+			strings.Contains(agent, "smartthings hub"),
+			strings.Contains(agent, "hue-bridge"),
+			strings.Contains(agent, "aqara hub"):
+			addScore(typeScores, "Smart Home Hub", 0.6)
 
 		case strings.Contains(agent, "alexa"),
 			strings.Contains(agent, "echo"),

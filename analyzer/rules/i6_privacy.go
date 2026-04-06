@@ -217,6 +217,7 @@ func (r *I6PrivacyRule) applyBehaviorBaselineAll(ctx *Context, category, commTyp
 	}
 	riskSignals := collectRiskSignals(baseline, ctx, commType, host, path, isExternal, representativeDomains, ecosystemDomains, categoryConfidenceLevel)
 	riskSummary := strings.Join(riskSignals, ",")
+	baselineSeverity, riskScoreHint := classifyBaselineRisk(riskSignals, isExternal)
 	out := make([]Match, 0, 4)
 
 	if isExternal && !ctx.TLS && baseline.PlaintextTolerance == "low" {
@@ -224,7 +225,7 @@ func (r *I6PrivacyRule) applyBehaviorBaselineAll(ctx *Context, category, commTyp
 			RuleID:   "I6_HTTP_BASELINE_PLAINTEXT",
 			Type:     "I6_HTTP_BASELINE_PLAINTEXT",
 			Category: "I6",
-			Severity: SeverityWarning,
+			Severity: baselineSeverity,
 			Message: formatBaselineMessage(
 				"Category baseline expects encrypted external communication",
 				suspicious,
@@ -232,8 +233,8 @@ func (r *I6PrivacyRule) applyBehaviorBaselineAll(ctx *Context, category, commTyp
 				categoryConfidence,
 			),
 			Evidence: fmt.Sprintf(
-				"category=%s host=%s dst_ip=%s dst_port=%d suspicious_patterns=%s risk_signals=%s category_confidence=%s",
-				category, host, ctx.DstIP, ctx.DstPort, suspicious, riskSummary, categoryConfidence,
+				"category=%s host=%s dst_ip=%s dst_port=%d suspicious_patterns=%s risk_signals=%s risk_score_hint=%d category_confidence=%s",
+				category, host, ctx.DstIP, ctx.DstPort, suspicious, riskSummary, riskScoreHint, categoryConfidence,
 			),
 		})
 	}
@@ -243,7 +244,7 @@ func (r *I6PrivacyRule) applyBehaviorBaselineAll(ctx *Context, category, commTyp
 			RuleID:   "I6_HTTP_BASELINE_UNEXPECTED_ADMIN",
 			Type:     "I6_HTTP_BASELINE_UNEXPECTED_ADMIN",
 			Category: "I6",
-			Severity: SeverityWarning,
+			Severity: baselineSeverity,
 			Message: formatBaselineMessage(
 				"Category baseline does not expect external admin-style HTTP access",
 				suspicious,
@@ -251,8 +252,8 @@ func (r *I6PrivacyRule) applyBehaviorBaselineAll(ctx *Context, category, commTyp
 				categoryConfidence,
 			),
 			Evidence: fmt.Sprintf(
-				"category=%s host=%s path=%s indicators=%s suspicious_patterns=%s risk_signals=%s category_confidence=%s",
-				category, host, path, strings.Join(indicators, ","), suspicious, riskSummary, categoryConfidence,
+				"category=%s host=%s path=%s indicators=%s suspicious_patterns=%s risk_signals=%s risk_score_hint=%d category_confidence=%s",
+				category, host, path, strings.Join(indicators, ","), suspicious, riskSummary, riskScoreHint, categoryConfidence,
 			),
 		})
 	}
@@ -262,7 +263,7 @@ func (r *I6PrivacyRule) applyBehaviorBaselineAll(ctx *Context, category, commTyp
 			RuleID:   "I6_HTTP_BASELINE_PROTOCOL_MISMATCH",
 			Type:     "I6_HTTP_BASELINE_PROTOCOL_MISMATCH",
 			Category: "I6",
-			Severity: SeverityWarning,
+			Severity: baselineSeverity,
 			Message: formatBaselineMessage(
 				"Observed protocol usage does not fit the category baseline",
 				suspicious,
@@ -270,8 +271,8 @@ func (r *I6PrivacyRule) applyBehaviorBaselineAll(ctx *Context, category, commTyp
 				categoryConfidence,
 			),
 			Evidence: fmt.Sprintf(
-				"category=%s host=%s dst_port=%d expected_protocols=%s suspicious_patterns=%s risk_signals=%s category_confidence=%s",
-				category, host, ctx.DstPort, strings.Join(baseline.ExpectedProtocols, ","), suspicious, riskSummary, categoryConfidence,
+				"category=%s host=%s dst_port=%d expected_protocols=%s suspicious_patterns=%s risk_signals=%s risk_score_hint=%d category_confidence=%s",
+				category, host, ctx.DstPort, strings.Join(baseline.ExpectedProtocols, ","), suspicious, riskSummary, riskScoreHint, categoryConfidence,
 			),
 		})
 	}
@@ -282,7 +283,7 @@ func (r *I6PrivacyRule) applyBehaviorBaselineAll(ctx *Context, category, commTyp
 				RuleID:   "I6_HTTP_BASELINE_UNEXPECTED_DOMAIN",
 				Type:     "I6_HTTP_BASELINE_UNEXPECTED_DOMAIN",
 				Category: "I6",
-				Severity: SeverityWarning,
+				Severity: baselineSeverity,
 				Message: formatBaselineMessage(
 					"Observed external domain does not fit the category baseline",
 					suspicious,
@@ -290,8 +291,8 @@ func (r *I6PrivacyRule) applyBehaviorBaselineAll(ctx *Context, category, commTyp
 					categoryConfidence,
 				),
 				Evidence: fmt.Sprintf(
-					"category=%s host=%s representative_domains=%s ecosystem_domains=%s suspicious_patterns=%s risk_signals=%s category_confidence=%s",
-					category, host, strings.Join(inference.RepresentativeDomains, ","), strings.Join(inference.EcosystemDomains, ","), suspicious, riskSummary, categoryConfidence,
+					"category=%s host=%s representative_domains=%s ecosystem_domains=%s suspicious_patterns=%s risk_signals=%s risk_score_hint=%d category_confidence=%s",
+					category, host, strings.Join(inference.RepresentativeDomains, ","), strings.Join(inference.EcosystemDomains, ","), suspicious, riskSummary, riskScoreHint, categoryConfidence,
 				),
 			})
 		}
@@ -455,6 +456,54 @@ func hostMatchesExpectedDomains(host string, representativeDomains []string, eco
 		return true
 	}
 	return false
+}
+
+func classifyBaselineRisk(signals []string, isExternal bool) (Severity, int) {
+	score := 10
+	has := make(map[string]bool, len(signals))
+	for _, signal := range signals {
+		has[signal] = true
+		switch signal {
+		case "plaintext_external":
+			score += 20
+		case "unexpected_external_admin":
+			score += 20
+		case "unexpected_domain":
+			score += 15
+		case "category_mismatch":
+			score += 15
+		case "protocol_mismatch":
+			score += 10
+		case "admin_like_path":
+			score += 10
+		case "external_comm":
+			score += 5
+		case "category_confidence_low":
+			score += 5
+		}
+	}
+	if score > 90 {
+		score = 90
+	}
+
+	critical := false
+	if has["unexpected_external_admin"] {
+		critical = true
+	}
+	if has["plaintext_external"] && has["unexpected_domain"] {
+		critical = true
+	}
+	if has["unexpected_domain"] && has["category_mismatch"] && isExternal {
+		critical = true
+	}
+	if score >= 50 {
+		critical = true
+	}
+
+	if critical {
+		return SeverityCritical, score
+	}
+	return SeverityWarning, score
 }
 
 func formatConfidence(score float64, level string) string {
