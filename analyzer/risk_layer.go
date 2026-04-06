@@ -14,7 +14,7 @@ func buildCompositeRiskMatch(ctx *rules.Context, matches []rules.Match) *rules.M
 		return nil
 	}
 
-	score, level, severity := classifyCompositeRisk(signals)
+	score, level, severity, action := classifyCompositeRisk(signals)
 	sourceTypes := collectI6SourceTypes(matches)
 
 	category := strings.TrimSpace(ctx.DeviceCategory)
@@ -38,18 +38,20 @@ func buildCompositeRiskMatch(ctx *rules.Context, matches []rules.Match) *rules.M
 		Category: "R1",
 		Severity: rules.Severity(severity),
 		Message: fmt.Sprintf(
-			"Composite risk derived from I6 signals | level=%s | score=%d | category=%s | local=%s | flow=%s | risk=%s",
+			"Composite risk derived from I6 signals | level=%s | score=%d | action=%s | category=%s | local=%s | flow=%s | risk=%s",
 			level,
 			score,
+			action,
 			category,
 			localCategory,
 			flowCategory,
 			strings.Join(signals, ","),
 		),
 		Evidence: fmt.Sprintf(
-			"risk_level=%s risk_score=%d category=%s local_category=%s flow_category=%s risk_signals=%s source_types=%s",
+			"risk_level=%s risk_score=%d recommended_action=%s category=%s local_category=%s flow_category=%s risk_signals=%s source_types=%s",
 			level,
 			score,
+			action,
 			category,
 			localCategory,
 			flowCategory,
@@ -119,7 +121,7 @@ func parseDelimitedEvidenceField(evidence, key string) []string {
 	return out
 }
 
-func classifyCompositeRisk(signals []string) (int, string, Severity) {
+func classifyCompositeRisk(signals []string) (int, string, Severity, string) {
 	score := 0
 	has := make(map[string]bool, len(signals))
 	for _, signal := range signals {
@@ -163,15 +165,19 @@ func classifyCompositeRisk(signals []string) (int, string, Severity) {
 
 	level := "low"
 	severity := SeverityWarning
+	action := "monitor"
 	switch {
 	case score >= 60:
 		level = "high"
 		severity = SeverityCritical
+		action = "isolate_or_block"
 	case score >= 35:
 		level = "medium"
+		action = "investigate"
 	default:
 		level = "low"
+		action = "monitor"
 	}
 
-	return score, level, severity
+	return score, level, severity, action
 }
