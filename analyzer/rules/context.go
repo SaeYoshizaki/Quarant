@@ -1,5 +1,13 @@
 package rules
 
+type InferenceView struct {
+	Category   string
+	DeviceType string
+	Source     string
+	Confidence string
+	Reasons    []string
+}
+
 type Context struct {
 	NowUnix int64
 	FlowKey string
@@ -18,4 +26,18 @@ type Context struct {
 	DeviceCategory      string
 	LocalDeviceCategory string
 	FlowDeviceCategory  string
+
+	DeviceInferenceSource     string
+	LocalInferenceSource      string
+	FlowInferenceSource       string
+	DeviceInferenceConfidence string
+	LocalInferenceConfidence  string
+	FlowInferenceConfidence   string
+	DeviceInferenceReasons    []string
+	LocalInferenceReasons     []string
+	FlowInferenceReasons      []string
+
+	ContextClassification InferenceView
+	LocalClassification   InferenceView
+	FlowClassification    InferenceView
 }

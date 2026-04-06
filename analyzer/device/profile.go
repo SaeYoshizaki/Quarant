@@ -7,6 +7,9 @@ type DeviceProfile struct {
 	UserAgents map[string]bool
 	Servers    map[string]bool
 	SNIValues  map[string]bool
+	Paths      map[string]bool
+	Ports      map[uint16]bool
+	Protocols  map[string]bool
 
 	DeviceType string
 	Vendor     string
@@ -15,6 +18,10 @@ type DeviceProfile struct {
 	Confidence float64
 	Evidence   []string
 	TypeScores map[string]float64
+
+	Classification  Classification
+	KnownDeviceType string
+	KnownConfidence float64
 
 	JA3 string
 

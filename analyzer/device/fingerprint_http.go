@@ -140,11 +140,13 @@ func recomputeDeviceIdentity(d *DeviceProfile) {
 
 	bestType, bestTypeScore := bestScoredLabel(typeScores, d.DeviceType)
 	bestVendor, bestVendorScore := bestScoredLabel(vendorScores, d.Vendor)
+	knownScore := bestTypeScore + bestVendorScore
 
 	d.TypeScores = typeScores
-	d.DeviceType = bestType
 	d.Vendor = bestVendor
-	d.Confidence = bestTypeScore + bestVendorScore
+	d.KnownDeviceType = bestType
+	d.KnownConfidence = knownScore
+	refreshClassification(d)
 }
 
 func EnrichFromHTTP(d *DeviceProfile, headers map[string]string) {

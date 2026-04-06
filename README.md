@@ -27,6 +27,11 @@ I6 の `risk_signals` をまとめて、`low / medium / high`、`risk_score`、`
 これにより、単に「変な通信があった」だけでなく、  
 「なぜ危険か」「どの程度危険か」まで一連で確認できます。
 
+カテゴリ推定は `known / inferred / unknown` の三層で扱います。  
+強い証拠があるときだけ `known` を使い、弱い場合は `inferred`、十分な根拠がない場合は無理に分類せず `unknown` として扱います。
+`confidence` はこの三層に応じた見え方になっており、`known` は strong な確定寄り、`inferred` は粗い推定の強さ、`unknown` は very_low として出力されます。  
+そのため、同じ数値でも意味は一律ではなく、「どの source の推定か」と合わせて読むのが基本です。
+
 ## OWASP IoT Top 10 (2018) 対応状況
 
 - [ ] I1: Weak, Guessable, or Hardcoded Passwords

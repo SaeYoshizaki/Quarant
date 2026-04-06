@@ -112,17 +112,28 @@ func (h *FlowHandler) writeDeviceDebug(now time.Time, srcIP string, d *device.De
 		return
 	}
 
+	reasons := d.Classification.Reasons
+	inferenceSource := string(d.Classification.InferenceSource)
+	if inferenceSource == "" {
+		inferenceSource = string(device.InferenceSourceUnknown)
+	}
+	inferredScores := d.Classification.Scores
+
 	_ = h.sink.Write(Event{
 		Timestamp: now,
 		Type:      "DEVICE_DEBUG",
 		Severity:  SeverityInfo,
 		SrcIP:     srcIP,
 		Message: fmt.Sprintf(
-			"device_type=%s vendor=%s model=%s confidence=%.2f ja3=%s evidence=%v risk_score=%d observed=%v insecure=%v admin=%t external=%t reasons=%v",
+			"device_type=%s vendor=%s model=%s category=%s inference_source=%s confidence=%s inference_reasons=%v inferred_scores=%v ja3=%s evidence=%v risk_score=%d observed=%v insecure=%v admin=%t external=%t reasons=%v",
 			d.DeviceType,
 			d.Vendor,
 			d.Model,
-			d.Confidence,
+			d.Classification.NormalizedCategory(),
+			inferenceSource,
+			d.Classification.ConfidenceSummary(),
+			reasons,
+			inferredScores,
 			d.JA3,
 			d.Evidence,
 			d.RiskScore,
@@ -133,6 +144,16 @@ func (h *FlowHandler) writeDeviceDebug(now time.Time, srcIP string, d *device.De
 			d.RiskReasons,
 		),
 	})
+}
+
+func inferenceView(category, deviceType, source, confidence string, reasons []string) rules.InferenceView {
+	return rules.InferenceView{
+		Category:   category,
+		DeviceType: deviceType,
+		Source:     source,
+		Confidence: confidence,
+		Reasons:    reasons,
+	}
 }
 
 func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
@@ -224,6 +245,7 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 
 			d := h.devices.GetOrCreate(srcIP)
 			device.EnrichFromTLS(d, tlsInfo)
+			device.AddTLSBehaviorHints(d, dstPort)
 			h.writeDeviceDebug(now, srcIP, d)
 		}
 	}
@@ -231,52 +253,106 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 	if httpInfo != nil {
 		d := h.devices.GetOrCreate(srcIP)
 		device.EnrichFromHTTP(d, httpInfo.Headers)
+		device.AddHTTPBehaviorHints(d, httpInfo, dstPort, isTLSClientToServer)
 		h.writeDeviceDebug(now, srcIP, d)
 	}
 
 	d := h.devices.GetOrCreate(srcIP)
-	localDeviceCategory := rules.MapDeviceTypeToCategory(d.DeviceType)
-	if localDeviceCategory == "Unknown" {
-		localDeviceCategory = "GenericIoT"
+	localClassification := d.Classification
+	localDeviceCategory := localClassification.NormalizedCategory()
+	localInferenceSource := string(localClassification.InferenceSource)
+	if localInferenceSource == "" {
+		localInferenceSource = string(device.InferenceSourceUnknown)
 	}
+	localInferenceConfidence := localClassification.ConfidenceSummary()
+	localInferenceReasons := localClassification.Reasons
 
-	flowDeviceCategory := "GenericIoT"
-	flowDeviceType := ""
+	flowClassification := device.Classification{
+		Category:        "GenericIoT",
+		InferenceSource: device.InferenceSourceUnknown,
+		ConfidenceLabel: "very_low",
+		Reasons:         []string{"insufficient_evidence"},
+	}
 	if httpInfo != nil {
 		flowProfile := device.InferFlowFromHTTP(httpInfo.Headers)
-		flowDeviceType = flowProfile.DeviceType
-		mapped := rules.MapDeviceTypeToCategory(flowProfile.DeviceType)
-		if mapped != "Unknown" {
-			flowDeviceCategory = mapped
-		}
+		device.AddHTTPBehaviorHints(flowProfile, httpInfo, dstPort, isTLSClientToServer)
+		flowClassification = flowProfile.Classification
 	} else if st.TLSClientSeen && st.TLSClientInfo != nil {
 		flowProfile := device.InferFlowFromTLS(*st.TLSClientInfo)
-		flowDeviceType = flowProfile.DeviceType
-		mapped := rules.MapDeviceTypeToCategory(flowProfile.DeviceType)
-		if mapped != "Unknown" {
-			flowDeviceCategory = mapped
-		}
+		device.AddTLSBehaviorHints(flowProfile, dstPort)
+		flowClassification = flowProfile.Classification
 	}
+	flowDeviceCategory := flowClassification.NormalizedCategory()
+	flowDeviceType := flowClassification.DeviceType
+	flowInferenceSource := string(flowClassification.InferenceSource)
+	if flowInferenceSource == "" {
+		flowInferenceSource = string(device.InferenceSourceUnknown)
+	}
+	flowInferenceConfidence := flowClassification.ConfidenceSummary()
+	flowInferenceReasons := flowClassification.Reasons
 
 	deviceCategory := flowDeviceCategory
 	if deviceCategory == "GenericIoT" {
 		deviceCategory = localDeviceCategory
 	}
+	deviceInferenceSource := flowInferenceSource
+	deviceInferenceConfidence := flowInferenceConfidence
+	deviceInferenceReasons := flowInferenceReasons
+	if deviceCategory == localDeviceCategory && flowDeviceCategory == "GenericIoT" {
+		deviceInferenceSource = localInferenceSource
+		deviceInferenceConfidence = localInferenceConfidence
+		deviceInferenceReasons = localInferenceReasons
+	}
 
 	ctx := &rules.Context{
-		NowUnix:             now.Unix(),
-		FlowKey:             key,
-		SrcIP:               srcIP,
-		SrcPort:             srcPort,
-		DstIP:               dstIP,
-		DstPort:             dstPort,
-		Payload:             st.ClientData,
-		Debug:               h.debug,
-		HTTP:                httpInfo,
-		TLS:                 isTLSClientToServer,
-		DeviceCategory:      deviceCategory,
-		LocalDeviceCategory: localDeviceCategory,
-		FlowDeviceCategory:  flowDeviceCategory,
+		NowUnix:                   now.Unix(),
+		FlowKey:                   key,
+		SrcIP:                     srcIP,
+		SrcPort:                   srcPort,
+		DstIP:                     dstIP,
+		DstPort:                   dstPort,
+		Payload:                   st.ClientData,
+		Debug:                     h.debug,
+		HTTP:                      httpInfo,
+		TLS:                       isTLSClientToServer,
+		DeviceCategory:            deviceCategory,
+		LocalDeviceCategory:       localDeviceCategory,
+		FlowDeviceCategory:        flowDeviceCategory,
+		DeviceInferenceSource:     deviceInferenceSource,
+		LocalInferenceSource:      localInferenceSource,
+		FlowInferenceSource:       flowInferenceSource,
+		DeviceInferenceConfidence: deviceInferenceConfidence,
+		LocalInferenceConfidence:  localInferenceConfidence,
+		FlowInferenceConfidence:   flowInferenceConfidence,
+		DeviceInferenceReasons:    deviceInferenceReasons,
+		LocalInferenceReasons:     localInferenceReasons,
+		FlowInferenceReasons:      flowInferenceReasons,
+		ContextClassification: inferenceView(
+			deviceCategory,
+			func() string {
+				if deviceCategory == localDeviceCategory && flowDeviceCategory == "GenericIoT" {
+					return d.DeviceType
+				}
+				return flowDeviceType
+			}(),
+			deviceInferenceSource,
+			deviceInferenceConfidence,
+			deviceInferenceReasons,
+		),
+		LocalClassification: inferenceView(
+			localDeviceCategory,
+			d.DeviceType,
+			localInferenceSource,
+			localInferenceConfidence,
+			localInferenceReasons,
+		),
+		FlowClassification: inferenceView(
+			flowDeviceCategory,
+			flowDeviceType,
+			flowInferenceSource,
+			flowInferenceConfidence,
+			flowInferenceReasons,
+		),
 	}
 
 	if h.debug {
@@ -289,12 +365,24 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 			DstIP:     dstIP,
 			DstPort:   dstPort,
 			Message: fmt.Sprintf(
-				"local_device_category=%q flow_device_category=%q ctx_device_category=%q local_device_type=%q flow_device_type=%q",
+				"local_device_category=%q flow_device_category=%q ctx_device_category=%q local_device_type=%q flow_device_type=%q local_inference_source=%q flow_inference_source=%q ctx_inference_source=%q local_confidence=%q flow_confidence=%q ctx_confidence=%q local_reasons=%v flow_reasons=%v ctx_reasons=%v local_classification=%+v flow_classification=%+v ctx_classification=%+v",
 				localDeviceCategory,
 				flowDeviceCategory,
 				ctx.DeviceCategory,
-				h.devices.GetOrCreate(srcIP).DeviceType,
+				d.DeviceType,
 				flowDeviceType,
+				localInferenceSource,
+				flowInferenceSource,
+				deviceInferenceSource,
+				localInferenceConfidence,
+				flowInferenceConfidence,
+				deviceInferenceConfidence,
+				localInferenceReasons,
+				flowInferenceReasons,
+				deviceInferenceReasons,
+				ctx.LocalClassification,
+				ctx.FlowClassification,
+				ctx.ContextClassification,
 			),
 		})
 	}

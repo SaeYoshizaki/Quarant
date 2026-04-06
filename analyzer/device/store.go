@@ -21,6 +21,9 @@ func NewProfile(ip string) *DeviceProfile {
 		UserAgents: map[string]bool{},
 		Servers:    map[string]bool{},
 		SNIValues:  map[string]bool{},
+		Paths:      map[string]bool{},
+		Ports:      map[uint16]bool{},
+		Protocols:  map[string]bool{},
 		TypeScores: map[string]float64{},
 	}
 }
