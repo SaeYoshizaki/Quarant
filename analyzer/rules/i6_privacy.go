@@ -150,6 +150,13 @@ func (r *I6PrivacyRule) applyCategoryMismatch(ctx *Context) *Match {
 	if commType == "" {
 		commType = "unknown"
 	}
+	isExternal := IsPublicIPv4(ctx.DstIP)
+	riskSignals := []string{"category_mismatch"}
+	riskScoreHint := 15
+	if isExternal {
+		riskSignals = append(riskSignals, "external_comm")
+		riskScoreHint = 25
+	}
 
 	localConfidence := ""
 	if inference, ok := r.db.GetCategoryInference(localCategory); ok {
@@ -167,19 +174,22 @@ func (r *I6PrivacyRule) applyCategoryMismatch(ctx *Context) *Match {
 		Category: "I6",
 		Severity: SeverityWarning,
 		Message: fmt.Sprintf(
-			"Observed flow category does not match the learned device category | local: %s | flow: %s | comm_type: %s",
+			"Observed flow category does not match the learned device category | local=%s | flow=%s | comm_type=%s | risk=%s",
 			localCategory,
 			flowCategory,
 			commType,
+			strings.Join(riskSignals, ","),
 		),
 		Evidence: fmt.Sprintf(
-			"host=%s local_category=%s flow_category=%s local_confidence=%s flow_confidence=%s path=%s",
+			"host=%s local_category=%s flow_category=%s local_confidence=%s flow_confidence=%s path=%s risk_signals=%s risk_score_hint=%d",
 			host,
 			localCategory,
 			flowCategory,
 			localConfidence,
 			flowConfidence,
 			strings.ToLower(strings.TrimSpace(ctx.HTTP.Path)),
+			strings.Join(riskSignals, ","),
+			riskScoreHint,
 		),
 	}
 }
@@ -422,6 +432,16 @@ func collectRiskSignals(baseline knowledge.CategoryBehaviorBaseline, ctx *Contex
 
 	if categoryConfidenceLevel == "low" {
 		signals = append(signals, "category_confidence_low")
+	}
+
+	localCategory := strings.TrimSpace(ctx.LocalDeviceCategory)
+	flowCategory := strings.TrimSpace(ctx.FlowDeviceCategory)
+	if localCategory != "" &&
+		flowCategory != "" &&
+		localCategory != "GenericIoT" &&
+		flowCategory != "GenericIoT" &&
+		localCategory != flowCategory {
+		signals = append(signals, "category_mismatch")
 	}
 
 	return uniqueStrings(signals)
