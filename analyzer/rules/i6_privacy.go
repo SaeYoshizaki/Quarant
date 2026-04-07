@@ -180,19 +180,20 @@ func (r *I6PrivacyRule) applyCategoryMismatch(ctx *Context) *Match {
 		Category: "I6",
 		Severity: SeverityWarning,
 		Message: fmt.Sprintf(
-			"Observed flow category does not match the learned device category | local=%s | flow=%s | comm_type=%s | risk=%s",
+			mismatchMessageBase(ctx),
 			localCategory,
 			flowCategory,
 			commType,
 			strings.Join(riskSignals, ","),
 		),
 		Evidence: fmt.Sprintf(
-			"host=%s local_category=%s flow_category=%s local_confidence=%s flow_confidence=%s path=%s risk_signals=%s risk_score_hint=%d",
+			"endpoint=%s local_category=%s flow_category=%s local_confidence=%s flow_confidence=%s comm_type=%s path=%s risk_signals=%s risk_score_hint=%d",
 			host,
 			localCategory,
 			flowCategory,
 			localConfidence,
 			flowConfidence,
+			commType,
 			path,
 			strings.Join(riskSignals, ","),
 			riskScoreHint,
@@ -311,14 +312,14 @@ func (r *I6PrivacyRule) applyBehaviorBaselineAll(ctx *Context, category, commTyp
 				Category: "I6",
 				Severity: baselineSeverity,
 				Message: formatBaselineMessage(
-					"Observed TLS SNI does not fit the category baseline",
+					"Observed TLS SNI does not fit the learned category baseline",
 					suspicious,
 					riskSummary,
 					categoryConfidence,
 				),
 				Evidence: fmt.Sprintf(
-					"category=%s sni=%s representative_domains=%s ecosystem_domains=%s suspicious_patterns=%s risk_signals=%s risk_score_hint=%d category_confidence=%s",
-					category, host, strings.Join(inference.RepresentativeDomains, ","), strings.Join(inference.EcosystemDomains, ","), suspicious, riskSummary, riskScoreHint, categoryConfidence,
+					"category=%s local_category=%s flow_category=%s sni=%s representative_domains=%s ecosystem_domains=%s suspicious_patterns=%s risk_signals=%s risk_score_hint=%d category_confidence=%s",
+					category, strings.TrimSpace(ctx.LocalDeviceCategory), strings.TrimSpace(ctx.FlowDeviceCategory), host, strings.Join(inference.RepresentativeDomains, ","), strings.Join(inference.EcosystemDomains, ","), suspicious, riskSummary, riskScoreHint, categoryConfidence,
 				),
 			})
 		}
@@ -344,6 +345,13 @@ func (r *I6PrivacyRule) applyBehaviorBaselineAll(ctx *Context, category, commTyp
 	}
 
 	return dedupeMatches(out)
+}
+
+func mismatchMessageBase(ctx *Context) string {
+	if ctx != nil && ctx.TLS {
+		return "Observed TLS flow category does not match the learned device category | local=%s | flow=%s | comm_type=%s | risk=%s"
+	}
+	return "Observed flow category does not match the learned device category | local=%s | flow=%s | comm_type=%s | risk=%s"
 }
 
 func DetectCommunicationType(http *HTTPInfo) string {
