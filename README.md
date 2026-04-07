@@ -32,6 +32,10 @@ I6 の `risk_signals` をまとめて、`low / medium / high`、`risk_score`、`
 `confidence` はこの三層に応じた見え方になっており、`known` は strong な確定寄り、`inferred` は粗い推定の強さ、`unknown` は very_low として出力されます。  
 そのため、同じ数値でも意味は一律ではなく、「どの source の推定か」と合わせて読むのが基本です。
 
+デバッグログは `summary` と `detail` に分かれており、まず短い要約、そのあとに根拠の詳細を確認できます。  
+例: `summary="known Controller device, flow classified as VoiceAssistant, ctx=VoiceAssistant"`  
+`detail="local=Controller(known,strong(1.00)) flow=VoiceAssistant(known,strong(0.90)) ctx=VoiceAssistant(known,strong(0.90)) ..."`
+
 ## OWASP IoT Top 10 (2018) 対応状況
 
 - [ ] I1: Weak, Guessable, or Hardcoded Passwords

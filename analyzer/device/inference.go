@@ -288,26 +288,26 @@ func collectTopInferredReasons(d *DeviceProfile, category string, limit int) []s
 	case "Camera":
 		_, has554 := d.Ports[554]
 		_, hasRTSP := d.Protocols["rtsp"]
-		addIf("port=554", has554)
-		addIf("protocol=rtsp", hasRTSP)
-		addIf("camera-like host/path", hasToken("camera", "stream", "live", "rtsp", "reolink", "cam"))
+		addIf("port 554 suggests camera or streaming behavior", has554)
+		addIf("RTSP protocol suggests camera streaming behavior", hasRTSP)
+		addIf("host/path indicates camera or live stream behavior", hasToken("camera", "stream", "live", "rtsp", "reolink", "cam"))
 	case "Sensor":
 		_, hasMQTT := d.Protocols["mqtt"]
 		_, hasCoAP := d.Protocols["coap"]
-		addIf("protocol=mqtt", hasMQTT)
-		addIf("protocol=coap", hasCoAP)
-		addIf("sensor/telemetry hint", hasToken("sensor", "telemetry", "aqara", "miot", "report"))
+		addIf("MQTT protocol suggests sensor or telemetry behavior", hasMQTT)
+		addIf("CoAP protocol suggests sensor or telemetry behavior", hasCoAP)
+		addIf("host/path indicates sensor or telemetry behavior", hasToken("sensor", "telemetry", "aqara", "miot", "report"))
 	case "Controller":
-		addIf("controller/control hint", hasToken("control", "switch", "plug", "relay", "kasa", "meross", "switch-bot", "shelly", "ewelink", "tuyaus"))
-		addIf("protocol=https/tls", d.Protocols["https"] || d.Protocols["tls"])
+		addIf("host/path indicates controller or device control behavior", hasToken("control", "switch", "plug", "relay", "kasa", "meross", "switch-bot", "shelly", "ewelink", "tuyaus"))
+		addIf("HTTPS or TLS usage is consistent with controller behavior", d.Protocols["https"] || d.Protocols["tls"])
 	case "Hub":
-		addIf("hub/bridge hint", hasToken("hub", "bridge", "gateway", "matter", "zigbee", "smartthings", "meethue"))
+		addIf("host/path indicates hub or bridge behavior", hasToken("hub", "bridge", "gateway", "matter", "zigbee", "smartthings", "meethue"))
 	case "VoiceAssistant":
-		addIf("assistant/speaker hint", hasToken("alexa", "assistant", "siri", "homepod", "nest", "speaker", "echo"))
+		addIf("host/path indicates voice assistant or speaker behavior", hasToken("alexa", "assistant", "siri", "homepod", "nest", "speaker", "echo"))
 	case "Wearable":
-		addIf("wearable/health hint", hasToken("health", "sync", "fitbit", "garmin", "wearable", "band", "watch"))
+		addIf("host/path indicates wearable or health sync behavior", hasToken("health", "sync", "fitbit", "garmin", "wearable", "band", "watch"))
 	case "Appliance":
-		addIf("appliance/hvac hint", hasToken("hvac", "washer", "fridge", "appliance", "daikin", "thinq", "midea", "ac"))
+		addIf("host/path indicates appliance or HVAC behavior", hasToken("hvac", "washer", "fridge", "appliance", "daikin", "thinq", "midea", "ac"))
 	}
 
 	return reasons

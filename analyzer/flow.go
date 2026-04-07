@@ -2,6 +2,7 @@ package analyzer
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"quarant/analyzer/device"
@@ -118,6 +119,8 @@ func (h *FlowHandler) writeDeviceDebug(now time.Time, srcIP string, d *device.De
 		inferenceSource = string(device.InferenceSourceUnknown)
 	}
 	inferredScores := d.Classification.Scores
+	summary := deviceDebugSummary(d.Classification, d.DeviceType)
+	detailReasons := humanizeReasons(reasons)
 
 	_ = h.sink.Write(Event{
 		Timestamp: now,
@@ -125,14 +128,16 @@ func (h *FlowHandler) writeDeviceDebug(now time.Time, srcIP string, d *device.De
 		Severity:  SeverityInfo,
 		SrcIP:     srcIP,
 		Message: fmt.Sprintf(
-			"device_type=%s vendor=%s model=%s category=%s inference_source=%s confidence=%s inference_reasons=%v inferred_scores=%v ja3=%s evidence=%v risk_score=%d observed=%v insecure=%v admin=%t external=%t reasons=%v",
+			"summary=%q detail=%q device_type=%s vendor=%s model=%s category=%s inference_source=%s confidence=%s inference_reasons=%v inferred_scores=%v ja3=%s evidence=%v risk_score=%d observed=%v insecure=%v admin=%t external=%t reasons=%v",
+			summary,
+			fmt.Sprintf("category=%s source=%s confidence=%s reasons=%v", d.Classification.NormalizedCategory(), inferenceSource, d.Classification.ConfidenceSummary(), detailReasons),
 			d.DeviceType,
 			d.Vendor,
 			d.Model,
 			d.Classification.NormalizedCategory(),
 			inferenceSource,
 			d.Classification.ConfidenceSummary(),
-			reasons,
+			detailReasons,
 			inferredScores,
 			d.JA3,
 			d.Evidence,
@@ -154,6 +159,102 @@ func inferenceView(category, deviceType, source, confidence string, reasons []st
 		Confidence: confidence,
 		Reasons:    reasons,
 	}
+}
+
+func humanizeReasons(reasons []string) []string {
+	if len(reasons) == 0 {
+		return reasons
+	}
+
+	out := make([]string, 0, len(reasons))
+	for _, reason := range reasons {
+		trimmed := strings.TrimSpace(reason)
+		if trimmed == "" {
+			continue
+		}
+		switch trimmed {
+		case "insufficient_evidence":
+			out = append(out, "no strong known match and inferred score below threshold")
+		default:
+			out = append(out, trimmed)
+		}
+	}
+	return out
+}
+
+func compactClassification(category, source, confidence string) string {
+	return fmt.Sprintf("%s(%s,%s)", category, source, confidence)
+}
+
+func classificationSourcePhrase(source string) string {
+	switch source {
+	case string(device.InferenceSourceKnown):
+		return "known"
+	case string(device.InferenceSourceInferred):
+		return "inferred"
+	default:
+		return "unknown"
+	}
+}
+
+func deviceDebugSummary(classification device.Classification, deviceType string) string {
+	category := classification.NormalizedCategory()
+	source := string(classification.InferenceSource)
+	if source == "" {
+		source = string(device.InferenceSourceUnknown)
+	}
+
+	switch source {
+	case string(device.InferenceSourceKnown):
+		if deviceType != "" {
+			return fmt.Sprintf("known %s device classified as %s", deviceType, category)
+		}
+		return fmt.Sprintf("known device classified as %s", category)
+	case string(device.InferenceSourceInferred):
+		return fmt.Sprintf("inferred %s device from communication hints", category)
+	default:
+		return "unknown device with insufficient evidence"
+	}
+}
+
+func i6DebugSummary(localCategory, flowCategory, ctxCategory, localSource, flowSource, ctxSource string) string {
+	if localSource == string(device.InferenceSourceUnknown) &&
+		flowSource == string(device.InferenceSourceUnknown) &&
+		ctxSource == string(device.InferenceSourceUnknown) &&
+		localCategory == "GenericIoT" &&
+		flowCategory == "GenericIoT" &&
+		ctxCategory == "GenericIoT" {
+		return "unknown device with insufficient evidence"
+	}
+
+	if localCategory == flowCategory && flowCategory == ctxCategory {
+		return fmt.Sprintf(
+			"%s %s device, flow also classified as %s",
+			classificationSourcePhrase(localSource),
+			localCategory,
+			flowCategory,
+		)
+	}
+
+	return fmt.Sprintf(
+		"%s %s device, flow classified as %s, ctx=%s",
+		classificationSourcePhrase(localSource),
+		localCategory,
+		flowCategory,
+		ctxCategory,
+	)
+}
+
+func i6DebugDetail(localCategory, flowCategory, ctxCategory, localSource, flowSource, ctxSource, localConfidence, flowConfidence, ctxConfidence string, localReasons, flowReasons, ctxReasons []string) string {
+	return fmt.Sprintf(
+		"local=%s flow=%s ctx=%s local_reasons=%v flow_reasons=%v ctx_reasons=%v",
+		compactClassification(localCategory, localSource, localConfidence),
+		compactClassification(flowCategory, flowSource, flowConfidence),
+		compactClassification(ctxCategory, ctxSource, ctxConfidence),
+		humanizeReasons(localReasons),
+		humanizeReasons(flowReasons),
+		humanizeReasons(ctxReasons),
+	)
 }
 
 func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
@@ -356,6 +457,29 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 	}
 
 	if h.debug {
+		summary := i6DebugSummary(
+			localDeviceCategory,
+			flowDeviceCategory,
+			ctx.DeviceCategory,
+			localInferenceSource,
+			flowInferenceSource,
+			deviceInferenceSource,
+		)
+		detail := i6DebugDetail(
+			localDeviceCategory,
+			flowDeviceCategory,
+			ctx.DeviceCategory,
+			localInferenceSource,
+			flowInferenceSource,
+			deviceInferenceSource,
+			localInferenceConfidence,
+			flowInferenceConfidence,
+			deviceInferenceConfidence,
+			localInferenceReasons,
+			flowInferenceReasons,
+			deviceInferenceReasons,
+		)
+
 		_ = h.sink.Write(Event{
 			Timestamp: now,
 			Type:      "I6_DEBUG",
@@ -365,7 +489,9 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 			DstIP:     dstIP,
 			DstPort:   dstPort,
 			Message: fmt.Sprintf(
-				"local_device_category=%q flow_device_category=%q ctx_device_category=%q local_device_type=%q flow_device_type=%q local_inference_source=%q flow_inference_source=%q ctx_inference_source=%q local_confidence=%q flow_confidence=%q ctx_confidence=%q local_reasons=%v flow_reasons=%v ctx_reasons=%v local_classification=%+v flow_classification=%+v ctx_classification=%+v",
+				"summary=%q detail=%q local_device_category=%q flow_device_category=%q ctx_device_category=%q local_device_type=%q flow_device_type=%q local_inference_source=%q flow_inference_source=%q ctx_inference_source=%q local_confidence=%q flow_confidence=%q ctx_confidence=%q local_reasons=%v flow_reasons=%v ctx_reasons=%v local_classification=%+v flow_classification=%+v ctx_classification=%+v",
+				summary,
+				detail,
 				localDeviceCategory,
 				flowDeviceCategory,
 				ctx.DeviceCategory,
@@ -377,9 +503,9 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 				localInferenceConfidence,
 				flowInferenceConfidence,
 				deviceInferenceConfidence,
-				localInferenceReasons,
-				flowInferenceReasons,
-				deviceInferenceReasons,
+				humanizeReasons(localInferenceReasons),
+				humanizeReasons(flowInferenceReasons),
+				humanizeReasons(deviceInferenceReasons),
 				ctx.LocalClassification,
 				ctx.FlowClassification,
 				ctx.ContextClassification,
