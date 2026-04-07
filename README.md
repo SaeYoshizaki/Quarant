@@ -91,6 +91,25 @@ I6 の考え方は、`baseline comparison`、`novelty vs anomaly-ish separation`
 - `suspicious_unmatched`: `observed SNI=evil-analytics.example.com` では `domain_disposition=suspicious_unmatched` と `R1_COMPOSITE_RISK=medium / investigate` が出て、baseline 外だが即 block ではない anomaly 寄り通信として説明できます。
 - `rooted mismatch`: `learned category=Controller` に対して `observed SNI=alexa.amazon.com` や `api.smartthings.com` が観測されると、`I6_DEVICE_FLOW_CATEGORY_MISMATCH` と `category_mismatch_over_tls` が出て、カテゴリ不一致を説明付きで示せます。
 
+### 現在の到達点
+
+- I6 は、機器カテゴリごとの通信ベースラインから外れる HTTP / TLS 通信を検知し、`risk_signals` と `recommended_action` まで含めて説明できます。
+- 特に TLS では、`SNI` を用いた baseline comparison、`baseline_novelty` と `suspicious_unmatched` の分離、`category_mismatch_over_tls` による rooted mismatch の説明が可能です。
+- そのため、本実装は OWASP IoT Top 10 の I6 に対して、完全な防止機構というより `explainable detection / triage` の役割を果たします。
+
+### まだ足りない部分
+
+- 個人情報そのものの常時識別や、`without permission` に相当する同意・権限の判断まではできません。
+- baseline に未登録でも正常なクラウド移行や委託先通信はありうるため、`unexpected_domain` 系 signal だけで異常を断定する設計にはしていません。
+- 保存データの扱い、クラウド側での二次利用、ecosystem 全体のポリシー順守までは直接観測できません。
+
+### 今後の改善候補
+
+- ベンダ単位 baseline と domain / API / 通信パターンの拡充
+- `adjacent / likely-benign` のような中間層の導入
+- 通信頻度や複数端末での再観測に基づく軽量スコアリング
+- novelty と anomaly の切り分け、および mismatch 理由の説明性のさらなる改善
+
 ## I7: Insecure Data Transfer and Storage
 
 アプリケーション層の通信を解析し、以下を検知します。
