@@ -88,6 +88,8 @@ func recomputeDeviceIdentity(d *DeviceProfile) {
 			addScore(typeScores, "Smart Home Controller", 0.5)
 		case strings.Contains(value, "smartthings") || strings.Contains(value, "meethue"):
 			addScore(typeScores, "Smart Home Hub", 0.5)
+		case strings.Contains(value, "alexa") || strings.Contains(value, "assistant.google") || strings.Contains(value, "siri.apple"):
+			addScore(typeScores, "Voice Assistant Speaker", 0.4)
 		case strings.Contains(value, "hikvision"):
 			addScore(vendorScores, "Hikvision", 0.4)
 			addScore(typeScores, "IP Camera", 0.4)

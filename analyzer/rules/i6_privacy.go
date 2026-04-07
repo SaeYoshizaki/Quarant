@@ -151,6 +151,9 @@ func (r *I6PrivacyRule) applyCategoryMismatch(ctx *Context) *Match {
 		commType = "unknown"
 	}
 	isExternal := IsPublicIPv4(ctx.DstIP)
+	if ctx.TLS && !shouldEmitTLSCategoryMismatch(ctx, isExternal) {
+		return nil
+	}
 	riskSignals := []string{"category_mismatch"}
 	if ctx.TLS {
 		riskSignals = append(riskSignals, "category_mismatch_over_tls")
@@ -195,6 +198,25 @@ func (r *I6PrivacyRule) applyCategoryMismatch(ctx *Context) *Match {
 			riskScoreHint,
 		),
 	}
+}
+
+func shouldEmitTLSCategoryMismatch(ctx *Context, isExternal bool) bool {
+	if ctx == nil || !ctx.TLS {
+		return true
+	}
+	if !isExternal {
+		return false
+	}
+	if strings.TrimSpace(ctx.LocalInferenceSource) != "known" {
+		return false
+	}
+	if strings.TrimSpace(ctx.FlowInferenceSource) != "known" {
+		return false
+	}
+	if ctx.TLSInfo == nil || strings.TrimSpace(ctx.TLSInfo.SNI) == "" {
+		return false
+	}
+	return true
 }
 
 func (r *I6PrivacyRule) applyBehaviorBaselineAll(ctx *Context, category, commType string) []Match {

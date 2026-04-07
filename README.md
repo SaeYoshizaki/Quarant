@@ -35,6 +35,7 @@ I6 の `risk_signals` をまとめて、`low / medium / high`、`risk_score`、`
 デバッグログは `summary` と `detail` に分かれており、まず短い要約、そのあとに根拠の詳細を確認できます。  
 例: `summary="known Controller device, flow classified as VoiceAssistant, ctx=VoiceAssistant"`  
 `detail="local=Controller(known,strong(1.00)) flow=VoiceAssistant(known,strong(0.90)) ctx=VoiceAssistant(known,strong(0.90)) ..."`
+public TLS の例では、`learned category=Controller` に対して `observed SNI=alexa.amazon.com` と `flow=VoiceAssistant` が観測され、`category_mismatch_over_tls` が出る形で説明できます。
 
 ## OWASP IoT Top 10 (2018) 対応状況
 
