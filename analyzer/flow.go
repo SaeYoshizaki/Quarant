@@ -345,7 +345,9 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 			st.TLSClientInfo = &tlsInfo
 
 			d := h.devices.GetOrCreate(srcIP)
-			device.EnrichFromTLS(d, tlsInfo)
+			// Keep local identity anchored to durable device evidence.
+			// The current flow's SNI/JA3 are used for flow classification below,
+			// but should not immediately rewrite the learned local category.
 			device.AddTLSBehaviorHints(d, dstPort)
 			h.writeDeviceDebug(now, srcIP, d)
 		}

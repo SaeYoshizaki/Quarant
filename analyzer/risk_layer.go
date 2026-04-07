@@ -127,6 +127,10 @@ func classifyCompositeRisk(signals []string) (int, string, Severity, string) {
 	for _, signal := range signals {
 		has[signal] = true
 		switch signal {
+		case "suspicious_unmatched":
+			score += 5
+		case "baseline_novelty":
+			score += 5
 		case "unexpected_external_admin":
 			score += 30
 		case "plaintext_external":

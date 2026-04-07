@@ -305,7 +305,7 @@ func (r *I6PrivacyRule) applyBehaviorBaselineAll(ctx *Context, category, commTyp
 	}
 
 	if ctx.TLS {
-		if hasInference && host != "" && isExternal && !hostMatchesExpectedDomains(host, representativeDomains, ecosystemDomains) {
+		if hasInference && host != "" && isExternal && !hostMatchesRepresentativeDomains(host, representativeDomains) {
 			out = append(out, Match{
 				RuleID:   "I6_TLS_BASELINE_UNEXPECTED_DOMAIN",
 				Type:     "I6_TLS_BASELINE_UNEXPECTED_DOMAIN",
@@ -318,13 +318,13 @@ func (r *I6PrivacyRule) applyBehaviorBaselineAll(ctx *Context, category, commTyp
 					categoryConfidence,
 				),
 				Evidence: fmt.Sprintf(
-					"category=%s local_category=%s flow_category=%s sni=%s representative_domains=%s ecosystem_domains=%s suspicious_patterns=%s risk_signals=%s risk_score_hint=%d category_confidence=%s",
-					category, strings.TrimSpace(ctx.LocalDeviceCategory), strings.TrimSpace(ctx.FlowDeviceCategory), host, strings.Join(inference.RepresentativeDomains, ","), strings.Join(inference.EcosystemDomains, ","), suspicious, riskSummary, riskScoreHint, categoryConfidence,
+					"category=%s local_category=%s flow_category=%s sni=%s representative_domains=%s ecosystem_domains=%s domain_disposition=%s suspicious_patterns=%s risk_signals=%s risk_score_hint=%d category_confidence=%s",
+					category, strings.TrimSpace(ctx.LocalDeviceCategory), strings.TrimSpace(ctx.FlowDeviceCategory), host, strings.Join(inference.RepresentativeDomains, ","), strings.Join(inference.EcosystemDomains, ","), domainDisposition(riskSignals), suspicious, riskSummary, riskScoreHint, categoryConfidence,
 				),
 			})
 		}
 	} else if commType == "analytics" || commType == "tracking" || commType == "cloud_api" {
-		if hasInference && host != "" && isExternal && !hostMatchesExpectedDomains(host, representativeDomains, ecosystemDomains) {
+		if hasInference && host != "" && isExternal && !hostMatchesRepresentativeDomains(host, representativeDomains) {
 			out = append(out, Match{
 				RuleID:   "I6_HTTP_BASELINE_UNEXPECTED_DOMAIN",
 				Type:     "I6_HTTP_BASELINE_UNEXPECTED_DOMAIN",
@@ -337,8 +337,8 @@ func (r *I6PrivacyRule) applyBehaviorBaselineAll(ctx *Context, category, commTyp
 					categoryConfidence,
 				),
 				Evidence: fmt.Sprintf(
-					"category=%s host=%s representative_domains=%s ecosystem_domains=%s suspicious_patterns=%s risk_signals=%s risk_score_hint=%d category_confidence=%s",
-					category, host, strings.Join(inference.RepresentativeDomains, ","), strings.Join(inference.EcosystemDomains, ","), suspicious, riskSummary, riskScoreHint, categoryConfidence,
+					"category=%s host=%s representative_domains=%s ecosystem_domains=%s domain_disposition=%s suspicious_patterns=%s risk_signals=%s risk_score_hint=%d category_confidence=%s",
+					category, host, strings.Join(inference.RepresentativeDomains, ","), strings.Join(inference.EcosystemDomains, ","), domainDisposition(riskSignals), suspicious, riskSummary, riskScoreHint, categoryConfidence,
 				),
 			})
 		}
@@ -477,14 +477,14 @@ func collectRiskSignals(baseline knowledge.CategoryBehaviorBaseline, ctx *Contex
 	}
 
 	if ctx.TLS && host != "" && isExternal {
-		if !hostMatchesExpectedDomains(host, representativeDomains, ecosystemDomains) {
-			signals = append(signals, "unexpected_domain", "tls_ecosystem_mismatch")
+		if !hostMatchesRepresentativeDomains(host, representativeDomains) {
+			signals = append(signals, classifyUnmatchedDomainSignals(ctx, host, isExternal, representativeDomains, ecosystemDomains, categoryConfidenceLevel)...)
 		}
 	}
 
 	if !ctx.TLS && (commType == "analytics" || commType == "tracking" || commType == "cloud_api") && host != "" && isExternal {
-		if !hostMatchesExpectedDomains(host, representativeDomains, ecosystemDomains) {
-			signals = append(signals, "unexpected_domain")
+		if !hostMatchesRepresentativeDomains(host, representativeDomains) {
+			signals = append(signals, classifyUnmatchedDomainSignals(ctx, host, isExternal, representativeDomains, ecosystemDomains, categoryConfidenceLevel)...)
 		}
 	}
 
@@ -514,6 +514,69 @@ func collectRiskSignals(baseline knowledge.CategoryBehaviorBaseline, ctx *Contex
 	}
 
 	return uniqueStrings(signals)
+}
+
+func classifyUnmatchedDomainSignals(ctx *Context, host string, isExternal bool, representativeDomains []string, ecosystemDomains []string, categoryConfidenceLevel string) []string {
+	signals := []string{"unexpected_domain"}
+	if strings.TrimSpace(host) == "" {
+		return signals
+	}
+
+	ecosystemMatch := hostMatchesRepresentativeDomains(host, ecosystemDomains)
+	if ctx != nil && ctx.TLS && isExternal && !ecosystemMatch {
+		signals = append(signals, "tls_ecosystem_mismatch")
+	}
+
+	if isSuspiciousUnmatched(ctx, isExternal, ecosystemMatch, categoryConfidenceLevel) {
+		signals = append(signals, "suspicious_unmatched")
+		return signals
+	}
+
+	signals = append(signals, "baseline_novelty")
+	return signals
+}
+
+func isSuspiciousUnmatched(ctx *Context, isExternal bool, ecosystemMatch bool, categoryConfidenceLevel string) bool {
+	if !isExternal {
+		return false
+	}
+	if !ecosystemMatch {
+		return true
+	}
+	if strings.EqualFold(strings.TrimSpace(categoryConfidenceLevel), "low") {
+		return true
+	}
+	if ctx == nil || !ctx.TLS {
+		return false
+	}
+	if ctx.TLSInfo == nil || strings.TrimSpace(ctx.TLSInfo.SNI) == "" {
+		return false
+	}
+	if strings.TrimSpace(ctx.LocalInferenceSource) != "known" || strings.TrimSpace(ctx.FlowInferenceSource) != "known" {
+		return false
+	}
+
+	localCategory := strings.TrimSpace(ctx.LocalDeviceCategory)
+	flowCategory := strings.TrimSpace(ctx.FlowDeviceCategory)
+	if localCategory == "" || flowCategory == "" {
+		return false
+	}
+	if localCategory == "GenericIoT" || flowCategory == "GenericIoT" {
+		return false
+	}
+	return localCategory != flowCategory
+}
+
+func domainDisposition(signals []string) string {
+	for _, signal := range signals {
+		switch signal {
+		case "suspicious_unmatched":
+			return "suspicious_unmatched"
+		case "baseline_novelty":
+			return "baseline_novelty"
+		}
+	}
+	return ""
 }
 
 func detectI6CommunicationType(ctx *Context) string {
@@ -558,6 +621,10 @@ func classifyBaselineRisk(signals []string, isExternal bool) (Severity, int) {
 	for _, signal := range signals {
 		has[signal] = true
 		switch signal {
+		case "suspicious_unmatched":
+			score += 5
+		case "baseline_novelty":
+			score += 5
 		case "plaintext_external":
 			score += 20
 		case "unexpected_external_admin":

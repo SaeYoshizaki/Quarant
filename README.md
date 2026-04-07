@@ -36,6 +36,7 @@ I6 の `risk_signals` をまとめて、`low / medium / high`、`risk_score`、`
 例: `summary="known Controller device, flow classified as VoiceAssistant, ctx=VoiceAssistant"`  
 `detail="local=Controller(known,strong(1.00)) flow=VoiceAssistant(known,strong(0.90)) ctx=VoiceAssistant(known,strong(0.90)) ..."`
 public TLS の例では、`learned category=Controller` の端末に対して `observed SNI=alexa.amazon.com` と `flow=VoiceAssistant` が観測され、`I6_DEVICE_FLOW_CATEGORY_MISMATCH` と `category_mismatch_over_tls` によって「Controller が VoiceAssistant 系の TLS 通信をしている」ことを説明できます。
+また、`observed SNI=evil-analytics.example.com` のように baseline にない TLS 通信でも、`domain_disposition=suspicious_unmatched` と `medium / investigate` によって「即 block ではないが anomaly 寄りの不一致」であることを表現できます。
 
 ## OWASP IoT Top 10 (2018) 対応状況
 
