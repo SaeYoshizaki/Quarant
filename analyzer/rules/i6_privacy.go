@@ -29,11 +29,11 @@ func (r *I6PrivacyRule) Apply(ctx *Context) (Match, bool) {
 }
 
 func (r *I6PrivacyRule) ApplyAll(ctx *Context) []Match {
-	if r.db == nil || ctx == nil || ctx.HTTP == nil {
+	if r.db == nil || ctx == nil || (ctx.HTTP == nil && ctx.TLSInfo == nil) {
 		return nil
 	}
 
-	commType := DetectCommunicationType(ctx.HTTP)
+	commType := detectI6CommunicationType(ctx)
 	category := strings.TrimSpace(ctx.DeviceCategory)
 	if category == "" {
 		category = "unknown"
@@ -145,13 +145,16 @@ func (r *I6PrivacyRule) applyCategoryMismatch(ctx *Context) *Match {
 		return nil
 	}
 
-	host := strings.ToLower(strings.TrimSpace(ctx.HTTP.Headers["host"]))
-	commType := DetectCommunicationType(ctx.HTTP)
+	host, path := observedEndpoint(ctx)
+	commType := detectI6CommunicationType(ctx)
 	if commType == "" {
 		commType = "unknown"
 	}
 	isExternal := IsPublicIPv4(ctx.DstIP)
 	riskSignals := []string{"category_mismatch"}
+	if ctx.TLS {
+		riskSignals = append(riskSignals, "category_mismatch_over_tls")
+	}
 	riskScoreHint := 15
 	if isExternal {
 		riskSignals = append(riskSignals, "external_comm")
@@ -187,7 +190,7 @@ func (r *I6PrivacyRule) applyCategoryMismatch(ctx *Context) *Match {
 			flowCategory,
 			localConfidence,
 			flowConfidence,
-			strings.ToLower(strings.TrimSpace(ctx.HTTP.Path)),
+			path,
 			strings.Join(riskSignals, ","),
 			riskScoreHint,
 		),
@@ -200,8 +203,7 @@ func (r *I6PrivacyRule) applyBehaviorBaselineAll(ctx *Context, category, commTyp
 		return nil
 	}
 
-	host := strings.ToLower(strings.TrimSpace(ctx.HTTP.Headers["host"]))
-	path := strings.ToLower(strings.TrimSpace(ctx.HTTP.Path))
+	host, path := observedEndpoint(ctx)
 	isExternal := IsPublicIPv4(ctx.DstIP)
 	suspicious := suspiciousPatternSummary(baseline.SuspiciousPatterns)
 	inference, hasInference := r.db.GetCategoryInference(category)
@@ -239,23 +241,25 @@ func (r *I6PrivacyRule) applyBehaviorBaselineAll(ctx *Context, category, commTyp
 		})
 	}
 
-	if indicators, hasAdmin := DetectHTTPAdminIndicators(ctx.HTTP); hasAdmin && isExternal && !baseline.LocalAdminExpected {
-		out = append(out, Match{
-			RuleID:   "I6_HTTP_BASELINE_UNEXPECTED_ADMIN",
-			Type:     "I6_HTTP_BASELINE_UNEXPECTED_ADMIN",
-			Category: "I6",
-			Severity: baselineSeverity,
-			Message: formatBaselineMessage(
-				"Category baseline does not expect external admin-style HTTP access",
-				suspicious,
-				riskSummary,
-				categoryConfidence,
-			),
-			Evidence: fmt.Sprintf(
-				"category=%s host=%s path=%s indicators=%s suspicious_patterns=%s risk_signals=%s risk_score_hint=%d category_confidence=%s",
-				category, host, path, strings.Join(indicators, ","), suspicious, riskSummary, riskScoreHint, categoryConfidence,
-			),
-		})
+	if ctx.HTTP != nil {
+		if indicators, hasAdmin := DetectHTTPAdminIndicators(ctx.HTTP); hasAdmin && isExternal && !baseline.LocalAdminExpected {
+			out = append(out, Match{
+				RuleID:   "I6_HTTP_BASELINE_UNEXPECTED_ADMIN",
+				Type:     "I6_HTTP_BASELINE_UNEXPECTED_ADMIN",
+				Category: "I6",
+				Severity: baselineSeverity,
+				Message: formatBaselineMessage(
+					"Category baseline does not expect external admin-style HTTP access",
+					suspicious,
+					riskSummary,
+					categoryConfidence,
+				),
+				Evidence: fmt.Sprintf(
+					"category=%s host=%s path=%s indicators=%s suspicious_patterns=%s risk_signals=%s risk_score_hint=%d category_confidence=%s",
+					category, host, path, strings.Join(indicators, ","), suspicious, riskSummary, riskScoreHint, categoryConfidence,
+				),
+			})
+		}
 	}
 
 	if commType != "" && isExternal && !matchesExpectedProtocol(baseline.ExpectedProtocols, ctx) {
@@ -277,7 +281,26 @@ func (r *I6PrivacyRule) applyBehaviorBaselineAll(ctx *Context, category, commTyp
 		})
 	}
 
-	if commType == "analytics" || commType == "tracking" || commType == "cloud_api" {
+	if ctx.TLS {
+		if hasInference && host != "" && isExternal && !hostMatchesExpectedDomains(host, representativeDomains, ecosystemDomains) {
+			out = append(out, Match{
+				RuleID:   "I6_TLS_BASELINE_UNEXPECTED_DOMAIN",
+				Type:     "I6_TLS_BASELINE_UNEXPECTED_DOMAIN",
+				Category: "I6",
+				Severity: baselineSeverity,
+				Message: formatBaselineMessage(
+					"Observed TLS SNI does not fit the category baseline",
+					suspicious,
+					riskSummary,
+					categoryConfidence,
+				),
+				Evidence: fmt.Sprintf(
+					"category=%s sni=%s representative_domains=%s ecosystem_domains=%s suspicious_patterns=%s risk_signals=%s risk_score_hint=%d category_confidence=%s",
+					category, host, strings.Join(inference.RepresentativeDomains, ","), strings.Join(inference.EcosystemDomains, ","), suspicious, riskSummary, riskScoreHint, categoryConfidence,
+				),
+			})
+		}
+	} else if commType == "analytics" || commType == "tracking" || commType == "cloud_api" {
 		if hasInference && host != "" && isExternal && !hostMatchesExpectedDomains(host, representativeDomains, ecosystemDomains) {
 			out = append(out, Match{
 				RuleID:   "I6_HTTP_BASELINE_UNEXPECTED_DOMAIN",
@@ -412,19 +435,31 @@ func collectRiskSignals(baseline knowledge.CategoryBehaviorBaseline, ctx *Contex
 		signals = append(signals, "plaintext_external")
 	}
 
-	if indicators, hasAdmin := DetectHTTPAdminIndicators(ctx.HTTP); hasAdmin && isExternal && !baseline.LocalAdminExpected {
-		_ = indicators
-		signals = append(signals, "unexpected_external_admin")
+	if ctx.HTTP != nil {
+		if indicators, hasAdmin := DetectHTTPAdminIndicators(ctx.HTTP); hasAdmin && isExternal && !baseline.LocalAdminExpected {
+			_ = indicators
+			signals = append(signals, "unexpected_external_admin")
+		}
 	}
 
 	if commType != "" && isExternal && !matchesExpectedProtocol(baseline.ExpectedProtocols, ctx) {
 		signals = append(signals, "protocol_mismatch")
 	}
 
-	if (commType == "analytics" || commType == "tracking" || commType == "cloud_api") && host != "" && isExternal {
+	if ctx.TLS && host != "" && isExternal {
+		if !hostMatchesExpectedDomains(host, representativeDomains, ecosystemDomains) {
+			signals = append(signals, "unexpected_domain", "tls_ecosystem_mismatch")
+		}
+	}
+
+	if !ctx.TLS && (commType == "analytics" || commType == "tracking" || commType == "cloud_api") && host != "" && isExternal {
 		if !hostMatchesExpectedDomains(host, representativeDomains, ecosystemDomains) {
 			signals = append(signals, "unexpected_domain")
 		}
+	}
+
+	if ctx.TLS && isExternal && host == "" {
+		signals = append(signals, "external_tls_unknown")
 	}
 
 	if path != "" && (strings.Contains(path, "/admin") || strings.Contains(path, "/login") || strings.Contains(path, "/setup")) {
@@ -443,9 +478,38 @@ func collectRiskSignals(baseline knowledge.CategoryBehaviorBaseline, ctx *Contex
 		flowCategory != "GenericIoT" &&
 		localCategory != flowCategory {
 		signals = append(signals, "category_mismatch")
+		if ctx.TLS {
+			signals = append(signals, "category_mismatch_over_tls")
+		}
 	}
 
 	return uniqueStrings(signals)
+}
+
+func detectI6CommunicationType(ctx *Context) string {
+	if ctx == nil {
+		return ""
+	}
+	if ctx.HTTP != nil {
+		return DetectCommunicationType(ctx.HTTP)
+	}
+	if ctx.TLSInfo != nil && strings.TrimSpace(ctx.TLSInfo.SNI) != "" {
+		return "tls_sni"
+	}
+	return ""
+}
+
+func observedEndpoint(ctx *Context) (host string, path string) {
+	if ctx == nil {
+		return "", ""
+	}
+	if ctx.HTTP != nil {
+		return strings.ToLower(strings.TrimSpace(ctx.HTTP.Headers["host"])), strings.ToLower(strings.TrimSpace(ctx.HTTP.Path))
+	}
+	if ctx.TLSInfo != nil {
+		return strings.ToLower(strings.TrimSpace(ctx.TLSInfo.SNI)), ""
+	}
+	return "", ""
 }
 
 func hostMatchesExpectedDomains(host string, representativeDomains []string, ecosystemDomains []string) bool {

@@ -416,6 +416,7 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 		Debug:                     h.debug,
 		HTTP:                      httpInfo,
 		TLS:                       isTLSClientToServer,
+		TLSInfo:                   st.TLSClientInfo,
 		DeviceCategory:            deviceCategory,
 		LocalDeviceCategory:       localDeviceCategory,
 		FlowDeviceCategory:        flowDeviceCategory,

@@ -20,8 +20,9 @@ type Context struct {
 	Payload []byte
 	Debug   bool
 
-	HTTP *HTTPInfo
-	TLS  bool
+	HTTP    *HTTPInfo
+	TLS     bool
+	TLSInfo *TLSClientHelloInfo
 
 	DeviceCategory      string
 	LocalDeviceCategory string

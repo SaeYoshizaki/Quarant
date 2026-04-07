@@ -137,6 +137,12 @@ func classifyCompositeRisk(signals []string) (int, string, Severity, string) {
 			score += 20
 		case "protocol_mismatch":
 			score += 15
+		case "tls_ecosystem_mismatch":
+			score += 15
+		case "category_mismatch_over_tls":
+			score += 10
+		case "external_tls_unknown":
+			score += 10
 		case "external_comm":
 			score += 10
 		case "admin_like_path":
