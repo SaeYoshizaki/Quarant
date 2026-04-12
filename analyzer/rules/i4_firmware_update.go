@@ -244,6 +244,14 @@ func formatI4FirmwareEvidence(obs i4FirmwareUpdateObservation) string {
 	)
 }
 
+func I4LooksLikeObservedUpdateCommunication(path, host, sni string) bool {
+	matches := make([]i4KeywordMatch, 0, 4)
+	matches = append(matches, matchI4Keywords(strings.ToLower(strings.TrimSpace(path)), "path")...)
+	matches = append(matches, matchI4Keywords(strings.ToLower(strings.TrimSpace(host)), "host")...)
+	matches = append(matches, matchI4Keywords(strings.ToLower(strings.TrimSpace(sni)), "sni")...)
+	return len(matches) > 0
+}
+
 func init() {
 	Register(&I4FirmwareUpdateObservedRule{})
 	Register(&I4InsecureFirmwareUpdateHTTPRule{})

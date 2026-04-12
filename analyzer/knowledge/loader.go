@@ -75,6 +75,22 @@ type CategoryBehaviorBaseline struct {
 
 type CategoryBehaviorBaselines map[string]CategoryBehaviorBaseline
 
+type I4KnownVulnCandidate struct {
+	Vendor            string   `json:"vendor"`
+	VendorAliases     []string `json:"vendor_aliases,omitempty"`
+	Family            string   `json:"family"`
+	Aliases           []string `json:"aliases"`
+	Categories        []string `json:"categories"`
+	ExampleCVEs       []string `json:"example_cves"`
+	KEV               bool     `json:"kev"`
+	RecommendedChecks []string `json:"recommended_checks"`
+	Notes             string   `json:"notes"`
+}
+
+type I4KnownVulnCandidates struct {
+	Candidates []I4KnownVulnCandidate `json:"candidates"`
+}
+
 func loadJSON(path string, out any) error {
 	data, err := os.ReadFile(path)
 	if err != nil {
@@ -154,6 +170,17 @@ func LoadCategoryBehaviorBaselines() (CategoryBehaviorBaselines, error) {
 	return v, nil
 }
 
+func LoadI4KnownVulnCandidates() (*I4KnownVulnCandidates, error) {
+	path := filepath.Join(knowledgeDir, "i4_known_vuln_candidates.json")
+
+	var v I4KnownVulnCandidates
+	if err := loadJSON(path, &v); err != nil {
+		return nil, err
+	}
+
+	return &v, nil
+}
+
 type DB struct {
 	DeviceCategories   *DeviceCategories
 	CommunicationTypes *CommunicationTypes
@@ -161,6 +188,7 @@ type DB struct {
 	CategoryPolicy     CategoryPolicy
 	CategoryInference  *CategoryInferenceDB
 	BehaviorBaselines  CategoryBehaviorBaselines
+	I4KnownVuln        *I4KnownVulnCandidates
 }
 
 func LoadAll() (*DB, error) {
@@ -194,6 +222,11 @@ func LoadAll() (*DB, error) {
 		return nil, err
 	}
 
+	i4KnownVuln, err := LoadI4KnownVulnCandidates()
+	if err != nil {
+		return nil, err
+	}
+
 	return &DB{
 		DeviceCategories:   deviceCategories,
 		CommunicationTypes: communicationTypes,
@@ -201,6 +234,7 @@ func LoadAll() (*DB, error) {
 		CategoryPolicy:     categoryPolicy,
 		CategoryInference:  categoryInference,
 		BehaviorBaselines:  behaviorBaselines,
+		I4KnownVuln:        i4KnownVuln,
 	}, nil
 }
 

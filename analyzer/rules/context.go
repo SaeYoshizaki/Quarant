@@ -27,6 +27,10 @@ type Context struct {
 	DeviceCategory      string
 	LocalDeviceCategory string
 	FlowDeviceCategory  string
+	VendorCandidate     string
+	FamilyCandidate     string
+	UpdateVisibility    string
+	LegacySignals       []string
 
 	DeviceInferenceSource     string
 	LocalInferenceSource      string

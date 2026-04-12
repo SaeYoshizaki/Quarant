@@ -1,0 +1,52 @@
+{
+  "candidates": [
+    {
+      "vendor": "Hikvision",
+      "family": "Hikvision Camera",
+      "aliases": [
+        "IP Camera"
+      ],
+      "categories": [
+        "Camera",
+        "NVR"
+      ],
+      "example_cves": [
+        "CVE-2021-36260"
+      ],
+      "kev": true,
+      "recommended_checks": [
+        "review firmware version in the device web admin page",
+        "confirm whether the device is still supported by the vendor",
+        "restrict unnecessary internet exposure before update review"
+      ],
+      "notes": "Hikvision camera families have widely reported issues; exact applicability depends on model and firmware generation."
+    },
+    {
+      "vendor": "TP-Link",
+      "vendor_aliases": [
+        "TP Link"
+      ],
+      "family": "TP-Link Archer Router Family",
+      "aliases": [
+        "Router",
+        "Wireless Router",
+        "Archer Router"
+      ],
+      "categories": [
+        "Hub",
+        "Router"
+      ],
+      "example_cves": [
+        "CVE-2023-1389",
+        "CVE-2024-5035"
+      ],
+      "kev": true,
+      "recommended_checks": [
+        "review firmware version in the router admin interface",
+        "confirm the vendor advisory and latest available firmware",
+        "verify remote administration and WAN-side management settings"
+      ],
+      "notes": "Representative TP-Link router issues are model-specific; confirm exact Archer model and firmware before treating this as affected."
+    }
+  ]
+}

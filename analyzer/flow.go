@@ -257,6 +257,62 @@ func i6DebugDetail(localCategory, flowCategory, ctxCategory, localSource, flowSo
 	)
 }
 
+func i4UpdateVisibility(d *device.DeviceProfile) string {
+	if d == nil {
+		return "unknown"
+	}
+
+	observedMetadata := false
+	for host := range d.Hosts {
+		observedMetadata = true
+		if rules.I4LooksLikeObservedUpdateCommunication("", host, "") {
+			return "seen"
+		}
+	}
+	for path := range d.Paths {
+		observedMetadata = true
+		if rules.I4LooksLikeObservedUpdateCommunication(path, "", "") {
+			return "seen"
+		}
+	}
+	for sni := range d.SNIValues {
+		observedMetadata = true
+		if rules.I4LooksLikeObservedUpdateCommunication("", "", sni) {
+			return "seen"
+		}
+	}
+
+	if !observedMetadata {
+		return "unknown"
+	}
+	return "not_seen"
+}
+
+func i4LegacySignals(d *device.DeviceProfile) []string {
+	if d == nil {
+		return nil
+	}
+
+	signals := make([]string, 0, 5)
+	if d.InsecureServices["telnet"] {
+		signals = append(signals, "telnet_observed")
+	}
+	if d.InsecureServices["ftp"] {
+		signals = append(signals, "ftp_observed")
+	}
+	if d.AdminSuspected {
+		signals = append(signals, "admin_interface")
+	}
+	if d.ExternalExposureSuspected {
+		signals = append(signals, "external_exposure")
+	}
+	if d.Protocols["http"] && !d.Protocols["https"] && !d.Protocols["tls"] {
+		signals = append(signals, "http_only_management")
+	}
+
+	return signals
+}
+
 func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 	ipLayer := packet.Layer(layers.LayerTypeIPv4)
 	tcpLayer := packet.Layer(layers.LayerTypeTCP)
@@ -422,6 +478,10 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 		DeviceCategory:            deviceCategory,
 		LocalDeviceCategory:       localDeviceCategory,
 		FlowDeviceCategory:        flowDeviceCategory,
+		VendorCandidate:           d.Vendor,
+		FamilyCandidate:           d.DeviceType,
+		UpdateVisibility:          i4UpdateVisibility(d),
+		LegacySignals:             i4LegacySignals(d),
 		DeviceInferenceSource:     deviceInferenceSource,
 		LocalInferenceSource:      localInferenceSource,
 		FlowInferenceSource:       flowInferenceSource,
@@ -522,6 +582,16 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 		i6Rule := rules.NewI6PrivacyRule(h.knowledge)
 		if i6Matches := i6Rule.ApplyAll(ctx); len(i6Matches) > 0 {
 			matches = append(matches, i6Matches...)
+		}
+
+		i4EnrichmentRule := rules.NewI4FirmwareRiskEnrichmentRule(h.knowledge)
+		if i4Matches := i4EnrichmentRule.ApplyAll(ctx); len(i4Matches) > 0 {
+			matches = append(matches, i4Matches...)
+		}
+
+		i4EOLRule := rules.NewI4EOLReviewRule(h.knowledge)
+		if i4Matches := i4EOLRule.ApplyAll(ctx); len(i4Matches) > 0 {
+			matches = append(matches, i4Matches...)
 		}
 	}
 
