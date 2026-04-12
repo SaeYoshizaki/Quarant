@@ -12,3 +12,6 @@ ansible-inventory.yml
 
 events.jsonl
 build/
+quarant-api
+quarant-viewer
+*.zip
