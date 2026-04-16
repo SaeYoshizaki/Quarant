@@ -9,6 +9,8 @@ nornir-simple-inventory.yml
 ansible-inventory.yml
 
 .DS_Store
+.gocache/
+.obsidian/
 
 events.jsonl
 build/

@@ -20,6 +20,70 @@ func TestI7HTTPQueryExpandedKeys(t *testing.T) {
 	}
 }
 
+func TestI7HTTPQuerySessionRequiresSensitiveValueShape(t *testing.T) {
+	ctx := &Context{
+		HTTP: &HTTPInfo{
+			Query: map[string][]string{
+				"session": {"abc"},
+			},
+		},
+	}
+
+	if _, ok := (&I7HTTPTokenLeakRule{}).Apply(ctx); ok {
+		t.Fatal("did not expect short session value to be detected")
+	}
+}
+
+func TestI7HTTPQuerySessionDetectsJWTValue(t *testing.T) {
+	ctx := &Context{
+		HTTP: &HTTPInfo{
+			Query: map[string][]string{
+				"session": {"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.c2lnbmF0dXJl"},
+			},
+		},
+	}
+
+	match, ok := (&I7HTTPTokenLeakRule{}).Apply(ctx)
+	if !ok {
+		t.Fatal("expected jwt-like session to be detected")
+	}
+	if match.Evidence != "session=***" {
+		t.Fatalf("unexpected evidence: %s", match.Evidence)
+	}
+}
+
+func TestI7HTTPQueryDeviceIDNeedsIdentifierShape(t *testing.T) {
+	ctx := &Context{
+		HTTP: &HTTPInfo{
+			Query: map[string][]string{
+				"device_id": {"abc"},
+			},
+		},
+	}
+
+	if _, ok := (&I7HTTPTokenLeakRule{}).Apply(ctx); ok {
+		t.Fatal("did not expect weak device_id value to be detected")
+	}
+}
+
+func TestI7HTTPQueryDeviceIDDetectsIdentifierShape(t *testing.T) {
+	ctx := &Context{
+		HTTP: &HTTPInfo{
+			Query: map[string][]string{
+				"device_id": {"dev-12345678"},
+			},
+		},
+	}
+
+	match, ok := (&I7HTTPTokenLeakRule{}).Apply(ctx)
+	if !ok {
+		t.Fatal("expected device identifier to be detected")
+	}
+	if match.Evidence != "device_id=***" {
+		t.Fatalf("unexpected evidence: %s", match.Evidence)
+	}
+}
+
 func TestI7HTTPAuthExtendedHeader(t *testing.T) {
 	ctx := &Context{
 		HTTP: &HTTPInfo{
@@ -38,6 +102,24 @@ func TestI7HTTPAuthExtendedHeader(t *testing.T) {
 	}
 }
 
+func TestI7HTTPAuthDetectsCustomTokenHeaderByValueShape(t *testing.T) {
+	ctx := &Context{
+		HTTP: &HTTPInfo{
+			Headers: map[string]string{
+				"x-device-token": "AbCdEf1234567890ZYXWVutsrq",
+			},
+		},
+	}
+
+	match, ok := (&I7HTTPAuthRule{}).Apply(ctx)
+	if !ok {
+		t.Fatal("expected custom token header to be detected")
+	}
+	if match.Evidence != "x-device-token=***" {
+		t.Fatalf("unexpected evidence: %s", match.Evidence)
+	}
+}
+
 func TestI7HTTPBodyInfersFormWithoutContentType(t *testing.T) {
 	ctx := &Context{
 		HTTP: &HTTPInfo{
@@ -51,6 +133,18 @@ func TestI7HTTPBodyInfersFormWithoutContentType(t *testing.T) {
 	}
 	if match.Evidence != "ssid=***" && match.Evidence != "psk=***" {
 		t.Fatalf("unexpected evidence: %s", match.Evidence)
+	}
+}
+
+func TestI7HTTPBodySSIDAloneDoesNotTrigger(t *testing.T) {
+	ctx := &Context{
+		HTTP: &HTTPInfo{
+			Body: []byte("ssid=guest"),
+		},
+	}
+
+	if _, ok := (&I7HTTPBodySecretRule{}).Apply(ctx); ok {
+		t.Fatal("did not expect standalone ssid to be detected")
 	}
 }
 
@@ -76,7 +170,7 @@ func TestI7HTTPBodyDetectsXMLSecrets(t *testing.T) {
 	ctx := &Context{
 		HTTP: &HTTPInfo{
 			ContentType: "application/xml",
-			Body:        []byte("<config><serial>123456</serial></config>"),
+			Body:        []byte("<config><serial>SN12345678</serial></config>"),
 		},
 	}
 
@@ -85,6 +179,23 @@ func TestI7HTTPBodyDetectsXMLSecrets(t *testing.T) {
 		t.Fatal("expected xml body leak to be detected")
 	}
 	if match.Evidence != "serial=***" {
+		t.Fatalf("unexpected evidence: %s", match.Evidence)
+	}
+}
+
+func TestI7HTTPBodyDetectsBase64LikeSession(t *testing.T) {
+	ctx := &Context{
+		HTTP: &HTTPInfo{
+			ContentType: "application/json",
+			Body:        []byte(`{"session":"QUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVo9"}`),
+		},
+	}
+
+	match, ok := (&I7HTTPBodySecretRule{}).Apply(ctx)
+	if !ok {
+		t.Fatal("expected base64-like session to be detected")
+	}
+	if match.Evidence != "session=***" {
 		t.Fatalf("unexpected evidence: %s", match.Evidence)
 	}
 }

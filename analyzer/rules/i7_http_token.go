@@ -12,13 +12,11 @@ func (r *I7HTTPTokenLeakRule) Apply(ctx *Context) (Match, bool) {
 		return Match{}, false
 	}
 
-	for k := range ctx.HTTP.Query {
-		if HasSensitiveKey(k) {
-			return Match{
-				Message:  "Sensitive parameter appears in plaintext HTTP query",
-				Evidence: k + "=***",
-			}, true
-		}
+	if ev, ok := DetectSensitiveQuery(ctx.HTTP.Query); ok {
+		return Match{
+			Message:  "Sensitive parameter appears in plaintext HTTP query",
+			Evidence: ev,
+		}, true
 	}
 	return Match{}, false
 }

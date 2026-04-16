@@ -215,6 +215,15 @@ I6 の考え方は、`baseline comparison`、`novelty vs anomaly-ish separation`
   - `a=b&c=d` の form 推定
   - `{...}` / `[...]` の JSON 推定
   - `<...>` の XML 推定
+- 値の特徴による追加検知
+  - JWT っぽい値
+  - Base64 っぽい値
+  - 長いランダムトークン
+  - 独自 `token` / `auth` 系キー名と値形状の組み合わせ
+- 誤検知を減らすための条件付き検知
+  - `session` / `sid` / `jwt` は値がトークンらしい場合に限定
+  - `device_id` / `serial` は識別子らしい形式の場合に限定
+  - `ssid` は `psk` / `wifi_password` と併存する場合を優先
 - TLS ClientHello の解析
 - JA3 フィンガープリント生成
 - HTTP / TLS メタデータによるデバイス推定
