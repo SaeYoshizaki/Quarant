@@ -178,15 +178,43 @@ I6 の考え方は、`baseline comparison`、`novelty vs anomaly-ish separation`
 ## I7: Insecure Data Transfer and Storage
 
 アプリケーション層の通信を解析し、以下を検知します。
+現状の主対象は、平文 HTTP における `in-transit` の機密情報露出です。
+`at rest` や `during processing` の問題は、パッシブ監視だけでは直接検知できないものがあります。
 
 ### 検知機能
 
 - 平文 HTTP 通信の検知
 - HTTP Header に含まれる認証情報の検知
+  - `Authorization`
+  - `Cookie`
+  - `Set-Cookie`
+  - `X-Api-Key`
+  - `X-Auth-Token`
+  - `Proxy-Authorization`
 - URL Query に含まれる機密情報の検知
+  - `password`
+  - `token`
+  - `access_token`
+  - `refresh_token`
+  - `session`
+  - `sid`
+  - `jwt`
+  - `wifi_password`
+  - `ssid`
+  - `psk`
+  - `device_id`
+  - `serial`
 - HTTP Body に含まれる機密情報の検知  
   - `application/x-www-form-urlencoded`
   - `application/json`
+  - `multipart/form-data`
+  - `text/plain`
+  - `application/xml`
+  - `text/xml`
+- `Content-Type` が欠落・不正な場合の body 形式推定
+  - `a=b&c=d` の form 推定
+  - `{...}` / `[...]` の JSON 推定
+  - `<...>` の XML 推定
 - TLS ClientHello の解析
 - JA3 フィンガープリント生成
 - HTTP / TLS メタデータによるデバイス推定

@@ -12,15 +12,8 @@ func (r *I7HTTPTokenLeakRule) Apply(ctx *Context) (Match, bool) {
 		return Match{}, false
 	}
 
-	keys := []string{
-		"password", "passwd", "pwd",
-		"token", "access_token",
-		"apikey", "api_key",
-		"secret", "client_secret",
-	}
-
-	for _, k := range keys {
-		if _, ok := ctx.HTTP.Query[k]; ok {
+	for k := range ctx.HTTP.Query {
+		if HasSensitiveKey(k) {
 			return Match{
 				Message:  "Sensitive parameter appears in plaintext HTTP query",
 				Evidence: k + "=***",

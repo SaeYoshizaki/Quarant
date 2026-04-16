@@ -16,23 +16,30 @@ func (r *I7HTTPAuthRule) Apply(ctx *Context) (Match, bool) {
 	if ctx.HTTP == nil {
 		return Match{}, false
 	}
-	v, ok := ctx.HTTP.Headers["authorization"]
-	if !ok || v == "" {
-		return Match{}, false
+
+	if v, ok := ctx.HTTP.Headers["authorization"]; ok && v != "" {
+		evidenceLower := strings.ToLower(v)
+		evidence := "Authorization: ***"
+		if strings.Contains(evidenceLower, "basic") {
+			evidence = "Authorization: Basic ***"
+		} else if strings.Contains(evidenceLower, "bearer") {
+			evidence = "Authorization: Bearer ***"
+		}
+
+		return Match{
+			Message:  "Authorization header sent over plaintext HTTP",
+			Evidence: evidence,
+		}, true
 	}
 
-	evidenceLower := strings.ToLower(v)
-	evidence := "Authorization: ***"
-	if strings.Contains(evidenceLower, "basic") {
-		evidence = "Authorization: Basic ***"
-	} else if strings.Contains(evidenceLower, "bearer") {
-		evidence = "Authorization: Bearer ***"
+	if evidence, ok := DetectSensitiveHeader(ctx.HTTP.Headers); ok {
+		return Match{
+			Message:  "Sensitive authentication header sent over plaintext HTTP",
+			Evidence: evidence,
+		}, true
 	}
 
-	return Match{
-		Message:  "Authorization header sent over plaintext HTTP",
-		Evidence: evidence,
-	}, true
+	return Match{}, false
 }
 
 func init() {

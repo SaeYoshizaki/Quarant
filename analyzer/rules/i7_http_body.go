@@ -15,22 +15,11 @@ func (r *I7HTTPBodySecretRule) Apply(ctx *Context) (Match, bool) {
 		return Match{}, false
 	}
 
-	switch ctx.HTTP.ContentType {
-	case "application/x-www-form-urlencoded":
-		if ev, ok := DetectSensitiveFormBody(ctx.HTTP.Body); ok {
-			return Match{
-				Message:  "Sensitive data appears in plaintext HTTP form body",
-				Evidence: ev,
-			}, true
-		}
-
-	case "application/json":
-		if ev, ok := DetectSensitiveJSONBody(ctx.HTTP.Body); ok {
-			return Match{
-				Message:  "Sensitive data appears in plaintext HTTP JSON body",
-				Evidence: ev,
-			}, true
-		}
+	if msg, ev, ok := DetectSensitiveHTTPBody(ctx.HTTP.ContentType, ctx.HTTP.Body); ok {
+		return Match{
+			Message:  msg,
+			Evidence: ev,
+		}, true
 	}
 
 	return Match{}, false
