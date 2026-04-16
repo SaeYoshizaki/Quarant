@@ -38,113 +38,56 @@
        改善案：
        弱いキーワード（`update`, `download`）でも、送信データ量が多い場合は警告を出すとか
 
-## I7: scope と拡張方針の整理
+## I7: HTTP 範囲で今回やり終えたこと
 
-- [x] I7 の現状スコープを明文化する
-  - 現状は「平文 HTTP 中心の in-transit 検知」であることを README / TODO 上で明記する
-  - `header` / `query` / `body` のどこを見ているかを整理する
-  - `at rest` / `during processing` はパッシブ監視だけでは直接検知しにくいことを明記する
+- [x] I7 の現状スコープを明文化した
+  - 現状は「平文 HTTP 中心の in-transit 検知」であることを README / TODO 上で明記
+  - `header` / `query` / `body` の観測範囲を整理
+  - `at rest` / `during processing` はパッシブ監視だけでは直接検知しにくいことを明記
 
-### 既存で実装済みのもの
+- [x] 平文 HTTP の機密情報検知を拡張した
+  - header: `Authorization`, `Cookie`, `Set-Cookie`, `X-Api-Key`, `X-Auth-Token`, `Proxy-Authorization`
+  - header: 独自 `token` / `auth` 系ヘッダーも値の形と合わせて検知
+  - query: `refresh_token`, `session`, `sid`, `jwt`, `wifi_password`, `ssid`, `psk`, `device_id`, `serial` などを追加
+  - body: `application/x-www-form-urlencoded`, `application/json`, `multipart/form-data`, `text/plain`, XML に対応
+  - `Content-Type` が欠落・不正でも body の見た目から形式を推定
 
-- [x] 平文 HTTP 通信の検知
-- [x] HTTP Header の認証情報検知
-  - `Authorization`
-  - `Cookie`
-  - `Set-Cookie`
-- [x] HTTP query の機密パラメータ検知
-  - `password`
-  - `token`
-  - `access_token`
-  - `apikey`
-  - `api_key`
-  - `secret`
-  - `client_secret`
-- [x] HTTP body の機密情報検知
-  - `application/x-www-form-urlencoded`
-  - `application/json`
-  - `session`
-  - `sid`
-
-### 優先度高: HTTP 検知の拡張
-
-- [x] `Content-Type` に依存しすぎない body 判定を追加する
-  - `Content-Type` が欠落・不正でも body の見た目から形式を推定する
-  - `a=b&c=d` なら form として扱う
-  - `{...}` / `[...]` なら JSON として扱う
-  - IoT 機器の雑な実装への対応を強化する
-
-- [x] HTTP query の機密パラメータ辞書を拡張する
-  - 既存 query 辞書に加えて以下を追加検討
-  - `refresh_token`
-  - `session`
-  - `sid`
-  - `jwt`
-  - `wifi_password`
-  - `ssid`
-  - `psk`
-  - `device_id`
-  - `serial`
-
-- [ ] HTTP header の追加検知を行う
-  - `X-Api-Key`
-  - `X-Auth-Token`
-  - `Proxy-Authorization`
-  - 独自認証ヘッダー候補の整理
-
-- [x] HTTP body の対応形式を拡張する
-  - `multipart/form-data`
-  - `text/plain`
-  - XML (`application/xml`, `text/xml`)
-
-- [x] IoT 向け機密キーワード辞書を拡張する
-  - `client_key`
-  - `private_key`
-  - `mqtt_user`
-  - `mqtt_pass`
-  - `rtsp_url`
-  - `update_token`
-
-### 優先度中: 値特徴と誤検知抑制
-
-- [x] 値そのものの特徴による検知を追加する
+- [x] 値特徴ベースの検知を追加した
   - JWT っぽい値
   - Base64 っぽい値
   - 長いランダムトークン
-  - メールアドレス / 電話番号 / GPS 座標などの個人情報候補
+  - 独自 `token` / `auth` 系キー名と値形状の組み合わせ
 
-- [x] 誤検知を減らす条件を追加する
-  - キー名だけでなく値の特徴も併用する
-  - `device_id` や `serial` を過剰検知しない条件を設ける
-  - 検知率と誤検知率のバランスを評価する
+- [x] 誤検知抑制を追加した
+  - `session` / `sid` / `jwt` は値がトークンらしい場合に限定
+  - `device_id` / `serial` は識別子らしい形式の場合に限定
+  - `ssid` は `psk` / `wifi_password` と併存する場合を優先
+  - 正常系の header / query / body サンプルで過検知しないことをテスト
 
-- [x] I7 の評価用テストケースを追加する
+- [x] I7 HTTP の評価用サンプルを追加した
   - form body に password を含む通信
-  - JSON body に token を含む通信
-  - query に password / token / session を含む通信
-  - header に Authorization / Cookie / X-Api-Key を含む通信
-  - IoT らしいキー名を含む通信
-  - 誤検知確認用の正常通信
+  - JSON body に token / session を含む通信
+  - query に password / token / session / device_id を含む通信
+  - header に Authorization / Cookie / X-Api-Key / X-Auth-Token / Proxy-Authorization を含む通信
+  - 独自認証ヘッダーと誤検知確認用の正常通信
 
-### 別トラック: HTTP 以外の平文通信
+## I7: 追加でいつかやるべきこと
 
-- [ ] MQTT 上の認証情報・機密情報の検知
-- [ ] FTP 上の認証情報・ファイル転送の検知
-- [ ] Telnet 上の認証情報送信の検知
-- [ ] RTSP URL 内の認証情報検知
-- [ ] DNS query に機密情報が載っていないか確認
-- [ ] 独自 TCP 平文プロトコルの簡易検知を検討
+- [ ] HTTP 以外の平文通信
+  - MQTT 上の認証情報・機密情報の検知
+  - FTP 上の認証情報・ファイル転送の検知
+  - Telnet 上の認証情報送信の検知
+  - RTSP URL 内の認証情報検知
+  - DNS query に機密情報が載っていないか確認
+  - 独自 TCP 平文プロトコルの簡易検知を検討
 
-### 別トラック: TLS / HTTPS hygiene
+- [ ] TLS / HTTPS hygiene
+  - 機密通信で HTTPS が使われていないケースを整理する
+  - TLS を使うべき通信先なのに平文 HTTP になっているパターンを検知する
+  - 古い TLS バージョンや弱い暗号スイートの検知を検討する
+  - 証明書異常や自己署名証明書の扱いを整理する
 
-- [ ] 機密通信で HTTPS が使われていないケースを整理する
-- [ ] TLS を使うべき通信先なのに平文 HTTP になっているパターンを検知する
-- [ ] 古い TLS バージョンや弱い暗号スイートの検知を検討する
-- [ ] 証明書異常や自己署名証明書の扱いを整理する
-
-### 別トラック: IoT 固有の機密情報整理
-
-- [ ] IoT 向け機密カテゴリを整理する
+- [ ] IoT 固有の機密情報整理
   - Wi-Fi 資格情報
   - クラウド API キー
   - デバイス識別子
@@ -153,7 +96,7 @@
   - RTSP 認証情報
   - ファームウェア更新 URL / update token
 
-- [ ] デバイス種別ごとに危険情報の候補を整理する
+- [ ] デバイス種別ごとの危険情報候補整理
   - カメラ
   - ルーター
   - センサー

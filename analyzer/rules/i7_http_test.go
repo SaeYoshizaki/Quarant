@@ -102,6 +102,42 @@ func TestI7HTTPAuthExtendedHeader(t *testing.T) {
 	}
 }
 
+func TestI7HTTPAuthExtendedProxyAuthorizationHeader(t *testing.T) {
+	ctx := &Context{
+		HTTP: &HTTPInfo{
+			Headers: map[string]string{
+				"proxy-authorization": "Basic Zm9vOmJhcg==",
+			},
+		},
+	}
+
+	match, ok := (&I7HTTPAuthRule{}).Apply(ctx)
+	if !ok {
+		t.Fatal("expected proxy authorization header to be detected")
+	}
+	if match.Evidence != "Proxy-Authorization: ***" {
+		t.Fatalf("unexpected evidence: %s", match.Evidence)
+	}
+}
+
+func TestI7HTTPAuthExtendedAuthTokenHeader(t *testing.T) {
+	ctx := &Context{
+		HTTP: &HTTPInfo{
+			Headers: map[string]string{
+				"x-auth-token": "secret-value",
+			},
+		},
+	}
+
+	match, ok := (&I7HTTPAuthRule{}).Apply(ctx)
+	if !ok {
+		t.Fatal("expected x-auth-token header to be detected")
+	}
+	if match.Evidence != "X-Auth-Token: ***" {
+		t.Fatalf("unexpected evidence: %s", match.Evidence)
+	}
+}
+
 func TestI7HTTPAuthDetectsCustomTokenHeaderByValueShape(t *testing.T) {
 	ctx := &Context{
 		HTTP: &HTTPInfo{
@@ -117,6 +153,20 @@ func TestI7HTTPAuthDetectsCustomTokenHeaderByValueShape(t *testing.T) {
 	}
 	if match.Evidence != "x-device-token=***" {
 		t.Fatalf("unexpected evidence: %s", match.Evidence)
+	}
+}
+
+func TestI7HTTPAuthDoesNotDetectBenignCustomHeader(t *testing.T) {
+	ctx := &Context{
+		HTTP: &HTTPInfo{
+			Headers: map[string]string{
+				"x-device-token": "abc",
+			},
+		},
+	}
+
+	if _, ok := (&I7HTTPAuthRule{}).Apply(ctx); ok {
+		t.Fatal("did not expect benign custom header to be detected")
 	}
 }
 
@@ -197,5 +247,18 @@ func TestI7HTTPBodyDetectsBase64LikeSession(t *testing.T) {
 	}
 	if match.Evidence != "session=***" {
 		t.Fatalf("unexpected evidence: %s", match.Evidence)
+	}
+}
+
+func TestI7HTTPBodyDoesNotDetectBenignSerialValue(t *testing.T) {
+	ctx := &Context{
+		HTTP: &HTTPInfo{
+			ContentType: "application/json",
+			Body:        []byte(`{"serial":"123"}`),
+		},
+	}
+
+	if _, ok := (&I7HTTPBodySecretRule{}).Apply(ctx); ok {
+		t.Fatal("did not expect benign serial value to be detected")
 	}
 }

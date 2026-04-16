@@ -51,10 +51,14 @@ var macLikeRegex = regexp.MustCompile(`(?i)^[0-9a-f]{2}(:[0-9a-f]{2}){5}$`)
 var longTokenCharsetRegex = regexp.MustCompile(`^[A-Za-z0-9._~+\-=/]+$`)
 
 var sensitiveHTTPHeaders = map[string]string{
-	"authorization":       "Authorization: ***",
-	"proxy-authorization": "Proxy-Authorization: ***",
-	"x-api-key":           "X-Api-Key: ***",
-	"x-auth-token":        "X-Auth-Token: ***",
+	"authorization":        "Authorization: ***",
+	"proxy-authorization":  "Proxy-Authorization: ***",
+	"x-api-key":            "X-Api-Key: ***",
+	"x-auth-token":         "X-Auth-Token: ***",
+	"x-access-token":       "X-Access-Token: ***",
+	"api-token":            "Api-Token: ***",
+	"authentication":       "Authentication: ***",
+	"authentication-token": "Authentication-Token: ***",
 }
 
 func HasSensitiveKey(name string) bool {
