@@ -214,6 +214,9 @@ I6 の考え方は、`baseline comparison`、`novelty vs anomaly-ish separation`
 - 平文 MQTT 通信の検知
 - MQTT CONNECT に含まれる username / password の検知
 - MQTT PUBLISH topic / payload に含まれる機密情報の検知
+- 平文 Telnet 通信の検知
+- Telnet login / password 入力の平文交換検知
+- Telnet payload に含まれる機密情報の検知
 - `Content-Type` が欠落・不正な場合の body 形式推定
   - `a=b&c=d` の form 推定
   - `{...}` / `[...]` の JSON 推定

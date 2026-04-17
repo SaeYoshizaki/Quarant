@@ -338,6 +338,7 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 
 	capturePayload := rules.NeedsPayloadCapture(dstPort) || rules.NeedsPayloadCapture(srcPort)
 	isHTTPClientToServer := rules.IsHTTPPort(dstPort)
+	isTelnetClientToServer := rules.IsTelnetPort(dstPort)
 	isMQTTClientToServer := rules.IsMQTTPort(dstPort)
 	isTLSClientToServer := rules.IsTLSPort(dstPort)
 	isTLSServerToClient := rules.IsTLSPort(srcPort)
@@ -400,6 +401,13 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 	if isMQTTClientToServer {
 		if mi, ok := rules.ParseMQTT(st.ClientData); ok {
 			mqttInfo = mi
+		}
+	}
+
+	var telnetInfo *rules.TelnetInfo
+	if isTelnetClientToServer {
+		if ti, ok := rules.ParseTelnet(st.ClientData, st.ServerData); ok {
+			telnetInfo = ti
 		}
 	}
 
@@ -479,9 +487,11 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 		DstIP:                     dstIP,
 		DstPort:                   dstPort,
 		Payload:                   st.ClientData,
+		ServerPayload:             st.ServerData,
 		Debug:                     h.debug,
 		HTTP:                      httpInfo,
 		MQTT:                      mqttInfo,
+		Telnet:                    telnetInfo,
 		TLS:                       isTLSClientToServer,
 		TLSInfo:                   st.TLSClientInfo,
 		DeviceCategory:            deviceCategory,

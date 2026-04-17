@@ -17,11 +17,13 @@ type Context struct {
 	DstIP   string
 	DstPort uint16
 
-	Payload []byte
-	Debug   bool
+	Payload       []byte
+	ServerPayload []byte
+	Debug         bool
 
 	HTTP    *HTTPInfo
 	MQTT    *MQTTInfo
+	Telnet  *TelnetInfo
 	TLS     bool
 	TLSInfo *TLSClientHelloInfo
 

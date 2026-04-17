@@ -33,6 +33,10 @@ func IsTLSPort(p uint16) bool {
 	}
 }
 
+func IsTelnetPort(p uint16) bool {
+	return p == 23 || p == 2323
+}
+
 func IsInsecureServicePort(p uint16) bool {
 	_, ok := insecureServicePorts[p]
 	return ok
