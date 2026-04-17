@@ -21,6 +21,7 @@ type Context struct {
 	Debug   bool
 
 	HTTP    *HTTPInfo
+	MQTT    *MQTTInfo
 	TLS     bool
 	TLSInfo *TLSClientHelloInfo
 
