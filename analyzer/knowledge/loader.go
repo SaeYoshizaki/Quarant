@@ -91,6 +91,20 @@ type I4KnownVulnCandidates struct {
 	Candidates []I4KnownVulnCandidate `json:"candidates"`
 }
 
+type I6StorageSignalPattern struct {
+	Signal         string   `json:"signal"`
+	Keywords       []string `json:"keywords"`
+	Methods        []string `json:"methods"`
+	MinUploadBytes int      `json:"min_upload_bytes"`
+	RiskSignal     string   `json:"risk_signal"`
+	NotesEN        string   `json:"notes_en"`
+	NotesJA        string   `json:"notes_ja"`
+}
+
+type I6StorageSignalPatterns struct {
+	Patterns []I6StorageSignalPattern `json:"patterns"`
+}
+
 func loadJSON(path string, out any) error {
 	data, err := os.ReadFile(path)
 	if err != nil {
@@ -181,6 +195,17 @@ func LoadI4KnownVulnCandidates() (*I4KnownVulnCandidates, error) {
 	return &v, nil
 }
 
+func LoadI6StorageSignalPatterns() (*I6StorageSignalPatterns, error) {
+	path := filepath.Join(knowledgeDir, "i6_storage_signal_patterns.json")
+
+	var v I6StorageSignalPatterns
+	if err := loadJSON(path, &v); err != nil {
+		return nil, err
+	}
+
+	return &v, nil
+}
+
 type DB struct {
 	DeviceCategories   *DeviceCategories
 	CommunicationTypes *CommunicationTypes
@@ -189,6 +214,7 @@ type DB struct {
 	CategoryInference  *CategoryInferenceDB
 	BehaviorBaselines  CategoryBehaviorBaselines
 	I4KnownVuln        *I4KnownVulnCandidates
+	I6StorageSignals   *I6StorageSignalPatterns
 }
 
 func LoadAll() (*DB, error) {
@@ -227,6 +253,11 @@ func LoadAll() (*DB, error) {
 		return nil, err
 	}
 
+	i6StorageSignals, err := LoadI6StorageSignalPatterns()
+	if err != nil {
+		return nil, err
+	}
+
 	return &DB{
 		DeviceCategories:   deviceCategories,
 		CommunicationTypes: communicationTypes,
@@ -235,6 +266,7 @@ func LoadAll() (*DB, error) {
 		CategoryInference:  categoryInference,
 		BehaviorBaselines:  behaviorBaselines,
 		I4KnownVuln:        i4KnownVuln,
+		I6StorageSignals:   i6StorageSignals,
 	}, nil
 }
 

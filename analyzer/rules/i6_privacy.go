@@ -49,6 +49,8 @@ func (r *I6PrivacyRule) ApplyAll(ctx *Context) []Match {
 		out = append(out, r.applyBehaviorBaselineAll(ctx, category, commType)...)
 	}
 
+	out = append(out, r.applyStorageSignalAll(ctx, category)...)
+
 	if commType == "" {
 		return out
 	}
@@ -126,6 +128,127 @@ func (r *I6PrivacyRule) ApplyAll(ctx *Context) []Match {
 	}
 
 	return dedupeMatches(out)
+}
+
+func (r *I6PrivacyRule) applyStorageSignalAll(ctx *Context, category string) []Match {
+	if r.db == nil || r.db.I6StorageSignals == nil || ctx == nil || ctx.HTTP == nil {
+		return nil
+	}
+	if !isHTTPUploadMethod(ctx.HTTP.Method) {
+		return nil
+	}
+
+	host, path := observedEndpoint(ctx)
+	if host == "" && path == "" {
+		return nil
+	}
+
+	uploadBytes := ctx.UploadBytes
+	if uploadBytes <= 0 && ctx.HTTP != nil {
+		uploadBytes = len(ctx.HTTP.Body)
+	}
+
+	hits := DetectPIIHits(ctx.HTTP, ctx.Payload)
+	identifierSignal := hasStableIdentifierHit(hits)
+	out := make([]Match, 0, 2)
+
+	for _, pattern := range r.db.I6StorageSignals.Patterns {
+		if !methodAllowedByStoragePattern(ctx.HTTP.Method, pattern.Methods) {
+			continue
+		}
+		if uploadBytes < pattern.MinUploadBytes {
+			continue
+		}
+		matchedKeyword := firstMatchedStorageKeyword(host, path, ctx.HTTP.RawLine, pattern.Keywords)
+		if matchedKeyword == "" {
+			continue
+		}
+
+		corroboration := storageSignalCorroboration(ctx, category, uploadBytes)
+		if len(corroboration) == 0 {
+			continue
+		}
+
+		patternRiskSignal := strings.TrimSpace(pattern.RiskSignal)
+		if patternRiskSignal == "" {
+			patternRiskSignal = "stored_data_signal"
+		}
+		riskSignals := []string{patternRiskSignal, "storage_endpoint"}
+		if isAccumulatedUpload(uploadBytes) {
+			riskSignals = append(riskSignals, "accumulated_upload")
+		}
+		if ctx.StableIdentifierRepeatCount >= 2 {
+			riskSignals = append(riskSignals, "stable_identifier_signal")
+		}
+		if ctx.StorageEndpointRepeatCount >= 2 {
+			riskSignals = append(riskSignals, "repeated_storage_endpoint")
+		}
+
+		out = append(out, Match{
+			RuleID:   "I6_STORED_DATA_SIGNAL_OBSERVED",
+			Type:     "I6_STORED_DATA_SIGNAL_OBSERVED",
+			Category: "I6",
+			Severity: SeverityWarning,
+			Message: fmt.Sprintf(
+				"Stored-data communication candidate observed | signal=%s | method=%s | keyword=%s | upload_bytes=%d | corroboration=%s | risk=%s",
+				pattern.Signal,
+				ctx.HTTP.Method,
+				matchedKeyword,
+				uploadBytes,
+				strings.Join(corroboration, ","),
+				strings.Join(riskSignals, ","),
+			),
+			Evidence: fmt.Sprintf(
+				"category=%s host=%s path=%s method=%s upload_bytes=%d storage_signal=%s keyword=%s endpoint_repeat_count=%d stable_identifier_observed=%t stable_identifier_repeat_count=%d corroboration=%s signal_confidence=candidate indirect_at_rest=true direct_storage_observed=false risk_signals=%s",
+				category,
+				host,
+				path,
+				ctx.HTTP.Method,
+				uploadBytes,
+				pattern.Signal,
+				matchedKeyword,
+				ctx.StorageEndpointRepeatCount,
+				identifierSignal,
+				ctx.StableIdentifierRepeatCount,
+				strings.Join(corroboration, ","),
+				strings.Join(riskSignals, ","),
+			),
+		})
+	}
+
+	return dedupeMatches(out)
+}
+
+func I6StorageCandidateEndpointKey(ctx *Context, patterns []knowledge.I6StorageSignalPattern) string {
+	if ctx == nil || ctx.HTTP == nil || !isHTTPUploadMethod(ctx.HTTP.Method) {
+		return ""
+	}
+	host, path := observedEndpoint(ctx)
+	if host == "" && path == "" {
+		return ""
+	}
+	uploadBytes := ctx.UploadBytes
+	if uploadBytes <= 0 {
+		uploadBytes = len(ctx.HTTP.Body)
+	}
+
+	for _, pattern := range patterns {
+		if !methodAllowedByStoragePattern(ctx.HTTP.Method, pattern.Methods) {
+			continue
+		}
+		if uploadBytes < pattern.MinUploadBytes {
+			continue
+		}
+		matchedKeyword := firstMatchedStorageKeyword(host, path, ctx.HTTP.RawLine, pattern.Keywords)
+		if matchedKeyword == "" {
+			continue
+		}
+		return strings.ToLower(strings.TrimSpace(ctx.HTTP.Method)) + "|" +
+			strings.ToLower(strings.TrimSpace(host)) + "|" +
+			normalizeStorageEndpointPath(path) + "|" +
+			matchedKeyword
+	}
+	return ""
 }
 
 func (r *I6PrivacyRule) applyCategoryMismatch(ctx *Context) *Match {
@@ -611,6 +734,110 @@ func hostMatchesExpectedDomains(host string, representativeDomains []string, eco
 	}
 	if hostMatchesRepresentativeDomains(host, ecosystemDomains) {
 		return true
+	}
+	return false
+}
+
+func isHTTPUploadMethod(method string) bool {
+	switch strings.ToUpper(strings.TrimSpace(method)) {
+	case "POST", "PUT", "PATCH":
+		return true
+	default:
+		return false
+	}
+}
+
+func methodAllowedByStoragePattern(method string, allowed []string) bool {
+	if len(allowed) == 0 {
+		return isHTTPUploadMethod(method)
+	}
+	method = strings.ToUpper(strings.TrimSpace(method))
+	for _, candidate := range allowed {
+		if method == strings.ToUpper(strings.TrimSpace(candidate)) {
+			return true
+		}
+	}
+	return false
+}
+
+func firstMatchedStorageKeyword(host, path, rawLine string, keywords []string) string {
+	combined := strings.ToLower(strings.TrimSpace(host + " " + path + " " + rawLine))
+	for _, keyword := range keywords {
+		normalized := strings.ToLower(strings.TrimSpace(keyword))
+		if normalized == "" {
+			continue
+		}
+		if strings.Contains(combined, normalized) {
+			return normalized
+		}
+	}
+	return ""
+}
+
+func storageSignalCorroboration(ctx *Context, category string, uploadBytes int) []string {
+	corroboration := make([]string, 0, 4)
+	privacySensitiveCategory := isPrivacySensitiveStorageCategory(category)
+	if isAccumulatedUpload(uploadBytes) {
+		corroboration = append(corroboration, "accumulated_upload")
+	}
+	if ctx != nil && ctx.StorageEndpointRepeatCount >= 2 {
+		corroboration = append(corroboration, "repeated_storage_endpoint")
+	}
+	if ctx != nil && ctx.StableIdentifierRepeatCount >= 2 {
+		corroboration = append(corroboration, "repeated_stable_identifier")
+	}
+	if privacySensitiveCategory && len(corroboration) > 0 {
+		corroboration = append(corroboration, "privacy_sensitive_category")
+	}
+	return uniqueStrings(corroboration)
+}
+
+func isPrivacySensitiveStorageCategory(category string) bool {
+	switch strings.TrimSpace(category) {
+	case "Camera", "VoiceAssistant", "Wearable":
+		return true
+	default:
+		return false
+	}
+}
+
+func isAccumulatedUpload(uploadBytes int) bool {
+	return uploadBytes >= 4096
+}
+
+func normalizeStorageEndpointPath(path string) string {
+	path = strings.ToLower(strings.TrimSpace(path))
+	if path == "" {
+		return ""
+	}
+	parts := strings.Split(path, "/")
+	for i, part := range parts {
+		if part == "" {
+			continue
+		}
+		if looksVariableStoragePathSegment(part) {
+			parts[i] = "*"
+		}
+	}
+	return strings.Join(parts, "/")
+}
+
+func looksVariableStoragePathSegment(segment string) bool {
+	if len(segment) >= 8 && strings.ContainsAny(segment, "0123456789") {
+		return true
+	}
+	if uuidLikeRegex.MatchString(segment) {
+		return true
+	}
+	return false
+}
+
+func hasStableIdentifierHit(hits []PIIHit) bool {
+	for _, hit := range hits {
+		switch hit.Type {
+		case "device_identifier", "user_identifier", "account_info":
+			return true
+		}
 	}
 	return false
 }

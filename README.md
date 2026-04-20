@@ -137,7 +137,8 @@ I4 v1 の考え方は、`update-like communication detection` と `plaintext ext
 機器カテゴリごとの通常通信ベースラインと、実際のフローを比較して、  
 プライバシー上不自然な通信を検知します。
 I6 は HTTP Host だけでなく TLS SNI に対しても baseline 比較を行い、TLS 通信でも想定外ドメインや ecosystem mismatch を説明可能に検知します。
-I6 の考え方は、`baseline comparison`、`novelty vs anomaly-ish separation`、`explainable mismatch` の3つです。
+また、パッシブ監視ではデバイス内部やクラウド側に保存された個人情報を直接確認できないため、I6 の at-rest は直接検知ではなく、保存データの存在を示唆する通信シグナルとして扱います。
+I6 の考え方は、`baseline comparison`、`novelty vs anomaly-ish separation`、`explainable mismatch`、`stored-data signal detection` の4つです。
 
 ### 検知機能
 
@@ -147,6 +148,7 @@ I6 の考え方は、`baseline comparison`、`novelty vs anomaly-ish separation`
 - 想定外ドメインの検知
 - プロトコル不一致の検知
 - 外向き平文通信の検知
+- history / backup / sync / logs 系 endpoint への蓄積データらしい upload 候補の検知
 - `risk_signals` に基づく総合リスク判定 (`R1_COMPOSITE_RISK`)
 - `recommended_action` による初動判断の支援
 
@@ -155,11 +157,13 @@ I6 の考え方は、`baseline comparison`、`novelty vs anomaly-ish separation`
 - `novelty 寄り`: baseline にないが ecosystem 内に収まる通信は `baseline_novelty` として扱い、未学習の正常通信寄りとして観察できます。
 - `suspicious_unmatched`: `observed SNI=evil-analytics.example.com` では `domain_disposition=suspicious_unmatched` と `R1_COMPOSITE_RISK=medium / investigate` が出て、baseline 外だが即 block ではない anomaly 寄り通信として説明できます。
 - `rooted mismatch`: `learned category=Controller` に対して `observed SNI=alexa.amazon.com` や `api.smartthings.com` が観測されると、`I6_DEVICE_FLOW_CATEGORY_MISMATCH` と `category_mismatch_over_tls` が出て、カテゴリ不一致を説明付きで示せます。
+- `stored-data signal`: `POST /v1/history/upload` や `POST /backup/sync` のような保存系 keyword と一定サイズ以上の upload はまず候補として記録し、大きめの upload、同じ endpoint の再観測、stable identifier の再観測などが揃う場合に `I6_STORED_DATA_SIGNAL_OBSERVED` が出ます。privacy-sensitive category は単独では trigger せず、これらの条件に対する補助 signal として扱います。これは「保存済みデータを直接見た」ことではなく、`indirect_at_rest=true` の通信シグナルとして扱います。
 
 ### 現在の到達点
 
 - I6 は、機器カテゴリごとの通信ベースラインから外れる HTTP / TLS 通信を検知し、`risk_signals` と `recommended_action` まで含めて説明できます。
 - 特に TLS では、`SNI` を用いた baseline comparison、`baseline_novelty` と `suspicious_unmatched` の分離、`category_mismatch_over_tls` による rooted mismatch の説明が可能です。
+- 保存データについては、`history / backup / sync / logs` などの endpoint 語、upload method、upload size、category、同じ endpoint や安定識別子の再観測を組み合わせ、直接検知ではなく保存シグナル候補として説明します。
 - そのため、本実装は OWASP IoT Top 10 の I6 に対して、完全な防止機構というより `explainable detection / triage` の役割を果たします。
 
 ### まだ足りない部分
@@ -167,12 +171,14 @@ I6 の考え方は、`baseline comparison`、`novelty vs anomaly-ish separation`
 - 個人情報そのものの常時識別や、`without permission` に相当する同意・権限の判断まではできません。
 - baseline に未登録でも正常なクラウド移行や委託先通信はありうるため、`unexpected_domain` 系 signal だけで異常を断定する設計にはしていません。
 - 保存データの扱い、クラウド側での二次利用、ecosystem 全体のポリシー順守までは直接観測できません。
+- `I6_STORED_DATA_SIGNAL_OBSERVED` は保存データの存在を断定せず、通信上の間接シグナルだけを示します。
 
 ### 今後の改善候補
 
 - ベンダ単位 baseline と domain / API / 通信パターンの拡充
 - `adjacent / likely-benign` のような中間層の導入
 - 通信頻度や複数端末での再観測に基づく軽量スコアリング
+- 同一識別子の繰り返し送信、起動直後バースト、複数 flow にまたがる backup / sync の相関
 - novelty と anomaly の切り分け、および mismatch 理由の説明性のさらなる改善
 
 ## I7: Insecure Data Transfer and Storage

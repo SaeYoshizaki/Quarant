@@ -16,15 +16,17 @@ func NewStore() *Store {
 
 func NewProfile(ip string) *DeviceProfile {
 	return &DeviceProfile{
-		IP:         ip,
-		Hosts:      map[string]bool{},
-		UserAgents: map[string]bool{},
-		Servers:    map[string]bool{},
-		SNIValues:  map[string]bool{},
-		Paths:      map[string]bool{},
-		Ports:      map[uint16]bool{},
-		Protocols:  map[string]bool{},
-		TypeScores: map[string]float64{},
+		IP:                           ip,
+		Hosts:                        map[string]bool{},
+		UserAgents:                   map[string]bool{},
+		Servers:                      map[string]bool{},
+		SNIValues:                    map[string]bool{},
+		Paths:                        map[string]bool{},
+		Ports:                        map[uint16]bool{},
+		Protocols:                    map[string]bool{},
+		TypeScores:                   map[string]float64{},
+		StorageSignalEndpoints:       map[string]int{},
+		StableIdentifierFingerprints: map[string]int{},
 	}
 }
 

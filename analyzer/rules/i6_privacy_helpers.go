@@ -1,6 +1,8 @@
 package rules
 
 import (
+	"crypto/sha256"
+	"fmt"
 	"net/url"
 	"regexp"
 	"strings"
@@ -219,4 +221,103 @@ func dedupePIIHits(in []PIIHit) []PIIHit {
 	}
 
 	return out
+}
+
+func StableIdentifierFingerprints(http *HTTPInfo) []string {
+	if http == nil {
+		return nil
+	}
+
+	fingerprints := make([]string, 0, 4)
+	for key, vals := range http.Query {
+		keyLower := strings.ToLower(strings.TrimSpace(key))
+		piiType, ok := piiKeyToType[keyLower]
+		if !ok || !isStableIdentifierPIIType(piiType) {
+			continue
+		}
+		for _, value := range vals {
+			if stableIdentifierValueLooksUseful(value) {
+				fingerprints = append(fingerprints, stableIdentifierFingerprint(piiType, keyLower, value))
+			}
+		}
+	}
+
+	for key, value := range http.Headers {
+		keyLower := strings.ToLower(strings.TrimSpace(key))
+		if piiType, ok := piiKeyToType[keyLower]; ok && isStableIdentifierPIIType(piiType) {
+			if stableIdentifierValueLooksUseful(value) {
+				fingerprints = append(fingerprints, stableIdentifierFingerprint(piiType, keyLower, value))
+			}
+			continue
+		}
+		if uuidRegex.MatchString(value) || macRegex.MatchString(value) {
+			fingerprints = append(fingerprints, stableIdentifierFingerprint("device_identifier", keyLower, value))
+		}
+	}
+
+	body := strings.TrimSpace(string(http.Body))
+	if body != "" {
+		fingerprints = append(fingerprints, stableIdentifierBodyFingerprints(body)...)
+	}
+
+	return uniqueStrings(fingerprints)
+}
+
+func stableIdentifierBodyFingerprints(body string) []string {
+	fingerprints := make([]string, 0, 4)
+	for _, match := range jsonStringKVRegex.FindAllStringSubmatch(body, -1) {
+		if len(match) < 3 {
+			continue
+		}
+		fingerprints = append(fingerprints, stableIdentifierFingerprintFromField(match[1], match[2])...)
+	}
+	for _, match := range textKVRegex.FindAllStringSubmatch(body, -1) {
+		if len(match) < 3 {
+			continue
+		}
+		fingerprints = append(fingerprints, stableIdentifierFingerprintFromField(match[1], match[2])...)
+	}
+	return fingerprints
+}
+
+func stableIdentifierFingerprintFromField(key, value string) []string {
+	keyLower := strings.ToLower(strings.TrimSpace(key))
+	if piiType, ok := piiKeyToType[keyLower]; ok && isStableIdentifierPIIType(piiType) && stableIdentifierValueLooksUseful(value) {
+		return []string{stableIdentifierFingerprint(piiType, keyLower, value)}
+	}
+	if uuidRegex.MatchString(value) || macRegex.MatchString(value) {
+		return []string{stableIdentifierFingerprint("device_identifier", keyLower, value)}
+	}
+	return nil
+}
+
+func isStableIdentifierPIIType(piiType string) bool {
+	switch piiType {
+	case "device_identifier", "user_identifier", "account_info":
+		return true
+	default:
+		return false
+	}
+}
+
+func stableIdentifierValueLooksUseful(value string) bool {
+	value = strings.TrimSpace(value)
+	if value == "" {
+		return false
+	}
+	if uuidRegex.MatchString(value) || macRegex.MatchString(value) {
+		return true
+	}
+	if len(value) >= 8 && strings.ContainsAny(value, "0123456789") {
+		return true
+	}
+	return false
+}
+
+func stableIdentifierFingerprint(piiType, key, value string) string {
+	normalized := strings.ToLower(strings.TrimSpace(piiType)) + "|" +
+		strings.ToLower(strings.TrimSpace(key)) + "|" +
+		strings.ToLower(strings.TrimSpace(value))
+	sum := sha256.Sum256([]byte(normalized))
+	return fmt.Sprintf("%x", sum[:8])
 }

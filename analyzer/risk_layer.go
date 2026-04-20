@@ -149,6 +149,16 @@ func classifyCompositeRisk(signals []string) (int, string, Severity, string) {
 			score += 10
 		case "external_comm":
 			score += 10
+		case "stored_data_signal":
+			score += 10
+		case "storage_endpoint":
+			score += 5
+		case "accumulated_upload":
+			score += 15
+		case "stable_identifier_signal":
+			score += 10
+		case "repeated_storage_endpoint":
+			score += 10
 		case "admin_like_path":
 			score += 10
 		case "category_confidence_low":

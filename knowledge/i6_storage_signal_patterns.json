@@ -1,0 +1,58 @@
+{
+  "patterns": [
+    {
+      "signal": "stored_history_upload",
+      "keywords": [
+        "history",
+        "activity",
+        "timeline"
+      ],
+      "methods": [
+        "POST",
+        "PUT",
+        "PATCH"
+      ],
+      "min_upload_bytes": 512,
+      "risk_signal": "stored_data_signal",
+      "notes_en": "History-like endpoint with an upload method suggests previously accumulated user or device activity may be transmitted.",
+      "notes_ja": "history 系 endpoint への upload method は、蓄積された利用履歴や端末履歴の送信を示唆する。"
+    },
+    {
+      "signal": "backup_sync_upload",
+      "keywords": [
+        "backup",
+        "restore",
+        "sync",
+        "snapshot"
+      ],
+      "methods": [
+        "POST",
+        "PUT",
+        "PATCH"
+      ],
+      "min_upload_bytes": 1024,
+      "risk_signal": "stored_data_signal",
+      "notes_en": "Backup or sync endpoint with a non-trivial upload size is an indirect signal of stored data transfer.",
+      "notes_ja": "backup / sync 系 endpoint への一定サイズ以上の upload は、保存データ転送の間接シグナルとして扱う。"
+    },
+    {
+      "signal": "log_export_upload",
+      "keywords": [
+        "log",
+        "logs",
+        "diagnostic",
+        "diagnostics",
+        "crash"
+      ],
+      "methods": [
+        "POST",
+        "PUT",
+        "PATCH"
+      ],
+      "min_upload_bytes": 2048,
+      "risk_signal": "stored_data_signal",
+      "notes_en": "Diagnostic or log upload may include retained local state, usage traces, or device identifiers.",
+      "notes_ja": "diagnostic / log upload は、端末内に保持された状態、利用痕跡、識別子を含む可能性がある。"
+    }
+  ]
+}

@@ -20,6 +20,10 @@ type Context struct {
 	Payload       []byte
 	ServerPayload []byte
 	Debug         bool
+	UploadBytes   int
+
+	StorageEndpointRepeatCount  int
+	StableIdentifierRepeatCount int
 
 	HTTP    *HTTPInfo
 	MQTT    *MQTTInfo

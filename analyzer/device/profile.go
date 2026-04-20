@@ -28,6 +28,9 @@ type DeviceProfile struct {
 	ObservedServices map[string]bool
 	InsecureServices map[string]bool
 
+	StorageSignalEndpoints       map[string]int
+	StableIdentifierFingerprints map[string]int
+
 	AdminSuspected            bool
 	ExternalExposureSuspected bool
 
@@ -63,6 +66,28 @@ func (p *DeviceProfile) AddRiskReason(reason string) {
 		p.RiskReasons = make(map[string]bool)
 	}
 	p.RiskReasons[reason] = true
+}
+
+func (p *DeviceProfile) ObserveStorageSignalEndpoint(endpoint string) int {
+	if endpoint == "" {
+		return 0
+	}
+	if p.StorageSignalEndpoints == nil {
+		p.StorageSignalEndpoints = make(map[string]int)
+	}
+	p.StorageSignalEndpoints[endpoint]++
+	return p.StorageSignalEndpoints[endpoint]
+}
+
+func (p *DeviceProfile) ObserveStableIdentifierFingerprint(fingerprint string) int {
+	if fingerprint == "" {
+		return 0
+	}
+	if p.StableIdentifierFingerprints == nil {
+		p.StableIdentifierFingerprints = make(map[string]int)
+	}
+	p.StableIdentifierFingerprints[fingerprint]++
+	return p.StableIdentifierFingerprints[fingerprint]
 }
 
 func (p *DeviceProfile) MarkAdminSuspected() {

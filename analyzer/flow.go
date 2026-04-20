@@ -505,6 +505,7 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 		Payload:                   st.ClientData,
 		ServerPayload:             st.ServerData,
 		Debug:                     h.debug,
+		UploadBytes:               estimateUploadBytes(httpInfo),
 		HTTP:                      httpInfo,
 		MQTT:                      mqttInfo,
 		Telnet:                    telnetInfo,
@@ -553,6 +554,7 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 			flowInferenceReasons,
 		),
 	}
+	h.annotateI6StorageObservation(ctx, d)
 
 	if h.debug {
 		summary := i6DebugSummary(
@@ -684,4 +686,34 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 			Message:   fmt.Sprintf("payload_head=%q", string(p)),
 		})
 	}
+}
+
+func (h *FlowHandler) annotateI6StorageObservation(ctx *rules.Context, d *device.DeviceProfile) {
+	if h == nil || h.knowledge == nil || h.knowledge.I6StorageSignals == nil || ctx == nil || d == nil || ctx.HTTP == nil {
+		return
+	}
+
+	if endpointKey := rules.I6StorageCandidateEndpointKey(ctx, h.knowledge.I6StorageSignals.Patterns); endpointKey != "" {
+		ctx.StorageEndpointRepeatCount = d.ObserveStorageSignalEndpoint(endpointKey)
+	}
+
+	for _, fingerprint := range rules.StableIdentifierFingerprints(ctx.HTTP) {
+		count := d.ObserveStableIdentifierFingerprint(fingerprint)
+		if count > ctx.StableIdentifierRepeatCount {
+			ctx.StableIdentifierRepeatCount = count
+		}
+	}
+}
+
+func estimateUploadBytes(httpInfo *rules.HTTPInfo) int {
+	if httpInfo == nil {
+		return 0
+	}
+	if v := strings.TrimSpace(httpInfo.Headers["content-length"]); v != "" {
+		var n int
+		if _, err := fmt.Sscanf(v, "%d", &n); err == nil && n > 0 {
+			return n
+		}
+	}
+	return len(httpInfo.Body)
 }
