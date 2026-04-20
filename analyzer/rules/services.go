@@ -15,6 +15,11 @@ var insecureServicePorts = map[uint16]string{
 	5683: "coap",
 }
 
+var nonPublicIPv6CIDRs = mustParseCIDRs(
+	"fc00::/7",      // unique local
+	"2001:db8::/32", // documentation
+)
+
 func IsHTTPPort(p uint16) bool {
 	switch p {
 	case 80, 8000, 8080, 8888:
@@ -59,6 +64,20 @@ func InsecureServiceNameByPort(p uint16) (string, bool) {
 	return name, ok
 }
 
+func IsPublicIP(ipStr string) bool {
+	ip := net.ParseIP(strings.TrimSpace(ipStr))
+	if ip == nil {
+		return false
+	}
+	if ip4 := ip.To4(); ip4 != nil {
+		return isPublicIPv4(ip4)
+	}
+	if ip16 := ip.To16(); ip16 != nil {
+		return isPublicIPv6(ip16)
+	}
+	return false
+}
+
 func IsPublicIPv4(ipStr string) bool {
 	ip := net.ParseIP(strings.TrimSpace(ipStr))
 	if ip == nil {
@@ -68,8 +87,11 @@ func IsPublicIPv4(ipStr string) bool {
 	if ip == nil {
 		return false
 	}
+	return isPublicIPv4(ip)
+}
 
-	if ip.IsLoopback() || ip.IsMulticast() || ip.IsLinkLocalUnicast() {
+func isPublicIPv4(ip net.IP) bool {
+	if ip.IsLoopback() || ip.IsMulticast() || ip.IsLinkLocalUnicast() || ip.IsUnspecified() {
 		return false
 	}
 
@@ -86,6 +108,32 @@ func IsPublicIPv4(ipStr string) bool {
 		return false
 	}
 	return true
+}
+
+func isPublicIPv6(ip net.IP) bool {
+	if ip.IsLoopback() || ip.IsMulticast() || ip.IsLinkLocalUnicast() || ip.IsUnspecified() {
+		return false
+	}
+
+	for _, network := range nonPublicIPv6CIDRs {
+		if network.Contains(ip) {
+			return false
+		}
+	}
+
+	return true
+}
+
+func mustParseCIDRs(values ...string) []*net.IPNet {
+	out := make([]*net.IPNet, 0, len(values))
+	for _, value := range values {
+		_, network, err := net.ParseCIDR(value)
+		if err != nil {
+			panic(err)
+		}
+		out = append(out, network)
+	}
+	return out
 }
 
 func DetectHTTPAdminIndicators(http *HTTPInfo) ([]string, bool) {

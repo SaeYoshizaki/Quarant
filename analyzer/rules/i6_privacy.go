@@ -150,7 +150,7 @@ func (r *I6PrivacyRule) applyCategoryMismatch(ctx *Context) *Match {
 	if commType == "" {
 		commType = "unknown"
 	}
-	isExternal := IsPublicIPv4(ctx.DstIP)
+	isExternal := IsPublicIP(ctx.DstIP)
 	if ctx.TLS && !shouldEmitTLSCategoryMismatch(ctx, isExternal) {
 		return nil
 	}
@@ -227,7 +227,7 @@ func (r *I6PrivacyRule) applyBehaviorBaselineAll(ctx *Context, category, commTyp
 	}
 
 	host, path := observedEndpoint(ctx)
-	isExternal := IsPublicIPv4(ctx.DstIP)
+	isExternal := IsPublicIP(ctx.DstIP)
 	suspicious := suspiciousPatternSummary(baseline.SuspiciousPatterns)
 	inference, hasInference := r.db.GetCategoryInference(category)
 	var representativeDomains []string

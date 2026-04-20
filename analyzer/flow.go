@@ -32,12 +32,31 @@ func NewFlowHandler(sink *JSONLSink, debug bool, db *knowledge.DB) *FlowHandler 
 }
 
 func flowKeyTCP(ipSrc string, srcPort uint16, ipDst string, dstPort uint16) string {
-	a := fmt.Sprintf("%s:%d", ipSrc, srcPort)
-	b := fmt.Sprintf("%s:%d", ipDst, dstPort)
+	a := flowEndpoint(ipSrc, srcPort)
+	b := flowEndpoint(ipDst, dstPort)
 	if a < b {
 		return "tcp|" + a + "<->" + b
 	}
 	return "tcp|" + b + "<->" + a
+}
+
+func flowEndpoint(ip string, port uint16) string {
+	if strings.Contains(ip, ":") {
+		return fmt.Sprintf("[%s]:%d", ip, port)
+	}
+	return fmt.Sprintf("%s:%d", ip, port)
+}
+
+func packetIPStrings(packet gopacket.Packet) (string, string, bool) {
+	if ipLayer := packet.Layer(layers.LayerTypeIPv4); ipLayer != nil {
+		ip := ipLayer.(*layers.IPv4)
+		return ip.SrcIP.String(), ip.DstIP.String(), true
+	}
+	if ipLayer := packet.Layer(layers.LayerTypeIPv6); ipLayer != nil {
+		ip := ipLayer.(*layers.IPv6)
+		return ip.SrcIP.String(), ip.DstIP.String(), true
+	}
+	return "", "", false
 }
 
 func isI2RiskEvent(eventType string) bool {
@@ -314,18 +333,15 @@ func i4LegacySignals(d *device.DeviceProfile) []string {
 }
 
 func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
-	ipLayer := packet.Layer(layers.LayerTypeIPv4)
 	tcpLayer := packet.Layer(layers.LayerTypeTCP)
-	if ipLayer == nil || tcpLayer == nil {
+	srcIP, dstIP, ok := packetIPStrings(packet)
+	if !ok || tcpLayer == nil {
 		return
 	}
 
-	ip := ipLayer.(*layers.IPv4)
 	tcp := tcpLayer.(*layers.TCP)
 	now := time.Now()
 
-	srcIP := ip.SrcIP.String()
-	dstIP := ip.DstIP.String()
 	srcPort := uint16(tcp.SrcPort)
 	dstPort := uint16(tcp.DstPort)
 

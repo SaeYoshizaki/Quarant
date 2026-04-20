@@ -146,7 +146,7 @@ func detectHTTPFirmwareUpdateObservation(ctx *Context) (i4FirmwareUpdateObservat
 		Indicators:  formatI4Indicators(matches),
 		ObservedVia: "http",
 		CommType:    "http",
-		External:    IsPublicIPv4(ctx.DstIP),
+		External:    IsPublicIP(ctx.DstIP),
 		StrongHit:   hasI4StrongHit(matches),
 	}, true
 }
@@ -163,7 +163,7 @@ func detectTLSFirmwareUpdateObservation(ctx *Context) (i4FirmwareUpdateObservati
 		Indicators:  formatI4Indicators(matches),
 		ObservedVia: "tls_sni",
 		CommType:    "tls",
-		External:    IsPublicIPv4(ctx.DstIP),
+		External:    IsPublicIP(ctx.DstIP),
 		StrongHit:   hasI4StrongHit(matches),
 	}, true
 }
