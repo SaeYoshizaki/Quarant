@@ -60,6 +60,8 @@ func (r *I6PrivacyRule) ApplyAll(ctx *Context) []Match {
 		return out
 	}
 
+	out = append(out, r.applyPIIUseSignalAll(ctx, category, commType, hits)...)
+
 	if category != "unknown" && r.db.IsKnownCategory(category) {
 		for _, hit := range hits {
 			if r.db.IsSuspiciousCombination(category, commType, hit.Type) {
@@ -249,6 +251,73 @@ func I6StorageCandidateEndpointKey(ctx *Context, patterns []knowledge.I6StorageS
 			matchedKeyword
 	}
 	return ""
+}
+
+func (r *I6PrivacyRule) applyPIIUseSignalAll(ctx *Context, category, commType string, hits []PIIHit) []Match {
+	if r.db == nil || ctx == nil || ctx.HTTP == nil || len(hits) == 0 {
+		return nil
+	}
+	if category == "" || category == "unknown" || !r.db.IsKnownCategory(category) {
+		return nil
+	}
+
+	unexpectedPIITypes := unexpectedPIITypesForCategory(r.db, category, hits)
+	if len(unexpectedPIITypes) == 0 {
+		return nil
+	}
+
+	host, path := observedEndpoint(ctx)
+	destinationSignals, destinationDisposition := r.piiDestinationSignals(ctx, category, commType, host)
+	if len(destinationSignals) == 0 {
+		return nil
+	}
+
+	corroboration := piiUseCorroboration(ctx, commType)
+	if len(corroboration) == 0 {
+		return nil
+	}
+
+	riskSignals := []string{"potential_pii_misuse", "unexpected_pii_type"}
+	riskSignals = append(riskSignals, destinationSignals...)
+	if ctx.StableIdentifierRepeatCount >= 2 {
+		riskSignals = append(riskSignals, "repeated_identifier_disclosure")
+	}
+	if ctx.PIIDistinctDestinationCount >= 2 {
+		riskSignals = append(riskSignals, "broad_pii_destination")
+	}
+	riskSignals = uniqueStrings(riskSignals)
+
+	return []Match{
+		{
+			RuleID:   "I6_PII_TO_UNEXPECTED_DESTINATION",
+			Type:     "I6_PII_TO_UNEXPECTED_DESTINATION",
+			Category: "I6",
+			Severity: SeverityWarning,
+			Message: fmt.Sprintf(
+				"Potentially inappropriate PII use signal observed | category=%s | pii_types=%s | destination=%s | disposition=%s | corroboration=%s | risk=%s",
+				category,
+				strings.Join(unexpectedPIITypes, ","),
+				host,
+				destinationDisposition,
+				strings.Join(corroboration, ","),
+				strings.Join(riskSignals, ","),
+			),
+			Evidence: fmt.Sprintf(
+				"category=%s host=%s path=%s comm_type=%s pii_types=%s destination_disposition=%s pii_destination_repeat_count=%d pii_distinct_destination_count=%d stable_identifier_repeat_count=%d corroboration=%s consent_observed=false consent_inferred=false risk_signals=%s",
+				category,
+				host,
+				path,
+				emptyAsUnknown(commType),
+				strings.Join(unexpectedPIITypes, ","),
+				destinationDisposition,
+				ctx.PIIDestinationRepeatCount,
+				ctx.PIIDistinctDestinationCount,
+				ctx.StableIdentifierRepeatCount,
+				strings.Join(corroboration, ","),
+				strings.Join(riskSignals, ","),
+			),
+		},
+	}
 }
 
 func (r *I6PrivacyRule) applyCategoryMismatch(ctx *Context) *Match {
@@ -736,6 +805,94 @@ func hostMatchesExpectedDomains(host string, representativeDomains []string, eco
 		return true
 	}
 	return false
+}
+
+func unexpectedPIITypesForCategory(db *knowledge.DB, category string, hits []PIIHit) []string {
+	values := make([]string, 0, len(hits))
+	for _, hit := range hits {
+		if hit.Type == "" {
+			continue
+		}
+		if !db.IsAllowedPIIType(category, hit.Type) {
+			values = append(values, hit.Type)
+		}
+	}
+	return uniqueStrings(values)
+}
+
+func (r *I6PrivacyRule) piiDestinationSignals(ctx *Context, category, commType, host string) ([]string, string) {
+	signals := make([]string, 0, 3)
+	disposition := ""
+
+	if commType == "analytics" || commType == "tracking" {
+		signals = append(signals, "tracking_or_analytics_destination")
+		disposition = commType
+	}
+	if looksLikeThirdPartyPIIDestination(host) {
+		signals = append(signals, "third_party_pii_destination")
+		if disposition == "" {
+			disposition = "third_party_like"
+		}
+	}
+
+	isExternal := ctx != nil && IsPublicIP(ctx.DstIP)
+	if host != "" && isExternal {
+		if inference, ok := r.db.GetCategoryInference(category); ok {
+			if !hostMatchesExpectedDomains(host, inference.RepresentativeDomains, inference.EcosystemDomains) {
+				signals = append(signals, "unexpected_pii_destination")
+				if disposition == "" {
+					disposition = "baseline_unexpected"
+				}
+			}
+		}
+	}
+
+	if disposition == "" && len(signals) > 0 {
+		disposition = "unexpected"
+	}
+	return uniqueStrings(signals), disposition
+}
+
+func looksLikeThirdPartyPIIDestination(host string) bool {
+	host = strings.ToLower(strings.TrimSpace(host))
+	if host == "" {
+		return false
+	}
+	return containsAny(host,
+		"analytics",
+		"tracking",
+		"track.",
+		"metrics",
+		"telemetry",
+		"collect",
+		"ads.",
+		"adtech",
+	)
+}
+
+func piiUseCorroboration(ctx *Context, commType string) []string {
+	corroboration := make([]string, 0, 4)
+	if ctx != nil && ctx.StableIdentifierRepeatCount >= 2 {
+		corroboration = append(corroboration, "repeated_identifier")
+	}
+	if ctx != nil && ctx.PIIDestinationRepeatCount >= 2 {
+		corroboration = append(corroboration, "repeated_pii_destination")
+	}
+	if ctx != nil && ctx.PIIDistinctDestinationCount >= 2 {
+		corroboration = append(corroboration, "multiple_pii_destinations")
+	}
+	if (commType == "analytics" || commType == "tracking") && len(corroboration) > 0 {
+		corroboration = append(corroboration, "tracking_or_analytics_destination")
+	}
+	return uniqueStrings(corroboration)
+}
+
+func emptyAsUnknown(value string) string {
+	value = strings.TrimSpace(value)
+	if value == "" {
+		return "unknown"
+	}
+	return value
 }
 
 func isHTTPUploadMethod(method string) bool {

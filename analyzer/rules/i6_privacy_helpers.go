@@ -69,6 +69,7 @@ func DetectPIIHits(http *HTTPInfo, payload []byte) []PIIHit {
 
 	if http != nil {
 		hits = append(hits, detectQueryPII(http.Path)...)
+		hits = append(hits, detectQueryValuesPII(http.Query)...)
 		hits = append(hits, detectHeaderPII(http.Headers)...)
 	}
 
@@ -114,6 +115,29 @@ func detectQueryPII(path string) []PIIHit {
 		}
 	}
 
+	return hits
+}
+
+func detectQueryValuesPII(values url.Values) []PIIHit {
+	hits := make([]PIIHit, 0, 4)
+	for key, vals := range values {
+		keyLower := strings.ToLower(strings.TrimSpace(key))
+		piiType, ok := piiKeyToType[keyLower]
+		if !ok {
+			continue
+		}
+		for _, v := range vals {
+			if strings.TrimSpace(v) == "" {
+				continue
+			}
+			hits = append(hits, PIIHit{
+				Type:     piiType,
+				Source:   "query",
+				Key:      keyLower,
+				Evidence: "query " + keyLower + "=***",
+			})
+		}
+	}
 	return hits
 }
 
@@ -261,6 +285,16 @@ func StableIdentifierFingerprints(http *HTTPInfo) []string {
 	}
 
 	return uniqueStrings(fingerprints)
+}
+
+func PIIHitTypes(hits []PIIHit) []string {
+	values := make([]string, 0, len(hits))
+	for _, hit := range hits {
+		if hit.Type != "" {
+			values = append(values, hit.Type)
+		}
+	}
+	return uniqueStrings(values)
 }
 
 func stableIdentifierBodyFingerprints(body string) []string {

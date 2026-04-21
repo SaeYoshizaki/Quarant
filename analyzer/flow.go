@@ -555,6 +555,7 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 		),
 	}
 	h.annotateI6StorageObservation(ctx, d)
+	h.annotateI6PIIUseObservation(ctx, d)
 
 	if h.debug {
 		summary := i6DebugSummary(
@@ -694,13 +695,33 @@ func (h *FlowHandler) annotateI6StorageObservation(ctx *rules.Context, d *device
 	}
 
 	if endpointKey := rules.I6StorageCandidateEndpointKey(ctx, h.knowledge.I6StorageSignals.Patterns); endpointKey != "" {
-		ctx.StorageEndpointRepeatCount = d.ObserveStorageSignalEndpoint(endpointKey)
+		ctx.StorageEndpointRepeatCount = d.ObserveStorageSignalEndpoint(endpointKey, ctx.NowUnix)
 	}
 
 	for _, fingerprint := range rules.StableIdentifierFingerprints(ctx.HTTP) {
-		count := d.ObserveStableIdentifierFingerprint(fingerprint)
+		count := d.ObserveStableIdentifierFingerprint(fingerprint, ctx.NowUnix)
 		if count > ctx.StableIdentifierRepeatCount {
 			ctx.StableIdentifierRepeatCount = count
+		}
+	}
+}
+
+func (h *FlowHandler) annotateI6PIIUseObservation(ctx *rules.Context, d *device.DeviceProfile) {
+	if ctx == nil || d == nil || ctx.HTTP == nil {
+		return
+	}
+	host := strings.ToLower(strings.TrimSpace(ctx.HTTP.Headers["host"]))
+	if host == "" {
+		return
+	}
+	hits := rules.DetectPIIHits(ctx.HTTP, ctx.Payload)
+	for _, piiType := range rules.PIIHitTypes(hits) {
+		repeat, distinct := d.ObservePIIUseDestination(piiType, host, ctx.NowUnix)
+		if repeat > ctx.PIIDestinationRepeatCount {
+			ctx.PIIDestinationRepeatCount = repeat
+		}
+		if distinct > ctx.PIIDistinctDestinationCount {
+			ctx.PIIDistinctDestinationCount = distinct
 		}
 	}
 }

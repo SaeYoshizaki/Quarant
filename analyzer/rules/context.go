@@ -24,6 +24,8 @@ type Context struct {
 
 	StorageEndpointRepeatCount  int
 	StableIdentifierRepeatCount int
+	PIIDestinationRepeatCount   int
+	PIIDistinctDestinationCount int
 
 	HTTP    *HTTPInfo
 	MQTT    *MQTTInfo

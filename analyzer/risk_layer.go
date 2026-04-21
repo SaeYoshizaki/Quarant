@@ -159,6 +159,20 @@ func classifyCompositeRisk(signals []string) (int, string, Severity, string) {
 			score += 10
 		case "repeated_storage_endpoint":
 			score += 10
+		case "potential_pii_misuse":
+			score += 15
+		case "unexpected_pii_type":
+			score += 10
+		case "unexpected_pii_destination":
+			score += 15
+		case "tracking_or_analytics_destination":
+			score += 10
+		case "third_party_pii_destination":
+			score += 10
+		case "repeated_identifier_disclosure":
+			score += 10
+		case "broad_pii_destination":
+			score += 10
 		case "admin_like_path":
 			score += 10
 		case "category_confidence_low":

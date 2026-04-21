@@ -25,8 +25,9 @@ func NewProfile(ip string) *DeviceProfile {
 		Ports:                        map[uint16]bool{},
 		Protocols:                    map[string]bool{},
 		TypeScores:                   map[string]float64{},
-		StorageSignalEndpoints:       map[string]int{},
-		StableIdentifierFingerprints: map[string]int{},
+		StorageSignalEndpoints:       map[string]ObservationCounter{},
+		StableIdentifierFingerprints: map[string]ObservationCounter{},
+		PIIUseDestinations:           map[string]ObservationCounter{},
 	}
 }
 

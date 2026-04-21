@@ -1,5 +1,15 @@
 package device
 
+const (
+	ObservationWindowSeconds = 30 * 60
+	MaxObservationKeys       = 128
+)
+
+type ObservationCounter struct {
+	Count    int
+	LastSeen int64
+}
+
 type DeviceProfile struct {
 	IP string
 
@@ -28,8 +38,9 @@ type DeviceProfile struct {
 	ObservedServices map[string]bool
 	InsecureServices map[string]bool
 
-	StorageSignalEndpoints       map[string]int
-	StableIdentifierFingerprints map[string]int
+	StorageSignalEndpoints       map[string]ObservationCounter
+	StableIdentifierFingerprints map[string]ObservationCounter
+	PIIUseDestinations           map[string]ObservationCounter
 
 	AdminSuspected            bool
 	ExternalExposureSuspected bool
@@ -68,26 +79,96 @@ func (p *DeviceProfile) AddRiskReason(reason string) {
 	p.RiskReasons[reason] = true
 }
 
-func (p *DeviceProfile) ObserveStorageSignalEndpoint(endpoint string) int {
+func (p *DeviceProfile) ObserveStorageSignalEndpoint(endpoint string, nowUnix int64) int {
 	if endpoint == "" {
 		return 0
 	}
 	if p.StorageSignalEndpoints == nil {
-		p.StorageSignalEndpoints = make(map[string]int)
+		p.StorageSignalEndpoints = make(map[string]ObservationCounter)
 	}
-	p.StorageSignalEndpoints[endpoint]++
-	return p.StorageSignalEndpoints[endpoint]
+	return observeWithinWindow(p.StorageSignalEndpoints, endpoint, nowUnix)
 }
 
-func (p *DeviceProfile) ObserveStableIdentifierFingerprint(fingerprint string) int {
+func (p *DeviceProfile) ObserveStableIdentifierFingerprint(fingerprint string, nowUnix int64) int {
 	if fingerprint == "" {
 		return 0
 	}
 	if p.StableIdentifierFingerprints == nil {
-		p.StableIdentifierFingerprints = make(map[string]int)
+		p.StableIdentifierFingerprints = make(map[string]ObservationCounter)
 	}
-	p.StableIdentifierFingerprints[fingerprint]++
-	return p.StableIdentifierFingerprints[fingerprint]
+	return observeWithinWindow(p.StableIdentifierFingerprints, fingerprint, nowUnix)
+}
+
+func (p *DeviceProfile) ObservePIIUseDestination(piiType, host string, nowUnix int64) (int, int) {
+	if piiType == "" || host == "" {
+		return 0, 0
+	}
+	if p.PIIUseDestinations == nil {
+		p.PIIUseDestinations = make(map[string]ObservationCounter)
+	}
+	key := piiType + "|" + host
+	repeat := observeWithinWindow(p.PIIUseDestinations, key, nowUnix)
+
+	distinct := 0
+	prefix := piiType + "|"
+	for observed, counter := range p.PIIUseDestinations {
+		if observationExpired(counter, nowUnix) {
+			continue
+		}
+		if len(observed) >= len(prefix) && observed[:len(prefix)] == prefix {
+			distinct++
+		}
+	}
+
+	return repeat, distinct
+}
+
+func observeWithinWindow(observations map[string]ObservationCounter, key string, nowUnix int64) int {
+	pruneObservationCounters(observations, nowUnix)
+
+	counter := observations[key]
+	if observationExpired(counter, nowUnix) {
+		counter = ObservationCounter{}
+	}
+	counter.Count++
+	counter.LastSeen = nowUnix
+	observations[key] = counter
+	return counter.Count
+}
+
+func pruneObservationCounters(observations map[string]ObservationCounter, nowUnix int64) {
+	for key, counter := range observations {
+		if observationExpired(counter, nowUnix) {
+			delete(observations, key)
+		}
+	}
+	if len(observations) < MaxObservationKeys {
+		return
+	}
+	for len(observations) >= MaxObservationKeys {
+		oldestKey := ""
+		oldestSeen := int64(0)
+		for key, counter := range observations {
+			if oldestKey == "" || counter.LastSeen < oldestSeen {
+				oldestKey = key
+				oldestSeen = counter.LastSeen
+			}
+		}
+		if oldestKey == "" {
+			return
+		}
+		delete(observations, oldestKey)
+	}
+}
+
+func observationExpired(counter ObservationCounter, nowUnix int64) bool {
+	if counter.LastSeen == 0 {
+		return true
+	}
+	if nowUnix == 0 {
+		return false
+	}
+	return nowUnix-counter.LastSeen > ObservationWindowSeconds
 }
 
 func (p *DeviceProfile) MarkAdminSuspected() {

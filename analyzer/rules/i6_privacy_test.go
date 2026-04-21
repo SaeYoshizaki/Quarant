@@ -227,3 +227,119 @@ func TestStableIdentifierFingerprintsAreStableAndDoNotExposeRawValue(t *testing.
 		t.Fatalf("expected stable fingerprint, got %v then %v", fingerprints, again)
 	}
 }
+
+func TestI6PIIToUnexpectedDestinationSuppressesAnalyticsWithoutRepeat(t *testing.T) {
+	db := testI6PIIUseDB()
+	ctx := &Context{
+		DstIP: "8.8.8.8",
+		HTTP: &HTTPInfo{
+			Method:  "POST",
+			Path:    "/collect",
+			Query:   map[string][]string{"email": {"user@example.com"}},
+			Headers: map[string]string{"host": "analytics.thirdparty.example"},
+			RawLine: "POST /collect?email=user@example.com HTTP/1.1",
+		},
+	}
+
+	hits := DetectPIIHits(ctx.HTTP, ctx.Payload)
+	if matches := (&I6PrivacyRule{db: db}).applyPIIUseSignalAll(ctx, "Sensor", "analytics", hits); len(matches) != 0 {
+		t.Fatalf("expected analytics destination without repeat corroboration to be suppressed, got %d", len(matches))
+	}
+}
+
+func TestI6PIIToUnexpectedDestinationDetectsAnalyticsPIIUseWithRepeat(t *testing.T) {
+	db := testI6PIIUseDB()
+	ctx := &Context{
+		DstIP: "8.8.8.8",
+		HTTP: &HTTPInfo{
+			Method:  "POST",
+			Path:    "/collect",
+			Query:   map[string][]string{"email": {"user@example.com"}},
+			Headers: map[string]string{"host": "analytics.thirdparty.example"},
+			RawLine: "POST /collect?email=user@example.com HTTP/1.1",
+		},
+		PIIDestinationRepeatCount: 2,
+	}
+
+	hits := DetectPIIHits(ctx.HTTP, ctx.Payload)
+	matches := (&I6PrivacyRule{db: db}).applyPIIUseSignalAll(ctx, "Sensor", "analytics", hits)
+	if len(matches) != 1 {
+		t.Fatalf("expected one PII misuse signal, got %d", len(matches))
+	}
+	if matches[0].RuleID != "I6_PII_TO_UNEXPECTED_DESTINATION" {
+		t.Fatalf("unexpected rule id: %s", matches[0].RuleID)
+	}
+	if !strings.Contains(matches[0].Evidence, "consent_observed=false") {
+		t.Fatalf("expected consent limitation evidence, got: %s", matches[0].Evidence)
+	}
+	if !strings.Contains(matches[0].Evidence, "risk_signals=potential_pii_misuse") {
+		t.Fatalf("expected PII misuse risk signals, got: %s", matches[0].Evidence)
+	}
+	if !strings.Contains(matches[0].Evidence, "corroboration=repeated_pii_destination,tracking_or_analytics_destination") {
+		t.Fatalf("expected repeat and analytics corroboration, got: %s", matches[0].Evidence)
+	}
+}
+
+func TestI6PIIToUnexpectedDestinationSuppressesSingleBaselineDestination(t *testing.T) {
+	db := testI6PIIUseDB()
+	ctx := &Context{
+		DstIP: "8.8.8.8",
+		HTTP: &HTTPInfo{
+			Method:  "POST",
+			Path:    "/sensor/upload",
+			Query:   map[string][]string{"email": {"user@example.com"}},
+			Headers: map[string]string{"host": "api.sensorcloud.example"},
+			RawLine: "POST /sensor/upload?email=user@example.com HTTP/1.1",
+		},
+	}
+
+	hits := DetectPIIHits(ctx.HTTP, ctx.Payload)
+	if matches := (&I6PrivacyRule{db: db}).applyPIIUseSignalAll(ctx, "Sensor", "cloud_api", hits); len(matches) != 0 {
+		t.Fatalf("expected baseline destination to be suppressed, got %d", len(matches))
+	}
+}
+
+func TestI6PIIToUnexpectedDestinationUsesRepeatedIdentifierCorroboration(t *testing.T) {
+	db := testI6PIIUseDB()
+	ctx := &Context{
+		DstIP: "8.8.8.8",
+		HTTP: &HTTPInfo{
+			Method:  "POST",
+			Path:    "/v1/profile",
+			Query:   map[string][]string{"account_id": {"acct-12345678"}},
+			Headers: map[string]string{"host": "api.unexpected.example"},
+			RawLine: "POST /v1/profile?account_id=acct-12345678 HTTP/1.1",
+		},
+		StableIdentifierRepeatCount: 2,
+	}
+
+	hits := DetectPIIHits(ctx.HTTP, ctx.Payload)
+	matches := (&I6PrivacyRule{db: db}).applyPIIUseSignalAll(ctx, "Sensor", "cloud_api", hits)
+	if len(matches) != 1 {
+		t.Fatalf("expected repeated identifier corroboration to emit one signal, got %d", len(matches))
+	}
+	if !strings.Contains(matches[0].Evidence, "corroboration=repeated_identifier") {
+		t.Fatalf("expected repeated identifier corroboration, got: %s", matches[0].Evidence)
+	}
+}
+
+func testI6PIIUseDB() *knowledge.DB {
+	return &knowledge.DB{
+		DeviceCategories: &knowledge.DeviceCategories{
+			Categories: []string{"Sensor"},
+		},
+		CategoryPolicy: knowledge.CategoryPolicy{
+			"Sensor": {
+				AllowedPIITypes: []string{"device_identifier", "usage_data"},
+			},
+		},
+		CategoryInference: &knowledge.CategoryInferenceDB{
+			Categories: map[string]knowledge.CategoryInferenceEntry{
+				"Sensor": {
+					RepresentativeDomains: []string{"api.sensorcloud.example"},
+					EcosystemDomains:      []string{"sensorcloud.example"},
+				},
+			},
+		},
+	}
+}
