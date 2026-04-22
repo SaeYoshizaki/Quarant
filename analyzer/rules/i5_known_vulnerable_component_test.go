@@ -31,17 +31,20 @@ func TestI5KnownVulnerableComponentMatchesFamilyCandidate(t *testing.T) {
 	if !strings.Contains(match.Evidence, "family_candidate=philips_hue_hub") {
 		t.Fatalf("missing family evidence: %s", match.Evidence)
 	}
+	if !strings.Contains(match.Evidence, "match_basis=family") {
+		t.Fatalf("missing match_basis evidence: %s", match.Evidence)
+	}
 }
 
-func TestI5KnownVulnerableComponentMatchesVendorCategoryAndHost(t *testing.T) {
+func TestI5KnownVulnerableComponentMatchesVendorCategoryAndHostKeyword(t *testing.T) {
 	db := testI5DB()
 	ctx := &Context{
-		LocalDeviceCategory: "Hub",
-		VendorCandidate:     "Samsung",
-		FamilyCandidate:     "Hub",
+		LocalDeviceCategory: "Camera",
+		VendorCandidate:     "Hikvision",
+		FamilyCandidate:     "IP Camera",
 		HTTP: &HTTPInfo{
 			Headers: map[string]string{
-				"host": "api.smartthings.example",
+				"host": "hikvision.com",
 			},
 		},
 	}
@@ -50,11 +53,70 @@ func TestI5KnownVulnerableComponentMatchesVendorCategoryAndHost(t *testing.T) {
 	if !ok {
 		t.Fatal("expected I5 match")
 	}
-	if !strings.Contains(match.Evidence, "knowledge_id=smartthings_hub") {
-		t.Fatalf("missing smartthings evidence: %s", match.Evidence)
+	if !strings.Contains(match.Evidence, "matched_component_id=hikvision_camera") {
+		t.Fatalf("missing Hikvision component evidence: %s", match.Evidence)
 	}
-	if !strings.Contains(match.Evidence, "http_host=api.smartthings.example") {
+	if !strings.Contains(match.Evidence, "match_basis=vendor+category+host_keyword") {
+		t.Fatalf("missing host keyword match_basis evidence: %s", match.Evidence)
+	}
+	if !strings.Contains(match.Evidence, "http_host=hikvision.com") {
 		t.Fatalf("missing host evidence: %s", match.Evidence)
+	}
+}
+
+func TestI5KnownVulnerableComponentMatchesObservedHostWhenHTTPHeadersMissing(t *testing.T) {
+	db := testI5DB()
+	ctx := &Context{
+		LocalDeviceCategory: "Camera",
+		VendorCandidate:     "Hikvision",
+		FamilyCandidate:     "IP Camera",
+		ObservedHosts:       []string{"hikvision.com"},
+		ObservedUserAgents:  []string{"curl/8.17.0"},
+	}
+
+	match, ok := NewI5KnownVulnerableComponentRule(db).Apply(ctx)
+	if !ok {
+		t.Fatal("expected I5 match from observed host")
+	}
+	if !strings.Contains(match.Evidence, "matched_component_id=hikvision_camera") {
+		t.Fatalf("missing Hikvision component evidence: %s", match.Evidence)
+	}
+	if !strings.Contains(match.Evidence, "match_basis=vendor+category+host_keyword") {
+		t.Fatalf("missing observed host match_basis evidence: %s", match.Evidence)
+	}
+	if !strings.Contains(match.Evidence, "http_host=hikvision.com") {
+		t.Fatalf("missing observed host evidence: %s", match.Evidence)
+	}
+}
+
+func TestI5KnownVulnerableComponentDoesNotMatchCategoryMismatch(t *testing.T) {
+	db := testI5DB()
+	ctx := &Context{
+		LocalDeviceCategory: "Speaker",
+		VendorCandidate:     "Hikvision",
+		FamilyCandidate:     "IP Camera",
+		HTTP: &HTTPInfo{
+			Headers: map[string]string{
+				"host": "hikvision.com",
+			},
+		},
+	}
+
+	if _, ok := NewI5KnownVulnerableComponentRule(db).Apply(ctx); ok {
+		t.Fatal("expected no I5 match when category does not match")
+	}
+}
+
+func TestI5KnownVulnerableComponentDoesNotMatchVendorOnly(t *testing.T) {
+	db := testI5DBWithoutHikvisionVendorKeywords()
+	ctx := &Context{
+		LocalDeviceCategory: "Camera",
+		VendorCandidate:     "Hikvision",
+		FamilyCandidate:     "IP Camera",
+	}
+
+	if _, ok := NewI5KnownVulnerableComponentRule(db).Apply(ctx); ok {
+		t.Fatal("expected no I5 match from vendor and category without keyword")
 	}
 }
 
@@ -70,6 +132,31 @@ func TestI5KnownVulnerableComponentDoesNotMatchSingleNetworkSignal(t *testing.T)
 
 	if _, ok := NewI5KnownVulnerableComponentRule(db).Apply(ctx); ok {
 		t.Fatal("expected no I5 match from a single network signal")
+	}
+}
+
+func TestI5KnownVulnerableComponentChoosesFamilyOverAuxiliaryMatch(t *testing.T) {
+	db := testI5DB()
+	ctx := &Context{
+		LocalDeviceCategory: "Hub",
+		VendorCandidate:     "Samsung",
+		FamilyCandidate:     "philips_hue_hub",
+		HTTP: &HTTPInfo{
+			Headers: map[string]string{
+				"host": "api.smartthings.example",
+			},
+		},
+	}
+
+	match, ok := NewI5KnownVulnerableComponentRule(db).Apply(ctx)
+	if !ok {
+		t.Fatal("expected I5 match")
+	}
+	if !strings.Contains(match.Evidence, "matched_component_id=philips_hue_hub") {
+		t.Fatalf("expected family match to win over auxiliary match: %s", match.Evidence)
+	}
+	if !strings.Contains(match.Evidence, "match_basis=family") {
+		t.Fatalf("missing family match_basis evidence: %s", match.Evidence)
 	}
 }
 
@@ -106,6 +193,44 @@ func testI5DB() *knowledge.DB {
 			RepresentativeCVEs: []string{"CVE-2025-2233"},
 			Severity:           "high",
 			Recommendation:     []string{"Review software versions."},
+		},
+		{
+			ID:       "hikvision_camera",
+			Category: "Camera",
+			Vendor:   "Hikvision",
+			Family:   "hikvision_camera",
+			MatchSignals: knowledge.I5MatchSignals{
+				VendorKeywords: []string{"hikvision"},
+				HostKeywords:   []string{"hikvision", "hik-connect"},
+				UAKeywords:     []string{"hikvision"},
+				SNIKeywords:    []string{"hikvision", "hik-connect"},
+			},
+			KnownIssues:        []string{"Known history of camera firmware vulnerabilities."},
+			RepresentativeCVEs: []string{"CVE-2021-36260"},
+			Severity:           "critical",
+			Recommendation:     []string{"Review camera firmware version."},
+		},
+	}
+
+	return &knowledge.DB{I5Vulnerable: &components}
+}
+
+func testI5DBWithoutHikvisionVendorKeywords() *knowledge.DB {
+	components := knowledge.I5VulnerableComponents{
+		{
+			ID:       "hikvision_camera",
+			Category: "Camera",
+			Vendor:   "Hikvision",
+			Family:   "hikvision_camera",
+			MatchSignals: knowledge.I5MatchSignals{
+				HostKeywords: []string{"hikvision", "hik-connect"},
+				UAKeywords:   []string{"hikvision"},
+				SNIKeywords:  []string{"hikvision", "hik-connect"},
+			},
+			KnownIssues:        []string{"Known history of camera firmware vulnerabilities."},
+			RepresentativeCVEs: []string{"CVE-2021-36260"},
+			Severity:           "critical",
+			Recommendation:     []string{"Review camera firmware version."},
 		},
 	}
 

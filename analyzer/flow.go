@@ -276,6 +276,18 @@ func i6DebugDetail(localCategory, flowCategory, ctxCategory, localSource, flowSo
 	)
 }
 
+func mapKeys(values map[string]bool) []string {
+	if len(values) == 0 {
+		return nil
+	}
+
+	keys := make([]string, 0, len(values))
+	for value := range values {
+		keys = append(keys, value)
+	}
+	return keys
+}
+
 func i4UpdateVisibility(d *device.DeviceProfile) string {
 	if d == nil {
 		return "unknown"
@@ -517,6 +529,9 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 		FlowDeviceCategory:        flowDeviceCategory,
 		VendorCandidate:           d.Vendor,
 		FamilyCandidate:           d.DeviceType,
+		ObservedHosts:             mapKeys(d.Hosts),
+		ObservedUserAgents:        mapKeys(d.UserAgents),
+		ObservedSNIValues:         mapKeys(d.SNIValues),
 		UpdateVisibility:          i4UpdateVisibility(d),
 		LegacySignals:             i4LegacySignals(d),
 		DeviceInferenceSource:     deviceInferenceSource,

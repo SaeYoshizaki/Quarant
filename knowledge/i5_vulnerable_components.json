@@ -67,5 +67,51 @@
       "Check account-linking and third-party integration settings.",
       "Prefer the latest vendor-supported versions across the ecosystem."
     ]
-  }
+  },
+  {
+    "id": "hikvision_camera",
+    "category": "Camera",
+    "vendor": "Hikvision",
+    "family": "hikvision_camera",
+    "match_signals": {
+      "vendor_keywords": ["hikvision"],
+      "host_keywords": ["hikvision", "hik-connect"],
+      "ua_keywords": ["hikvision"],
+      "sni_keywords": ["hikvision", "hik-connect"]
+    },
+    "known_issues": [
+      "Known history of camera firmware vulnerabilities affecting exposed Hikvision devices.",
+      "Camera management interfaces and firmware should be reviewed when Hikvision devices are observed."
+    ],
+    "representative_cves": ["CVE-2021-36260"],
+    "severity": "critical",
+    "recommendation": [
+      "Review camera firmware version and apply vendor updates.",
+      "Restrict administrative access to camera management interfaces.",
+      "Confirm the device remains supported by the vendor."
+    ]
+  },
+  {
+  "id": "tplink_controller",
+  "category": "Controller",
+  "vendor": "TP-Link",
+  "family": "tplink_controller",
+  "match_signals": {
+    "vendor_keywords": ["tp-link", "tplink", "tapo", "kasa"],
+    "host_keywords": ["tplinkcloud", "tp-link", "tplink", "tapo", "kasa"],
+    "ua_keywords": ["tp-link", "tplink", "tapo", "kasa"],
+    "sni_keywords": ["tplinkcloud", "tp-link", "tplink", "tapo", "kasa"]
+  },
+  "known_issues": [
+    "Known issues have affected TP-Link controller and ecosystem-facing management components.",
+    "Cloud-connected controller paths and management interfaces should be reviewed when TP-Link controller traffic is observed."
+  ],
+  "representative_cves": ["CVE-2023-1389"],
+  "severity": "high",
+  "recommendation": [
+    "Review controller firmware version and apply vendor updates.",
+    "Restrict unnecessary exposure of management interfaces.",
+    "Confirm the device and ecosystem components remain vendor-supported."
+  ]
+}
 ]

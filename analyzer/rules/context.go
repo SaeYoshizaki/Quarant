@@ -39,6 +39,9 @@ type Context struct {
 	FlowDeviceCategory  string
 	VendorCandidate     string
 	FamilyCandidate     string
+	ObservedHosts       []string
+	ObservedUserAgents  []string
+	ObservedSNIValues   []string
 	UpdateVisibility    string
 	LegacySignals       []string
 

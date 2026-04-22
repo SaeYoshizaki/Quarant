@@ -11,6 +11,14 @@ type I5KnownVulnerableComponentRule struct {
 	db *knowledge.DB
 }
 
+type i5ComponentMatch struct {
+	component   knowledge.I5VulnerableComponent
+	signals     []string
+	matchBasis  []string
+	score       int
+	keywordHits int
+}
+
 func NewI5KnownVulnerableComponentRule(db *knowledge.DB) *I5KnownVulnerableComponentRule {
 	return &I5KnownVulnerableComponentRule{db: db}
 }
@@ -18,8 +26,11 @@ func NewI5KnownVulnerableComponentRule(db *knowledge.DB) *I5KnownVulnerableCompo
 func (r *I5KnownVulnerableComponentRule) ID() string {
 	return "I5_KNOWN_VULNERABLE_COMPONENT"
 }
-func (r *I5KnownVulnerableComponentRule) Category() string   { return "I5" }
+
+func (r *I5KnownVulnerableComponentRule) Category() string { return "I5" }
+
 func (r *I5KnownVulnerableComponentRule) Severity() Severity { return SeverityWarning }
+
 func (r *I5KnownVulnerableComponentRule) Type() string {
 	return "I5_KNOWN_VULNERABLE_COMPONENT"
 }
@@ -37,31 +48,46 @@ func (r *I5KnownVulnerableComponentRule) ApplyAll(ctx *Context) []Match {
 		return nil
 	}
 
+	var best *i5ComponentMatch
 	for _, component := range *r.db.I5Vulnerable {
-		signals := matchI5VulnerableComponent(ctx, component)
-		if len(signals) == 0 {
+		match, ok := matchI5VulnerableComponent(ctx, component)
+		if !ok {
 			continue
 		}
-
-		return []Match{formatI5KnownVulnerableComponentMatch(ctx, component, signals)}
+		if best == nil || i5BetterMatch(match, *best) {
+			best = &match
+		}
 	}
 
-	return nil
-}
-
-func matchI5VulnerableComponent(ctx *Context, component knowledge.I5VulnerableComponent) []string {
-	if ctx == nil {
+	if best == nil {
 		return nil
 	}
 
-	signals := make([]string, 0, 6)
+	return []Match{
+		formatI5KnownVulnerableComponentMatch(
+			ctx,
+			best.component,
+			best.signals,
+			best.matchBasis,
+		),
+	}
+}
+
+func matchI5VulnerableComponent(ctx *Context, component knowledge.I5VulnerableComponent) (i5ComponentMatch, bool) {
+	if ctx == nil {
+		return i5ComponentMatch{}, false
+	}
+
+	signals := make([]string, 0, 8)
+	basis := make([]string, 0, 4)
+	keywordHits := 0
 
 	categoryMatched := i5CategoryMatches(ctx, component.Category)
 	if categoryMatched {
 		signals = append(signals, "category="+strings.TrimSpace(component.Category))
 	}
 
-	vendorMatched := i5VendorMatches(ctx.VendorCandidate, component)
+	vendorMatched := i5VendorMatches(ctx.VendorCandidate, component.Vendor)
 	if vendorMatched {
 		signals = append(signals, "vendor_candidate="+strings.TrimSpace(ctx.VendorCandidate))
 	}
@@ -71,35 +97,71 @@ func matchI5VulnerableComponent(ctx *Context, component knowledge.I5VulnerableCo
 		signals = append(signals, "family_candidate="+strings.TrimSpace(ctx.FamilyCandidate))
 	}
 
-	host := i5HTTPHeader(ctx.HTTP, "host")
-	if i5AnyKeywordContains(host, component.MatchSignals.HostKeywords) {
+	host, hostMatched := i5FirstKeywordMatch(i5HostValues(ctx), component.MatchSignals.HostKeywords)
+	if hostMatched {
 		signals = append(signals, "http_host="+strings.TrimSpace(host))
+		basis = append(basis, "vendor+category+host_keyword")
+		keywordHits++
 	}
 
-	ua := i5HTTPHeader(ctx.HTTP, "user-agent")
-	if i5AnyKeywordContains(ua, component.MatchSignals.UAKeywords) {
+	ua, uaMatched := i5FirstKeywordMatch(i5UserAgentValues(ctx), component.MatchSignals.UAKeywords)
+	if uaMatched {
 		signals = append(signals, "http_user_agent="+strings.TrimSpace(ua))
+		basis = append(basis, "vendor+category+ua_keyword")
+		keywordHits++
 	}
 
-	sni := ""
-	if ctx.TLSInfo != nil {
-		sni = ctx.TLSInfo.SNI
-	}
-	if i5AnyKeywordContains(sni, component.MatchSignals.SNIKeywords) {
+	sni, sniMatched := i5FirstKeywordMatch(i5SNIValues(ctx), component.MatchSignals.SNIKeywords)
+	if sniMatched {
 		signals = append(signals, "tls_sni="+strings.TrimSpace(sni))
+		basis = append(basis, "vendor+category+sni_keyword")
+		keywordHits++
 	}
 
-	networkMatched := len(signals) > 0 && i5HasNetworkSignal(signals)
-	switch {
-	case familyMatched && (categoryMatched || vendorMatched || networkMatched):
-		return signals
-	case vendorMatched && categoryMatched && networkMatched:
-		return signals
-	case categoryMatched && i5NetworkSignalCount(signals) >= 2:
-		return signals
-	default:
+	vendorKeywordValue, vendorKeywordMatched := i5VendorKeywordMatches(ctx, component.MatchSignals.VendorKeywords)
+	if vendorKeywordMatched {
+		signals = append(signals, "vendor_keyword="+strings.TrimSpace(vendorKeywordValue))
+		basis = append(basis, "vendor+category+vendor_keyword")
+		keywordHits++
+	}
+
+	keywordMatched := keywordHits > 0
+
+	if familyMatched && (categoryMatched || vendorMatched || keywordMatched) {
+		return i5ComponentMatch{
+			component:   component,
+			signals:     signals,
+			matchBasis:  []string{"family"},
+			score:       1000 + keywordHits,
+			keywordHits: keywordHits,
+		}, true
+	}
+
+	if categoryMatched && vendorMatched && keywordMatched {
+		return i5ComponentMatch{
+			component:   component,
+			signals:     signals,
+			matchBasis:  i5PrimaryMatchBasis(basis),
+			score:       500 + keywordHits,
+			keywordHits: keywordHits,
+		}, true
+	}
+
+	return i5ComponentMatch{}, false
+}
+
+func i5BetterMatch(candidate, current i5ComponentMatch) bool {
+	if candidate.score != current.score {
+		return candidate.score > current.score
+	}
+	return candidate.keywordHits > current.keywordHits
+}
+
+func i5PrimaryMatchBasis(basis []string) []string {
+	if len(basis) == 0 {
 		return nil
 	}
+	return []string{basis[0]}
 }
 
 func i5CategoryMatches(ctx *Context, category string) bool {
@@ -107,6 +169,7 @@ func i5CategoryMatches(ctx *Context, category string) bool {
 	if want == "" {
 		return false
 	}
+
 	for _, candidate := range []string{
 		ctx.LocalDeviceCategory,
 		ctx.FlowDeviceCategory,
@@ -119,16 +182,14 @@ func i5CategoryMatches(ctx *Context, category string) bool {
 	return false
 }
 
-func i5VendorMatches(vendorCandidate string, component knowledge.I5VulnerableComponent) bool {
+func i5VendorMatches(vendorCandidate, vendor string) bool {
 	candidate := i5NormalizeValue(vendorCandidate)
-	if candidate == "" {
+	want := i5NormalizeValue(vendor)
+	if candidate == "" || want == "" {
 		return false
 	}
 
-	if i5NormalizeValue(component.Vendor) == candidate {
-		return true
-	}
-	return i5AnyKeywordContains(vendorCandidate, component.MatchSignals.VendorKeywords)
+	return candidate == want || strings.Contains(candidate, want) || strings.Contains(want, candidate)
 }
 
 func i5FamilyMatches(familyCandidate, family string) bool {
@@ -138,14 +199,100 @@ func i5FamilyMatches(familyCandidate, family string) bool {
 		return false
 	}
 
-	return candidate == want || strings.Contains(candidate, want)
+	return candidate == want
 }
 
 func i5HTTPHeader(info *HTTPInfo, name string) string {
 	if info == nil || info.Headers == nil {
 		return ""
 	}
-	return info.Headers[strings.ToLower(name)]
+
+	key := strings.ToLower(name)
+	if value, ok := info.Headers[key]; ok {
+		return value
+	}
+
+	for headerName, value := range info.Headers {
+		if strings.EqualFold(headerName, name) {
+			return value
+		}
+	}
+
+	return ""
+}
+
+func i5HTTPHost(info *HTTPInfo) string {
+	return i5HTTPHeader(info, "host")
+}
+
+func i5HTTPUserAgent(info *HTTPInfo) string {
+	return i5HTTPHeader(info, "user-agent")
+}
+
+func i5HostValues(ctx *Context) []string {
+	if ctx == nil {
+		return nil
+	}
+
+	values := []string{
+		i5HTTPHost(ctx.HTTP),
+	}
+	values = append(values, ctx.ObservedHosts...)
+
+	return i5CompactValues(values)
+}
+
+func i5UserAgentValues(ctx *Context) []string {
+	if ctx == nil {
+		return nil
+	}
+
+	values := []string{
+		i5HTTPUserAgent(ctx.HTTP),
+	}
+	values = append(values, ctx.ObservedUserAgents...)
+
+	return i5CompactValues(values)
+}
+
+func i5SNIValues(ctx *Context) []string {
+	if ctx == nil {
+		return nil
+	}
+
+	values := make([]string, 0, 1+len(ctx.ObservedSNIValues))
+	if ctx.TLSInfo != nil {
+		values = append(values, ctx.TLSInfo.SNI)
+	}
+	values = append(values, ctx.ObservedSNIValues...)
+
+	return i5CompactValues(values)
+}
+
+func i5CompactValues(values []string) []string {
+	out := make([]string, 0, len(values))
+	seen := map[string]bool{}
+
+	for _, value := range values {
+		trimmed := strings.TrimSpace(value)
+		normalized := i5NormalizeValue(trimmed)
+		if normalized == "" || seen[normalized] {
+			continue
+		}
+		seen[normalized] = true
+		out = append(out, trimmed)
+	}
+
+	return out
+}
+
+func i5FirstKeywordMatch(values []string, keywords []string) (string, bool) {
+	for _, value := range values {
+		if i5AnyKeywordContains(value, keywords) {
+			return value, true
+		}
+	}
+	return "", false
 }
 
 func i5AnyKeywordContains(value string, keywords []string) bool {
@@ -153,29 +300,42 @@ func i5AnyKeywordContains(value string, keywords []string) bool {
 	if normalizedValue == "" {
 		return false
 	}
+
 	for _, keyword := range keywords {
 		normalizedKeyword := i5NormalizeValue(keyword)
 		if normalizedKeyword != "" && strings.Contains(normalizedValue, normalizedKeyword) {
 			return true
 		}
 	}
+
 	return false
 }
 
-func i5HasNetworkSignal(signals []string) bool {
-	return i5NetworkSignalCount(signals) > 0
-}
+func i5VendorKeywordMatches(ctx *Context, keywords []string) (string, bool) {
+	if ctx == nil {
+		return "", false
+	}
 
-func i5NetworkSignalCount(signals []string) int {
-	count := 0
-	for _, signal := range signals {
-		if strings.HasPrefix(signal, "http_host=") ||
-			strings.HasPrefix(signal, "http_user_agent=") ||
-			strings.HasPrefix(signal, "tls_sni=") {
-			count++
+	for _, value := range []string{
+		ctx.VendorCandidate,
+		ctx.FamilyCandidate,
+	} {
+		if i5AnyKeywordContains(value, keywords) {
+			return value, true
 		}
 	}
-	return count
+
+	if value, ok := i5FirstKeywordMatch(i5HostValues(ctx), keywords); ok {
+		return value, true
+	}
+	if value, ok := i5FirstKeywordMatch(i5UserAgentValues(ctx), keywords); ok {
+		return value, true
+	}
+	if value, ok := i5FirstKeywordMatch(i5SNIValues(ctx), keywords); ok {
+		return value, true
+	}
+
+	return "", false
 }
 
 func i5NormalizeValue(value string) string {
@@ -185,7 +345,12 @@ func i5NormalizeValue(value string) string {
 	return strings.Join(strings.Fields(value), " ")
 }
 
-func formatI5KnownVulnerableComponentMatch(ctx *Context, component knowledge.I5VulnerableComponent, signals []string) Match {
+func formatI5KnownVulnerableComponentMatch(
+	ctx *Context,
+	component knowledge.I5VulnerableComponent,
+	signals []string,
+	matchBasis []string,
+) Match {
 	recommendation := strings.Join(component.Recommendation, " | ")
 	if recommendation == "" {
 		recommendation = "review component version and vendor support status"
@@ -203,8 +368,10 @@ func formatI5KnownVulnerableComponentMatch(ctx *Context, component knowledge.I5V
 		Severity: i5Severity(component.Severity),
 		Message:  "Device appears to match a known vulnerable component family in local knowledge",
 		Evidence: fmt.Sprintf(
-			"knowledge_id=%s category=%s vendor=%s family=%s context_category=%s vendor_candidate=%s family_candidate=%s matched_signals=%s known_issues=%s representative_cves=%s knowledge_severity=%s recommendation=%s applicability=unconfirmed",
+			"knowledge_id=%s matched_component_id=%s match_basis=%s category=%s vendor=%s family=%s context_category=%s vendor_candidate=%s family_candidate=%s matched_signals=%s known_issues=%s representative_cves=%s knowledge_severity=%s recommendation=%s applicability=unconfirmed",
 			strings.TrimSpace(component.ID),
+			strings.TrimSpace(component.ID),
+			strings.Join(matchBasis, ","),
 			strings.TrimSpace(component.Category),
 			strings.TrimSpace(component.Vendor),
 			strings.TrimSpace(component.Family),
@@ -233,6 +400,7 @@ func i5BestContextCategory(ctx *Context) string {
 	if ctx == nil {
 		return ""
 	}
+
 	for _, category := range []string{
 		ctx.LocalDeviceCategory,
 		ctx.FlowDeviceCategory,
@@ -242,5 +410,6 @@ func i5BestContextCategory(ctx *Context) string {
 			return strings.TrimSpace(category)
 		}
 	}
+
 	return ""
 }

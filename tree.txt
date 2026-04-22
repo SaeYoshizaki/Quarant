@@ -1,0 +1,110 @@
+.
+├── analyzer
+│   ├── cache.go
+│   ├── capture.go
+│   ├── device
+│   │   ├── behavior.go
+│   │   ├── fingerprint_http.go
+│   │   ├── fingerprint_tls.go
+│   │   ├── inference.go
+│   │   ├── profile.go
+│   │   └── store.go
+│   ├── engine.go
+│   ├── event.go
+│   ├── flow.go
+│   ├── knowledge
+│   │   └── loader.go
+│   ├── risk_layer.go
+│   ├── rules
+│   │   ├── context.go
+│   │   ├── device_category.go
+│   │   ├── http_body.go
+│   │   ├── http_detect.go
+│   │   ├── http_parse.go
+│   │   ├── i2_external.go
+│   │   ├── i2_http_admin.go
+│   │   ├── i2_insecure_service.go
+│   │   ├── i4_eol_review.go
+│   │   ├── i4_firmware_risk_enrichment.go
+│   │   ├── i4_firmware_update.go
+│   │   ├── i6_privacy.go
+│   │   ├── i6_privacy_helpers.go
+│   │   ├── i7_http_auth.go
+│   │   ├── i7_http_body.go
+│   │   ├── i7_http_cookie.go
+│   │   ├── i7_http_plain.go
+│   │   ├── i7_http_token.go
+│   │   ├── match.go
+│   │   ├── registry.go
+│   │   ├── services.go
+│   │   ├── tls_client_hello.go
+│   │   └── tls.go
+│   └── sink_jsonl.go
+├── build
+│   └── quarant
+├── clab-lab1
+│   ├── ansible-inventory.yml
+│   ├── authorized_keys
+│   ├── nornir-simple-inventory.yml
+│   └── topology-data.json
+├── clab-quarant
+│   ├── ansible-inventory.yml
+│   ├── authorized_keys
+│   ├── nornir-simple-inventory.yml
+│   └── topology-data.json
+├── cmd
+│   ├── quarant
+│   │   ├── build
+│   │   └── main.go
+│   ├── quarant-agg
+│   │   └── main.go
+│   ├── quarant-api
+│   │   └── main.go
+│   └── quarant-viewer
+├── event.json
+├── events.jsonl
+├── events.old.jsonl
+├── go.mod
+├── go.sum
+├── internal
+│   └── reportapi
+│       └── report.go
+├── kari.json
+├── knowledge
+│   ├── category_behavior_baselines.json
+│   ├── category_inference_db.json
+│   ├── category_policy.json
+│   ├── category_stats.json
+│   ├── communication_types.json
+│   ├── device_categories.json
+│   ├── fingerbank_rejected_summary.json
+│   ├── i4_known_vuln_candidates.json
+│   ├── normalized_devices.json
+│   ├── official_overrides.json
+│   └── pii_types.json
+├── quarant-api
+├── quarant-viewer
+├── quarant.zip
+├── README.md
+├── report.json
+├── tool
+│   ├── build_category_inference_db.py
+│   ├── extract_devices.py
+│   ├── fetch_fingerbank.py
+│   ├── input
+│   │   ├── fingerbank_raw.json
+│   │   ├── oui.csv
+│   │   └── sample_devices.json
+│   ├── oui_loader.py
+│   └── __pycache__
+│       ├── build_category_inference_db.cpython-313.pyc
+│       ├── extract_devices.cpython-312.pyc
+│       ├── extract_devices.cpython-313.pyc
+│       ├── fetch_fingerbank.cpython-313.pyc
+│       ├── oui_loader.cpython-312.pyc
+│       └── oui_loader.cpython-313.pyc
+├── topo.yaml
+├── tree.txt
+└── wget-log
+
+20 directories, 88 files
