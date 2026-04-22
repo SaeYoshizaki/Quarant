@@ -91,6 +91,27 @@ type I4KnownVulnCandidates struct {
 	Candidates []I4KnownVulnCandidate `json:"candidates"`
 }
 
+type I5MatchSignals struct {
+	VendorKeywords []string `json:"vendor_keywords"`
+	HostKeywords   []string `json:"host_keywords"`
+	UAKeywords     []string `json:"ua_keywords"`
+	SNIKeywords    []string `json:"sni_keywords"`
+}
+
+type I5VulnerableComponent struct {
+	ID                 string         `json:"id"`
+	Category           string         `json:"category"`
+	Vendor             string         `json:"vendor"`
+	Family             string         `json:"family"`
+	MatchSignals       I5MatchSignals `json:"match_signals"`
+	KnownIssues        []string       `json:"known_issues"`
+	RepresentativeCVEs []string       `json:"representative_cves"`
+	Severity           string         `json:"severity"`
+	Recommendation     []string       `json:"recommendation"`
+}
+
+type I5VulnerableComponents []I5VulnerableComponent
+
 type I6StorageSignalPattern struct {
 	Signal         string   `json:"signal"`
 	Keywords       []string `json:"keywords"`
@@ -195,6 +216,17 @@ func LoadI4KnownVulnCandidates() (*I4KnownVulnCandidates, error) {
 	return &v, nil
 }
 
+func LoadI5VulnerableComponents() (*I5VulnerableComponents, error) {
+	path := filepath.Join(knowledgeDir, "i5_vulnerable_components.json")
+
+	var v I5VulnerableComponents
+	if err := loadJSON(path, &v); err != nil {
+		return nil, err
+	}
+
+	return &v, nil
+}
+
 func LoadI6StorageSignalPatterns() (*I6StorageSignalPatterns, error) {
 	path := filepath.Join(knowledgeDir, "i6_storage_signal_patterns.json")
 
@@ -214,6 +246,7 @@ type DB struct {
 	CategoryInference  *CategoryInferenceDB
 	BehaviorBaselines  CategoryBehaviorBaselines
 	I4KnownVuln        *I4KnownVulnCandidates
+	I5Vulnerable       *I5VulnerableComponents
 	I6StorageSignals   *I6StorageSignalPatterns
 }
 
@@ -253,6 +286,11 @@ func LoadAll() (*DB, error) {
 		return nil, err
 	}
 
+	i5Vulnerable, err := LoadI5VulnerableComponents()
+	if err != nil {
+		return nil, err
+	}
+
 	i6StorageSignals, err := LoadI6StorageSignalPatterns()
 	if err != nil {
 		return nil, err
@@ -266,6 +304,7 @@ func LoadAll() (*DB, error) {
 		CategoryInference:  categoryInference,
 		BehaviorBaselines:  behaviorBaselines,
 		I4KnownVuln:        i4KnownVuln,
+		I5Vulnerable:       i5Vulnerable,
 		I6StorageSignals:   i6StorageSignals,
 	}, nil
 }

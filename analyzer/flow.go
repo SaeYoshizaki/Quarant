@@ -632,6 +632,11 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 		if i4Matches := i4EOLRule.ApplyAll(ctx); len(i4Matches) > 0 {
 			matches = append(matches, i4Matches...)
 		}
+
+		i5Rule := rules.NewI5KnownVulnerableComponentRule(h.knowledge)
+		if i5Matches := i5Rule.ApplyAll(ctx); len(i5Matches) > 0 {
+			matches = append(matches, i5Matches...)
+		}
 	}
 
 	if composite := buildCompositeRiskMatch(ctx, matches); composite != nil {

@@ -1,0 +1,71 @@
+[
+  {
+    "id": "philips_hue_hub",
+    "category": "Hub",
+    "vendor": "Philips",
+    "family": "philips_hue_hub",
+    "match_signals": {
+      "vendor_keywords": ["philips", "signify", "hue"],
+      "host_keywords": ["meethue", "philips-hue", "hue"],
+      "ua_keywords": ["hue", "philips"],
+      "sni_keywords": ["meethue", "philips-hue", "hue"]
+    },
+    "known_issues": [
+      "Known history of hub-side denial-of-service conditions affecting availability.",
+      "Ecosystem-facing hub components should be kept updated because central failure affects all attached devices."
+    ],
+    "representative_cves": ["CVE-2018-7580"],
+    "severity": "medium",
+    "recommendation": [
+      "Review hub firmware version and apply vendor updates.",
+      "Restrict unnecessary exposure of hub management interfaces.",
+      "Confirm cloud and local bridge access settings are still appropriate."
+    ]
+  },
+  {
+    "id": "smartthings_hub",
+    "category": "Hub",
+    "vendor": "Samsung",
+    "family": "smartthings_hub",
+    "match_signals": {
+      "vendor_keywords": ["samsung", "smartthings"],
+      "host_keywords": ["smartthings"],
+      "ua_keywords": ["smartthings", "samsung"],
+      "sni_keywords": ["smartthings"]
+    },
+    "known_issues": [
+      "Known history of authentication bypass and HTTP-facing vulnerabilities in SmartThings-related components.",
+      "Hub and ecosystem components may expose elevated risk when management or camera-related features are reachable."
+    ],
+    "representative_cves": ["CVE-2025-2233"],
+    "severity": "high",
+    "recommendation": [
+      "Review SmartThings hub and ecosystem software versions.",
+      "Restrict administrative and camera-related interfaces where possible.",
+      "Confirm that all SmartThings components remain supported and updated."
+    ]
+  },
+  {
+    "id": "tuya_controller",
+    "category": "Controller",
+    "vendor": "Tuya",
+    "family": "tuya_controller",
+    "match_signals": {
+      "vendor_keywords": ["tuya", "smartlife", "smart life"],
+      "host_keywords": ["tuya", "tuyaus", "smartlife"],
+      "ua_keywords": ["tuya", "smartlife"],
+      "sni_keywords": ["tuya", "smartlife"]
+    },
+    "known_issues": [
+      "Known issues have affected Tuya ecosystem SDK and Smart Life account-linking flows.",
+      "Controller or app-layer weaknesses can impact multiple attached devices across the ecosystem."
+    ],
+    "representative_cves": ["CVE-2025-56400"],
+    "severity": "medium",
+    "recommendation": [
+      "Review app, SDK, and controller software update status.",
+      "Check account-linking and third-party integration settings.",
+      "Prefer the latest vendor-supported versions across the ecosystem."
+    ]
+  }
+]
