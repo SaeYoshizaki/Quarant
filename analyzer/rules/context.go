@@ -27,11 +27,12 @@ type Context struct {
 	PIIDestinationRepeatCount   int
 	PIIDistinctDestinationCount int
 
-	HTTP    *HTTPInfo
-	MQTT    *MQTTInfo
-	Telnet  *TelnetInfo
-	TLS     bool
-	TLSInfo *TLSClientHelloInfo
+	HTTP          *HTTPInfo
+	MQTT          *MQTTInfo
+	Telnet        *TelnetInfo
+	TLS           bool
+	TLSInfo       *TLSClientHelloInfo
+	TLSServerInfo *TLSServerInfo
 
 	DeviceCategory      string
 	LocalDeviceCategory string

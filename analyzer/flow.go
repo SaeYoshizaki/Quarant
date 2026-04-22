@@ -511,6 +511,7 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 		Telnet:                    telnetInfo,
 		TLS:                       isTLSClientToServer,
 		TLSInfo:                   st.TLSClientInfo,
+		TLSServerInfo:             st.TLSServerInfo,
 		DeviceCategory:            deviceCategory,
 		LocalDeviceCategory:       localDeviceCategory,
 		FlowDeviceCategory:        flowDeviceCategory,
