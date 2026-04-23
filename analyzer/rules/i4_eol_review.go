@@ -19,11 +19,50 @@ func (r *I4EOLReviewRule) ApplyAll(ctx *Context) []Match {
 	if r.db == nil || ctx == nil {
 		return nil
 	}
-	if !isI4EnrichmentCategory(ctx.LocalDeviceCategory) {
+
+	eol := evaluateI4EOL(r.db, ctx)
+	if !eol.valid {
 		return nil
 	}
+
+	if !eol.likely {
+		return []Match{{
+			RuleID:   "I4_MAYBE_EOL_DEVICE",
+			Type:     "I4_MAYBE_EOL_DEVICE",
+			Category: "I4",
+			Severity: SeverityInfo,
+			Message:  "This device may be beyond a typical support lifecycle; review firmware support status and update availability",
+			Evidence: formatI4EOLEvidence(ctx, eol.updateVisibility, eol.legacySignals, eol.basis),
+		}}
+	}
+
+	return []Match{{
+		RuleID:   "I4_LIKELY_EOL_DEVICE",
+		Type:     "I4_LIKELY_EOL_DEVICE",
+		Category: "I4",
+		Severity: SeverityWarning,
+		Message:  "This device appears likely to be beyond a typical support lifecycle; review vendor support status and continued firmware update availability",
+		Evidence: formatI4EOLEvidence(ctx, eol.updateVisibility, eol.legacySignals, eol.basis),
+	}}
+}
+
+type i4EOLEvaluation struct {
+	valid            bool
+	likely           bool
+	updateVisibility string
+	legacySignals    []string
+	basis            []string
+}
+
+func evaluateI4EOL(db *knowledge.DB, ctx *Context) i4EOLEvaluation {
+	if db == nil || ctx == nil {
+		return i4EOLEvaluation{}
+	}
+	if !isI4EnrichmentCategory(ctx.LocalDeviceCategory) {
+		return i4EOLEvaluation{}
+	}
 	if !isI4HighConfidenceLocalFingerprint(ctx) {
-		return nil
+		return i4EOLEvaluation{}
 	}
 
 	updateVisibility := strings.TrimSpace(ctx.UpdateVisibility)
@@ -31,16 +70,16 @@ func (r *I4EOLReviewRule) ApplyAll(ctx *Context) []Match {
 		updateVisibility = "unknown"
 	}
 	if updateVisibility == "seen" {
-		return nil
+		return i4EOLEvaluation{}
 	}
 
 	legacySignals := normalizedNonEmptyStrings(ctx.LegacySignals)
-	if matchedFamilyForI4KnownIssues(r.db, ctx) {
+	if matchedFamilyForI4KnownIssues(db, ctx) {
 		legacySignals = append(legacySignals, "known_issues_family")
 	}
 	legacySignals = dedupeOrderedStrings(legacySignals)
 	if len(legacySignals) == 0 {
-		return nil
+		return i4EOLEvaluation{}
 	}
 
 	basis := []string{
@@ -49,27 +88,20 @@ func (r *I4EOLReviewRule) ApplyAll(ctx *Context) []Match {
 		"update_visibility=" + updateVisibility,
 	}
 
-	if shouldEmitLikelyEOL(updateVisibility, legacySignals) {
+	likely := shouldEmitLikelyEOL(updateVisibility, legacySignals)
+	if likely {
 		basis = append(basis, classifyI4EOLBasis(updateVisibility, legacySignals, true)...)
-		return []Match{{
-			RuleID:   "I4_LIKELY_EOL_DEVICE",
-			Type:     "I4_LIKELY_EOL_DEVICE",
-			Category: "I4",
-			Severity: SeverityWarning,
-			Message:  "This device appears likely to be beyond a typical support lifecycle; review vendor support status and continued firmware update availability",
-			Evidence: formatI4EOLEvidence(ctx, updateVisibility, legacySignals, basis),
-		}}
+	} else {
+		basis = append(basis, classifyI4EOLBasis(updateVisibility, legacySignals, false)...)
 	}
 
-	basis = append(basis, classifyI4EOLBasis(updateVisibility, legacySignals, false)...)
-	return []Match{{
-		RuleID:   "I4_MAYBE_EOL_DEVICE",
-		Type:     "I4_MAYBE_EOL_DEVICE",
-		Category: "I4",
-		Severity: SeverityInfo,
-		Message:  "This device may be beyond a typical support lifecycle; review firmware support status and update availability",
-		Evidence: formatI4EOLEvidence(ctx, updateVisibility, legacySignals, basis),
-	}}
+	return i4EOLEvaluation{
+		valid:            true,
+		likely:           likely,
+		updateVisibility: updateVisibility,
+		legacySignals:    legacySignals,
+		basis:            basis,
+	}
 }
 
 func matchedFamilyForI4KnownIssues(db *knowledge.DB, ctx *Context) bool {

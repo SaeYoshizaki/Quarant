@@ -17,27 +17,44 @@ func (r *I4LikelyNoSecureUpdateMechanismRule) Type() string {
 }
 
 func (r *I4LikelyNoSecureUpdateMechanismRule) Apply(ctx *Context) (Match, bool) {
-	if ctx == nil {
-		return Match{}, false
-	}
-	if strings.TrimSpace(ctx.UpdateVisibility) != "not_seen" {
-		return Match{}, false
-	}
-
-	legacySignals := dedupeOrderedStrings(normalizeI4LegacySignals(ctx.LegacySignals))
-	if len(legacySignals) == 0 {
-		return Match{}, false
-	}
-
-	score, basis := scoreI4NoSecureUpdateSignals(legacySignals)
-	if score < 2 {
+	evaluation := evaluateI4NoSecureUpdate(ctx)
+	if !evaluation.likely {
 		return Match{}, false
 	}
 
 	return Match{
 		Message:  "This device likely lacks a secure update mechanism or shows no observable evidence of one",
-		Evidence: formatI4NoSecureUpdateEvidence(ctx, legacySignals, basis),
+		Evidence: formatI4NoSecureUpdateEvidence(ctx, evaluation.legacySignals, evaluation.basis),
 	}, true
+}
+
+type i4NoSecureUpdateEvaluation struct {
+	likely        bool
+	legacySignals []string
+	basis         []string
+	score         int
+}
+
+func evaluateI4NoSecureUpdate(ctx *Context) i4NoSecureUpdateEvaluation {
+	if ctx == nil {
+		return i4NoSecureUpdateEvaluation{}
+	}
+	if strings.TrimSpace(ctx.UpdateVisibility) != "not_seen" {
+		return i4NoSecureUpdateEvaluation{}
+	}
+
+	legacySignals := dedupeOrderedStrings(normalizeI4LegacySignals(ctx.LegacySignals))
+	if len(legacySignals) == 0 {
+		return i4NoSecureUpdateEvaluation{}
+	}
+
+	score, basis := scoreI4NoSecureUpdateSignals(legacySignals)
+	return i4NoSecureUpdateEvaluation{
+		likely:        score >= 2,
+		legacySignals: legacySignals,
+		basis:         basis,
+		score:         score,
+	}
 }
 
 func normalizeI4LegacySignals(signals []string) []string {

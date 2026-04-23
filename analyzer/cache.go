@@ -28,6 +28,23 @@ type FlowState struct {
 	DNSNames []string
 }
 
+func (st *FlowState) AlreadyReported(ruleID string) bool {
+	if st == nil || ruleID == "" {
+		return false
+	}
+	return st.Reported[ruleID]
+}
+
+func (st *FlowState) MarkReported(ruleID string) {
+	if st == nil || ruleID == "" {
+		return
+	}
+	if st.Reported == nil {
+		st.Reported = make(map[string]bool)
+	}
+	st.Reported[ruleID] = true
+}
+
 type FlowCache struct {
 	mu      sync.Mutex
 	maxSize int

@@ -38,9 +38,10 @@
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
   
-  /* Severity colors */
   --severity-critical: oklch(0.55 0.22 25);
   --severity-critical-bg: oklch(0.95 0.04 25);
+  --severity-high: oklch(0.58 0.2 45);
+  --severity-high-bg: oklch(0.96 0.04 45);
   --severity-warning: oklch(0.65 0.18 70);
   --severity-warning-bg: oklch(0.96 0.04 70);
   --severity-info: oklch(0.55 0.12 230);

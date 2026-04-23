@@ -102,10 +102,8 @@ def pick_top_domains(devices, limit=8):
         representative_domains.append(normalized_domain)
 
     if representative_domains:
-        # 順序を保ったまま重複を除く。
         return list(dict.fromkeys(representative_domains))[:limit]
 
-    # ドメインそのものがないカテゴリは、識別に効きやすいキーワードだけ補助的に使う。
     filtered_keywords = [
         keyword
         for keyword, _count in keyword_counter.most_common()

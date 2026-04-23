@@ -135,7 +135,7 @@ func parseMQTTConnect(packet []byte) (*MQTTInfo, bool) {
 
 	level := packet[offset]
 	connectFlags := packet[offset+1]
-	offset += 4 // level, flags, keepalive
+	offset += 4
 
 	if level == 5 {
 		propsLen, used, ok := parseMQTTRemainingLength(packet[offset:])

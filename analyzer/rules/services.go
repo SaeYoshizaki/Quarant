@@ -16,8 +16,8 @@ var insecureServicePorts = map[uint16]string{
 }
 
 var nonPublicIPv6CIDRs = mustParseCIDRs(
-	"fc00::/7",      // unique local
-	"2001:db8::/32", // documentation
+	"fc00::/7",
+	"2001:db8::/32",
 )
 
 func IsHTTPPort(p uint16) bool {

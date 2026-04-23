@@ -82,7 +82,6 @@ def normalize_device_category(raw: str) -> str:
     if s in mapping:
         return mapping[s]
 
-    # Fingerbank API の曖昧な値や device_name 用の補助
     if "camera" in s or "video" in s:
         return "Camera"
     if "voice" in s or "alexa" in s or "assistant" in s or "speaker" in s:

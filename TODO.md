@@ -102,6 +102,70 @@
 - [x] 平文 HTTP の機密情報検知を拡張した
   - header: `Authorization`, `Cookie`, `Set-Cookie`, `X-Api-Key`, `X-Auth-Token`, `Proxy-Authorization`
   - header: 独自 `token` / `auth` 系ヘッダーも値の形と合わせて検知
+## I6: 今回やり終えたこと
+
+- [x] I6 のパッシブ監視スコープを明文化した
+  - デバイス内部やクラウド側に「個人情報が保存されていること」は直接観測できない
+  - `without permission` や UI 上の同意状態は直接判定しない
+  - 直接検知ではなく、通信上の privacy risk signal として扱う方針に整理
+
+- [x] baseline / category mismatch による I6 検知を整理した
+  - HTTP Host / TLS SNI を category baseline と比較
+  - `baseline_novelty` と `suspicious_unmatched` を分離
+  - `I6_DEVICE_FLOW_CATEGORY_MISMATCH` で local category と flow category の不一致を説明
+
+- [x] stored-data signal の最小実装を追加した
+  - `history / backup / sync / logs` 系 endpoint を直接保存検知ではなく保存シグナル候補として扱う
+  - upload method、upload size、endpoint 再観測、stable identifier 再観測を組み合わせる
+  - `I6_STORED_DATA_SIGNAL_OBSERVED` は `indirect_at_rest=true` / `direct_storage_observed=false` を evidence に残す
+
+- [x] PII misuse signal の最小実装を追加した
+  - category に不要寄りの PII type と unexpected / analytics / tracking 寄り destination の組み合わせを検知
+  - `I6_PII_TO_UNEXPECTED_DESTINATION` は同意違反やポリシー違反を断定せず、`consent_observed=false` / `consent_inferred=false` を evidence に残す
+  - analytics / tracking は単独 trigger ではなく、identifier や destination の再観測に対する補助 signal として扱う
+
+- [x] I6 の観測 state を privacy-preserving にした
+  - raw identifier は保存せず fingerprint / endpoint / destination の軽量 count のみ保持
+  - observation window と map size 上限を追加し、古い再観測が無期限に repeat 扱いされないようにした
+
+## I6: 追加でいつかやるべきこと
+
+- [ ] category policy の精度向上
+  - `allowed_pii_types` をカテゴリごとに精査する
+  - `Sensor` / `Camera` / `Wearable` / `VoiceAssistant` などで「不要寄り PII」をもう少し細かく定義する
+  - 現状の policy は粗いので、実 pcap / サンプルイベントで false positive を確認しながら調整する
+
+- [ ] analytics / tracking / ad-tech destination knowledge の追加
+  - 現状は host keyword による素朴な判定
+  - 小さな knowledge JSON として known analytics / ad-tech domain pattern を持たせる
+  - vendor ecosystem 内の telemetry と third-party tracking を分けて説明できるようにする
+
+- [ ] TLS で PII 本文が見えない場合の補助 signal 整理
+  - HTTPS では PII 内容を見られないため、SNI / destination / frequency / size だけで扱う必要がある
+  - TLS 上の `unexpected destination + repeated identifier-like flow` を低 confidence signal として扱うか検討する
+
+- [ ] 起動直後バースト / repeated sync の時間窓を改善
+  - 現状は endpoint / identifier / PII destination の軽量 count 中心
+  - device first_seen 直後の burst、短時間の複数 upload、複数 destination への拡散をもう少し説明可能にする
+
+- [ ] I7 との接続を整理する
+  - 平文 HTTP 上で PII が見えている場合、I7 は in-transit の露出、I6 は privacy misuse signal として役割を分ける
+  - event evidence に関連 event type を入れるか、report 側でまとめるか検討する
+
+- [ ] mitigation への接続
+  - `R1_COMPOSITE_RISK` の recommended action を通知 / ブロック / 隔離候補に接続する
+  - ただし I6 は signal ベースなので、単独で block しすぎない運用ルールを考える
+
+## I7: HTTP 範囲で今回やり終えたこと
+
+- [x] I7 の現状スコープを明文化した
+  - 現状は「平文 HTTP 中心の in-transit 検知」であることを README / TODO 上で明記
+  - `header` / `query` / `body` の観測範囲を整理
+  - `at rest` / `during processing` はパッシブ監視だけでは直接検知しにくいことを明記
+
+- [x] 平文 HTTP の機密情報検知を拡張した
+  - header: `Authorization`, `Cookie`, `Set-Cookie`, `X-Api-Key`, `X-Auth-Token`, `Proxy-Authorization`
+  - header: 独自 `token` / `auth` 系ヘッダーも値の形と合わせて検知
   - query: `refresh_token`, `session`, `sid`, `jwt`, `wifi_password`, `ssid`, `psk`, `device_id`, `serial` などを追加
   - body: `application/x-www-form-urlencoded`, `application/json`, `multipart/form-data`, `text/plain`, XML に対応
   - `Content-Type` が欠落・不正でも body の見た目から形式を推定

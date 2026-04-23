@@ -156,6 +156,8 @@ func toSortedKV(m map[string]int) []KV {
 func severityRank(s string) int {
 	switch s {
 	case "CRITICAL":
+		return 4
+	case "HIGH":
 		return 3
 	case "WARNING":
 		return 2

@@ -2,6 +2,7 @@ package analyzer
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 	"time"
 
@@ -140,6 +141,7 @@ func (h *FlowHandler) writeDeviceDebug(now time.Time, srcIP string, d *device.De
 	inferredScores := d.Classification.Scores
 	summary := deviceDebugSummary(d.Classification, d.DeviceType)
 	detailReasons := humanizeReasons(reasons)
+	identity := d.Identity
 
 	_ = h.sink.Write(Event{
 		Timestamp: now,
@@ -147,9 +149,20 @@ func (h *FlowHandler) writeDeviceDebug(now time.Time, srcIP string, d *device.De
 		Severity:  SeverityInfo,
 		SrcIP:     srcIP,
 		Message: fmt.Sprintf(
-			"summary=%q detail=%q device_type=%s vendor=%s model=%s category=%s inference_source=%s confidence=%s inference_reasons=%v inferred_scores=%v ja3=%s evidence=%v risk_score=%d observed=%v insecure=%v admin=%t external=%t reasons=%v",
+			"summary=%q detail=%q identity_state=%s identity_category=%s identity_category_confidence=%s identity_vendor=%s identity_vendor_confidence=%s identity_family=%s identity_family_confidence=%s identity_reasons=%v identity_top_category_scores=%v identity_top_vendor_scores=%v identity_top_family_scores=%v device_type=%s vendor=%s model=%s category=%s inference_source=%s confidence=%s inference_reasons=%v inferred_scores=%v ja3=%s evidence=%v risk_score=%d observed=%v insecure=%v admin=%t external=%t reasons=%v",
 			summary,
 			fmt.Sprintf("category=%s source=%s confidence=%s reasons=%v", d.Classification.NormalizedCategory(), inferenceSource, d.Classification.ConfidenceSummary(), detailReasons),
+			identityDebugState(identity),
+			identity.CategoryCandidate,
+			identity.CategoryConfidence,
+			identity.VendorCandidate,
+			identity.VendorConfidence,
+			identity.FamilyCandidate,
+			identity.FamilyConfidence,
+			identityDebugReasons(identity),
+			topScores(identity.CategoryScores, 3),
+			topScores(identity.VendorScores, 3),
+			topScores(identity.FamilyScores, 3),
 			d.DeviceType,
 			d.Vendor,
 			d.Model,
@@ -168,6 +181,45 @@ func (h *FlowHandler) writeDeviceDebug(now time.Time, srcIP string, d *device.De
 			d.RiskReasons,
 		),
 	})
+}
+
+func identityDebugState(identity device.DeviceIdentity) string {
+	familyRank := debugConfidenceRank(identity.FamilyConfidence)
+	vendorRank := debugConfidenceRank(identity.VendorConfidence)
+	hasFamily := strings.TrimSpace(identity.FamilyCandidate) != ""
+	hasVendor := strings.TrimSpace(identity.VendorCandidate) != ""
+	switch {
+	case hasFamily && familyRank >= debugConfidenceRank("medium"):
+		return "concrete_family"
+	case hasVendor && vendorRank >= debugConfidenceRank("medium"):
+		return "vendor_without_concrete_family"
+	case hasFamily:
+		return "family_uncertain"
+	default:
+		return "identity_weak"
+	}
+}
+
+func identityDebugReasons(identity device.DeviceIdentity) []string {
+	reasons := []string{}
+	reasons = append(reasons, limitPrefixedReasons("category", identity.CategoryReasons, 2)...)
+	reasons = append(reasons, limitPrefixedReasons("vendor", identity.VendorReasons, 2)...)
+	reasons = append(reasons, limitPrefixedReasons("family", identity.FamilyReasons, 3)...)
+	return reasons
+}
+
+func limitPrefixedReasons(prefix string, reasons []string, limit int) []string {
+	out := []string{}
+	for _, reason := range reasons {
+		if strings.TrimSpace(reason) == "" {
+			continue
+		}
+		out = append(out, prefix+":"+reason)
+		if len(out) >= limit {
+			return out
+		}
+	}
+	return out
 }
 
 func inferenceView(category, deviceType, source, confidence string, reasons []string) rules.InferenceView {
@@ -203,6 +255,52 @@ func humanizeReasons(reasons []string) []string {
 
 func compactClassification(category, source, confidence string) string {
 	return fmt.Sprintf("%s(%s,%s)", category, source, confidence)
+}
+
+func topScores(scores map[string]float64, limit int) []string {
+	if len(scores) == 0 || limit <= 0 {
+		return nil
+	}
+	type scoreEntry struct {
+		label string
+		score float64
+	}
+	entries := make([]scoreEntry, 0, len(scores))
+	for label, score := range scores {
+		if score <= 0 {
+			continue
+		}
+		entries = append(entries, scoreEntry{label: label, score: score})
+	}
+	sort.SliceStable(entries, func(i, j int) bool {
+		if entries[i].score == entries[j].score {
+			return entries[i].label < entries[j].label
+		}
+		return entries[i].score > entries[j].score
+	})
+	if len(entries) > limit {
+		entries = entries[:limit]
+	}
+	out := make([]string, 0, len(entries))
+	for _, entry := range entries {
+		out = append(out, fmt.Sprintf("%s=%.2f", entry.label, entry.score))
+	}
+	return out
+}
+
+func debugConfidenceRank(label string) int {
+	switch strings.ToLower(strings.TrimSpace(label)) {
+	case "strong":
+		return 4
+	case "high":
+		return 3
+	case "medium":
+		return 2
+	case "low":
+		return 1
+	default:
+		return 0
+	}
 }
 
 func classificationSourcePhrase(source string) string {
@@ -445,9 +543,7 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 			st.TLSClientInfo = &tlsInfo
 
 			d := h.devices.GetOrCreate(srcIP)
-			// Keep local identity anchored to durable device evidence.
-			// The current flow's SNI/JA3 are used for flow classification below,
-			// but should not immediately rewrite the learned local category.
+			device.EnrichFromTLS(d, tlsInfo)
 			device.AddTLSBehaviorHints(d, dstPort)
 			h.writeDeviceDebug(now, srcIP, d)
 		}
@@ -527,8 +623,15 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 		DeviceCategory:            deviceCategory,
 		LocalDeviceCategory:       localDeviceCategory,
 		FlowDeviceCategory:        flowDeviceCategory,
-		VendorCandidate:           d.Vendor,
-		FamilyCandidate:           d.DeviceType,
+		CategoryCandidate:         d.Identity.CategoryCandidate,
+		VendorCandidate:           d.Identity.VendorCandidate,
+		FamilyCandidate:           d.Identity.FamilyCandidate,
+		CategoryConfidence:        d.Identity.CategoryConfidence,
+		VendorConfidence:          d.Identity.VendorConfidence,
+		FamilyConfidence:          d.Identity.FamilyConfidence,
+		CategoryReasons:           d.Identity.CategoryReasons,
+		VendorReasons:             d.Identity.VendorReasons,
+		FamilyReasons:             d.Identity.FamilyReasons,
 		ObservedHosts:             mapKeys(d.Hosts),
 		ObservedUserAgents:        mapKeys(d.UserAgents),
 		ObservedSNIValues:         mapKeys(d.SNIValues),
@@ -652,6 +755,13 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 		if i5Matches := i5Rule.ApplyAll(ctx); len(i5Matches) > 0 {
 			matches = append(matches, i5Matches...)
 		}
+
+		if !st.AlreadyReported(rules.I4I5CombinedRiskRuleID) {
+			i4I5Rule := rules.NewI4I5CombinedRiskRule(h.knowledge)
+			if i4I5Match, ok := i4I5Rule.Apply(ctx); ok {
+				matches = append(matches, i4I5Match)
+			}
+		}
 	}
 
 	if composite := buildCompositeRiskMatch(ctx, matches); composite != nil {
@@ -659,7 +769,7 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 	}
 
 	for _, m := range matches {
-		if m.RuleID != "" && st.Reported[m.RuleID] {
+		if st.AlreadyReported(m.RuleID) {
 			continue
 		}
 
@@ -683,9 +793,7 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 			h.writeDeviceDebug(now, srcIP, h.devices.GetOrCreate(srcIP))
 		}
 
-		if m.RuleID != "" {
-			st.Reported[m.RuleID] = true
-		}
+		st.MarkReported(m.RuleID)
 	}
 
 	if now.Unix()%10 == 0 {

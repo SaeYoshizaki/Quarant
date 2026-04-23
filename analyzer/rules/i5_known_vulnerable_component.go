@@ -48,17 +48,7 @@ func (r *I5KnownVulnerableComponentRule) ApplyAll(ctx *Context) []Match {
 		return nil
 	}
 
-	var best *i5ComponentMatch
-	for _, component := range *r.db.I5Vulnerable {
-		match, ok := matchI5VulnerableComponent(ctx, component)
-		if !ok {
-			continue
-		}
-		if best == nil || i5BetterMatch(match, *best) {
-			best = &match
-		}
-	}
-
+	best := findBestI5VulnerableComponent(r.db, ctx)
 	if best == nil {
 		return nil
 	}
@@ -71,6 +61,25 @@ func (r *I5KnownVulnerableComponentRule) ApplyAll(ctx *Context) []Match {
 			best.matchBasis,
 		),
 	}
+}
+
+func findBestI5VulnerableComponent(db *knowledge.DB, ctx *Context) *i5ComponentMatch {
+	if db == nil || db.I5Vulnerable == nil || ctx == nil {
+		return nil
+	}
+
+	var best *i5ComponentMatch
+	for _, component := range *db.I5Vulnerable {
+		match, ok := matchI5VulnerableComponent(ctx, component)
+		if !ok {
+			continue
+		}
+		if best == nil || i5BetterMatch(match, *best) {
+			best = &match
+		}
+	}
+
+	return best
 }
 
 func matchI5VulnerableComponent(ctx *Context, component knowledge.I5VulnerableComponent) (i5ComponentMatch, bool) {

@@ -31,8 +31,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 
-// Types
-type EventSeverity = "CRITICAL" | "WARNING" | "INFO" | string;
+type EventSeverity = "CRITICAL" | "HIGH" | "WARNING" | "INFO" | string;
 
 type Event = {
   ts: string;
@@ -71,17 +70,16 @@ type Report = {
 
 type Summary = {
   critical: number;
+  high: number;
   warning: number;
   info: number;
   sources: number;
   total: number;
 };
 
-// Constants
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:8080";
 
-// Utilities
 function formatTime(value?: string): string {
   if (!value) return "-";
   const date = new Date(value);
@@ -114,6 +112,7 @@ function endpoint(ip?: string, port?: number): string {
 function summarize(filteredEvents: Event[]): Summary {
   return {
     critical: filteredEvents.filter((e) => e.severity === "CRITICAL").length,
+    high: filteredEvents.filter((e) => e.severity === "HIGH").length,
     warning: filteredEvents.filter((e) => e.severity === "WARNING").length,
     info: filteredEvents.filter((e) => e.severity === "INFO").length,
     sources: new Set(filteredEvents.map((e) => e.src_ip).filter(Boolean)).size,
@@ -121,7 +120,6 @@ function summarize(filteredEvents: Event[]): Summary {
   };
 }
 
-// Components
 function SummaryCard({
   label,
   value,
@@ -131,12 +129,13 @@ function SummaryCard({
   label: string;
   value: number;
   icon: React.ElementType;
-  variant?: "default" | "critical" | "warning" | "info";
+  variant?: "default" | "critical" | "high" | "warning" | "info";
 }) {
   const variantStyles = {
     default: "border-border",
     critical:
       "border-[var(--severity-critical)]/30 bg-[var(--severity-critical-bg)]",
+    high: "border-[var(--severity-high)]/30 bg-[var(--severity-high-bg)]",
     warning:
       "border-[var(--severity-warning)]/30 bg-[var(--severity-warning-bg)]",
     info: "border-[var(--severity-info)]/30 bg-[var(--severity-info-bg)]",
@@ -145,6 +144,7 @@ function SummaryCard({
   const iconStyles = {
     default: "text-muted-foreground",
     critical: "text-[var(--severity-critical)]",
+    high: "text-[var(--severity-high)]",
     warning: "text-[var(--severity-warning)]",
     info: "text-[var(--severity-info)]",
   };
@@ -177,6 +177,7 @@ function SeverityBadge({ severity }: { severity?: EventSeverity }) {
   const styles: Record<string, string> = {
     CRITICAL:
       "bg-[var(--severity-critical)] text-white hover:bg-[var(--severity-critical)]",
+    HIGH: "bg-[var(--severity-high)] text-white hover:bg-[var(--severity-high)]",
     WARNING:
       "bg-[var(--severity-warning)] text-white hover:bg-[var(--severity-warning)]",
     INFO: "bg-[var(--severity-info)] text-white hover:bg-[var(--severity-info)]",
@@ -394,7 +395,6 @@ function TopListCollapsible({
   );
 }
 
-// Main Page
 export default function QuarantDashboard() {
   const [report, setReport] = useState<Report | null>(null);
   const [severity, setSeverity] = useState<string>("all");
@@ -474,7 +474,6 @@ export default function QuarantDashboard() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
       <header className="sticky top-0 z-10 border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80">
         <div className="mx-auto flex max-w-screen-2xl items-center justify-between gap-4 px-4 py-3">
           <div className="flex items-center gap-4">
@@ -521,7 +520,6 @@ export default function QuarantDashboard() {
       </header>
 
       <main className="mx-auto max-w-screen-2xl px-4 py-4">
-        {/* Status */}
         {error && (
           <div className="mb-4 rounded-md border border-[var(--severity-critical)]/30 bg-[var(--severity-critical-bg)] px-4 py-2 text-sm">
             <span className="font-medium text-[var(--severity-critical)]">
@@ -531,8 +529,7 @@ export default function QuarantDashboard() {
           </div>
         )}
 
-        {/* Summary Cards */}
-        <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-5">
           <SummaryCard
             label="Total Events"
             value={stats.total}
@@ -543,6 +540,12 @@ export default function QuarantDashboard() {
             value={stats.critical}
             icon={AlertCircle}
             variant="critical"
+          />
+          <SummaryCard
+            label="High"
+            value={stats.high}
+            icon={AlertTriangle}
+            variant="high"
           />
           <SummaryCard
             label="Warning"
@@ -559,10 +562,8 @@ export default function QuarantDashboard() {
         </div>
 
         <div className="flex flex-col gap-4 lg:flex-row">
-          {/* Main Event Log */}
           <div className="min-w-0 flex-1">
             <div className="rounded-md border border-border bg-card">
-              {/* Filter Bar */}
               <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-3 py-2">
                 <FilterBar
                   severity={severity}
@@ -582,7 +583,6 @@ export default function QuarantDashboard() {
                 </span>
               </div>
 
-              {/* Table Header */}
               <div className="grid grid-cols-[100px_80px_1fr_180px_2fr] items-center gap-3 border-b border-border bg-muted/30 px-3 py-2 text-xs font-medium text-muted-foreground">
                 <span>Time</span>
                 <span>Severity</span>
@@ -591,7 +591,6 @@ export default function QuarantDashboard() {
                 <span>Message</span>
               </div>
 
-              {/* Event Rows */}
               <div className="max-h-[calc(100vh-320px)] overflow-y-auto">
                 {filteredEvents.length > 0 ? (
                   filteredEvents.map((event, index) => (
@@ -614,7 +613,6 @@ export default function QuarantDashboard() {
             </div>
           </div>
 
-          {/* Sidebar - Top Lists */}
           <aside className="w-full shrink-0 lg:w-64">
             <div className="rounded-md border border-border bg-card">
               <TopListCollapsible

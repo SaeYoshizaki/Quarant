@@ -1,0 +1,459 @@
+[
+  // camera
+  {
+    "id": "nest_cam",
+    "category": "Camera",
+    "vendor": "Google",
+    "family": "nest_cam",
+    "match_signals": {
+      "vendor_keywords": ["google", "nest"],
+      "host_keywords": ["google", "nest"],
+      "ua_keywords": ["google", "nest"],
+      "sni_keywords": ["google", "nest"]
+    },
+    "known_issues": [
+      "Known history of Weave-related denial-of-service and information disclosure issues in Nest Cam IQ Indoor product lines.",
+      "Pairing and device communication paths should be reviewed when Nest camera traffic is observed."
+    ],
+    "representative_cves": ["CVE-2019-5043"],
+    "severity": "medium",
+    "recommendation": [
+      "Review camera firmware version and apply available vendor updates.",
+      "Restrict unnecessary local pairing and management exposure.",
+      "Confirm the observed device model is still vendor-supported."
+    ]
+  },
+  {
+    "id": "ring_camera",
+    "category": "Camera",
+    "vendor": "Amazon",
+    "family": "ring_camera",
+    "match_signals": {
+      "vendor_keywords": ["ring", "amazon"],
+      "host_keywords": ["ring", "amazon"],
+      "ua_keywords": ["ring", "amazon"],
+      "sni_keywords": ["ring", "amazon"]
+    },
+    "known_issues": [],
+    "representative_cves": [],
+    "severity": "",
+    "recommendation": []
+  },
+  {
+    "id": "hikvision_camera",
+    "category": "Camera",
+    "vendor": "Hikvision",
+    "family": "hikvision_camera",
+    "match_signals": {
+      "vendor_keywords": ["hikvision"],
+      "host_keywords": ["hikvision", "hik-connect"],
+      "ua_keywords": ["hikvision"],
+      "sni_keywords": ["hikvision", "hik-connect"]
+    },
+    "known_issues": [
+      "Known history of camera firmware vulnerabilities affecting exposed Hikvision devices.",
+      "Camera management interfaces and firmware should be reviewed when Hikvision devices are observed."
+    ],
+    "representative_cves": ["CVE-2021-36260"],
+    "severity": "critical",
+    "recommendation": [
+      "Review camera firmware version and apply vendor updates.",
+      "Restrict administrative access to camera management interfaces.",
+      "Confirm the device remains supported by the vendor."
+    ]
+  },
+  // sensor
+  {
+    "id": "aqara_sensor",
+    "category": "Sensor",
+    "vendor": "Aqara",
+    "family": "aqara_sensor",
+    "match_signals": {
+      "vendor_keywords": ["aqara"],
+      "host_keywords": ["aqara"],
+      "ua_keywords": ["aqara"],
+      "sni_keywords": ["aqara"]
+    },
+    "known_issues": [],
+    "representative_cves": [],
+    "severity": "",
+    "recommendation": []
+  },
+  {
+    "id": "eve_sensor",
+    "category": "Sensor",
+    "vendor": "Eve",
+    "family": "eve_sensor",
+    "match_signals": {
+      "vendor_keywords": ["eve"],
+      "host_keywords": ["eve"],
+      "ua_keywords": ["eve"],
+      "sni_keywords": ["eve"]
+    },
+    "known_issues": [],
+    "representative_cves": [],
+    "severity": "",
+    "recommendation": []
+  },
+  {
+    "id": "switchbot_sensor",
+    "category": "Sensor",
+    "vendor": "SwitchBot",
+    "family": "switchbot_sensor",
+    "match_signals": {
+      "vendor_keywords": ["switchbot", "switch-bot"],
+      "host_keywords": ["switchbot", "switch-bot"],
+      "ua_keywords": ["switchbot", "switch-bot"],
+      "sni_keywords": ["switchbot", "switch-bot"]
+    },
+    "known_issues": [],
+    "representative_cves": [],
+    "severity": "",
+    "recommendation": []
+  },
+  // hub
+  {
+    "id": "smartthings_hub",
+    "category": "Hub",
+    "vendor": "Samsung",
+    "family": "smartthings_hub",
+    "match_signals": {
+      "vendor_keywords": ["samsung", "smartthings"],
+      "host_keywords": ["smartthings"],
+      "ua_keywords": ["smartthings", "samsung"],
+      "sni_keywords": ["smartthings"]
+    },
+    "known_issues": [
+      "Known history of authentication bypass and HTTP-facing vulnerabilities in SmartThings-related components.",
+      "Hub and ecosystem components may expose elevated risk when management or camera-related features are reachable."
+    ],
+    "representative_cves": ["CVE-2025-2233"],
+    "severity": "high",
+    "recommendation": [
+      "Review SmartThings hub and ecosystem software versions.",
+      "Restrict administrative and camera-related interfaces where possible.",
+      "Confirm that all SmartThings components remain supported and updated."
+    ]
+  },
+  {
+    "id": "philips_hue_hub",
+    "category": "Hub",
+    "vendor": "Philips",
+    "family": "philips_hue_hub",
+    "match_signals": {
+      "vendor_keywords": ["philips", "signify", "hue"],
+      "host_keywords": ["meethue", "philips-hue", "hue"],
+      "ua_keywords": ["hue", "philips"],
+      "sni_keywords": ["meethue", "philips-hue", "hue"]
+    },
+    "known_issues": [
+      "Known history of hub-side denial-of-service conditions affecting availability.",
+      "Ecosystem-facing hub components should be kept updated because central failure affects all attached devices."
+    ],
+    "representative_cves": ["CVE-2018-7580"],
+    "severity": "medium",
+    "recommendation": [
+      "Review hub firmware version and apply vendor updates.",
+      "Restrict unnecessary exposure of hub management interfaces.",
+      "Confirm cloud and local bridge access settings are still appropriate."
+    ]
+  },
+  {
+    "id": "aqara_hub",
+    "category": "Hub",
+    "vendor": "Aqara",
+    "family": "aqara_hub",
+    "match_signals": {
+      "vendor_keywords": ["aqara"],
+      "host_keywords": ["aqara"],
+      "ua_keywords": ["aqara"],
+      "sni_keywords": ["aqara"]
+    },
+    "known_issues": [
+      "Known history of command injection, certificate validation failures, and insecure update-process weaknesses in Aqara hub product lines.",
+      "Hub and firmware update paths should be reviewed carefully when Aqara hub traffic is observed."
+    ],
+    "representative_cves": ["CVE-2025-65292"],
+    "severity": "critical",
+    "recommendation": [
+      "Review hub firmware version and apply available vendor updates.",
+      "Restrict unnecessary remote and management exposure.",
+      "Confirm the specific hub model remains vendor-supported."
+    ]
+  },
+  // controller
+  {
+    "id": "tuya_controller",
+    "category": "Controller",
+    "vendor": "Tuya",
+    "family": "tuya_controller",
+    "match_signals": {
+      "vendor_keywords": ["tuya", "smartlife", "smart life"],
+      "host_keywords": ["tuya", "tuyaus", "smartlife"],
+      "ua_keywords": ["tuya", "smartlife"],
+      "sni_keywords": ["tuya", "smartlife"]
+    },
+    "known_issues": [
+      "Known issues have affected Tuya ecosystem SDK and Smart Life account-linking flows.",
+      "Controller or app-layer weaknesses can impact multiple attached devices across the ecosystem."
+    ],
+    "representative_cves": ["CVE-2025-56400"],
+    "severity": "medium",
+    "recommendation": [
+      "Review app, SDK, and controller software update status.",
+      "Check account-linking and third-party integration settings.",
+      "Prefer the latest vendor-supported versions across the ecosystem."
+    ]
+  },
+  {
+    "id": "tplink_controller",
+    "category": "Controller",
+    "vendor": "TP-Link",
+    "family": "tplink_controller",
+    "match_signals": {
+      "vendor_keywords": ["tp-link", "tplink", "tapo", "kasa"],
+      "host_keywords": ["tplinkcloud", "tp-link", "tplink", "tapo", "kasa"],
+      "ua_keywords": ["tp-link", "tplink", "tapo", "kasa"],
+      "sni_keywords": ["tplinkcloud", "tp-link", "tplink", "tapo", "kasa"]
+    },
+    "known_issues": [
+      "Known issues have affected TP-Link controller and ecosystem-facing management components.",
+      "Cloud-connected controller paths and management interfaces should be reviewed when TP-Link controller traffic is observed."
+    ],
+    "representative_cves": ["CVE-2023-1389"],
+    "severity": "high",
+    "recommendation": [
+      "Review controller firmware version and apply vendor updates.",
+      "Restrict unnecessary exposure of management interfaces.",
+      "Confirm the device and ecosystem components remain vendor-supported."
+    ]
+  },
+  [
+    {
+      "id": "switchbot_controller",
+      "category": "Controller",
+      "vendor": "SwitchBot",
+      "family": "switchbot_controller",
+      "match_signals": {
+        "vendor_keywords": ["switchbot", "switch-bot"],
+        "host_keywords": ["switch-bot", "switchbot"],
+        "ua_keywords": ["switchbot", "switch-bot"],
+        "sni_keywords": ["switch-bot", "switchbot"]
+      },
+      "known_issues": [
+        "Known issues have affected the SwitchBot app and related ecosystem software, including firmware-update and log-exposure related weaknesses.",
+        "Controller or app-layer weaknesses can affect management and cloud-connected control paths across attached devices."
+      ],
+      "representative_cves": ["CVE-2024-48786", "CVE-2025-53649"],
+      "severity": "medium",
+      "recommendation": [
+        "Review SwitchBot app and controller software versions.",
+        "Review firmware-update related behavior and exposed management paths.",
+        "Prefer the latest vendor-supported versions across the ecosystem."
+      ]
+    },
+    {
+      "id": "amazon_echo",
+      "category": "VoiceAssistant",
+      "vendor": "Amazon",
+      "family": "amazon_echo",
+      "match_signals": {
+        "vendor_keywords": ["amazon", "alexa", "echo"],
+        "host_keywords": ["alexa", "amazon"],
+        "ua_keywords": ["alexa", "amazon", "echo"],
+        "sni_keywords": ["alexa", "amazon"]
+      },
+      "known_issues": [
+        "Known history of device-side security issues affecting Echo product lines.",
+        "Voice-assistant devices should be reviewed carefully because they are central account-linked home endpoints."
+      ],
+      "representative_cves": ["CVE-2021-37436"],
+      "severity": "medium",
+      "recommendation": [
+        "Review device software version and apply vendor updates.",
+        "Review account-linking and voice-purchase/privacy settings.",
+        "Confirm the observed device model remains vendor-supported."
+      ]
+    },
+    {
+      "id": "apple_homepod",
+      "category": "VoiceAssistant",
+      "vendor": "Apple",
+      "family": "apple_homepod",
+      "match_signals": {
+        "vendor_keywords": ["apple", "homepod", "siri"],
+        "host_keywords": ["apple", "icloud", "homekit"],
+        "ua_keywords": ["apple", "homepod"],
+        "sni_keywords": ["apple", "icloud", "homekit"]
+      },
+      "known_issues": [
+        "HomePod is a Siri-enabled home device and should be reviewed as a privacy-sensitive, account-linked smart-home endpoint."
+      ],
+      "representative_cves": [],
+      "severity": "",
+      "recommendation": [
+        "Review software update status and Apple account security settings.",
+        "Review Home app sharing and home-access configuration.",
+        "Prefer the latest vendor-supported software."
+      ]
+    },
+    {
+      "id": "google_nest_audio",
+      "category": "VoiceAssistant",
+      "vendor": "Google",
+      "family": "google_nest_audio",
+      "match_signals": {
+        "vendor_keywords": ["google", "nest"],
+        "host_keywords": ["google", "nest"],
+        "ua_keywords": ["google", "nest"],
+        "sni_keywords": ["google", "nest"]
+      },
+      "known_issues": [
+        "Nest audio devices should be reviewed as account-linked voice-assistant endpoints that may bridge smart-home and cloud services."
+      ],
+      "representative_cves": [],
+      "severity": "",
+      "recommendation": [
+        "Review firmware/software update status.",
+        "Review linked Google account and smart-home integration settings.",
+        "Confirm the observed model remains vendor-supported."
+      ]
+    },
+    {
+      "id": "apple_watch",
+      "category": "Wearable",
+      "vendor": "Apple",
+      "family": "apple_watch",
+      "match_signals": {
+        "vendor_keywords": ["apple", "watch"],
+        "host_keywords": ["apple", "icloud"],
+        "ua_keywords": ["apple", "watch"],
+        "sni_keywords": ["apple", "icloud"]
+      },
+      "known_issues": [
+        "Known history of lock-screen and accessibility-related issues affecting Apple Watch product lines.",
+        "Wearables should be reviewed carefully because they may process health, identity, and notification data."
+      ],
+      "representative_cves": ["CVE-2023-32417"],
+      "severity": "medium",
+      "recommendation": [
+        "Review watchOS version and apply vendor updates.",
+        "Review lock-screen and privacy-related settings.",
+        "Confirm the observed model remains vendor-supported."
+      ]
+    },
+    {
+      "id": "google_pixel_watch",
+      "category": "Wearable",
+      "vendor": "Google",
+      "family": "google_pixel_watch",
+      "match_signals": {
+        "vendor_keywords": ["google", "pixel", "fitbit"],
+        "host_keywords": ["google", "fitbit", "pixel"],
+        "ua_keywords": ["google", "pixel", "fitbit"],
+        "sni_keywords": ["google", "fitbit", "pixel"]
+      },
+      "known_issues": [
+        "Pixel Watch devices integrate tightly with Google and Fitbit services, so observed traffic should be reviewed as privacy-sensitive wearable traffic."
+      ],
+      "representative_cves": [],
+      "severity": "",
+      "recommendation": [
+        "Review software update status.",
+        "Review Fitbit and Google account-linking settings.",
+        "Prefer the latest vendor-supported software."
+      ]
+    },
+    {
+      "id": "samsung_galaxy_watch",
+      "category": "Wearable",
+      "vendor": "Samsung",
+      "family": "samsung_galaxy_watch",
+      "match_signals": {
+        "vendor_keywords": ["samsung", "galaxy", "watch"],
+        "host_keywords": ["samsung", "galaxy"],
+        "ua_keywords": ["samsung", "galaxy", "watch"],
+        "sni_keywords": ["samsung", "galaxy"]
+      },
+      "known_issues": [
+        "Known history of access-control and permission issues affecting Galaxy Watch product lines.",
+        "Wearables should be reviewed carefully because they may process health, notification, and identity-related data."
+      ],
+      "representative_cves": ["CVE-2025-20945", "CVE-2025-20997"],
+      "severity": "medium",
+      "recommendation": [
+        "Review software version and apply vendor updates.",
+        "Review pairing, privacy, and wearable management settings.",
+        "Confirm the observed model remains vendor-supported."
+      ]
+    },
+    {
+      "id": "irobot_roomba",
+      "category": "Appliance",
+      "vendor": "iRobot",
+      "family": "irobot_roomba",
+      "match_signals": {
+        "vendor_keywords": ["irobot", "roomba"],
+        "host_keywords": ["irobot", "roomba"],
+        "ua_keywords": ["irobot", "roomba"],
+        "sni_keywords": ["irobot", "roomba"]
+      },
+      "known_issues": [
+        "Smart cleaning appliances should be reviewed as cloud-connected home devices with account-linked telemetry and remote-control paths."
+      ],
+      "representative_cves": [],
+      "severity": "",
+      "recommendation": [
+        "Review firmware/software update status.",
+        "Review account-linking and remote-control settings.",
+        "Confirm the observed model remains vendor-supported."
+      ]
+    },
+    {
+      "id": "lg_thinq_appliance",
+      "category": "Appliance",
+      "vendor": "LG",
+      "family": "lg_thinq_appliance",
+      "match_signals": {
+        "vendor_keywords": ["lg", "thinq"],
+        "host_keywords": ["lg", "thinq", "lge"],
+        "ua_keywords": ["lg", "thinq"],
+        "sni_keywords": ["lg", "thinq", "lge"]
+      },
+      "known_issues": [
+        "Known issues have affected LG ThinQ-related software components.",
+        "ThinQ-connected appliances should be reviewed carefully because account-linked cloud control may span multiple household appliances."
+      ],
+      "representative_cves": ["CVE-2023-44121"],
+      "severity": "medium",
+      "recommendation": [
+        "Review appliance and ThinQ software versions.",
+        "Review linked-account and remote-control settings.",
+        "Prefer the latest vendor-supported software."
+      ]
+    },
+    {
+      "id": "samsung_family_hub",
+      "category": "Appliance",
+      "vendor": "Samsung",
+      "family": "samsung_family_hub",
+      "match_signals": {
+        "vendor_keywords": ["samsung", "family hub", "smartthings"],
+        "host_keywords": ["samsung", "smartthings"],
+        "ua_keywords": ["samsung", "family hub"],
+        "sni_keywords": ["samsung", "smartthings"]
+      },
+      "known_issues": [
+        "Family Hub appliances are smart-home-integrated appliances and should be reviewed as account-linked household control surfaces.",
+        "Because Family Hub integrates with SmartThings, household-wide impact should be considered when risky behavior is observed."
+      ],
+      "representative_cves": [],
+      "severity": "",
+      "recommendation": [
+        "Review firmware/software update status.",
+        "Review SmartThings integration and account settings.",
+        "Confirm the observed appliance model remains vendor-supported."
+      ]
+    }
+  ]
+]
