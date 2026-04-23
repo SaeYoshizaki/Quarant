@@ -1,5 +1,4 @@
 [
-  // camera
   {
     "id": "nest_cam",
     "category": "Camera",
@@ -62,7 +61,6 @@
       "Confirm the device remains supported by the vendor."
     ]
   },
-  // sensor
   {
     "id": "aqara_sensor",
     "category": "Sensor",
@@ -111,7 +109,6 @@
     "severity": "",
     "recommendation": []
   },
-  // hub
   {
     "id": "smartthings_hub",
     "category": "Hub",
@@ -181,7 +178,6 @@
       "Confirm the specific hub model remains vendor-supported."
     ]
   },
-  // controller
   {
     "id": "tuya_controller",
     "category": "Controller",
@@ -228,8 +224,7 @@
       "Confirm the device and ecosystem components remain vendor-supported."
     ]
   },
-  [
-    {
+  {
       "id": "switchbot_controller",
       "category": "Controller",
       "vendor": "SwitchBot",
@@ -455,5 +450,4 @@
         "Confirm the observed appliance model remains vendor-supported."
       ]
     }
-  ]
 ]
