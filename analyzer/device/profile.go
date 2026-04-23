@@ -25,15 +25,20 @@ type DeviceProfile struct {
 	Vendor     string
 	Model      string
 
-	Confidence float64
-	Evidence   []string
-	TypeScores map[string]float64
+	Confidence   float64
+	Evidence     []string
+	TypeScores   map[string]float64
+	VendorScores map[string]float64
+	FamilyScores map[string]float64
 
 	Classification  Classification
 	KnownDeviceType string
 	KnownConfidence float64
+	Identity        DeviceIdentity
 
 	JA3 string
+
+	IdentitySignalObservations map[string]ObservationCounter
 
 	ObservedServices map[string]bool
 	InsecureServices map[string]bool
@@ -121,6 +126,26 @@ func (p *DeviceProfile) ObservePIIUseDestination(piiType, host string, nowUnix i
 	}
 
 	return repeat, distinct
+}
+
+func (p *DeviceProfile) ObserveIdentitySignal(kind, value string, nowUnix int64) int {
+	if kind == "" || value == "" {
+		return 0
+	}
+	if p.IdentitySignalObservations == nil {
+		p.IdentitySignalObservations = make(map[string]ObservationCounter)
+	}
+	if nowUnix == 0 {
+		nowUnix = 1
+	}
+	return observeWithinWindow(p.IdentitySignalObservations, kind+"|"+value, nowUnix)
+}
+
+func (p *DeviceProfile) IdentitySignalRepeatCount(kind, value string) int {
+	if p == nil || p.IdentitySignalObservations == nil || kind == "" || value == "" {
+		return 0
+	}
+	return p.IdentitySignalObservations[kind+"|"+value].Count
 }
 
 func observeWithinWindow(observations map[string]ObservationCounter, key string, nowUnix int64) int {

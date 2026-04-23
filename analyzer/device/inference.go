@@ -25,6 +25,26 @@ type Classification struct {
 	Scores          map[string]float64
 }
 
+type DeviceIdentity struct {
+	CategoryCandidate   string
+	VendorCandidate     string
+	FamilyCandidate     string
+	CategoryConfidence  string
+	VendorConfidence    string
+	FamilyConfidence    string
+	CategoryScore       float64
+	VendorScore         float64
+	FamilyScore         float64
+	CategoryReasons     []string
+	VendorReasons       []string
+	FamilyReasons       []string
+	CategoryScores      map[string]float64
+	VendorScores        map[string]float64
+	FamilyScores        map[string]float64
+	FamilySignalTypes   []string
+	FamilyEvidenceCount int
+}
+
 func (c Classification) NormalizedCategory() string {
 	category := strings.TrimSpace(c.Category)
 	if category == "" || category == "Unknown" {

@@ -18,12 +18,14 @@ func EnrichFromTLS(d *DeviceProfile, info rules.TLSClientHelloInfo) {
 
 	if info.SNI != "" {
 		d.SNIValues[info.SNI] = true
+		d.ObserveIdentitySignal("sni", info.SNI, 0)
 		d.Evidence = appendUnique(d.Evidence, "SNI="+info.SNI)
 	}
 
 	ja3 := rules.BuildJA3Hash(info)
 	if ja3 != "" {
 		d.JA3 = ja3
+		d.ObserveIdentitySignal("ja3", ja3, 0)
 		d.Evidence = appendUnique(d.Evidence, "JA3="+ja3)
 	}
 

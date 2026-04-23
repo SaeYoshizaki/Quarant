@@ -112,6 +112,34 @@ type I5VulnerableComponent struct {
 
 type I5VulnerableComponents []I5VulnerableComponent
 
+type DeviceFamilySignature struct {
+	Family               string   `json:"family"`
+	Vendor               string   `json:"vendor"`
+	Category             string   `json:"category"`
+	HostKeywords         []string `json:"host_keywords"`
+	SNIKeywords          []string `json:"sni_keywords"`
+	UAKeywords           []string `json:"ua_keywords"`
+	ServerKeywords       []string `json:"server_keywords"`
+	PathKeywords         []string `json:"path_keywords"`
+	StrongHostKeywords   []string `json:"strong_host_keywords,omitempty"`
+	WeakHostKeywords     []string `json:"weak_host_keywords,omitempty"`
+	StrongSNIKeywords    []string `json:"strong_sni_keywords,omitempty"`
+	WeakSNIKeywords      []string `json:"weak_sni_keywords,omitempty"`
+	StrongUAKeywords     []string `json:"strong_ua_keywords,omitempty"`
+	WeakUAKeywords       []string `json:"weak_ua_keywords,omitempty"`
+	StrongServerKeywords []string `json:"strong_server_keywords,omitempty"`
+	WeakServerKeywords   []string `json:"weak_server_keywords,omitempty"`
+	StrongPathKeywords   []string `json:"strong_path_keywords,omitempty"`
+	WeakPathKeywords     []string `json:"weak_path_keywords,omitempty"`
+	JA3Hashes            []string `json:"ja3_hashes,omitempty"`
+	Ports                []int    `json:"ports,omitempty"`
+	MinScoreForMatch     float64  `json:"min_score_for_match,omitempty"`
+}
+
+type DeviceFamilySignatures struct {
+	Families []DeviceFamilySignature `json:"families"`
+}
+
 type I6StorageSignalPattern struct {
 	Signal         string   `json:"signal"`
 	Keywords       []string `json:"keywords"`
@@ -227,6 +255,17 @@ func LoadI5VulnerableComponents() (*I5VulnerableComponents, error) {
 	return &v, nil
 }
 
+func LoadDeviceFamilySignatures() (*DeviceFamilySignatures, error) {
+	path := filepath.Join(knowledgeDir, "device_family_signatures.json")
+
+	var v DeviceFamilySignatures
+	if err := loadJSON(path, &v); err != nil {
+		return nil, err
+	}
+
+	return &v, nil
+}
+
 func LoadI6StorageSignalPatterns() (*I6StorageSignalPatterns, error) {
 	path := filepath.Join(knowledgeDir, "i6_storage_signal_patterns.json")
 
@@ -247,6 +286,7 @@ type DB struct {
 	BehaviorBaselines  CategoryBehaviorBaselines
 	I4KnownVuln        *I4KnownVulnCandidates
 	I5Vulnerable       *I5VulnerableComponents
+	DeviceFamilies     *DeviceFamilySignatures
 	I6StorageSignals   *I6StorageSignalPatterns
 }
 
@@ -291,6 +331,11 @@ func LoadAll() (*DB, error) {
 		return nil, err
 	}
 
+	deviceFamilies, err := LoadDeviceFamilySignatures()
+	if err != nil {
+		return nil, err
+	}
+
 	i6StorageSignals, err := LoadI6StorageSignalPatterns()
 	if err != nil {
 		return nil, err
@@ -305,6 +350,7 @@ func LoadAll() (*DB, error) {
 		BehaviorBaselines:  behaviorBaselines,
 		I4KnownVuln:        i4KnownVuln,
 		I5Vulnerable:       i5Vulnerable,
+		DeviceFamilies:     deviceFamilies,
 		I6StorageSignals:   i6StorageSignals,
 	}, nil
 }

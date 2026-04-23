@@ -24,6 +24,7 @@ func AddHTTPBehaviorHints(d *DeviceProfile, http *rules.HTTPInfo, dstPort uint16
 		path := strings.TrimSpace(http.Path)
 		if path != "" {
 			d.Paths[path] = true
+			d.ObserveIdentitySignal("path", path, 0)
 			d.Evidence = appendUnique(d.Evidence, "Path="+path)
 		}
 	}
@@ -48,7 +49,7 @@ func AddHTTPBehaviorHints(d *DeviceProfile, http *rules.HTTPInfo, dstPort uint16
 		d.Protocols["coap"] = true
 	}
 
-	refreshClassification(d)
+	recomputeDeviceIdentity(d)
 }
 
 func AddTLSBehaviorHints(d *DeviceProfile, dstPort uint16) {
@@ -75,5 +76,5 @@ func AddTLSBehaviorHints(d *DeviceProfile, dstPort uint16) {
 		d.Protocols["rtsp"] = true
 	}
 
-	refreshClassification(d)
+	recomputeDeviceIdentity(d)
 }
