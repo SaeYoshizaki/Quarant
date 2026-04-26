@@ -1,0 +1,321 @@
+{
+  "generated_at": "2026-04-26T10:40:16Z",
+  "devices": [
+    {
+      "ip": "100.49.34.134",
+      "first_seen": "2026-04-26T09:56:19Z",
+      "last_seen": "2026-04-26T09:59:27Z",
+      "observed_ports": [
+        49650
+      ],
+      "category_candidate": "GenericIoT",
+      "category_confidence": "very_low"
+    },
+    {
+      "ip": "104.20.23.154",
+      "first_seen": "2026-04-26T09:57:16Z",
+      "last_seen": "2026-04-26T10:39:44Z",
+      "observed_ports": [
+        35472,
+        37714,
+        58694
+      ],
+      "category_candidate": "GenericIoT",
+      "category_confidence": "very_low"
+    },
+    {
+      "ip": "140.82.112.25",
+      "first_seen": "2026-04-26T10:33:00Z",
+      "last_seen": "2026-04-26T10:40:02Z",
+      "observed_protocols": [
+        "tls"
+      ],
+      "observed_ports": [
+        42068,
+        56134
+      ],
+      "category_candidate": "GenericIoT",
+      "category_confidence": "very_low"
+    },
+    {
+      "ip": "140.82.112.26",
+      "first_seen": "2026-04-26T09:56:58Z",
+      "last_seen": "2026-04-26T10:33:01Z",
+      "observed_protocols": [
+        "tls"
+      ],
+      "observed_ports": [
+        37908,
+        41700
+      ],
+      "category_candidate": "GenericIoT",
+      "category_confidence": "very_low"
+    },
+    {
+      "ip": "140.82.113.22",
+      "first_seen": "2026-04-26T10:33:52Z",
+      "last_seen": "2026-04-26T10:35:53Z",
+      "observed_protocols": [
+        "tls"
+      ],
+      "observed_ports": [
+        59082,
+        59084,
+        59088,
+        59100
+      ],
+      "category_candidate": "GenericIoT",
+      "category_confidence": "very_low"
+    },
+    {
+      "ip": "140.82.113.25",
+      "first_seen": "2026-04-26T09:57:58Z",
+      "last_seen": "2026-04-26T10:15:00Z",
+      "observed_protocols": [
+        "tls"
+      ],
+      "observed_ports": [
+        35428,
+        35438
+      ],
+      "category_candidate": "GenericIoT",
+      "category_confidence": "very_low"
+    },
+    {
+      "ip": "18.172.31.47",
+      "first_seen": "2026-04-26T09:58:13Z",
+      "last_seen": "2026-04-26T10:26:13Z",
+      "observed_protocols": [
+        "tls"
+      ],
+      "observed_ports": [
+        52908,
+        59206
+      ],
+      "category_candidate": "GenericIoT",
+      "category_confidence": "very_low"
+    },
+    {
+      "ip": "185.125.190.23",
+      "first_seen": "2026-04-26T10:26:12Z",
+      "last_seen": "2026-04-26T10:26:13Z",
+      "observed_protocols": [
+        "tls"
+      ],
+      "observed_ports": [
+        59738
+      ],
+      "category_candidate": "GenericIoT",
+      "category_confidence": "very_low"
+    },
+    {
+      "ip": "185.125.190.80",
+      "first_seen": "2026-04-26T09:58:13Z",
+      "last_seen": "2026-04-26T10:26:13Z",
+      "observed_protocols": [
+        "tls"
+      ],
+      "observed_ports": [
+        42922,
+        56136
+      ],
+      "category_candidate": "GenericIoT",
+      "category_confidence": "very_low"
+    },
+    {
+      "ip": "192.168.64.17",
+      "first_seen": "2026-04-26T09:56:19Z",
+      "last_seen": "2026-04-26T10:40:02Z",
+      "observed_protocols": [
+        "http",
+        "https",
+        "tls"
+      ],
+      "observed_ports": [
+        80,
+        443
+      ],
+      "observed_hosts": [
+        "api.vendor-cloud.test",
+        "device.local",
+        "example.com",
+        "ports.ubuntu.com"
+      ],
+      "observed_sni": [
+        "alive.github.com",
+        "collector.github.com",
+        "download.docker.com",
+        "esm.ubuntu.com",
+        "firefox.settings.services.mozilla.com",
+        "github.com",
+        "incoming.telemetry.mozilla.org",
+        "ohttp-merino.mozilla.fastly-edge.com",
+        "ppa.launchpadcontent.net",
+        "push.services.mozilla.com"
+      ],
+      "category_candidate": "GenericIoT",
+      "category_confidence": "very_low",
+      "vendor_candidate": "Philips",
+      "vendor_confidence": "medium",
+      "family_candidate": "philips_hue_hub",
+      "family_confidence": "medium",
+      "risk_event_count": 109,
+      "severity_counts": {
+        "CRITICAL": 1,
+        "HIGH": 6,
+        "INFO": 32,
+        "WARNING": 70
+      },
+      "owasp_tag_counts": {
+        "I1": 2,
+        "I2": 4,
+        "I3": 10,
+        "I5": 30,
+        "I7": 16,
+        "I9": 6
+      },
+      "last_risk_event_type": "I9_DEFAULT_HOSTNAME_PATTERN",
+      "last_risk_event_ts": "2026-04-26T10:40:02Z"
+    },
+    {
+      "ip": "199.232.161.91",
+      "first_seen": "2026-04-26T09:56:27Z",
+      "last_seen": "2026-04-26T10:38:19Z",
+      "observed_protocols": [
+        "tls"
+      ],
+      "observed_ports": [
+        48668,
+        49274,
+        49282,
+        49290,
+        49306,
+        52316,
+        58850,
+        60682
+      ],
+      "category_candidate": "GenericIoT",
+      "category_confidence": "very_low"
+    },
+    {
+      "ip": "20.27.177.113",
+      "first_seen": "2026-04-26T09:57:58Z",
+      "last_seen": "2026-04-26T10:33:31Z",
+      "observed_protocols": [
+        "tls"
+      ],
+      "observed_ports": [
+        55984,
+        55992,
+        56154,
+        56170
+      ],
+      "category_candidate": "GenericIoT",
+      "category_confidence": "very_low"
+    },
+    {
+      "ip": "2001:67c:1562::21",
+      "first_seen": "2026-04-26T09:58:14Z",
+      "last_seen": "2026-04-26T09:58:14Z",
+      "observed_ports": [
+        44762
+      ],
+      "category_candidate": "GenericIoT",
+      "category_confidence": "very_low"
+    },
+    {
+      "ip": "2a06:bc80:0:1000::13",
+      "first_seen": "2026-04-26T09:58:14Z",
+      "last_seen": "2026-04-26T10:26:12Z",
+      "observed_ports": [
+        49026,
+        52086
+      ],
+      "category_candidate": "GenericIoT",
+      "category_confidence": "very_low"
+    },
+    {
+      "ip": "2a06:bc80:0:1000::15",
+      "first_seen": "2026-04-26T09:58:16Z",
+      "last_seen": "2026-04-26T09:58:16Z",
+      "observed_ports": [
+        60500
+      ],
+      "category_candidate": "GenericIoT",
+      "category_confidence": "very_low"
+    },
+    {
+      "ip": "34.107.243.93",
+      "first_seen": "2026-04-26T10:03:50Z",
+      "last_seen": "2026-04-26T10:39:30Z",
+      "observed_protocols": [
+        "tls"
+      ],
+      "observed_ports": [
+        37086,
+        37100,
+        41002,
+        41006,
+        42922,
+        42938,
+        48232
+      ],
+      "category_candidate": "GenericIoT",
+      "category_confidence": "very_low"
+    },
+    {
+      "ip": "34.120.208.123",
+      "first_seen": "2026-04-26T09:56:28Z",
+      "last_seen": "2026-04-26T10:36:36Z",
+      "observed_protocols": [
+        "tls"
+      ],
+      "observed_ports": [
+        38008,
+        54598
+      ],
+      "category_candidate": "GenericIoT",
+      "category_confidence": "very_low"
+    },
+    {
+      "ip": "91.189.91.47",
+      "first_seen": "2026-04-26T09:58:13Z",
+      "last_seen": "2026-04-26T09:58:15Z",
+      "observed_protocols": [
+        "tls"
+      ],
+      "observed_ports": [
+        41076
+      ],
+      "category_candidate": "GenericIoT",
+      "category_confidence": "very_low"
+    },
+    {
+      "ip": "91.189.92.20",
+      "first_seen": "2026-04-26T09:58:13Z",
+      "last_seen": "2026-04-26T10:26:13Z",
+      "observed_ports": [
+        35046,
+        35048,
+        48262
+      ],
+      "category_candidate": "GenericIoT",
+      "category_confidence": "very_low"
+    },
+    {
+      "ip": "fd96:dc6b:b854:ced5:f87c:beff:feab:720e",
+      "first_seen": "2026-04-26T09:58:13Z",
+      "last_seen": "2026-04-26T10:26:12Z",
+      "observed_protocols": [
+        "https",
+        "tls"
+      ],
+      "observed_ports": [
+        80,
+        443
+      ],
+      "category_candidate": "GenericIoT",
+      "category_confidence": "very_low"
+    }
+  ]
+}
