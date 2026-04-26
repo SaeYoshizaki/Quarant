@@ -260,6 +260,77 @@ func TestStrongSignalRepeatedAcrossSignalTypesReachesHighFamily(t *testing.T) {
 	}
 }
 
+func TestGenericHTTPPathDoesNotImplyPhilipsHueFamily(t *testing.T) {
+	p := NewProfile("10.0.0.24")
+
+	EnrichFromHTTP(p, map[string]string{"host": "api.vendor-cloud.test"})
+	AddHTTPBehaviorHints(p, &rules.HTTPInfo{Path: "/api/config"}, 80, false)
+
+	if p.Identity.FamilyCandidate == "philips_hue_hub" {
+		t.Fatalf("generic api path should not imply philips hue family, got confidence=%s reasons=%v scores=%v", p.Identity.FamilyConfidence, p.Identity.FamilyReasons, p.Identity.FamilyScores)
+	}
+	if p.Identity.VendorCandidate == "Philips" && confidenceRank(p.Identity.VendorConfidence) > confidenceRank("low") {
+		t.Fatalf("generic api path should not raise Philips vendor confidence, got confidence=%s reasons=%v scores=%v", p.Identity.VendorConfidence, p.Identity.VendorReasons, p.Identity.VendorScores)
+	}
+}
+
+func TestGenericSetupPathDoesNotImplyConcreteVendorOrFamily(t *testing.T) {
+	p := NewProfile("10.0.0.25")
+
+	EnrichFromHTTP(p, map[string]string{"host": "device.local"})
+	AddHTTPBehaviorHints(p, &rules.HTTPInfo{Path: "/setup"}, 80, false)
+
+	if p.Identity.FamilyCandidate != "" {
+		t.Fatalf("generic setup path should not select a concrete family, got family=%q confidence=%s reasons=%v scores=%v", p.Identity.FamilyCandidate, p.Identity.FamilyConfidence, p.Identity.FamilyReasons, p.Identity.FamilyScores)
+	}
+	if p.Identity.VendorCandidate != "" {
+		t.Fatalf("generic setup path should not select a concrete vendor, got vendor=%q confidence=%s reasons=%v scores=%v", p.Identity.VendorCandidate, p.Identity.VendorConfidence, p.Identity.VendorReasons, p.Identity.VendorScores)
+	}
+}
+
+func TestMeethueHostCanRemainHueCandidate(t *testing.T) {
+	p := NewProfile("10.0.0.26")
+
+	EnrichFromHTTP(p, map[string]string{"host": "discovery.meethue.com"})
+
+	if p.Identity.FamilyCandidate != "philips_hue_hub" {
+		t.Fatalf("meethue host should remain a hue candidate, got family=%q confidence=%s reasons=%v scores=%v", p.Identity.FamilyCandidate, p.Identity.FamilyConfidence, p.Identity.FamilyReasons, p.Identity.FamilyScores)
+	}
+	if p.Identity.FamilyConfidence != "low" {
+		t.Fatalf("single meethue host should stay low confidence, got %s reasons=%v", p.Identity.FamilyConfidence, p.Identity.FamilyReasons)
+	}
+}
+
+func TestGenericAPIPathAloneIsNotFamilyStrongSignal(t *testing.T) {
+	p := NewProfile("10.0.0.27")
+
+	AddHTTPBehaviorHints(p, &rules.HTTPInfo{Path: "/api/"}, 80, false)
+
+	if p.Identity.FamilyCandidate != "" {
+		t.Fatalf("generic /api/ path alone should not select a concrete family, got family=%q confidence=%s reasons=%v scores=%v", p.Identity.FamilyCandidate, p.Identity.FamilyConfidence, p.Identity.FamilyReasons, p.Identity.FamilyScores)
+	}
+	if p.Identity.VendorCandidate != "" {
+		t.Fatalf("generic /api/ path alone should not select a concrete vendor, got vendor=%q confidence=%s reasons=%v", p.Identity.VendorCandidate, p.Identity.VendorConfidence, p.Identity.VendorReasons)
+	}
+}
+
+func TestUbuntuDemoSignalsDoNotProducePhilipsHueInference(t *testing.T) {
+	p := NewProfile("10.0.0.28")
+
+	EnrichFromHTTP(p, map[string]string{"host": "api.vendor-cloud.test"})
+	AddHTTPBehaviorHints(p, &rules.HTTPInfo{Path: "/api/config"}, 80, false)
+	EnrichFromHTTP(p, map[string]string{"host": "device.local"})
+	AddHTTPBehaviorHints(p, &rules.HTTPInfo{Path: "/setup"}, 80, false)
+	EnrichFromHTTP(p, map[string]string{"host": "example.com"})
+
+	if p.Identity.FamilyCandidate == "philips_hue_hub" {
+		t.Fatalf("ubuntu demo signals should not produce philips hue family, got confidence=%s reasons=%v scores=%v", p.Identity.FamilyConfidence, p.Identity.FamilyReasons, p.Identity.FamilyScores)
+	}
+	if p.Identity.VendorCandidate == "Philips" {
+		t.Fatalf("ubuntu demo signals should not produce Philips vendor, got confidence=%s reasons=%v scores=%v", p.Identity.VendorConfidence, p.Identity.VendorReasons, p.Identity.VendorScores)
+	}
+}
+
 func TestAmbiguousFamilyCandidatesRemainUncertain(t *testing.T) {
 	p := NewProfile("10.0.0.23")
 	EnrichFromHTTP(p, map[string]string{"host": "api.switchbot.net"})

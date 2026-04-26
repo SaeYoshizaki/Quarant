@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"testing"
 	"time"
+
+	"quarant/analyzer/rules"
 )
 
 func TestObservationRepeatExpiresAfterWindow(t *testing.T) {
@@ -106,6 +108,22 @@ func TestInventorySnapshotIncludesObservedStateAndRiskSummary(t *testing.T) {
 	}
 	if snapshot.LastRiskEventType != "I2_HTTP_ADMIN_INTERFACE_SUSPECTED" || snapshot.LastRiskEventTS != "2026-04-26T00:10:00Z" {
 		t.Fatalf("unexpected last risk event summary: %+v", snapshot)
+	}
+}
+
+func TestInventorySnapshotOmitsPhilipsHueForGenericUbuntuDemoSignals(t *testing.T) {
+	p := NewProfile("10.0.0.21")
+
+	EnrichFromHTTP(p, map[string]string{"host": "api.vendor-cloud.test"})
+	AddHTTPBehaviorHints(p, nil, 80, false)
+	AddHTTPBehaviorHints(p, &rules.HTTPInfo{Path: "/api/config"}, 80, false)
+	EnrichFromHTTP(p, map[string]string{"host": "device.local"})
+	AddHTTPBehaviorHints(p, &rules.HTTPInfo{Path: "/setup"}, 80, false)
+	EnrichFromHTTP(p, map[string]string{"host": "example.com"})
+
+	snapshot := p.Snapshot()
+	if snapshot.VendorCandidate != "" || snapshot.FamilyCandidate != "" {
+		t.Fatalf("generic ubuntu demo signals should not populate Philips Hue identity in inventory snapshot: %+v", snapshot)
 	}
 }
 

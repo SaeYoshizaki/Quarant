@@ -281,6 +281,34 @@ type familyEvaluation struct {
 	matched             bool
 }
 
+func isGenericFamilyPathKeyword(keyword string) bool {
+	normalized := strings.ToLower(strings.TrimSpace(keyword))
+	switch normalized {
+	case "/api/", "/api/config", "/admin", "/setup", "/login", "/config":
+		return true
+	default:
+		return false
+	}
+}
+
+func nonGenericPathKeywords(keywords []string) []string {
+	if len(keywords) == 0 {
+		return nil
+	}
+	filtered := make([]string, 0, len(keywords))
+	for _, keyword := range keywords {
+		if isGenericFamilyPathKeyword(keyword) {
+			continue
+		}
+		filtered = append(filtered, keyword)
+	}
+	return filtered
+}
+
+func isGenericWebPort(port int) bool {
+	return port == 80 || port == 443
+}
+
 func scoreFamilySignature(d *DeviceProfile, category string, signature knowledge.DeviceFamilySignature) familyEvaluation {
 	eval := familyEvaluation{
 		family:              signature.Family,
@@ -329,15 +357,22 @@ func scoreFamilySignature(d *DeviceProfile, category string, signature knowledge
 	addKeywordMatches("ua", d.UserAgents, signature.WeakUAKeywords, 0.45, "weak")
 	addKeywordMatches("server", d.Servers, strongKeywords(signature.StrongServerKeywords, signature.ServerKeywords), 0.9, "strong")
 	addKeywordMatches("server", d.Servers, signature.WeakServerKeywords, 0.3, "weak")
-	addKeywordMatches("path", d.Paths, strongKeywords(signature.StrongPathKeywords, signature.PathKeywords), 0.9, "strong")
-	addKeywordMatches("path", d.Paths, signature.WeakPathKeywords, 0.35, "weak")
+	addKeywordMatches("path", d.Paths, nonGenericPathKeywords(strongKeywords(signature.StrongPathKeywords, signature.PathKeywords)), 0.9, "strong")
+	addKeywordMatches("path", d.Paths, nonGenericPathKeywords(signature.WeakPathKeywords), 0.35, "weak")
 
 	for _, port := range signature.Ports {
 		if port <= 0 {
 			continue
 		}
 		if d.Ports[uint16(port)] {
-			eval.score += 0.6
+			if isGenericWebPort(port) && len(eval.signalTypes) == 0 {
+				continue
+			}
+			portScore := 0.6
+			if isGenericWebPort(port) {
+				portScore = 0.15
+			}
+			eval.score += portScore
 			eval.signalTypes["port"] = true
 			eval.reasons = appendUnique(eval.reasons, "port matched: "+strconv.Itoa(port))
 		}
@@ -481,8 +516,8 @@ func scoreVendorsFromPassiveSignals(d *DeviceProfile, legacyScores map[string]fl
 		scoreVendorKeywords(d, vendor, "ua", d.UserAgents, signature.WeakUAKeywords, 0.25, "weak", add)
 		scoreVendorKeywords(d, vendor, "server", d.Servers, strongKeywords(signature.StrongServerKeywords, signature.ServerKeywords), 0.45, "strong", add)
 		scoreVendorKeywords(d, vendor, "server", d.Servers, signature.WeakServerKeywords, 0.15, "weak", add)
-		scoreVendorKeywords(d, vendor, "path", d.Paths, strongKeywords(signature.StrongPathKeywords, signature.PathKeywords), 0.35, "strong", add)
-		scoreVendorKeywords(d, vendor, "path", d.Paths, signature.WeakPathKeywords, 0.15, "weak", add)
+		scoreVendorKeywords(d, vendor, "path", d.Paths, nonGenericPathKeywords(strongKeywords(signature.StrongPathKeywords, signature.PathKeywords)), 0.35, "strong", add)
+		scoreVendorKeywords(d, vendor, "path", d.Paths, nonGenericPathKeywords(signature.WeakPathKeywords), 0.15, "weak", add)
 	}
 
 	if family.VendorCandidate != "" && family.FamilyCandidate != "" {

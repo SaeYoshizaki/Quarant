@@ -46,10 +46,10 @@
       "weak_ua_keywords": [],
       "strong_server_keywords": [],
       "weak_server_keywords": [],
-      "strong_path_keywords": ["/api/", "/description.xml"],
+      "strong_path_keywords": ["/clip/v2/", "/eventstream/clip/v2", "/api/newdeveloper"],
       "weak_path_keywords": ["/hue"],
       "ports": [80, 443],
-      "min_score_for_match": 2.4
+      "min_score_for_match": 1.5
     },
     {
       "family": "smartthings_hub",
