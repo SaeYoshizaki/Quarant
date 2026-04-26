@@ -127,6 +127,9 @@ func TestI7HTTPAuthExtendedProxyAuthorizationHeader(t *testing.T) {
 	if match.Evidence != "Proxy-Authorization: ***" {
 		t.Fatalf("unexpected evidence: %s", match.Evidence)
 	}
+	if !containsAll(match.OWASPTags, "I1", "I3", "I7") {
+		t.Fatalf("expected OWASP tags, got: %v", match.OWASPTags)
+	}
 }
 
 func TestI7HTTPAuthExtendedAuthTokenHeader(t *testing.T) {
@@ -192,6 +195,9 @@ func TestI7HTTPBodyInfersFormWithoutContentType(t *testing.T) {
 	}
 	if match.Evidence != "ssid=***" && match.Evidence != "psk=***" {
 		t.Fatalf("unexpected evidence: %s", match.Evidence)
+	}
+	if !containsAll(match.OWASPTags, "I1", "I3", "I7") {
+		t.Fatalf("expected OWASP tags, got: %v", match.OWASPTags)
 	}
 }
 
@@ -294,20 +300,4 @@ func TestI7HTTPTokenMetadataDoesNotExposeRawValue(t *testing.T) {
 	if match.Limitation == "" {
 		t.Fatalf("expected limitation, got empty match: %+v", match)
 	}
-}
-
-func containsAll(values []string, wants ...string) bool {
-	for _, want := range wants {
-		found := false
-		for _, value := range values {
-			if value == want {
-				found = true
-				break
-			}
-		}
-		if !found {
-			return false
-		}
-	}
-	return true
 }
