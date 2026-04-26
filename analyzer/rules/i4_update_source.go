@@ -26,12 +26,18 @@ func (r *I4SuspiciousUpdateSourceRule) Apply(ctx *Context) (Match, bool) {
 	}
 
 	return Match{
-		Message: "Firmware/update-like communication observed from a suspicious update source",
+		Message: "Firmware or update-like communication was observed with suspicious source characteristics.",
 		Evidence: fmt.Sprintf(
 			"%s suspicious_signals=%s",
 			formatI4FirmwareEvidence(obs),
 			strings.Join(signals, ","),
 		),
+		OWASPTags:      uniqueTags("I4"),
+		Confidence:     "medium",
+		ObservedFact:   "Firmware or update-like traffic was observed with suspicious source indicators.",
+		Inference:      "This may indicate elevated update-delivery risk or an update endpoint that should be verified.",
+		Limitation:     "Passive monitoring cannot confirm whether the update endpoint is legitimate or whether the update payload would be accepted by the device.",
+		Recommendation: "Verify that the update source, certificate, and destination are expected for the device vendor.",
 	}, true
 }
 

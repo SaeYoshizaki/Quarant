@@ -25,12 +25,18 @@ func (r *I2HTTPAdminRule) Apply(ctx *Context) (Match, bool) {
 	}
 
 	return Match{
-		RuleID:   "I2_HTTP_ADMIN_INTERFACE_SUSPECTED",
-		Type:     "I2_HTTP_ADMIN_INTERFACE_SUSPECTED",
-		Category: "I2",
-		Severity: SeverityWarning,
-		Message:  "HTTP admin interface suspected",
-		Evidence: evidence,
+		RuleID:         "I2_HTTP_ADMIN_INTERFACE_SUSPECTED",
+		Type:           "I2_HTTP_ADMIN_INTERFACE_SUSPECTED",
+		Category:       "I2",
+		Severity:       SeverityWarning,
+		Message:        "HTTP management-like interface was observed on the local network.",
+		Evidence:       evidence,
+		OWASPTags:      uniqueTags("I2", "I3", "I7"),
+		Confidence:     "medium",
+		ObservedFact:   "HTTP management indicators were observed in traffic.",
+		Inference:      "HTTP management endpoints may expose configuration or administrative functions without transport encryption.",
+		Limitation:     "Passive monitoring cannot confirm the exact management features behind the endpoint or whether HTTPS is available elsewhere.",
+		Recommendation: "Use HTTPS if supported and confirm that the interface is not exposed outside the trusted network.",
 	}, true
 }
 

@@ -69,7 +69,7 @@ func (r *I4FirmwareRiskEnrichmentRule) ApplyAll(ctx *Context) []Match {
 			Type:     "I4_FIRMWARE_RISK_ENRICHMENT",
 			Category: "I4",
 			Severity: SeverityInfo,
-			Message:  "Known issues have been reported in this device family; example CVEs are provided for review, but firmware version is unknown and applicability is unconfirmed",
+			Message:  "This device family has known update-related security history; representative CVEs are provided for review, but applicability is unconfirmed.",
 			Evidence: fmt.Sprintf(
 				"category=%s vendor_candidate=%s family_candidate=%s matched_family=%s example_cves=%s kev=%t version_status=unknown applicability=unconfirmed recommended_checks=%s notes=%s",
 				ctx.LocalDeviceCategory,
@@ -81,6 +81,12 @@ func (r *I4FirmwareRiskEnrichmentRule) ApplyAll(ctx *Context) []Match {
 				recommendedChecks,
 				strings.TrimSpace(match.Notes),
 			),
+			OWASPTags:      uniqueTags("I4", "I5"),
+			Confidence:     "low",
+			ObservedFact:   "Observed identification signals matched a device family with known update-related security history in local knowledge.",
+			Inference:      "The device may require firmware review because representative issues have affected this family.",
+			Limitation:     "Passive monitoring cannot confirm the exact model, firmware version, or whether the representative CVEs apply to this device.",
+			Recommendation: strings.ReplaceAll(recommendedChecks, " | ", " "),
 		},
 	}
 }

@@ -103,9 +103,12 @@ type I5VulnerableComponent struct {
 	Category           string         `json:"category"`
 	Vendor             string         `json:"vendor"`
 	Family             string         `json:"family"`
+	MatchLevel         string         `json:"match_level,omitempty"`
 	MatchSignals       I5MatchSignals `json:"match_signals"`
 	KnownIssues        []string       `json:"known_issues"`
 	RepresentativeCVEs []string       `json:"representative_cves"`
+	Source             string         `json:"source,omitempty"`
+	LastReviewed       string         `json:"last_reviewed,omitempty"`
 	Severity           string         `json:"severity"`
 	Recommendation     []string       `json:"recommendation"`
 }

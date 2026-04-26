@@ -1,3 +1,44 @@
+## OWASP signal-based coverage
+
+- [x] I1: partial / related signal
+  - Direct password strength or hardcoded credential detection remains out of scope for passive monitoring.
+  - Credential exposure in traffic is treated as a related signal via I7.
+
+- [x] I2: implemented as insecure network service signal
+  - Telnet, FTP, RTSP, MQTT, CoAP, HTTP management, and external exposure are covered as explainable service-risk signals.
+
+- [x] I3: initial implemented / ecosystem-interface risk signal
+  - API over plaintext, token in URL, management endpoint, weak cloud/backend transport, mobile-backend pattern, and unexpected ecosystem endpoint are handled as passive risk signals.
+  - Full API vulnerability testing, authorization testing, CORS/CSRF, and cloud-side scanning remain out of scope.
+
+- [x] I4: implemented as update-risk signal
+  - Firmware or update-like traffic and plaintext update delivery are observable.
+  - Signature verification and rollback protection cannot be confirmed passively.
+
+- [x] I5: implemented as known-vulnerable-family/component candidate enrichment
+  - Exact CVE applicability still requires model and firmware confirmation.
+
+- [x] I6: implemented as privacy-risk signal
+  - Privacy-sensitive plaintext, stable identifiers, unexpected privacy destinations, and baseline mismatch are covered.
+  - Consent or policy violation cannot be confirmed passively.
+
+- [x] I7: implemented as insecure transfer signal
+  - Plaintext HTTP, credentials, cookies, tokens, MQTT/Telnet secrets, and related transport exposure are covered.
+
+- [ ] I8: partial / product feature direction
+  - Device inventory, monitoring, and risk summary are still partial.
+
+- [ ] I9: planned as default-setting related signal
+  - Default credential patterns, setup endpoints, and insecure default services are future work.
+
+- [ ] I10: mostly out of scope
+  - Physical hardening cannot be evaluated passively.
+  - Network-visible debug or factory endpoints may be handled as related signals only.
+
+- [x] Event metadata cleanup
+  - Major I2/I4/I5/I6/I7 events now carry `owasp_tags`, `confidence`, `observed_fact`, `inference`, `limitation`, and `recommendation`.
+  - Debug events are marked with `debug=true` and kept at `INFO`.
+
 ## 判定対象の拡大
 - [ ] 監視プロトコルの追加 (UPnP, ONVIF, SSDPとか)
 - [ ] 各プロトコルのリスク配分(Weight)の再評価
@@ -55,7 +96,7 @@
   - upload method、upload size、endpoint 再観測、stable identifier 再観測を組み合わせる
   - `I6_STORED_DATA_SIGNAL_OBSERVED` は `indirect_at_rest=true` / `direct_storage_observed=false` を evidence に残す
 
-- [x] PII misuse signal の最小実装を追加した
+- [x] privacy risk signal / unexpected PII flow signal の最小実装を追加した
   - category に不要寄りの PII type と unexpected / analytics / tracking 寄り destination の組み合わせを検知
   - `I6_PII_TO_UNEXPECTED_DESTINATION` は同意違反やポリシー違反を断定せず、`consent_observed=false` / `consent_inferred=false` を evidence に残す
   - analytics / tracking は単独 trigger ではなく、identifier や destination の再観測に対する補助 signal として扱う
@@ -85,7 +126,7 @@
   - device first_seen 直後の burst、短時間の複数 upload、複数 destination への拡散をもう少し説明可能にする
 
 - [ ] I7 との接続を整理する
-  - 平文 HTTP 上で PII が見えている場合、I7 は in-transit の露出、I6 は privacy misuse signal として役割を分ける
+  - 平文 HTTP 上で PII が見えている場合、I7 は in-transit の露出、I6 は privacy risk signal / unexpected PII flow signal として役割を分ける
   - event evidence に関連 event type を入れるか、report 側でまとめるか検討する
 
 - [ ] mitigation への接続
@@ -119,7 +160,7 @@
   - upload method、upload size、endpoint 再観測、stable identifier 再観測を組み合わせる
   - `I6_STORED_DATA_SIGNAL_OBSERVED` は `indirect_at_rest=true` / `direct_storage_observed=false` を evidence に残す
 
-- [x] PII misuse signal の最小実装を追加した
+- [x] privacy risk signal / unexpected PII flow signal の最小実装を追加した
   - category に不要寄りの PII type と unexpected / analytics / tracking 寄り destination の組み合わせを検知
   - `I6_PII_TO_UNEXPECTED_DESTINATION` は同意違反やポリシー違反を断定せず、`consent_observed=false` / `consent_inferred=false` を evidence に残す
   - analytics / tracking は単独 trigger ではなく、identifier や destination の再観測に対する補助 signal として扱う
@@ -149,7 +190,7 @@
   - device first_seen 直後の burst、短時間の複数 upload、複数 destination への拡散をもう少し説明可能にする
 
 - [ ] I7 との接続を整理する
-  - 平文 HTTP 上で PII が見えている場合、I7 は in-transit の露出、I6 は privacy misuse signal として役割を分ける
+  - 平文 HTTP 上で PII が見えている場合、I7 は in-transit の露出、I6 は privacy risk signal / unexpected PII flow signal として役割を分ける
   - event evidence に関連 event type を入れるか、report 側でまとめるか検討する
 
 - [ ] mitigation への接続

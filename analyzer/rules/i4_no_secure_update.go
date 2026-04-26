@@ -8,12 +8,12 @@ import (
 type I4LikelyNoSecureUpdateMechanismRule struct{}
 
 func (r *I4LikelyNoSecureUpdateMechanismRule) ID() string {
-	return "I4_LIKELY_NO_SECURE_UPDATE_MECHANISM"
+	return "I4_WEAK_UPDATE_VISIBILITY"
 }
 func (r *I4LikelyNoSecureUpdateMechanismRule) Category() string   { return "I4" }
 func (r *I4LikelyNoSecureUpdateMechanismRule) Severity() Severity { return SeverityWarning }
 func (r *I4LikelyNoSecureUpdateMechanismRule) Type() string {
-	return "I4_LIKELY_NO_SECURE_UPDATE_MECHANISM"
+	return "I4_WEAK_UPDATE_VISIBILITY"
 }
 
 func (r *I4LikelyNoSecureUpdateMechanismRule) Apply(ctx *Context) (Match, bool) {
@@ -23,8 +23,18 @@ func (r *I4LikelyNoSecureUpdateMechanismRule) Apply(ctx *Context) (Match, bool) 
 	}
 
 	return Match{
-		Message:  "This device likely lacks a secure update mechanism or shows no observable evidence of one",
-		Evidence: formatI4NoSecureUpdateEvidence(ctx, evaluation.legacySignals, evaluation.basis),
+		RuleID:         "I4_WEAK_UPDATE_VISIBILITY",
+		Type:           "I4_WEAK_UPDATE_VISIBILITY",
+		Category:       "I4",
+		Severity:       SeverityWarning,
+		Message:        "No update signal was observed, and legacy network signals suggest update-mechanism risk.",
+		Evidence:       formatI4NoSecureUpdateEvidence(ctx, evaluation.legacySignals, evaluation.basis),
+		OWASPTags:      uniqueTags("I4"),
+		Confidence:     "low",
+		ObservedFact:   "No update activity was observed for this device context, while legacy service signals were present.",
+		Inference:      "This may indicate weak update visibility or a higher chance that secure update practices are absent or difficult to verify.",
+		Limitation:     "Passive monitoring does not prove that the device lacks signature verification, rollback protection, or any secure update mechanism.",
+		Recommendation: "Review vendor documentation, firmware menus, and support advisories to confirm how updates are delivered and verified.",
 	}, true
 }
 

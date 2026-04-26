@@ -14,14 +14,26 @@ func (r *I7HTTPCookieRule) Apply(ctx *Context) (Match, bool) {
 
 	if _, ok := ctx.HTTP.Headers["cookie"]; ok {
 		return Match{
-			Message:  "Cookie header sent over plaintext HTTP",
-			Evidence: "Cookie: ***",
+			Message:        "Cookie header was observed over plaintext HTTP.",
+			Evidence:       "Cookie: ***",
+			OWASPTags:      uniqueTags("I3", "I7"),
+			Confidence:     "high",
+			ObservedFact:   "Cookie header was observed over plaintext HTTP.",
+			Inference:      "Session identifiers or authentication state may be exposed in transit.",
+			Limitation:     "Passive monitoring cannot confirm whether the cookie is authenticated, sensitive, or protected by additional server-side controls.",
+			Recommendation: "Use HTTPS and review whether cookies carrying session state are restricted to secure transport.",
 		}, true
 	}
 	if _, ok := ctx.HTTP.Headers["set-cookie"]; ok {
 		return Match{
-			Message:  "Set-Cookie header observed over plaintext HTTP",
-			Evidence: "Set-Cookie: ***",
+			Message:        "Set-Cookie header was observed over plaintext HTTP.",
+			Evidence:       "Set-Cookie: ***",
+			OWASPTags:      uniqueTags("I3", "I7"),
+			Confidence:     "high",
+			ObservedFact:   "Set-Cookie header was observed over plaintext HTTP.",
+			Inference:      "Session identifiers or authentication state may be exposed in transit.",
+			Limitation:     "Passive monitoring cannot confirm whether the cookie is sensitive or whether secure alternatives are available elsewhere.",
+			Recommendation: "Use HTTPS and review whether cookies carrying session state are restricted to secure transport.",
 		}, true
 	}
 	return Match{}, false

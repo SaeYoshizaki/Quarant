@@ -13,7 +13,13 @@ func (r *I7MQTTPlaintextRule) Apply(ctx *Context) (Match, bool) {
 	}
 
 	ev := Match{
-		Message: "Plaintext MQTT detected",
+		Message:        "Plain MQTT traffic was observed.",
+		OWASPTags:      uniqueTags("I2", "I7"),
+		Confidence:     "high",
+		ObservedFact:   "Plain MQTT traffic was observed.",
+		Inference:      "MQTT metadata and payloads may be exposed in transit when transport encryption is absent.",
+		Limitation:     "Passive monitoring does not confirm whether TLS is available on another port or whether this topic carries sensitive data.",
+		Recommendation: "Use MQTT over TLS, usually port 8883, if supported.",
 	}
 	if ctx.Debug {
 		ev.Evidence = "packet=" + ctx.MQTT.PacketName
@@ -41,15 +47,27 @@ func (r *I7MQTTCredentialsRule) Apply(ctx *Context) (Match, bool) {
 
 	if ctx.MQTT.HasPassword {
 		return Match{
-			Message:  "MQTT password sent over plaintext",
-			Evidence: "mqtt_password=***",
+			Message:        "MQTT password was observed over plaintext transport.",
+			Evidence:       "mqtt_password=***",
+			OWASPTags:      uniqueTags("I1", "I2", "I7"),
+			Confidence:     "high",
+			ObservedFact:   "MQTT password field was observed in plaintext traffic.",
+			Inference:      "Credentials may be exposed in transit.",
+			Limitation:     "Passive monitoring cannot determine password strength or whether the credential is shared, default, or hardcoded.",
+			Recommendation: "Use MQTT over TLS, rotate exposed credentials if needed, and review broker authentication settings.",
 		}, true
 	}
 
 	if ctx.MQTT.HasUsername && looksSensitiveIdentifier(ctx.MQTT.Username) {
 		return Match{
-			Message:  "MQTT username-like identifier sent over plaintext",
-			Evidence: "mqtt_username=***",
+			Message:        "MQTT username-like identifier was observed over plaintext transport.",
+			Evidence:       "mqtt_username=***",
+			OWASPTags:      uniqueTags("I1", "I2", "I7"),
+			Confidence:     "high",
+			ObservedFact:   "MQTT username-like identifier was observed in plaintext traffic.",
+			Inference:      "An authentication identifier may be exposed in transit.",
+			Limitation:     "Passive monitoring cannot confirm whether the value is sensitive on its own or whether stronger credentials are used elsewhere.",
+			Recommendation: "Use MQTT over TLS and review broker authentication settings.",
 		}, true
 	}
 
@@ -72,8 +90,14 @@ func (r *I7MQTTSensitivePayloadRule) Apply(ctx *Context) (Match, bool) {
 
 	if ev, ok := detectSensitiveMQTTTopic(ctx.MQTT.Topic); ok {
 		return Match{
-			Message:  "Sensitive MQTT topic observed over plaintext",
-			Evidence: ev,
+			Message:        "Sensitive MQTT topic component was observed over plaintext transport.",
+			Evidence:       ev,
+			OWASPTags:      uniqueTags("I1", "I2", "I7"),
+			Confidence:     "high",
+			ObservedFact:   "Sensitive MQTT topic component was observed in plaintext traffic.",
+			Inference:      "Topic names may reveal tokens or identifiers in transit.",
+			Limitation:     "Passive monitoring cannot determine whether the value remains valid or how it is used by the broker.",
+			Recommendation: "Avoid embedding sensitive values in topics and prefer MQTT over TLS.",
 		}, true
 	}
 
@@ -83,8 +107,14 @@ func (r *I7MQTTSensitivePayloadRule) Apply(ctx *Context) (Match, bool) {
 
 	if msg, ev, ok := DetectSensitiveHTTPBody("", ctx.MQTT.Payload); ok {
 		return Match{
-			Message:  "Sensitive data appears in plaintext MQTT payload: " + msg,
-			Evidence: ev,
+			Message:        "Sensitive data appears in plaintext MQTT payload: " + msg,
+			Evidence:       ev,
+			OWASPTags:      uniqueTags("I1", "I2", "I7"),
+			Confidence:     "high",
+			ObservedFact:   "Sensitive data patterns were observed in a plaintext MQTT payload.",
+			Inference:      "Credentials, tokens, or identifiers may be exposed in transit.",
+			Limitation:     "Passive monitoring cannot determine whether the value is active or whether the device supports an encrypted transport alternative.",
+			Recommendation: "Use MQTT over TLS and review which fields are published in plaintext payloads.",
 		}, true
 	}
 

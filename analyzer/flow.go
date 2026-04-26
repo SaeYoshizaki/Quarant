@@ -147,6 +147,7 @@ func (h *FlowHandler) writeDeviceDebug(now time.Time, srcIP string, d *device.De
 		Timestamp: now,
 		Type:      "DEVICE_DEBUG",
 		Severity:  SeverityInfo,
+		Debug:     true,
 		SrcIP:     srcIP,
 		Message: fmt.Sprintf(
 			"summary=%q detail=%q identity_state=%s identity_category=%s identity_category_confidence=%s identity_vendor=%s identity_vendor_confidence=%s identity_family=%s identity_family_confidence=%s identity_reasons=%v identity_top_category_scores=%v identity_top_vendor_scores=%v identity_top_family_scores=%v device_type=%s vendor=%s model=%s category=%s inference_source=%s confidence=%s inference_reasons=%v inferred_scores=%v ja3=%s evidence=%v risk_score=%d observed=%v insecure=%v admin=%t external=%t reasons=%v",
@@ -506,6 +507,7 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 					Timestamp: now,
 					Type:      "TLS_SERVER_DEBUG",
 					Severity:  SeverityInfo,
+					Debug:     true,
 					SrcIP:     srcIP,
 					SrcPort:   srcPort,
 					DstIP:     dstIP,
@@ -704,6 +706,7 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 			Timestamp: now,
 			Type:      "I6_DEBUG",
 			Severity:  SeverityInfo,
+			Debug:     true,
 			SrcIP:     srcIP,
 			SrcPort:   srcPort,
 			DstIP:     dstIP,
@@ -756,6 +759,11 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 			matches = append(matches, i5Matches...)
 		}
 
+		i3Rule := rules.NewI3UnexpectedCloudEndpointRule(h.knowledge)
+		if i3Matches := i3Rule.ApplyAll(ctx); len(i3Matches) > 0 {
+			matches = append(matches, i3Matches...)
+		}
+
 		if !st.AlreadyReported(rules.I4I5CombinedRiskRuleID) {
 			i4I5Rule := rules.NewI4I5CombinedRiskRule(h.knowledge)
 			if i4I5Match, ok := i4I5Rule.Apply(ctx); ok {
@@ -774,18 +782,25 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 		}
 
 		_ = h.sink.Write(Event{
-			Timestamp: now,
-			Type:      m.Type,
-			Severity:  Severity(m.Severity),
-			RuleID:    m.RuleID,
-			Category:  m.Category,
-			FlowKey:   key,
-			Evidence:  m.Evidence,
-			SrcIP:     srcIP,
-			SrcPort:   srcPort,
-			DstIP:     dstIP,
-			DstPort:   dstPort,
-			Message:   m.Message,
+			Timestamp:      now,
+			Type:           m.Type,
+			Severity:       Severity(m.Severity),
+			RuleID:         m.RuleID,
+			Category:       m.Category,
+			FlowKey:        key,
+			Evidence:       m.Evidence,
+			OWASPTags:      m.OWASPTags,
+			Confidence:     m.Confidence,
+			ObservedFact:   m.ObservedFact,
+			Inference:      m.Inference,
+			Limitation:     m.Limitation,
+			Recommendation: m.Recommendation,
+			Debug:          m.Debug,
+			SrcIP:          srcIP,
+			SrcPort:        srcPort,
+			DstIP:          dstIP,
+			DstPort:        dstPort,
+			Message:        m.Message,
 		})
 
 		if isI2RiskEvent(m.Type) {
@@ -809,6 +824,7 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 			Timestamp: now,
 			Type:      "PAYLOAD_DEBUG",
 			Severity:  SeverityInfo,
+			Debug:     true,
 			SrcIP:     srcIP,
 			SrcPort:   srcPort,
 			DstIP:     dstIP,

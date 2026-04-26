@@ -75,6 +75,9 @@ func TestI6StoredDataSignalEmitsForPrivacySensitiveCategoryWithAccumulatedUpload
 	if !strings.Contains(matches[0].Evidence, "corroboration=accumulated_upload,privacy_sensitive_category") {
 		t.Fatalf("expected combined corroboration, got: %s", matches[0].Evidence)
 	}
+	if matches[0].Limitation == "" {
+		t.Fatalf("expected limitation metadata, got: %+v", matches[0])
+	}
 }
 
 func TestI6StoredDataSignalSuppressesFirstBenignCategoryCandidate(t *testing.T) {
@@ -204,6 +207,42 @@ func TestI6StoredDataSignalIgnoresSmallKeywordRequest(t *testing.T) {
 
 	if matches := (&I6PrivacyRule{db: db}).applyStorageSignalAll(ctx, "Sensor"); len(matches) != 0 {
 		t.Fatalf("expected no storage signal for small upload, got %d", len(matches))
+	}
+}
+
+func TestI6UnexpectedCommunicationUsesSignalLanguage(t *testing.T) {
+	db := &knowledge.DB{
+		CategoryPolicy: knowledge.CategoryPolicy{
+			"Sensor": {
+				AllowedCommunicationTypes: []string{"telemetry"},
+				AllowedPIITypes:           []string{"device_id"},
+			},
+		},
+		DeviceCategories: &knowledge.DeviceCategories{Categories: []string{"Sensor"}},
+	}
+
+	ctx := &Context{
+		HTTP: &HTTPInfo{
+			Method:  "GET",
+			Path:    "/track",
+			Query:   map[string][]string{"email": {"user@example.com"}},
+			Headers: map[string]string{"host": "tracker.example"},
+		},
+		DeviceCategory: "Sensor",
+	}
+
+	matches := (&I6PrivacyRule{db: db}).ApplyAll(ctx)
+	if len(matches) == 0 {
+		t.Fatal("expected I6 signal")
+	}
+	for _, match := range matches {
+		lowerMessage := strings.ToLower(match.Message)
+		if strings.Contains(lowerMessage, "violation") || strings.Contains(lowerMessage, "unauthorized") {
+			t.Fatalf("expected signal wording, got: %s", match.Message)
+		}
+		if match.Category == "I6" && match.Limitation == "" {
+			t.Fatalf("expected limitation metadata, got: %+v", match)
+		}
 	}
 }
 

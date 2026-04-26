@@ -14,7 +14,14 @@ type Match struct {
 	Category string
 	Severity Severity
 
-	Type     string
-	Message  string
-	Evidence string
+	Type           string
+	Message        string
+	Evidence       string
+	OWASPTags      []string
+	Confidence     string
+	ObservedFact   string
+	Inference      string
+	Limitation     string
+	Recommendation string
+	Debug          bool
 }

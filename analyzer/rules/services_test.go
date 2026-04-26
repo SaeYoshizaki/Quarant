@@ -1,6 +1,9 @@
 package rules
 
-import "testing"
+import (
+	"strings"
+	"testing"
+)
 
 func TestIsPublicIPIPv4(t *testing.T) {
 	tests := []struct {
@@ -59,5 +62,40 @@ func TestIsPublicIPIPv4MappedIPv6(t *testing.T) {
 		if got := IsPublicIP(tt.ip); got != tt.want {
 			t.Fatalf("IsPublicIP(%q)=%t, want %t", tt.ip, got, tt.want)
 		}
+	}
+}
+
+func TestI2ExternalExposureRaisesSeverityAndAddsRecommendation(t *testing.T) {
+	match, ok := (&I2ExternalExposureRule{}).Apply(&Context{
+		DstIP:   "8.8.8.8",
+		DstPort: 23,
+	})
+	if !ok {
+		t.Fatal("expected external exposure match")
+	}
+	if match.Severity != SeverityHigh {
+		t.Fatalf("expected HIGH severity, got %s", match.Severity)
+	}
+	if !strings.Contains(match.Recommendation, "Disable Telnet") {
+		t.Fatalf("expected Telnet recommendation, got: %s", match.Recommendation)
+	}
+	if match.Limitation == "" {
+		t.Fatalf("expected limitation metadata, got: %+v", match)
+	}
+}
+
+func TestI2HTTPAdminIncludesRecommendation(t *testing.T) {
+	match, ok := (&I2HTTPAdminRule{}).Apply(&Context{
+		HTTP: &HTTPInfo{
+			Method:  "GET",
+			Path:    "/admin/login",
+			Headers: map[string]string{"host": "device.local"},
+		},
+	})
+	if !ok {
+		t.Fatal("expected admin interface match")
+	}
+	if !strings.Contains(match.Recommendation, "Use HTTPS") {
+		t.Fatalf("expected HTTPS recommendation, got: %s", match.Recommendation)
 	}
 }

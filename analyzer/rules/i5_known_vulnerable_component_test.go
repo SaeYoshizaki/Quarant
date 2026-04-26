@@ -25,6 +25,9 @@ func TestI5KnownVulnerableComponentMatchesFamilyCandidate(t *testing.T) {
 	if match.Category != "I5" {
 		t.Fatalf("unexpected category: %s", match.Category)
 	}
+	if !strings.Contains(strings.ToLower(match.Message), "candidate") {
+		t.Fatalf("expected candidate wording, got: %s", match.Message)
+	}
 	if !strings.Contains(match.Evidence, "knowledge_id=philips_hue_hub") {
 		t.Fatalf("missing knowledge evidence: %s", match.Evidence)
 	}
@@ -33,6 +36,15 @@ func TestI5KnownVulnerableComponentMatchesFamilyCandidate(t *testing.T) {
 	}
 	if !strings.Contains(match.Evidence, "match_basis=family") {
 		t.Fatalf("missing match_basis evidence: %s", match.Evidence)
+	}
+	if !strings.Contains(match.Evidence, "match_level=family_candidate") {
+		t.Fatalf("missing match level evidence: %s", match.Evidence)
+	}
+	if !strings.Contains(match.Evidence, "representative_cves=CVE-2018-7580") {
+		t.Fatalf("missing representative cves: %s", match.Evidence)
+	}
+	if match.Limitation == "" {
+		t.Fatalf("expected limitation metadata, got: %+v", match)
 	}
 }
 

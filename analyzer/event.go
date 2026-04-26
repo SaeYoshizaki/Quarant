@@ -16,10 +16,17 @@ type Event struct {
 	Type      string    `json:"type"`
 	Severity  Severity  `json:"severity"`
 
-	RuleID   string `json:"rule_id,omitempty"`
-	Category string `json:"category,omitempty"`
-	FlowKey  string `json:"flow_key,omitempty"`
-	Evidence string `json:"evidence,omitempty"`
+	RuleID         string   `json:"rule_id,omitempty"`
+	Category       string   `json:"category,omitempty"`
+	FlowKey        string   `json:"flow_key,omitempty"`
+	Evidence       string   `json:"evidence,omitempty"`
+	OWASPTags      []string `json:"owasp_tags,omitempty"`
+	Confidence     string   `json:"confidence,omitempty"`
+	ObservedFact   string   `json:"observed_fact,omitempty"`
+	Inference      string   `json:"inference,omitempty"`
+	Limitation     string   `json:"limitation,omitempty"`
+	Recommendation string   `json:"recommendation,omitempty"`
+	Debug          bool     `json:"debug,omitempty"`
 
 	SrcIP   string `json:"src_ip,omitempty"`
 	SrcPort uint16 `json:"src_port,omitempty"`

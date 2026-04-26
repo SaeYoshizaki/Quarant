@@ -66,15 +66,21 @@ func (r *I6PrivacyRule) ApplyAll(ctx *Context) []Match {
 		for _, hit := range hits {
 			if r.db.IsSuspiciousCombination(category, commType, hit.Type) {
 				out = append(out, Match{
-					RuleID:   "I6_HTTP_PRIVACY_POLICY_VIOLATION",
-					Type:     "I6_HTTP_PRIVACY_POLICY_VIOLATION",
+					RuleID:   "I6_HTTP_PRIVACY_RISK_SIGNAL",
+					Type:     "I6_HTTP_PRIVACY_RISK_SIGNAL",
 					Category: "I6",
 					Severity: SeverityWarning,
-					Message:  "Privacy-related information violates device category policy",
+					Message:  "Privacy-related communication risk signal observed for this device category.",
 					Evidence: fmt.Sprintf(
 						"category=%s comm_type=%s pii_type=%s source=%s %s",
 						category, commType, hit.Type, hit.Source, hit.Evidence,
 					),
+					OWASPTags:      uniqueTags("I6", "I7"),
+					Confidence:     "medium",
+					ObservedFact:   "Privacy-related value was observed in traffic for a device category and communication type combination that local policy marks as suspicious.",
+					Inference:      "This may indicate privacy-sensitive communication that deserves review.",
+					Limitation:     "Passive monitoring cannot determine user consent, privacy policy compliance, or whether the observed data was used improperly.",
+					Recommendation: "Review whether this communication type and destination are expected for the device and limit plaintext exposure where possible.",
 				})
 			}
 		}
@@ -86,11 +92,17 @@ func (r *I6PrivacyRule) ApplyAll(ctx *Context) []Match {
 				Type:     "I6_HTTP_UNEXPECTED_COMMUNICATION",
 				Category: "I6",
 				Severity: SeverityWarning,
-				Message:  "Privacy-related information observed in unexpected communication type",
+				Message:  "Unexpected privacy-related communication was observed for this device category.",
 				Evidence: fmt.Sprintf(
 					"category=%s comm_type=%s pii_type=%s source=%s %s",
 					category, commType, hit.Type, hit.Source, hit.Evidence,
 				),
+				OWASPTags:      uniqueTags("I6", "I7"),
+				Confidence:     "medium",
+				ObservedFact:   "Privacy-related value was observed in a communication type that is not normally allowed for this device category.",
+				Inference:      "This may indicate an unexpected privacy destination or communication pattern.",
+				Limitation:     "Passive monitoring cannot determine user consent or whether the device vendor documents this communication elsewhere.",
+				Recommendation: "Verify that the destination and communication type are expected for the device.",
 			})
 		}
 
@@ -101,11 +113,17 @@ func (r *I6PrivacyRule) ApplyAll(ctx *Context) []Match {
 					Type:     "I6_HTTP_UNEXPECTED_PII",
 					Category: "I6",
 					Severity: SeverityWarning,
-					Message:  "Unexpected privacy-related information observed for device category",
+					Message:  "Unexpected privacy-sensitive data type was observed for this device category.",
 					Evidence: fmt.Sprintf(
 						"category=%s comm_type=%s pii_type=%s source=%s %s",
 						category, commType, hit.Type, hit.Source, hit.Evidence,
 					),
+					OWASPTags:      uniqueTags("I6", "I7"),
+					Confidence:     "medium",
+					ObservedFact:   "A privacy-sensitive data type was observed for a device category that does not normally require it.",
+					Inference:      "This may indicate privacy-sensitive data exposure beyond the device's expected role.",
+					Limitation:     "Passive monitoring cannot determine whether the data is user-approved, policy-compliant, or required by an undocumented feature.",
+					Recommendation: "Review device settings, destinations, and whether this data type is expected for the device category.",
 				})
 			}
 		}
@@ -120,11 +138,17 @@ func (r *I6PrivacyRule) ApplyAll(ctx *Context) []Match {
 				Type:     "I6_HTTP_PRIVACY_EXPOSURE",
 				Category: "I6",
 				Severity: SeverityWarning,
-				Message:  "Privacy-related information observed in suspicious HTTP communication",
+				Message:  "Privacy-sensitive data exposure signal was observed in HTTP communication.",
 				Evidence: fmt.Sprintf(
 					"comm_type=%s pii_type=%s source=%s %s category=%s",
 					commType, hit.Type, hit.Source, hit.Evidence, category,
 				),
+				OWASPTags:      uniqueTags("I6", "I7"),
+				Confidence:     "medium",
+				ObservedFact:   "Privacy-related value was observed in HTTP analytics or tracking-like communication.",
+				Inference:      "This may indicate privacy-sensitive data exposure to an unexpected destination class.",
+				Limitation:     "Passive monitoring cannot determine consent, policy compliance, or whether the value is pseudonymized elsewhere.",
+				Recommendation: "Review whether the destination is expected and whether privacy-sensitive fields should be removed or encrypted.",
 			})
 		}
 	}
@@ -215,6 +239,12 @@ func (r *I6PrivacyRule) applyStorageSignalAll(ctx *Context, category string) []M
 				strings.Join(corroboration, ","),
 				strings.Join(riskSignals, ","),
 			),
+			OWASPTags:      uniqueTags("I6"),
+			Confidence:     "medium",
+			ObservedFact:   "Upload traffic matched a storage-related endpoint pattern with corroborating network signals.",
+			Inference:      "This may indicate stored-data synchronization or backup-related communication.",
+			Limitation:     "Passive monitoring does not prove that personal data is stored at rest or reveal what the remote service does with the uploaded data.",
+			Recommendation: "Confirm whether backup or history synchronization is expected for the device and review where the data is sent.",
 		})
 	}
 
@@ -294,7 +324,7 @@ func (r *I6PrivacyRule) applyPIIUseSignalAll(ctx *Context, category, commType st
 			Category: "I6",
 			Severity: SeverityWarning,
 			Message: fmt.Sprintf(
-				"Potentially inappropriate PII use signal observed | category=%s | pii_types=%s | destination=%s | disposition=%s | corroboration=%s | risk=%s",
+				"Unexpected privacy destination signal observed | category=%s | pii_types=%s | destination=%s | disposition=%s | corroboration=%s | risk=%s",
 				category,
 				strings.Join(unexpectedPIITypes, ","),
 				host,
@@ -316,6 +346,12 @@ func (r *I6PrivacyRule) applyPIIUseSignalAll(ctx *Context, category, commType st
 				strings.Join(corroboration, ","),
 				strings.Join(riskSignals, ","),
 			),
+			OWASPTags:      uniqueTags("I6", "I7"),
+			Confidence:     "medium",
+			ObservedFact:   "Privacy-sensitive value types were observed being sent toward a destination that appears unexpected for the device category.",
+			Inference:      "This may indicate a privacy risk signal involving unexpected destination use or repeated identifier disclosure.",
+			Limitation:     "Passive monitoring cannot determine user consent, policy compliance, or whether the destination is contractually expected but not present in local knowledge.",
+			Recommendation: "Verify that this destination is expected for the device and review whether privacy-sensitive fields can be reduced or encrypted.",
 		},
 	}
 }
@@ -390,6 +426,12 @@ func (r *I6PrivacyRule) applyCategoryMismatch(ctx *Context) *Match {
 			strings.Join(riskSignals, ","),
 			riskScoreHint,
 		),
+		OWASPTags:      uniqueTags("I6"),
+		Confidence:     "medium",
+		ObservedFact:   "Observed flow characteristics fit a different device category than the locally learned category.",
+		Inference:      "This may indicate ecosystem mismatch, unexpected third-party behavior, or privacy-relevant communication outside the device's normal role.",
+		Limitation:     "Passive monitoring cannot confirm a compromise or determine whether the communication is documented but missing from local knowledge.",
+		Recommendation: "Verify the device role, expected ecosystem integrations, and whether the destination or SNI is legitimate.",
 	}
 }
 
@@ -453,6 +495,12 @@ func (r *I6PrivacyRule) applyBehaviorBaselineAll(ctx *Context, category, commTyp
 				"category=%s host=%s dst_ip=%s dst_port=%d suspicious_patterns=%s risk_signals=%s risk_score_hint=%d category_confidence=%s",
 				category, host, ctx.DstIP, ctx.DstPort, suspicious, riskSummary, riskScoreHint, categoryConfidence,
 			),
+			OWASPTags:      uniqueTags("I6", "I7"),
+			Confidence:     "medium",
+			ObservedFact:   "External plaintext HTTP communication was observed for a category whose baseline prefers encrypted communication.",
+			Inference:      "This may indicate privacy-sensitive plaintext exposure or an unexpected transport downgrade.",
+			Limitation:     "Passive monitoring cannot determine whether the remote service also supports HTTPS or whether the plaintext path is required for setup.",
+			Recommendation: "Enable HTTPS if supported and review why this category is using plaintext external communication.",
 		})
 	}
 
@@ -473,6 +521,12 @@ func (r *I6PrivacyRule) applyBehaviorBaselineAll(ctx *Context, category, commTyp
 					"category=%s host=%s path=%s indicators=%s suspicious_patterns=%s risk_signals=%s risk_score_hint=%d category_confidence=%s",
 					category, host, path, strings.Join(indicators, ","), suspicious, riskSummary, riskScoreHint, categoryConfidence,
 				),
+				OWASPTags:      uniqueTags("I6", "I3", "I7"),
+				Confidence:     "medium",
+				ObservedFact:   "External HTTP admin-style indicators were observed for a category that does not normally expose them.",
+				Inference:      "This may indicate unexpected management communication with privacy or ecosystem risk.",
+				Limitation:     "Passive monitoring cannot confirm the exact administrative capability or whether the endpoint is intentionally exposed.",
+				Recommendation: "Confirm whether the management endpoint is expected and restrict it to trusted networks.",
 			})
 		}
 	}
@@ -493,6 +547,12 @@ func (r *I6PrivacyRule) applyBehaviorBaselineAll(ctx *Context, category, commTyp
 				"category=%s host=%s dst_port=%d expected_protocols=%s suspicious_patterns=%s risk_signals=%s risk_score_hint=%d category_confidence=%s",
 				category, host, ctx.DstPort, strings.Join(baseline.ExpectedProtocols, ","), suspicious, riskSummary, riskScoreHint, categoryConfidence,
 			),
+			OWASPTags:      uniqueTags("I6"),
+			Confidence:     "medium",
+			ObservedFact:   "Observed external protocol usage did not match the expected baseline for the device category.",
+			Inference:      "This may indicate unexpected ecosystem behavior or a privacy-relevant communication path outside the normal role.",
+			Limitation:     "Passive monitoring cannot determine whether the baseline is incomplete or whether the device recently changed behavior after an update.",
+			Recommendation: "Verify whether the protocol is expected for the device and update local baselines if it is legitimate.",
 		})
 	}
 
@@ -513,6 +573,12 @@ func (r *I6PrivacyRule) applyBehaviorBaselineAll(ctx *Context, category, commTyp
 					"category=%s local_category=%s flow_category=%s sni=%s representative_domains=%s ecosystem_domains=%s domain_disposition=%s suspicious_patterns=%s risk_signals=%s risk_score_hint=%d category_confidence=%s",
 					category, strings.TrimSpace(ctx.LocalDeviceCategory), strings.TrimSpace(ctx.FlowDeviceCategory), host, strings.Join(inference.RepresentativeDomains, ","), strings.Join(inference.EcosystemDomains, ","), domainDisposition(riskSignals), suspicious, riskSummary, riskScoreHint, categoryConfidence,
 				),
+				OWASPTags:      uniqueTags("I6"),
+				Confidence:     "medium",
+				ObservedFact:   "Observed TLS SNI did not fit the learned category baseline.",
+				Inference:      "This may indicate an unexpected ecosystem destination or privacy-related communication outside the normal category profile.",
+				Limitation:     "Passive monitoring cannot inspect encrypted payload contents or determine whether the destination is a newly added legitimate service.",
+				Recommendation: "Verify that the cloud endpoint is expected for the device and update local baselines if it is legitimate.",
 			})
 		}
 	} else if commType == "analytics" || commType == "tracking" || commType == "cloud_api" {
@@ -532,6 +598,12 @@ func (r *I6PrivacyRule) applyBehaviorBaselineAll(ctx *Context, category, commTyp
 					"category=%s host=%s representative_domains=%s ecosystem_domains=%s domain_disposition=%s suspicious_patterns=%s risk_signals=%s risk_score_hint=%d category_confidence=%s",
 					category, host, strings.Join(inference.RepresentativeDomains, ","), strings.Join(inference.EcosystemDomains, ","), domainDisposition(riskSignals), suspicious, riskSummary, riskScoreHint, categoryConfidence,
 				),
+				OWASPTags:      uniqueTags("I6"),
+				Confidence:     "medium",
+				ObservedFact:   "Observed external domain did not fit the learned category baseline.",
+				Inference:      "This may indicate an unexpected privacy destination or ecosystem communication path.",
+				Limitation:     "Passive monitoring cannot confirm whether the domain is a newly added vendor endpoint or a third-party service authorized by the user.",
+				Recommendation: "Verify that this cloud endpoint is expected for the device and update local baselines if it is legitimate.",
 			})
 		}
 	}

@@ -15,6 +15,9 @@ TCP フロー再構成、HTTP / TLS 解析、デバイスカテゴリ推定を�
 - JSONL 形式での説明可能なセキュリティログ出力
 - Go API + Next.js によるイベント可視化フロントエンド
 
+Quarant does not claim to fully diagnose all OWASP IoT Top 10 vulnerabilities.  
+It converts passively observable network behavior into explainable risk signals.
+
 ## Web UI
 
 ターミナルに流れる `events.jsonl` を、Go 側の JSON API と TypeScript/TSX + Tailwind CSS ベースの Next.js フロントで分離して確認できます。
@@ -64,18 +67,24 @@ I6 の `risk_signals` をまとめて、`low / medium / high`、`risk_score`、`
 public TLS の例では、`learned category=Controller` の端末に対して `observed SNI=alexa.amazon.com` と `flow=VoiceAssistant` が観測され、`I6_DEVICE_FLOW_CATEGORY_MISMATCH` と `category_mismatch_over_tls` によって「Controller が VoiceAssistant 系の TLS 通信をしている」ことを説明できます。
 また、`observed SNI=evil-analytics.example.com` のように baseline にない TLS 通信でも、`domain_disposition=suspicious_unmatched` と `medium / investigate` によって「即 block ではないが anomaly 寄りの不一致」であることを表現できます。
 
+通常の `events.jsonl` にはリスクイベントを出力し、開発用イベントは `severity=INFO` かつ `debug=true` として区別します。
+
 ## OWASP IoT Top 10 (2018) 対応状況
 
-- [ ] I1: Weak, Guessable, or Hardcoded Passwords
-- [x] I2: Insecure Network Services
-- [ ] I3: Insecure Ecosystem Interfaces
-- [x] I4: Lack of Secure Update Mechanism
-- [ ] I5: Use of Insecure or Outdated Components
-- [x] I6: Insufficient Privacy Protection
-- [x] I7: Insecure Data Transfer and Storage
-- [ ] I8: Lack of Device Management
-- [ ] I9: Insecure Default Settings
-- [ ] I10: Lack of Physical Hardening
+| Item | Status | Notes |
+| --- | --- | --- |
+| I1 | partial / related signal | Direct password strength or hardcoded credential detection is out of scope for passive monitoring. Credential exposure in traffic is handled as a related signal via I7. |
+| I2 | implemented as insecure network service signal | Telnet, FTP, RTSP, MQTT, CoAP, HTTP management, and related external exposure are handled as explainable service-risk signals. |
+| I3 | initial implemented / ecosystem-interface risk signal | API over plaintext, token in URL, management endpoint, weak cloud or backend transport, mobile-backend pattern, and unexpected ecosystem endpoint are handled as passive risk signals. Full API vulnerability testing, authorization testing, CORS/CSRF checks, and cloud-side scanning are out of scope. |
+| I4 | implemented as update-risk signal | Firmware or update-like traffic and plaintext update delivery can be observed. Signature verification and rollback protection cannot be confirmed passively. |
+| I5 | implemented as known-vulnerable-family/component candidate enrichment | Exact CVE applicability requires model and firmware confirmation. Representative CVEs are enrichment, not proof of impact. |
+| I6 | implemented as privacy-risk signal | Privacy-sensitive plaintext, stable identifiers, unexpected privacy destinations, and baseline mismatch are handled as risk signals. Consent or policy violation cannot be confirmed passively. |
+| I7 | implemented as insecure transfer signal | Plaintext HTTP, credentials, cookies, tokens, MQTT/Telnet secrets, and related transport exposure are covered. |
+| I8 | partial / product feature direction | Device inventory, monitoring, and risk summary are partial today and may expand. |
+| I9 | planned as default-setting related signal | Default credential patterns, setup endpoints, and insecure default services are future signal areas. |
+| I10 | mostly out of scope | Physical hardening cannot be evaluated passively. Only network-visible debug or factory endpoints may appear as related signals. |
+
+主要イベントは `owasp_tags`, `confidence`, `observed_fact`, `inference`, `limitation`, `recommendation` を持ち、観測事実と推定を分けて説明します。
 
 
 ## I2: Insecure Network Services
@@ -138,7 +147,7 @@ I4 v1 の考え方は、`update-like communication detection` と `plaintext ext
 プライバシー上不自然な通信を検知します。
 I6 は HTTP Host だけでなく TLS SNI に対しても baseline 比較を行い、TLS 通信でも想定外ドメインや ecosystem mismatch を説明可能に検知します。
 また、パッシブ監視ではデバイス内部やクラウド側に保存された個人情報を直接確認できないため、I6 の at-rest は直接検知ではなく、保存データの存在を示唆する通信シグナルとして扱います。
-I6 の考え方は、`baseline comparison`、`novelty vs anomaly-ish separation`、`explainable mismatch`、`stored-data signal detection`、`potential PII misuse signal` です。
+I6 の考え方は、`baseline comparison`、`novelty vs anomaly-ish separation`、`explainable mismatch`、`stored-data signal detection`、`privacy risk signal / unexpected PII flow signal` です。
 
 ### 検知機能
 
@@ -149,7 +158,7 @@ I6 の考え方は、`baseline comparison`、`novelty vs anomaly-ish separation`
 - プロトコル不一致の検知
 - 外向き平文通信の検知
 - history / backup / sync / logs 系 endpoint への蓄積データらしい upload 候補の検知
-- category に不要寄りの PII が unexpected / analytics / tracking 寄り destination に送られる場合の privacy misuse signal 検知
+- category に不要寄りの PII が unexpected / analytics / tracking 寄り destination に送られる場合の privacy risk signal / unexpected PII flow signal 検知
 - `risk_signals` に基づく総合リスク判定 (`R1_COMPOSITE_RISK`)
 - `recommended_action` による初動判断の支援
 
@@ -159,14 +168,16 @@ I6 の考え方は、`baseline comparison`、`novelty vs anomaly-ish separation`
 - `suspicious_unmatched`: `observed SNI=evil-analytics.example.com` では `domain_disposition=suspicious_unmatched` と `R1_COMPOSITE_RISK=medium / investigate` が出て、baseline 外だが即 block ではない anomaly 寄り通信として説明できます。
 - `rooted mismatch`: `learned category=Controller` に対して `observed SNI=alexa.amazon.com` や `api.smartthings.com` が観測されると、`I6_DEVICE_FLOW_CATEGORY_MISMATCH` と `category_mismatch_over_tls` が出て、カテゴリ不一致を説明付きで示せます。
 - `stored-data signal`: `POST /v1/history/upload` や `POST /backup/sync` のような保存系 keyword と一定サイズ以上の upload はまず候補として記録し、大きめの upload、同じ endpoint の再観測、stable identifier の再観測などが揃う場合に `I6_STORED_DATA_SIGNAL_OBSERVED` が出ます。privacy-sensitive category は単独では trigger せず、これらの条件に対する補助 signal として扱います。これは「保存済みデータを直接見た」ことではなく、`indirect_at_rest=true` の通信シグナルとして扱います。
-- `PII misuse signal`: `Sensor` が `email` や `account_info` など category に不要寄りの PII を analytics / tracking / baseline 外 destination に送る場合、identifier や PII destination の再観測などと合わせて `I6_PII_TO_UNEXPECTED_DESTINATION` が出ます。analytics / tracking は単独 trigger ではなく補助 signal として扱います。同意や許可の有無は断定せず、`consent_observed=false` の privacy risk signal として扱います。
+- `unexpected PII flow signal`: `Sensor` が `email` や `account_info` など category に不要寄りの PII を analytics / tracking / baseline 外 destination に送る場合、identifier や PII destination の再観測などと合わせて `I6_PII_TO_UNEXPECTED_DESTINATION` が出ます。analytics / tracking は単独 trigger ではなく補助 signal として扱います。同意や許可の有無は断定せず、`consent_observed=false` の privacy risk signal として扱います。
 
 ### 現在の到達点
 
 - I6 は、機器カテゴリごとの通信ベースラインから外れる HTTP / TLS 通信を検知し、`risk_signals` と `recommended_action` まで含めて説明できます。
 - 特に TLS では、`SNI` を用いた baseline comparison、`baseline_novelty` と `suspicious_unmatched` の分離、`category_mismatch_over_tls` による rooted mismatch の説明が可能です。
 - 保存データについては、`history / backup / sync / logs` などの endpoint 語、upload method、upload size、category、同じ endpoint や安定識別子の再観測を組み合わせ、直接検知ではなく保存シグナル候補として説明します。
-- 不適切な個人情報利用については、PII type と device category の不一致、baseline 外または analytics/tracking 寄り destination、同一 identifier や destination の再観測を組み合わせ、直接的な同意違反ではなく `potentially inappropriate PII use` の signal として説明します。
+- unexpected PII flow については、PII type と device category の不一致、baseline 外または analytics/tracking 寄り destination、同一 identifier や destination の再観測を組み合わせ、直接的な同意違反ではなく `privacy risk signal / unexpected PII flow signal` として説明します。
+- I3 では、`I3_API_OVER_PLAINTEXT`、`I3_AUTH_TOKEN_IN_URL`、`I3_MANAGEMENT_API_EXPOSED`、`I3_WEAK_ECOSYSTEM_CRYPTO_SIGNAL`、`I3_MOBILE_APP_BACKEND_PATTERN_OBSERVED`、`I3_UNEXPECTED_CLOUD_ENDPOINT` を passive ecosystem-interface risk signal として扱います。
+- I3 では Full API vulnerability testing、authorization testing、CORS/CSRF、cloud-side scanning は out of scope です。
 - そのため、本実装は OWASP IoT Top 10 の I6 に対して、完全な防止機構というより `explainable detection / triage` の役割を果たします。
 
 ### まだ足りない部分

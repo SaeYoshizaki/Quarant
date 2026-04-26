@@ -76,8 +76,14 @@ func (r *I4FirmwareUpdateObservedRule) Apply(ctx *Context) (Match, bool) {
 	}
 
 	return Match{
-		Message:  "Firmware/update-like communication observed",
-		Evidence: formatI4FirmwareEvidence(obs),
+		Message:        "Firmware or update-like communication was observed.",
+		Evidence:       formatI4FirmwareEvidence(obs),
+		OWASPTags:      uniqueTags("I4"),
+		Confidence:     "medium",
+		ObservedFact:   "Firmware-like update traffic was observed.",
+		Inference:      "This may indicate a device update workflow or update-related ecosystem traffic.",
+		Limitation:     "Passive monitoring cannot confirm the exact device model, firmware version, or whether the update mechanism includes signature verification.",
+		Recommendation: "Check the device firmware version and vendor documentation to confirm how updates are delivered.",
 	}, true
 }
 
@@ -97,11 +103,17 @@ func (r *I4InsecureFirmwareUpdateHTTPRule) Apply(ctx *Context) (Match, bool) {
 	}
 
 	return Match{
-		Message: "Potential firmware/update delivery observed over plaintext external HTTP",
+		Message: "Firmware or update-like traffic was observed over plaintext external HTTP.",
 		Evidence: fmt.Sprintf(
 			"%s plaintext=true risk_signals=firmware_update,plaintext_update,external_update",
 			formatI4FirmwareEvidence(obs),
 		),
+		OWASPTags:      uniqueTags("I4", "I7"),
+		Confidence:     "high",
+		ObservedFact:   "Firmware or update-like HTTP traffic was observed without transport encryption.",
+		Inference:      "This indicates an update transport risk because firmware delivery metadata or payloads may be exposed in transit.",
+		Limitation:     "Passive monitoring cannot determine whether firmware signature verification, rollback protection, or secure boot is implemented on the device.",
+		Recommendation: "Enable HTTPS or another vendor-supported secure update path if available, and review the current firmware version.",
 	}, true
 }
 

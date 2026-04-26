@@ -17,8 +17,14 @@ func (r *I7HTTPBodySecretRule) Apply(ctx *Context) (Match, bool) {
 
 	if msg, ev, ok := DetectSensitiveHTTPBody(ctx.HTTP.ContentType, ctx.HTTP.Body); ok {
 		return Match{
-			Message:  msg,
-			Evidence: ev,
+			Message:        msg,
+			Evidence:       ev,
+			OWASPTags:      uniqueTags("I1", "I3", "I7"),
+			Confidence:     "high",
+			ObservedFact:   "Sensitive value patterns were observed in a plaintext HTTP body.",
+			Inference:      "Credentials, tokens, or stable identifiers may be exposed in transit.",
+			Limitation:     "Passive monitoring cannot determine whether the observed value is active, hardcoded, or accepted by the remote service.",
+			Recommendation: "Use HTTPS, review which fields are sent in request bodies, and rotate exposed secrets if necessary.",
 		}, true
 	}
 

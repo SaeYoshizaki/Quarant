@@ -27,22 +27,34 @@ func (r *I4EOLReviewRule) ApplyAll(ctx *Context) []Match {
 
 	if !eol.likely {
 		return []Match{{
-			RuleID:   "I4_MAYBE_EOL_DEVICE",
-			Type:     "I4_MAYBE_EOL_DEVICE",
-			Category: "I4",
-			Severity: SeverityInfo,
-			Message:  "This device may be beyond a typical support lifecycle; review firmware support status and update availability",
-			Evidence: formatI4EOLEvidence(ctx, eol.updateVisibility, eol.legacySignals, eol.basis),
+			RuleID:         "I4_MAYBE_EOL_DEVICE",
+			Type:           "I4_MAYBE_EOL_DEVICE",
+			Category:       "I4",
+			Severity:       SeverityInfo,
+			Message:        "This device may be beyond a typical support lifecycle; review firmware support status and update availability.",
+			Evidence:       formatI4EOLEvidence(ctx, eol.updateVisibility, eol.legacySignals, eol.basis),
+			OWASPTags:      uniqueTags("I4"),
+			Confidence:     "low",
+			ObservedFact:   "Lifecycle-related update visibility signals were weak or incomplete.",
+			Inference:      "The device may be approaching the end of normal support, which can increase update risk.",
+			Limitation:     "Passive monitoring does not confirm the actual support contract, release policy, or installed firmware version.",
+			Recommendation: "Review firmware version and vendor lifecycle notices for the exact device model.",
 		}}
 	}
 
 	return []Match{{
-		RuleID:   "I4_LIKELY_EOL_DEVICE",
-		Type:     "I4_LIKELY_EOL_DEVICE",
-		Category: "I4",
-		Severity: SeverityWarning,
-		Message:  "This device appears likely to be beyond a typical support lifecycle; review vendor support status and continued firmware update availability",
-		Evidence: formatI4EOLEvidence(ctx, eol.updateVisibility, eol.legacySignals, eol.basis),
+		RuleID:         "I4_LIKELY_EOL_DEVICE",
+		Type:           "I4_LIKELY_EOL_DEVICE",
+		Category:       "I4",
+		Severity:       SeverityWarning,
+		Message:        "This device appears likely to be beyond a typical support lifecycle; review vendor support status and firmware update availability.",
+		Evidence:       formatI4EOLEvidence(ctx, eol.updateVisibility, eol.legacySignals, eol.basis),
+		OWASPTags:      uniqueTags("I4"),
+		Confidence:     "medium",
+		ObservedFact:   "Update visibility was absent or weak while lifecycle-related legacy signals were present.",
+		Inference:      "The device may have reduced update support, which can increase the chance that known issues remain unpatched.",
+		Limitation:     "Passive monitoring does not prove that the device is end-of-life or that no updates remain available.",
+		Recommendation: "Review firmware version, vendor lifecycle notices, and replacement planning for the exact model.",
 	}}
 }
 

@@ -4,6 +4,7 @@
     "category": "Camera",
     "vendor": "Google",
     "family": "nest_cam",
+    "match_level": "family_candidate",
     "match_signals": {
       "vendor_keywords": ["google", "nest"],
       "host_keywords": ["google", "nest"],
@@ -15,6 +16,8 @@
       "Pairing and device communication paths should be reviewed when Nest camera traffic is observed."
     ],
     "representative_cves": ["CVE-2019-5043"],
+    "source": "manual research / representative CVE mapping",
+    "last_reviewed": "2026-04-24",
     "severity": "medium",
     "recommendation": [
       "Review camera firmware version and apply available vendor updates.",
@@ -43,6 +46,7 @@
     "category": "Camera",
     "vendor": "Hikvision",
     "family": "hikvision_camera",
+    "match_level": "family_candidate",
     "match_signals": {
       "vendor_keywords": ["hikvision"],
       "host_keywords": ["hikvision", "hik-connect"],
@@ -54,6 +58,8 @@
       "Camera management interfaces and firmware should be reviewed when Hikvision devices are observed."
     ],
     "representative_cves": ["CVE-2021-36260"],
+    "source": "manual research / representative CVE mapping",
+    "last_reviewed": "2026-04-24",
     "severity": "critical",
     "recommendation": [
       "Review camera firmware version and apply vendor updates.",
@@ -114,6 +120,7 @@
     "category": "Hub",
     "vendor": "Samsung",
     "family": "smartthings_hub",
+    "match_level": "family_candidate",
     "match_signals": {
       "vendor_keywords": ["samsung", "smartthings"],
       "host_keywords": ["smartthings"],
@@ -125,6 +132,8 @@
       "Hub and ecosystem components may expose elevated risk when management or camera-related features are reachable."
     ],
     "representative_cves": ["CVE-2025-2233"],
+    "source": "manual research / representative CVE mapping",
+    "last_reviewed": "2026-04-24",
     "severity": "high",
     "recommendation": [
       "Review SmartThings hub and ecosystem software versions.",
@@ -137,6 +146,7 @@
     "category": "Hub",
     "vendor": "Philips",
     "family": "philips_hue_hub",
+    "match_level": "family_candidate",
     "match_signals": {
       "vendor_keywords": ["philips", "signify", "hue"],
       "host_keywords": ["meethue", "philips-hue", "hue"],
@@ -148,6 +158,8 @@
       "Ecosystem-facing hub components should be kept updated because central failure affects all attached devices."
     ],
     "representative_cves": ["CVE-2018-7580"],
+    "source": "manual research / representative CVE mapping",
+    "last_reviewed": "2026-04-24",
     "severity": "medium",
     "recommendation": [
       "Review hub firmware version and apply vendor updates.",
@@ -160,6 +172,7 @@
     "category": "Hub",
     "vendor": "Aqara",
     "family": "aqara_hub",
+    "match_level": "family_candidate",
     "match_signals": {
       "vendor_keywords": ["aqara"],
       "host_keywords": ["aqara"],
@@ -171,6 +184,8 @@
       "Hub and firmware update paths should be reviewed carefully when Aqara hub traffic is observed."
     ],
     "representative_cves": ["CVE-2025-65292"],
+    "source": "manual research / representative CVE mapping",
+    "last_reviewed": "2026-04-24",
     "severity": "critical",
     "recommendation": [
       "Review hub firmware version and apply available vendor updates.",
@@ -183,6 +198,7 @@
     "category": "Controller",
     "vendor": "Tuya",
     "family": "tuya_controller",
+    "match_level": "family_candidate",
     "match_signals": {
       "vendor_keywords": ["tuya", "smartlife", "smart life"],
       "host_keywords": ["tuya", "tuyaus", "smartlife"],
@@ -194,6 +210,8 @@
       "Controller or app-layer weaknesses can impact multiple attached devices across the ecosystem."
     ],
     "representative_cves": ["CVE-2025-56400"],
+    "source": "manual research / representative CVE mapping",
+    "last_reviewed": "2026-04-24",
     "severity": "medium",
     "recommendation": [
       "Review app, SDK, and controller software update status.",
@@ -206,6 +224,7 @@
     "category": "Controller",
     "vendor": "TP-Link",
     "family": "tplink_controller",
+    "match_level": "family_candidate",
     "match_signals": {
       "vendor_keywords": ["tp-link", "tplink", "tapo", "kasa"],
       "host_keywords": ["tplinkcloud", "tp-link", "tplink", "tapo", "kasa"],
@@ -217,6 +236,8 @@
       "Cloud-connected controller paths and management interfaces should be reviewed when TP-Link controller traffic is observed."
     ],
     "representative_cves": ["CVE-2023-1389"],
+    "source": "manual research / representative CVE mapping",
+    "last_reviewed": "2026-04-24",
     "severity": "high",
     "recommendation": [
       "Review controller firmware version and apply vendor updates.",

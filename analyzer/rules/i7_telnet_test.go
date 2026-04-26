@@ -12,8 +12,11 @@ func TestI7TelnetPlaintextDetectsTelnet(t *testing.T) {
 	if !ok {
 		t.Fatal("expected plaintext telnet to be detected")
 	}
-	if match.Message != "Plaintext Telnet detected" {
+	if match.Message != "Plaintext Telnet traffic was observed." {
 		t.Fatalf("unexpected message: %s", match.Message)
+	}
+	if len(match.OWASPTags) == 0 || match.Limitation == "" {
+		t.Fatalf("expected metadata to be populated: %+v", match)
 	}
 }
 

@@ -27,15 +27,27 @@ func (r *I7HTTPAuthRule) Apply(ctx *Context) (Match, bool) {
 		}
 
 		return Match{
-			Message:  "Authorization header sent over plaintext HTTP",
-			Evidence: evidence,
+			Message:        "Authorization or authentication header was observed over plaintext HTTP.",
+			Evidence:       evidence,
+			OWASPTags:      uniqueTags("I1", "I3", "I7"),
+			Confidence:     "high",
+			ObservedFact:   "Authorization header was observed over plaintext HTTP.",
+			Inference:      "Credentials or authentication tokens may be exposed in transit.",
+			Limitation:     "Passive monitoring cannot determine password strength, whether the credential is hardcoded, or whether the backend enforces additional controls.",
+			Recommendation: "Use HTTPS, rotate exposed credentials if needed, and review device or application authentication settings.",
 		}, true
 	}
 
 	if evidence, ok := DetectSensitiveHeader(ctx.HTTP.Headers); ok {
 		return Match{
-			Message:  "Sensitive authentication header sent over plaintext HTTP",
-			Evidence: evidence,
+			Message:        "Sensitive authentication-related header was observed over plaintext HTTP.",
+			Evidence:       evidence,
+			OWASPTags:      uniqueTags("I1", "I3", "I7"),
+			Confidence:     "high",
+			ObservedFact:   "Sensitive authentication-related header was observed over plaintext HTTP.",
+			Inference:      "Credentials or API tokens may be exposed in transit.",
+			Limitation:     "Passive monitoring cannot determine whether the value is active, hardcoded, or restricted by other controls.",
+			Recommendation: "Use HTTPS, rotate exposed credentials if needed, and review device or application authentication settings.",
 		}, true
 	}
 

@@ -1,6 +1,9 @@
 package rules
 
-import "testing"
+import (
+	"strings"
+	"testing"
+)
 
 func TestI7HTTPQueryExpandedKeys(t *testing.T) {
 	ctx := &Context{
@@ -99,6 +102,12 @@ func TestI7HTTPAuthExtendedHeader(t *testing.T) {
 	}
 	if match.Evidence != "X-Api-Key: ***" {
 		t.Fatalf("unexpected evidence: %s", match.Evidence)
+	}
+	if !containsAll(match.OWASPTags, "I1", "I3", "I7") {
+		t.Fatalf("expected OWASP tags, got: %v", match.OWASPTags)
+	}
+	if match.Limitation == "" {
+		t.Fatalf("expected limitation, got empty match: %+v", match)
 	}
 }
 
@@ -261,4 +270,44 @@ func TestI7HTTPBodyDoesNotDetectBenignSerialValue(t *testing.T) {
 	if _, ok := (&I7HTTPBodySecretRule{}).Apply(ctx); ok {
 		t.Fatal("did not expect benign serial value to be detected")
 	}
+}
+
+func TestI7HTTPTokenMetadataDoesNotExposeRawValue(t *testing.T) {
+	ctx := &Context{
+		HTTP: &HTTPInfo{
+			Query: map[string][]string{
+				"token": {"super-secret-token-value"},
+			},
+		},
+	}
+
+	match, ok := (&I7HTTPTokenLeakRule{}).Apply(ctx)
+	if !ok {
+		t.Fatal("expected token leak to be detected")
+	}
+	if strings.Contains(match.Evidence, "super-secret-token-value") {
+		t.Fatalf("raw token should not be exposed: %s", match.Evidence)
+	}
+	if !containsAll(match.OWASPTags, "I1", "I3", "I7") {
+		t.Fatalf("expected OWASP tags, got: %v", match.OWASPTags)
+	}
+	if match.Limitation == "" {
+		t.Fatalf("expected limitation, got empty match: %+v", match)
+	}
+}
+
+func containsAll(values []string, wants ...string) bool {
+	for _, want := range wants {
+		found := false
+		for _, value := range values {
+			if value == want {
+				found = true
+				break
+			}
+		}
+		if !found {
+			return false
+		}
+	}
+	return true
 }

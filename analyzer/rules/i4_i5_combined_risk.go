@@ -12,9 +12,9 @@ const (
 
 	i4I5BasisKnownVulnerableOnly      = "known_vulnerable_component_only"
 	i4I5BasisKnownVulnerableLikelyEOL = "known_vulnerable_component+likely_eol"
-	i4I5BasisKnownVulnerableNoUpdate  = "known_vulnerable_component+likely_no_secure_update_mechanism"
+	i4I5BasisKnownVulnerableNoUpdate  = "known_vulnerable_component+weak_update_visibility"
 	i4I5SignalLikelyEOL               = "likely_eol"
-	i4I5SignalNoSecureUpdateMechanism = "likely_no_secure_update_mechanism"
+	i4I5SignalNoSecureUpdateMechanism = "weak_update_visibility"
 )
 
 type I4I5CombinedRiskRule struct {

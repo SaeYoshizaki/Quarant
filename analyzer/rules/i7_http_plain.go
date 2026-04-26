@@ -14,7 +14,13 @@ func (r *I7HTTPPlaintextRule) Apply(ctx *Context) (Match, bool) {
 	}
 
 	ev := Match{
-		Message: "Plaintext HTTP detected",
+		Message:        "Plaintext HTTP request was observed.",
+		OWASPTags:      uniqueTags("I7"),
+		Confidence:     "high",
+		ObservedFact:   "Plaintext HTTP request was observed.",
+		Inference:      "HTTP metadata and contents may be exposed in transit on untrusted networks.",
+		Limitation:     "Passive monitoring does not confirm whether sensitive values were present in this specific request.",
+		Recommendation: "Enable HTTPS if supported and review device or application settings that still permit plaintext HTTP.",
 	}
 
 	if ctx.Debug {

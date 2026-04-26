@@ -14,8 +14,14 @@ func (r *I7HTTPTokenLeakRule) Apply(ctx *Context) (Match, bool) {
 
 	if ev, ok := DetectSensitiveQuery(ctx.HTTP.Query); ok {
 		return Match{
-			Message:  "Sensitive parameter appears in plaintext HTTP query",
-			Evidence: ev,
+			Message:        "Sensitive token or identifier-like parameter was observed in a plaintext HTTP URL.",
+			Evidence:       ev,
+			OWASPTags:      uniqueTags("I1", "I3", "I7"),
+			Confidence:     "high",
+			ObservedFact:   "Sensitive token or identifier-like query parameter was observed over plaintext HTTP.",
+			Inference:      "Credentials, session tokens, or stable identifiers may be exposed in transit and in URL logs.",
+			Limitation:     "Passive monitoring cannot determine whether the value is still valid, whether it is hardcoded, or whether the API has additional protections.",
+			Recommendation: "Avoid putting tokens in URLs, use HTTPS, and rotate exposed credentials or tokens if necessary.",
 		}, true
 	}
 	return Match{}, false

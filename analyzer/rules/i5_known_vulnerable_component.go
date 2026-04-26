@@ -362,12 +362,17 @@ func formatI5KnownVulnerableComponentMatch(
 ) Match {
 	recommendation := strings.Join(component.Recommendation, " | ")
 	if recommendation == "" {
-		recommendation = "review component version and vendor support status"
+		recommendation = "Confirm the exact model and firmware version. Check vendor advisories and apply firmware updates."
 	}
 
 	knownIssues := strings.Join(component.KnownIssues, " | ")
 	if knownIssues == "" {
-		knownIssues = "known vulnerable component family match"
+		knownIssues = "known vulnerable family candidate in local knowledge"
+	}
+
+	matchLevel := strings.TrimSpace(component.MatchLevel)
+	if matchLevel == "" {
+		matchLevel = "family_candidate"
 	}
 
 	return Match{
@@ -375,12 +380,13 @@ func formatI5KnownVulnerableComponentMatch(
 		Type:     "I5_KNOWN_VULNERABLE_COMPONENT",
 		Category: "I5",
 		Severity: i5Severity(component.Severity),
-		Message:  "Device appears to match a known vulnerable component family in local knowledge",
+		Message:  "Traffic characteristics match a known vulnerable family or component candidate in local knowledge.",
 		Evidence: fmt.Sprintf(
-			"knowledge_id=%s matched_component_id=%s match_basis=%s category=%s vendor=%s family=%s context_category=%s vendor_candidate=%s family_candidate=%s matched_signals=%s known_issues=%s representative_cves=%s knowledge_severity=%s recommendation=%s applicability=unconfirmed",
+			"knowledge_id=%s matched_component_id=%s match_basis=%s match_level=%s category=%s vendor=%s family=%s context_category=%s vendor_candidate=%s family_candidate=%s matched_signals=%s known_issues=%s representative_cves=%s knowledge_severity=%s source=%s last_reviewed=%s recommendation=%s applicability=unconfirmed",
 			strings.TrimSpace(component.ID),
 			strings.TrimSpace(component.ID),
 			strings.Join(matchBasis, ","),
+			matchLevel,
 			strings.TrimSpace(component.Category),
 			strings.TrimSpace(component.Vendor),
 			strings.TrimSpace(component.Family),
@@ -391,8 +397,16 @@ func formatI5KnownVulnerableComponentMatch(
 			knownIssues,
 			strings.Join(component.RepresentativeCVEs, ","),
 			strings.TrimSpace(component.Severity),
+			strings.TrimSpace(component.Source),
+			strings.TrimSpace(component.LastReviewed),
 			recommendation,
 		),
+		OWASPTags:      uniqueTags("I5"),
+		Confidence:     "low",
+		ObservedFact:   "Observed identification signals matched a device family or component candidate in the local vulnerability knowledge base.",
+		Inference:      "The device may belong to a family with known historical vulnerabilities, so firmware and support status should be reviewed.",
+		Limitation:     "Passive monitoring cannot confirm the exact model, firmware version, internal component list, or whether a specific CVE applies.",
+		Recommendation: strings.ReplaceAll(recommendation, " | ", " "),
 	}
 }
 

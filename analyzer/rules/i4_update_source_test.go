@@ -83,6 +83,9 @@ func TestI4LikelyNoSecureUpdateMechanismTelnetObserved(t *testing.T) {
 	if !ok {
 		t.Fatal("expected no secure update mechanism review signal")
 	}
+	if match.Type != "I4_WEAK_UPDATE_VISIBILITY" {
+		t.Fatalf("unexpected type: %s", match.Type)
+	}
 	for _, want := range []string{
 		"category=Camera",
 		"vendor_candidate=ExampleCam",
@@ -93,6 +96,12 @@ func TestI4LikelyNoSecureUpdateMechanismTelnetObserved(t *testing.T) {
 		if !strings.Contains(match.Evidence, want) {
 			t.Fatalf("expected evidence to contain %q, got: %s", want, match.Evidence)
 		}
+	}
+	if strings.Contains(strings.ToLower(match.Message), "lacks a secure update mechanism") {
+		t.Fatalf("message should avoid hard assertion: %s", match.Message)
+	}
+	if match.Limitation == "" {
+		t.Fatalf("expected limitation metadata, got: %+v", match)
 	}
 }
 

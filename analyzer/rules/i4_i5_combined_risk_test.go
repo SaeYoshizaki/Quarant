@@ -53,7 +53,7 @@ func TestI4I5CombinedRiskLikelyEOLWins(t *testing.T) {
 		"matched_component_id=hikvision_camera",
 		"representative_cves=CVE-2021-36260",
 		"i5_severity=critical",
-		"i4_signals=likely_eol,likely_no_secure_update_mechanism",
+		"i4_signals=likely_eol,weak_update_visibility",
 		"recommended_checks=review firmware version | confirm vendor support status | consider replacement if unsupported",
 	} {
 		if !strings.Contains(match.Evidence, want) {
@@ -82,10 +82,10 @@ func TestI4I5CombinedRiskNoSecureUpdateWhenNotEOL(t *testing.T) {
 	if match.Severity != SeverityHigh {
 		t.Fatalf("unexpected severity: %s", match.Severity)
 	}
-	if !strings.Contains(match.Evidence, "combined_basis=known_vulnerable_component+likely_no_secure_update_mechanism") {
+	if !strings.Contains(match.Evidence, "combined_basis=known_vulnerable_component+weak_update_visibility") {
 		t.Fatalf("missing no-secure-update basis: %s", match.Evidence)
 	}
-	if !strings.Contains(match.Evidence, "i4_signals=likely_no_secure_update_mechanism") {
+	if !strings.Contains(match.Evidence, "i4_signals=weak_update_visibility") {
 		t.Fatalf("missing i4 signal: %s", match.Evidence)
 	}
 }
