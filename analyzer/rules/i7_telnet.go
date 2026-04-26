@@ -14,11 +14,11 @@ func (r *I7TelnetPlaintextRule) Apply(ctx *Context) (Match, bool) {
 
 	ev := Match{
 		Message:        "Plaintext Telnet traffic was observed.",
-		OWASPTags:      uniqueTags("I2", "I7"),
+		OWASPTags:      uniqueTags("I2", "I7", "I9"),
 		Confidence:     "high",
 		ObservedFact:   "Telnet traffic was observed.",
-		Inference:      "Telnet is a plaintext remote login service, so credentials and commands may be exposed in transit.",
-		Limitation:     "Passive monitoring does not confirm whether Telnet is required or whether access is restricted to a trusted segment.",
+		Inference:      "Telnet is a plaintext remote login service, so credentials and commands may be exposed in transit. This may indicate that an insecure service remains enabled and should be reviewed.",
+		Limitation:     "Passive monitoring does not confirm whether Telnet is required, whether it was enabled by default, or whether access is restricted to a trusted segment.",
 		Recommendation: "Disable Telnet if not required, or replace it with SSH or a vendor-supported secure management method.",
 	}
 	if ctx.Debug {
@@ -43,7 +43,7 @@ func (r *I7TelnetCredentialsRule) Apply(ctx *Context) (Match, bool) {
 		return Match{
 			Message:        "Telnet password exchange was observed over plaintext transport.",
 			Evidence:       "telnet_password=***",
-			OWASPTags:      uniqueTags("I1", "I2", "I7"),
+			OWASPTags:      uniqueTags("I1", "I2", "I7", "I9"),
 			Confidence:     "high",
 			ObservedFact:   "Telnet password exchange was observed in plaintext traffic.",
 			Inference:      "Credentials may be exposed in transit.",
@@ -56,7 +56,7 @@ func (r *I7TelnetCredentialsRule) Apply(ctx *Context) (Match, bool) {
 		return Match{
 			Message:        "Telnet login identifier exchange was observed over plaintext transport.",
 			Evidence:       "telnet_login=***",
-			OWASPTags:      uniqueTags("I1", "I2", "I7"),
+			OWASPTags:      uniqueTags("I1", "I2", "I7", "I9"),
 			Confidence:     "high",
 			ObservedFact:   "Telnet login identifier exchange was observed in plaintext traffic.",
 			Inference:      "Authentication identifiers may be exposed in transit.",
@@ -85,7 +85,7 @@ func (r *I7TelnetPayloadSecretRule) Apply(ctx *Context) (Match, bool) {
 	return Match{
 		Message:        "Sensitive data appears in plaintext Telnet payload.",
 		Evidence:       ctx.Telnet.SensitiveEvidence,
-		OWASPTags:      uniqueTags("I1", "I2", "I7"),
+		OWASPTags:      uniqueTags("I1", "I2", "I7", "I9"),
 		Confidence:     "high",
 		ObservedFact:   "Sensitive data pattern was observed in plaintext Telnet payload.",
 		Inference:      "Credentials, tokens, or identifiers may be exposed in transit.",

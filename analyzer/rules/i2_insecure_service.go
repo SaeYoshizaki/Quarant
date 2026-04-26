@@ -32,12 +32,12 @@ func (r *I2InsecureServiceRule) Apply(ctx *Context) (Match, bool) {
 			Severity:       SeverityWarning,
 			Message:        display + " service traffic was observed on the local network.",
 			Evidence:       fmt.Sprintf("service=%s port=%d indicators=[%s]", service, ctx.DstPort, strings.Join(indicators, ",")),
-			OWASPTags:      uniqueTags("I2", "I7"),
+			OWASPTags:      uniqueTags("I2", "I7", "I9"),
 			Confidence:     "high",
 			ObservedFact:   display + " protocol evidence was observed in traffic.",
-			Inference:      inference,
-			Limitation:     "Passive monitoring confirms the protocol was observed, but it does not confirm how the service is configured or whether access controls are adequate.",
-			Recommendation: recommendation,
+			Inference:      inference + " This may indicate that a risky or legacy service remains enabled and should be reviewed.",
+			Limitation:     "Passive monitoring confirms the protocol was observed, but it does not confirm whether the service is enabled by default, intentionally configured, or adequately restricted.",
+			Recommendation: "Disable unused services and restrict management access to trusted networks. " + recommendation,
 		}, true
 	}
 
@@ -48,12 +48,12 @@ func (r *I2InsecureServiceRule) Apply(ctx *Context) (Match, bool) {
 		Severity:       SeverityWarning,
 		Message:        display + " service was observed on the local network.",
 		Evidence:       fmt.Sprintf("service=%s port=%d", service, ctx.DstPort),
-		OWASPTags:      uniqueTags("I2", "I7"),
+		OWASPTags:      uniqueTags("I2", "I7", "I9"),
 		Confidence:     "high",
 		ObservedFact:   display + " service traffic was observed.",
-		Inference:      inference,
-		Limitation:     "Passive monitoring does not confirm whether the service is intentionally exposed or limited to trusted clients.",
-		Recommendation: recommendation,
+		Inference:      inference + " This may indicate that a risky or legacy service remains enabled and should be reviewed.",
+		Limitation:     "Passive monitoring does not confirm whether the service is enabled by default, intentionally exposed, or limited to trusted clients.",
+		Recommendation: "Disable unused services and restrict management access to trusted networks. " + recommendation,
 	}, true
 }
 

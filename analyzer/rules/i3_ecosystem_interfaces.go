@@ -115,12 +115,12 @@ func (r *I3ManagementAPIExposedRule) Apply(ctx *Context) (Match, bool) {
 		Severity:       i3ManagementSeverity(path, plaintext),
 		Message:        "Management or configuration endpoint-like communication was observed.",
 		Evidence:       fmt.Sprintf("path=%s host=%s plaintext=%t", path, host, plaintext),
-		OWASPTags:      uniqueTags("I2", "I3", "I7"),
+		OWASPTags:      uniqueTags("I2", "I3", "I7", "I9"),
 		Confidence:     "medium",
 		ObservedFact:   "Management, setup, diagnostic, or backup-related endpoint pattern was observed in traffic.",
-		Inference:      "This may indicate a reachable management interface or configuration API that deserves review.",
-		Limitation:     "Passive monitoring does not prove that authentication is missing or that the endpoint is externally reachable.",
-		Recommendation: "Confirm that management interfaces are expected, use HTTPS where supported, and verify that they are not exposed beyond trusted networks.",
+		Inference:      "This may indicate a reachable management interface or configuration API that deserves review. It may also indicate that setup or administrative functionality remains reachable.",
+		Limitation:     "Passive monitoring does not prove that authentication is missing, that the endpoint is externally reachable, or that any default settings remain unchanged.",
+		Recommendation: "Confirm that management interfaces are expected, disable or restrict setup and management paths after provisioning, use HTTPS where supported, and verify that they are not exposed beyond trusted networks.",
 	}, true
 }
 

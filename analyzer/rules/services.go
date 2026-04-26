@@ -147,7 +147,6 @@ func DetectHTTPAdminIndicators(http *HTTPInfo) ([]string, bool) {
 	for _, needle := range []string{
 		"/admin",
 		"/login",
-		"/setup",
 		"/config",
 		"/manage",
 		"/management",

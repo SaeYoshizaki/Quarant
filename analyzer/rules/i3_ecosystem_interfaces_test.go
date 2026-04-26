@@ -88,6 +88,12 @@ func TestI3ManagementAPIExposed(t *testing.T) {
 	if match.Severity != SeverityHigh {
 		t.Fatalf("expected HIGH severity, got %s", match.Severity)
 	}
+	if !containsAll(match.OWASPTags, "I2", "I3", "I9") {
+		t.Fatalf("expected I2/I3/I9 tags, got %v", match.OWASPTags)
+	}
+	if !strings.Contains(strings.ToLower(match.Limitation), "default settings remain unchanged") {
+		t.Fatalf("expected non-assertive default-setting limitation, got: %s", match.Limitation)
+	}
 }
 
 func TestI3WeakEcosystemCryptoSignal(t *testing.T) {

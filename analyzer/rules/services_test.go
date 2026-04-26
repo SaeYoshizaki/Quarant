@@ -98,4 +98,26 @@ func TestI2HTTPAdminIncludesRecommendation(t *testing.T) {
 	if !strings.Contains(match.Recommendation, "Use HTTPS") {
 		t.Fatalf("expected HTTPS recommendation, got: %s", match.Recommendation)
 	}
+	if !containsAll(match.OWASPTags, "I2", "I3", "I9") {
+		t.Fatalf("expected I2/I3/I9 tags, got %v", match.OWASPTags)
+	}
+	if !strings.Contains(strings.ToLower(match.Limitation), "enabled by default") {
+		t.Fatalf("expected default-setting limitation, got: %s", match.Limitation)
+	}
+}
+
+func TestI2InsecureServiceCarriesI9Tag(t *testing.T) {
+	match, ok := (&I2InsecureServiceRule{}).Apply(&Context{
+		DstPort: 23,
+		Payload: []byte("login: "),
+	})
+	if !ok {
+		t.Fatal("expected insecure service match")
+	}
+	if !containsAll(match.OWASPTags, "I2", "I7", "I9") {
+		t.Fatalf("expected I2/I7/I9 tags, got %v", match.OWASPTags)
+	}
+	if !strings.Contains(strings.ToLower(match.Inference), "remains enabled") {
+		t.Fatalf("expected remains-enabled phrasing, got: %s", match.Inference)
+	}
 }

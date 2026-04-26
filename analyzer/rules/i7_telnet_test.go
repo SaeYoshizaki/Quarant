@@ -33,6 +33,9 @@ func TestI7TelnetCredentialsDetectsPasswordExchange(t *testing.T) {
 	if match.Evidence != "telnet_password=***" {
 		t.Fatalf("unexpected evidence: %s", match.Evidence)
 	}
+	if !containsAll(match.OWASPTags, "I1", "I2", "I7", "I9") {
+		t.Fatalf("expected OWASP tags, got: %v", match.OWASPTags)
+	}
 }
 
 func TestI7TelnetCredentialsDoesNotDetectPromptOnly(t *testing.T) {

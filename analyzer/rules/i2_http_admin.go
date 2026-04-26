@@ -31,12 +31,12 @@ func (r *I2HTTPAdminRule) Apply(ctx *Context) (Match, bool) {
 		Severity:       SeverityWarning,
 		Message:        "HTTP management-like interface was observed on the local network.",
 		Evidence:       evidence,
-		OWASPTags:      uniqueTags("I2", "I3", "I7"),
+		OWASPTags:      uniqueTags("I2", "I3", "I7", "I9"),
 		Confidence:     "medium",
 		ObservedFact:   "HTTP management indicators were observed in traffic.",
-		Inference:      "HTTP management endpoints may expose configuration or administrative functions without transport encryption.",
-		Limitation:     "Passive monitoring cannot confirm the exact management features behind the endpoint or whether HTTPS is available elsewhere.",
-		Recommendation: "Use HTTPS if supported and confirm that the interface is not exposed outside the trusted network.",
+		Inference:      "HTTP management endpoints may expose configuration or administrative functions without transport encryption. This may indicate that a management interface remains enabled and should be reviewed.",
+		Limitation:     "Passive monitoring cannot confirm the exact management features behind the endpoint, whether it was enabled by default, or whether HTTPS is available elsewhere.",
+		Recommendation: "Use HTTPS if supported, disable unused management features, and confirm that the interface is not exposed outside the trusted network.",
 	}, true
 }
 

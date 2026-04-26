@@ -14,12 +14,12 @@ func (r *I7MQTTPlaintextRule) Apply(ctx *Context) (Match, bool) {
 
 	ev := Match{
 		Message:        "Plain MQTT traffic was observed.",
-		OWASPTags:      uniqueTags("I2", "I7"),
+		OWASPTags:      uniqueTags("I2", "I7", "I9"),
 		Confidence:     "high",
 		ObservedFact:   "Plain MQTT traffic was observed.",
-		Inference:      "MQTT metadata and payloads may be exposed in transit when transport encryption is absent.",
-		Limitation:     "Passive monitoring does not confirm whether TLS is available on another port or whether this topic carries sensitive data.",
-		Recommendation: "Use MQTT over TLS, usually port 8883, if supported.",
+		Inference:      "MQTT metadata and payloads may be exposed in transit when transport encryption is absent. This may indicate that an insecure service remains enabled and should be reviewed.",
+		Limitation:     "Passive monitoring does not confirm whether TLS is available on another port, whether this service was enabled by default, or whether this topic carries sensitive data.",
+		Recommendation: "Use MQTT over TLS, usually port 8883, if supported, and disable unused plaintext broker access.",
 	}
 	if ctx.Debug {
 		ev.Evidence = "packet=" + ctx.MQTT.PacketName
@@ -49,7 +49,7 @@ func (r *I7MQTTCredentialsRule) Apply(ctx *Context) (Match, bool) {
 		return Match{
 			Message:        "MQTT password was observed over plaintext transport.",
 			Evidence:       "mqtt_password=***",
-			OWASPTags:      uniqueTags("I1", "I2", "I7"),
+			OWASPTags:      uniqueTags("I1", "I2", "I7", "I9"),
 			Confidence:     "high",
 			ObservedFact:   "MQTT password field was observed in plaintext traffic.",
 			Inference:      "Credentials may be exposed in transit.",
@@ -62,7 +62,7 @@ func (r *I7MQTTCredentialsRule) Apply(ctx *Context) (Match, bool) {
 		return Match{
 			Message:        "MQTT username-like identifier was observed over plaintext transport.",
 			Evidence:       "mqtt_username=***",
-			OWASPTags:      uniqueTags("I1", "I2", "I7"),
+			OWASPTags:      uniqueTags("I1", "I2", "I7", "I9"),
 			Confidence:     "high",
 			ObservedFact:   "MQTT username-like identifier was observed in plaintext traffic.",
 			Inference:      "An authentication identifier may be exposed in transit.",
