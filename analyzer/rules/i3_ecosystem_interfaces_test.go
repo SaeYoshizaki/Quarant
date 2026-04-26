@@ -119,7 +119,7 @@ func TestI3MobileAppBackendPatternObserved(t *testing.T) {
 			Method:  "GET",
 			Path:    "/mobile/device/register",
 			Query:   map[string][]string{"user_id": {"123"}},
-			Headers: map[string]string{"host": "api.vendor-cloud.example"},
+			Headers: map[string]string{"host": "api.vendor-cloud.example", "user-agent": "okhttp/4.10.0"},
 		},
 	})
 	if !ok {
@@ -151,6 +151,74 @@ func TestI3MobileBackendPatternDoesNotFireOnUserAgentOnly(t *testing.T) {
 		},
 	}); ok {
 		t.Fatal("did not expect mobile backend signal from user-agent only")
+	}
+}
+
+func TestI3MobileBackendPatternDoesNotFireForCurlOnGenericAPI(t *testing.T) {
+	if _, ok := (&I3MobileAppBackendPatternObservedRule{}).Apply(&Context{
+		HTTP: &HTTPInfo{
+			Method:  "GET",
+			Path:    "/api/config",
+			Headers: map[string]string{"host": "api.vendor-cloud.test", "user-agent": "curl/7.81.0"},
+		},
+	}); ok {
+		t.Fatal("did not expect mobile backend signal for curl generic api traffic")
+	}
+}
+
+func TestI3MobileBackendPatternDoesNotFireForWgetOnGenericAPI(t *testing.T) {
+	if _, ok := (&I3MobileAppBackendPatternObservedRule{}).Apply(&Context{
+		HTTP: &HTTPInfo{
+			Method:  "GET",
+			Path:    "/api/config",
+			Headers: map[string]string{"host": "api.vendor-cloud.test", "user-agent": "Wget/1.21.2"},
+		},
+	}); ok {
+		t.Fatal("did not expect mobile backend signal for wget generic api traffic")
+	}
+}
+
+func TestI3MobileBackendPatternDoesNotFireForPythonRequestsOnGenericAPI(t *testing.T) {
+	if _, ok := (&I3MobileAppBackendPatternObservedRule{}).Apply(&Context{
+		HTTP: &HTTPInfo{
+			Method:  "GET",
+			Path:    "/api/config",
+			Headers: map[string]string{"host": "api.vendor-cloud.test", "user-agent": "python-requests/2.31.0"},
+		},
+	}); ok {
+		t.Fatal("did not expect mobile backend signal for python-requests generic api traffic")
+	}
+}
+
+func TestI3MobileBackendPatternObservedForOkhttpGenericAPI(t *testing.T) {
+	match, ok := (&I3MobileAppBackendPatternObservedRule{}).Apply(&Context{
+		HTTP: &HTTPInfo{
+			Method:  "GET",
+			Path:    "/api/config",
+			Headers: map[string]string{"host": "api.vendor-cloud.test", "user-agent": "okhttp/4.10.0"},
+		},
+	})
+	if !ok {
+		t.Fatal("expected mobile backend signal for okhttp generic api traffic")
+	}
+	if match.Type != "I3_MOBILE_APP_BACKEND_PATTERN_OBSERVED" {
+		t.Fatalf("unexpected type: %s", match.Type)
+	}
+}
+
+func TestI3MobileBackendPatternObservedForCFNetworkSyncPath(t *testing.T) {
+	match, ok := (&I3MobileAppBackendPatternObservedRule{}).Apply(&Context{
+		HTTP: &HTTPInfo{
+			Method:  "POST",
+			Path:    "/app/sync",
+			Headers: map[string]string{"host": "device.local", "user-agent": "CFNetwork/1408.0.4 Darwin/22.5.0"},
+		},
+	})
+	if !ok {
+		t.Fatal("expected mobile backend signal for cfnetwork sync traffic")
+	}
+	if match.Type != "I3_MOBILE_APP_BACKEND_PATTERN_OBSERVED" {
+		t.Fatalf("unexpected type: %s", match.Type)
 	}
 }
 

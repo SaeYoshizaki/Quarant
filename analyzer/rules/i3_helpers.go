@@ -94,6 +94,23 @@ var i3MobileHints = []string{
 	"/notification",
 }
 
+var i3MobileUserAgentHints = []string{
+	"android",
+	"iphone",
+	"ios",
+	"okhttp",
+	"cfnetwork",
+	"dalvik",
+	"mobile",
+}
+
+var i3CLIUserAgentHints = []string{
+	"curl/",
+	"wget",
+	"python-requests",
+	"go-http-client",
+}
+
 var i3AuthURLKeys = map[string]bool{
 	"token":         true,
 	"access_token":  true,
@@ -202,22 +219,45 @@ func isMobileBackendPattern(host, path, userAgent string) bool {
 	path = strings.ToLower(strings.TrimSpace(path))
 	userAgent = strings.ToLower(strings.TrimSpace(userAgent))
 
-	pathOrHostHint := false
-	for _, hint := range i3MobileHints {
-		if strings.Contains(path, hint) || strings.Contains(host, strings.TrimPrefix(hint, "/")) {
-			pathOrHostHint = true
-			break
+	if !isMobileLikeUserAgent(userAgent) || isCLIOrGenericUserAgent(userAgent) {
+		return false
+	}
+
+	if hasI3MobilePathOrHostHint(path, host) {
+		return true
+	}
+	if isAPIEndpoint(path, host) {
+		return true
+	}
+	if isCloudOrBackendHost(host) && isCloudOrBackendPath(path) {
+		return true
+	}
+	return false
+}
+
+func isMobileLikeUserAgent(userAgent string) bool {
+	for _, hint := range i3MobileUserAgentHints {
+		if strings.Contains(userAgent, hint) {
+			return true
 		}
 	}
+	return false
+}
 
-	hostSupportHint := isCloudOrBackendHost(host)
-	userAgentHint := strings.Contains(userAgent, "android") || strings.Contains(userAgent, "iphone") || strings.Contains(userAgent, "ios") || strings.Contains(userAgent, "okhttp") || strings.Contains(userAgent, "cfnetwork")
-
-	if pathOrHostHint {
-		return true
+func isCLIOrGenericUserAgent(userAgent string) bool {
+	for _, hint := range i3CLIUserAgentHints {
+		if strings.Contains(userAgent, hint) {
+			return true
+		}
 	}
-	if hostSupportHint && (isCloudOrBackendPath(path) || userAgentHint) {
-		return true
+	return false
+}
+
+func hasI3MobilePathOrHostHint(path, host string) bool {
+	for _, hint := range i3MobileHints {
+		if strings.Contains(path, hint) || strings.Contains(host, strings.TrimPrefix(hint, "/")) {
+			return true
+		}
 	}
 	return false
 }
