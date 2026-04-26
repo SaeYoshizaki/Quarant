@@ -1,6 +1,9 @@
 package device
 
-import "sync"
+import (
+	"sort"
+	"sync"
+)
 
 type Store struct {
 	mu sync.Mutex
@@ -31,6 +34,8 @@ func NewProfile(ip string) *DeviceProfile {
 		StorageSignalEndpoints:       map[string]ObservationCounter{},
 		StableIdentifierFingerprints: map[string]ObservationCounter{},
 		PIIUseDestinations:           map[string]ObservationCounter{},
+		SeverityCounts:               map[string]int{},
+		OWASPTagCounts:               map[string]int{},
 	}
 }
 
@@ -45,4 +50,25 @@ func (s *Store) GetOrCreate(ip string) *DeviceProfile {
 	}
 
 	return d
+}
+
+func (s *Store) Snapshots() []InventorySnapshot {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	if len(s.devices) == 0 {
+		return nil
+	}
+
+	keys := make([]string, 0, len(s.devices))
+	for ip := range s.devices {
+		keys = append(keys, ip)
+	}
+	sort.Strings(keys)
+
+	out := make([]InventorySnapshot, 0, len(keys))
+	for _, ip := range keys {
+		out = append(out, s.devices[ip].Snapshot())
+	}
+	return out
 }

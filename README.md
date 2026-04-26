@@ -18,6 +18,8 @@ TCP フロー再構成、HTTP / TLS 解析、デバイスカテゴリ推定を�
 Quarant does not claim to fully diagnose all OWASP IoT Top 10 vulnerabilities.  
 It converts passively observable network behavior into explainable risk signals.
 
+`cmd/quarant` では、`-inventory-out device_inventory.json` と `-inventory-interval 10s` で I8 向けの device inventory snapshot を別 JSON として確認できます。
+
 ## Web UI
 
 ターミナルに流れる `events.jsonl` を、Go 側の JSON API と TypeScript/TSX + Tailwind CSS ベースの Next.js フロントで分離して確認できます。
@@ -80,8 +82,8 @@ public TLS の例では、`learned category=Controller` の端末に対して `o
 | I5 | implemented as known-vulnerable-family/component candidate enrichment | Exact CVE applicability requires model and firmware confirmation. Representative CVEs are enrichment, not proof of impact. |
 | I6 | implemented as privacy-risk signal | Privacy-sensitive plaintext, stable identifiers, unexpected privacy destinations, and baseline mismatch are handled as risk signals. Consent or policy violation cannot be confirmed passively. |
 | I7 | implemented as insecure transfer signal | Plaintext HTTP, credentials, cookies, tokens, MQTT/Telnet secrets, and related transport exposure are covered. |
-| I8 | partial / product feature direction | Device inventory, monitoring, and risk summary are partial today and may expand. |
-| I9 | planned as default-setting related signal | Default credential patterns, setup endpoints, and insecure default services are future signal areas. |
+| I8 | partial / device-management support signal | Passive monitoring cannot prove that device management is absent. Quarant keeps per-device inventory state, unknown or low-confidence identity candidates, and per-device risk summaries as management-supporting signals, and can export them as `device_inventory.json`. |
+| I9 | partial / default-setting related signal | Passive monitoring cannot confirm that a device remains in a factory-default state. Quarant treats setup or onboarding endpoint exposure, default hostname-like patterns, and risky services left enabled as I9-related risk signals. Insecure default password detection is only handled indirectly when credentials are exposed in traffic or default credential-like patterns are observed. |
 | I10 | mostly out of scope | Physical hardening cannot be evaluated passively. Only network-visible debug or factory endpoints may appear as related signals. |
 
 主要イベントは `owasp_tags`, `confidence`, `observed_fact`, `inference`, `limitation`, `recommendation` を持ち、観測事実と推定を分けて説明します。

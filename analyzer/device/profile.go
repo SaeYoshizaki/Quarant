@@ -1,5 +1,7 @@
 package device
 
+import "time"
+
 const (
 	ObservationWindowSeconds = 30 * 60
 	MaxObservationKeys       = 128
@@ -12,6 +14,9 @@ type ObservationCounter struct {
 
 type DeviceProfile struct {
 	IP string
+
+	FirstSeen time.Time
+	LastSeen  time.Time
 
 	Hosts      map[string]bool
 	UserAgents map[string]bool
@@ -52,6 +57,12 @@ type DeviceProfile struct {
 
 	RiskReasons map[string]bool
 	RiskScore   int
+
+	RiskEventCount    int
+	SeverityCounts    map[string]int
+	OWASPTagCounts    map[string]int
+	LastRiskEventType string
+	LastRiskEventAt   time.Time
 }
 
 func (p *DeviceProfile) AddObservedService(service string) {

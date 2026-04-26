@@ -3,6 +3,10 @@ package analyzer
 import (
 	"net"
 	"testing"
+	"time"
+
+	"quarant/analyzer/device"
+	"quarant/analyzer/rules"
 
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/layers"
@@ -52,5 +56,42 @@ func TestPacketIPStringsIPv6(t *testing.T) {
 	}
 	if src != "2001:db8::10" || dst != "2001:4860:4860::8888" {
 		t.Fatalf("unexpected IPs: src=%s dst=%s", src, dst)
+	}
+}
+
+func TestObservedProtocolsForFlow(t *testing.T) {
+	got := observedProtocolsForFlow(1883, nil, &rules.MQTTInfo{PacketName: "CONNECT"}, nil, false)
+	want := []string{"mqtt"}
+	if len(got) != len(want) || got[0] != want[0] {
+		t.Fatalf("unexpected protocols: got=%v want=%v", got, want)
+	}
+
+	got = observedProtocolsForFlow(443, &rules.HTTPInfo{Path: "/"}, nil, nil, true)
+	want = []string{"https", "tls"}
+	if len(got) != len(want) || got[0] != want[0] || got[1] != want[1] {
+		t.Fatalf("unexpected tls protocols: got=%v want=%v", got, want)
+	}
+}
+
+func TestFlowHandlerDeviceInventorySnapshot(t *testing.T) {
+	h := &FlowHandler{devices: device.NewStore()}
+	d := h.devices.GetOrCreate("10.0.1.2")
+	observeDeviceFlow(d, time.Date(2026, 4, 26, 0, 0, 0, 0, time.UTC), 1883, []string{"mqtt"})
+	d.Hosts["api.vendor-cloud.test"] = true
+	d.SNIValues["example.com"] = true
+	d.RecordRiskEvent(time.Date(2026, 4, 26, 0, 10, 0, 0, time.UTC), "I3_AUTH_TOKEN_IN_URL", "HIGH", []string{"I3", "I7"})
+
+	snapshots := h.DeviceInventory()
+	if len(snapshots) != 1 {
+		t.Fatalf("expected one snapshot, got %d", len(snapshots))
+	}
+	if snapshots[0].IP != "10.0.1.2" {
+		t.Fatalf("unexpected snapshot ip: %s", snapshots[0].IP)
+	}
+	if snapshots[0].RiskEventCount != 1 || snapshots[0].OWASPTagCounts["I3"] != 1 {
+		t.Fatalf("unexpected risk summary: %+v", snapshots[0])
+	}
+	if snapshots[0].ObservedProtocols[0] != "mqtt" {
+		t.Fatalf("unexpected protocols: %v", snapshots[0].ObservedProtocols)
 	}
 }

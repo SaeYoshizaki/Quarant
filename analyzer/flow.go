@@ -32,6 +32,13 @@ func NewFlowHandler(sink *JSONLSink, debug bool, db *knowledge.DB) *FlowHandler 
 	}
 }
 
+func (h *FlowHandler) DeviceInventory() []device.InventorySnapshot {
+	if h == nil || h.devices == nil {
+		return nil
+	}
+	return h.devices.Snapshots()
+}
+
 func flowKeyTCP(ipSrc string, srcPort uint16, ipDst string, dstPort uint16) string {
 	a := flowEndpoint(ipSrc, srcPort)
 	b := flowEndpoint(ipDst, dstPort)
@@ -77,6 +84,65 @@ func isI2RiskEvent(eventType string) bool {
 		return true
 	default:
 		return false
+	}
+}
+
+func observedProtocolsForFlow(dstPort uint16, httpInfo *rules.HTTPInfo, mqttInfo *rules.MQTTInfo, telnetInfo *rules.TelnetInfo, tlsSeen bool) []string {
+	protocols := map[string]bool{}
+
+	if httpInfo != nil {
+		if tlsSeen {
+			protocols["https"] = true
+			protocols["tls"] = true
+		} else {
+			protocols["http"] = true
+		}
+	}
+	if mqttInfo != nil {
+		protocols["mqtt"] = true
+		if tlsSeen || dstPort == 8883 {
+			protocols["tls"] = true
+		}
+	}
+	if telnetInfo != nil {
+		protocols["telnet"] = true
+	}
+
+	if service, ok := rules.InsecureServiceNameByPort(dstPort); ok {
+		protocols[service] = true
+	}
+	if tlsSeen || rules.IsTLSPort(dstPort) {
+		protocols["tls"] = true
+		if httpInfo != nil || dstPort == 443 || dstPort == 8443 || dstPort == 9443 || dstPort == 10443 {
+			protocols["https"] = true
+		}
+	}
+
+	out := make([]string, 0, len(protocols))
+	for protocol := range protocols {
+		out = append(out, protocol)
+	}
+	sort.Strings(out)
+	return out
+}
+
+func observeDeviceFlow(d *device.DeviceProfile, now time.Time, dstPort uint16, protocols []string) {
+	if d == nil {
+		return
+	}
+	d.ObserveActivity(now)
+	if d.Ports == nil {
+		d.Ports = map[uint16]bool{}
+	}
+	d.Ports[dstPort] = true
+	if d.Protocols == nil {
+		d.Protocols = map[string]bool{}
+	}
+	for _, protocol := range protocols {
+		if strings.TrimSpace(protocol) == "" {
+			continue
+		}
+		d.Protocols[protocol] = true
 	}
 }
 
@@ -559,6 +625,7 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 	}
 
 	d := h.devices.GetOrCreate(srcIP)
+	observeDeviceFlow(d, now, dstPort, observedProtocolsForFlow(dstPort, httpInfo, mqttInfo, telnetInfo, st.TLSClientSeen))
 	localClassification := d.Classification
 	localDeviceCategory := localClassification.NormalizedCategory()
 	localInferenceSource := string(localClassification.InferenceSource)
@@ -802,6 +869,9 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 			DstPort:        dstPort,
 			Message:        m.Message,
 		})
+
+		deviceProfile := h.devices.GetOrCreate(srcIP)
+		deviceProfile.RecordRiskEvent(now, m.Type, string(m.Severity), m.OWASPTags)
 
 		if isI2RiskEvent(m.Type) {
 			h.updateDeviceRiskFromMatch(srcIP, m)

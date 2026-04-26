@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"log"
+	"time"
 
 	"quarant/analyzer"
 	"quarant/analyzer/knowledge"
@@ -11,6 +12,8 @@ import (
 func main() {
 	debug := flag.Bool("debug", false, "enable debug payload logging")
 	iface := flag.String("i", "eth1", "interface to capture on")
+	inventoryOut := flag.String("inventory-out", "device_inventory.json", "path to write device inventory snapshot JSON (empty to disable)")
+	inventoryInterval := flag.Duration("inventory-interval", 10*time.Second, "interval to refresh device inventory snapshot JSON")
 	flag.Parse()
 
 	db, err := knowledge.LoadAll()
@@ -35,6 +38,12 @@ func main() {
 	}
 
 	handler := analyzer.NewFlowHandler(sink, *debug, db)
+	var inventoryWriter *analyzer.DeviceInventoryWriter
+	if *inventoryOut != "" {
+		inventoryWriter = analyzer.NewDeviceInventoryWriter(*inventoryOut, *inventoryInterval, handler.DeviceInventory)
+		inventoryWriter.Start()
+		defer inventoryWriter.Stop()
+	}
 	engine := analyzer.NewEngine(handler)
 
 	if err := engine.Run(*iface); err != nil {

@@ -25,11 +25,16 @@
 - [x] I7: implemented as insecure transfer signal
   - Plaintext HTTP, credentials, cookies, tokens, MQTT/Telnet secrets, and related transport exposure are covered.
 
-- [ ] I8: partial / product feature direction
-  - Device inventory, monitoring, and risk summary are still partial.
+- [x] I8: partial / device-management support signal
+  - Passive monitoring cannot prove that device management is absent.
+  - Quarant keeps per-device inventory state, unknown or low-confidence identity candidates, and per-device risk summaries as management-supporting signals.
+  - `device_inventory.json` can be exported from the passive inventory snapshot for external review.
+  - Existing risk events remain the primary source; I8 organizes them per device rather than asserting a management failure.
 
-- [ ] I9: planned as default-setting related signal
-  - Default credential patterns, setup endpoints, and insecure default services are future work.
+- [x] I9: partial / default-setting related signal
+  - Passive monitoring cannot confirm that a device remains in factory-default state.
+  - Quarant handles setup/onboarding endpoint exposure, default hostname-like patterns, and risky services left enabled as I9-related risk signals.
+  - Insecure default password detection is only handled indirectly when credentials are exposed in traffic or default credential-like patterns are observed.
 
 - [ ] I10: mostly out of scope
   - Physical hardening cannot be evaluated passively.
