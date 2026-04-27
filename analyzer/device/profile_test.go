@@ -109,6 +109,60 @@ func TestInventorySnapshotIncludesObservedStateAndRiskSummary(t *testing.T) {
 	if snapshot.LastRiskEventType != "I2_HTTP_ADMIN_INTERFACE_SUSPECTED" || snapshot.LastRiskEventTS != "2026-04-26T00:10:00Z" {
 		t.Fatalf("unexpected last risk event summary: %+v", snapshot)
 	}
+	if snapshot.RiskSummary == nil {
+		t.Fatalf("expected risk summary: %+v", snapshot)
+	}
+	if snapshot.RiskSummary.HighestSeverity != "HIGH" {
+		t.Fatalf("unexpected highest severity: %+v", snapshot.RiskSummary)
+	}
+	if !equalStrings(snapshot.RiskSummary.TopOWASPTags, []string{"I3", "I9", "I2", "I7"}) {
+		t.Fatalf("unexpected top OWASP tags: %v", snapshot.RiskSummary.TopOWASPTags)
+	}
+	if !equalStrings(snapshot.RiskSummary.TopSeverities, []string{"HIGH", "WARNING"}) {
+		t.Fatalf("unexpected top severities: %v", snapshot.RiskSummary.TopSeverities)
+	}
+	if snapshot.RiskSummary.RecommendedNextAction != "Review plaintext API usage, token handling, and ecosystem interface transport security." {
+		t.Fatalf("unexpected recommended action: %q", snapshot.RiskSummary.RecommendedNextAction)
+	}
+}
+
+func TestInventorySnapshotRiskSummaryUsesDeterministicOrderingAndLimit(t *testing.T) {
+	p := NewProfile("10.0.0.29")
+	now := time.Date(2026, 4, 26, 1, 0, 0, 0, time.UTC)
+
+	p.ObserveActivity(now)
+	p.RecordRiskEvent(now.Add(time.Minute), "I7_HTTP_AUTH", "WARNING", []string{"I7", "I3", "I9", "I2", "I6", "I5", "I4"})
+	p.RecordRiskEvent(now.Add(2*time.Minute), "I5_KNOWN_VULNERABLE_COMPONENT", "CRITICAL", []string{"I7", "I3", "I9", "I2", "I6", "I5"})
+	p.RecordRiskEvent(now.Add(3*time.Minute), "I3_AUTH_TOKEN_IN_URL", "HIGH", []string{"I7", "I3", "I9", "I2", "I6"})
+	p.RecordRiskEvent(now.Add(4*time.Minute), "I9_DEFAULT_HOSTNAME_PATTERN", "LOW", []string{"I7", "I3", "I9", "I2"})
+	p.RecordRiskEvent(now.Add(5*time.Minute), "I2_TELNET_SERVICE_OBSERVED", "MEDIUM", []string{"I7", "I3", "I9"})
+	p.RecordRiskEvent(now.Add(6*time.Minute), "I6_PRIVACY_DESTINATION", "INFO", []string{"I7", "I3"})
+
+	snapshot := p.Snapshot()
+	if snapshot.RiskSummary == nil {
+		t.Fatalf("expected risk summary")
+	}
+	if snapshot.RiskSummary.HighestSeverity != "CRITICAL" {
+		t.Fatalf("expected CRITICAL highest severity, got %+v", snapshot.RiskSummary)
+	}
+	if !equalStrings(snapshot.RiskSummary.TopOWASPTags, []string{"I3", "I7", "I9", "I2", "I6"}) {
+		t.Fatalf("unexpected top OWASP tags ordering/limit: %v", snapshot.RiskSummary.TopOWASPTags)
+	}
+	if !equalStrings(snapshot.RiskSummary.TopSeverities, []string{"CRITICAL", "HIGH", "MEDIUM", "WARNING", "LOW"}) {
+		t.Fatalf("unexpected top severities ordering/limit: %v", snapshot.RiskSummary.TopSeverities)
+	}
+}
+
+func TestInventorySnapshotRiskSummaryOmittedForInfoOnly(t *testing.T) {
+	p := NewProfile("10.0.0.30")
+	now := time.Date(2026, 4, 26, 2, 0, 0, 0, time.UTC)
+
+	p.RecordRiskEvent(now, "DEVICE_DEBUG", "INFO", []string{"I6"})
+
+	snapshot := p.Snapshot()
+	if snapshot.RiskSummary != nil {
+		t.Fatalf("info-only device should not include risk summary: %+v", snapshot.RiskSummary)
+	}
 }
 
 func TestInventorySnapshotOmitsPhilipsHueForGenericUbuntuDemoSignals(t *testing.T) {

@@ -39,6 +39,15 @@ func TestMarshalDeviceInventoryReportIncludesExpectedFields(t *testing.T) {
 			},
 			LastRiskEventType: "I3_AUTH_TOKEN_IN_URL",
 			LastRiskEventTS:   "2026-04-26T00:10:00Z",
+			RiskSummary: &device.RiskSummary{
+				RiskEventCount:        4,
+				HighestSeverity:       "HIGH",
+				TopOWASPTags:          []string{"I3", "I7", "I9"},
+				TopSeverities:         []string{"HIGH", "WARNING"},
+				LastRiskEventType:     "I3_AUTH_TOKEN_IN_URL",
+				LastRiskEventTS:       "2026-04-26T00:10:00Z",
+				RecommendedNextAction: "Review plaintext API usage, token handling, and ecosystem interface transport security.",
+			},
 		},
 	}
 
@@ -59,6 +68,10 @@ func TestMarshalDeviceInventoryReportIncludesExpectedFields(t *testing.T) {
 		`"risk_event_count": 4`,
 		`"severity_counts": {`,
 		`"owasp_tag_counts": {`,
+		`"risk_summary": {`,
+		`"highest_severity": "HIGH"`,
+		`"top_owasp_tags": [`,
+		`"recommended_next_action": "Review plaintext API usage, token handling, and ecosystem interface transport security."`,
 	} {
 		if !strings.Contains(text, want) {
 			t.Fatalf("expected inventory JSON to contain %q, got: %s", want, text)
@@ -90,6 +103,30 @@ func TestInventorySnapshotExcludesDebugEventsAndSecretValues(t *testing.T) {
 	}
 	if !strings.Contains(text, `"risk_event_count": 1`) {
 		t.Fatalf("expected only one risk event in inventory, got: %s", text)
+	}
+	if !strings.Contains(text, `"risk_summary": {`) {
+		t.Fatalf("expected risk summary in inventory, got: %s", text)
+	}
+}
+
+func TestMarshalDeviceInventoryReportOmitsRiskSummaryForInfoOnlyDevice(t *testing.T) {
+	now := time.Date(2026, 4, 26, 0, 10, 0, 0, time.UTC)
+	devices := []device.InventorySnapshot{
+		{
+			IP:             "10.0.1.4",
+			RiskEventCount: 1,
+			SeverityCounts: map[string]int{"INFO": 1},
+			OWASPTagCounts: map[string]int{"I6": 1},
+		},
+	}
+
+	data, err := MarshalDeviceInventoryReport(now, devices)
+	if err != nil {
+		t.Fatalf("marshal inventory report: %v", err)
+	}
+	text := string(data)
+	if strings.Contains(text, `"risk_summary": {`) {
+		t.Fatalf("info-only device should not include risk summary, got: %s", text)
 	}
 }
 
