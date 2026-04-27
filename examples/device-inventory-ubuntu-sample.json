@@ -1,102 +1,70 @@
 {
-  "generated_at": "2026-04-27T02:11:25Z",
+  "generated_at": "2026-04-27T10:18:45Z",
   "devices": [
     {
-      "ip": "140.82.112.25",
-      "first_seen": "2026-04-27T02:10:32Z",
-      "last_seen": "2026-04-27T02:10:32Z",
-      "observed_ports": [
-        50324
-      ],
-      "category_candidate": "GenericIoT",
-      "category_confidence": "very_low"
-    },
-    {
       "ip": "172.66.147.243",
-      "first_seen": "2026-04-27T02:10:03Z",
-      "last_seen": "2026-04-27T02:10:03Z",
+      "first_seen": "2026-04-27T10:13:37Z",
+      "last_seen": "2026-04-27T10:13:37Z",
       "observed_ports": [
-        56002,
-        56006
+        43550,
+        43564
       ],
       "category_candidate": "GenericIoT",
       "category_confidence": "very_low"
     },
     {
       "ip": "192.168.64.17",
-      "first_seen": "2026-04-27T02:10:03Z",
-      "last_seen": "2026-04-27T02:10:45Z",
+      "first_seen": "2026-04-27T10:13:37Z",
+      "last_seen": "2026-04-27T10:13:37Z",
       "observed_protocols": [
-        "http",
-        "https",
-        "tls"
+        "http"
       ],
       "observed_ports": [
-        80,
-        443
+        80
       ],
       "observed_hosts": [
         "api.vendor-cloud.test",
         "device.local"
       ],
-      "observed_sni": [
-        "incoming.telemetry.mozilla.org"
-      ],
       "category_candidate": "GenericIoT",
       "category_confidence": "very_low",
       "vendor_confidence": "unknown",
       "family_confidence": "unknown",
-      "risk_event_count": 22,
+      "risk_event_count": 14,
       "severity_counts": {
         "CRITICAL": 1,
-        "HIGH": 5,
-        "INFO": 5,
-        "WARNING": 11
+        "HIGH": 6,
+        "WARNING": 7
       },
       "owasp_tag_counts": {
         "I1": 2,
         "I2": 4,
         "I3": 9,
-        "I4": 5,
+        "I4": 2,
         "I7": 11,
-        "I9": 8
+        "I9": 5
       },
-      "last_risk_event_type": "TLS_CLIENT_HELLO",
-      "last_risk_event_ts": "2026-04-27T02:10:45Z",
+      "last_risk_event_type": "I9_DEFAULT_HOSTNAME_PATTERN",
+      "last_risk_event_ts": "2026-04-27T10:13:37Z",
       "risk_summary": {
-        "risk_event_count": 22,
+        "risk_event_count": 14,
         "highest_severity": "CRITICAL",
         "top_owasp_tags": [
           "I7",
           "I3",
           "I9",
-          "I4",
-          "I2"
+          "I2",
+          "I1"
         ],
         "top_severities": [
           "WARNING",
           "HIGH",
-          "INFO",
           "CRITICAL"
         ],
-        "last_risk_event_type": "TLS_CLIENT_HELLO",
-        "last_risk_event_ts": "2026-04-27T02:10:45Z",
+        "last_risk_event_type": "I9_DEFAULT_HOSTNAME_PATTERN",
+        "last_risk_event_ts": "2026-04-27T10:13:37Z",
         "recommended_next_action": "Review plaintext API usage, token handling, and ecosystem interface transport security."
       }
-    },
-    {
-      "ip": "34.120.208.123",
-      "first_seen": "2026-04-27T02:10:45Z",
-      "last_seen": "2026-04-27T02:10:45Z",
-      "observed_protocols": [
-        "tls"
-      ],
-      "observed_ports": [
-        56402,
-        56416
-      ],
-      "category_candidate": "GenericIoT",
-      "category_confidence": "very_low"
     }
   ]
 }
