@@ -59,6 +59,9 @@ func TestI3AuthTokenInURLMasksValue(t *testing.T) {
 	if match.Evidence != "token=***" {
 		t.Fatalf("unexpected evidence: %s", match.Evidence)
 	}
+	if match.Severity != SeverityHigh {
+		t.Fatalf("expected HIGH severity, got %s", match.Severity)
+	}
 }
 
 func TestI3AuthTokenInURLRequiresPlaintextHTTP(t *testing.T) {
@@ -85,14 +88,47 @@ func TestI3ManagementAPIExposed(t *testing.T) {
 	if !ok {
 		t.Fatal("expected management API match")
 	}
-	if match.Severity != SeverityHigh {
-		t.Fatalf("expected HIGH severity, got %s", match.Severity)
+	if match.Severity != SeverityWarning {
+		t.Fatalf("expected WARNING severity, got %s", match.Severity)
 	}
 	if !containsAll(match.OWASPTags, "I2", "I3", "I9") {
 		t.Fatalf("expected I2/I3/I9 tags, got %v", match.OWASPTags)
 	}
 	if !strings.Contains(strings.ToLower(match.Limitation), "default settings remain unchanged") {
 		t.Fatalf("expected non-assertive default-setting limitation, got: %s", match.Limitation)
+	}
+}
+
+func TestI3ManagementAPIExposedLocalStatusIsWarning(t *testing.T) {
+	match, ok := (&I3ManagementAPIExposedRule{}).Apply(&Context{
+		HTTP: &HTTPInfo{
+			Method:  "GET",
+			Path:    "/status",
+			Headers: map[string]string{"host": "device.local"},
+		},
+	})
+	if !ok {
+		t.Fatal("expected local management-like status match")
+	}
+	if match.Severity != SeverityWarning {
+		t.Fatalf("expected WARNING severity, got %s", match.Severity)
+	}
+}
+
+func TestI3ManagementAPIExposedPublicDestinationIsHigh(t *testing.T) {
+	match, ok := (&I3ManagementAPIExposedRule{}).Apply(&Context{
+		DstIP: "8.8.8.8",
+		HTTP: &HTTPInfo{
+			Method:  "GET",
+			Path:    "/setup",
+			Headers: map[string]string{"host": "device.local"},
+		},
+	})
+	if !ok {
+		t.Fatal("expected public management-like match")
+	}
+	if match.Severity != SeverityHigh {
+		t.Fatalf("expected HIGH severity, got %s", match.Severity)
 	}
 }
 
@@ -233,8 +269,8 @@ func TestI3AuthKeyIsWarningNotHigh(t *testing.T) {
 	if !ok {
 		t.Fatal("expected auth URL signal")
 	}
-	if match.Severity != SeverityWarning {
-		t.Fatalf("expected WARNING severity, got %s", match.Severity)
+	if match.Severity != SeverityHigh {
+		t.Fatalf("expected HIGH severity, got %s", match.Severity)
 	}
 }
 

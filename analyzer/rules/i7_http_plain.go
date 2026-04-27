@@ -9,12 +9,13 @@ func (r *I7HTTPPlaintextRule) Type() string       { return "INSECURE_HTTP" }
 
 func (r *I7HTTPPlaintextRule) Apply(ctx *Context) (Match, bool) {
 
-	if ctx.HTTP == nil {
+	if ctx == nil || ctx.HTTP == nil || ctx.TLS {
 		return Match{}, false
 	}
 
 	ev := Match{
 		Message:        "Plaintext HTTP request was observed.",
+		Severity:       SeverityWarning,
 		OWASPTags:      uniqueTags("I7"),
 		Confidence:     "high",
 		ObservedFact:   "Plaintext HTTP request was observed.",

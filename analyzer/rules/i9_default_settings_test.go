@@ -69,8 +69,8 @@ func TestI9DefaultHostnamePatternDetectsDeviceLocal(t *testing.T) {
 	if !ok {
 		t.Fatal("expected default hostname-like signal")
 	}
-	if match.Severity != SeverityInfo && match.Severity != SeverityWarning {
-		t.Fatalf("expected INFO or WARNING severity, got %s", match.Severity)
+	if match.Severity != SeverityWarning {
+		t.Fatalf("expected WARNING severity, got %s", match.Severity)
 	}
 	if !containsAll(match.OWASPTags, "I9") {
 		t.Fatalf("expected I9 tag, got %v", match.OWASPTags)

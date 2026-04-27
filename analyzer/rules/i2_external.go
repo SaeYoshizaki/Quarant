@@ -6,7 +6,7 @@ type I2ExternalExposureRule struct{}
 
 func (r *I2ExternalExposureRule) ID() string         { return "I2_EXTERNAL_EXPOSURE" }
 func (r *I2ExternalExposureRule) Category() string   { return "I2" }
-func (r *I2ExternalExposureRule) Severity() Severity { return SeverityCritical }
+func (r *I2ExternalExposureRule) Severity() Severity { return SeverityHigh }
 func (r *I2ExternalExposureRule) Type() string       { return "I2_EXTERNAL_EXPOSURE" }
 
 func (r *I2ExternalExposureRule) Apply(ctx *Context) (Match, bool) {

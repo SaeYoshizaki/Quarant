@@ -13,7 +13,7 @@ func (r *I7HTTPAuthRule) Severity() Severity { return SeverityCritical }
 func (r *I7HTTPAuthRule) Type() string       { return "INSECURE_HTTP_AUTH" }
 
 func (r *I7HTTPAuthRule) Apply(ctx *Context) (Match, bool) {
-	if ctx.HTTP == nil {
+	if ctx == nil || ctx.HTTP == nil || ctx.TLS {
 		return Match{}, false
 	}
 
@@ -29,6 +29,7 @@ func (r *I7HTTPAuthRule) Apply(ctx *Context) (Match, bool) {
 		return Match{
 			Message:        "Authorization or authentication header was observed over plaintext HTTP.",
 			Evidence:       evidence,
+			Severity:       SeverityCritical,
 			OWASPTags:      uniqueTags("I1", "I3", "I7"),
 			Confidence:     "high",
 			ObservedFact:   "Authorization header was observed over plaintext HTTP.",
@@ -42,6 +43,7 @@ func (r *I7HTTPAuthRule) Apply(ctx *Context) (Match, bool) {
 		return Match{
 			Message:        "Sensitive authentication-related header was observed over plaintext HTTP.",
 			Evidence:       evidence,
+			Severity:       SeverityCritical,
 			OWASPTags:      uniqueTags("I1", "I3", "I7"),
 			Confidence:     "high",
 			ObservedFact:   "Sensitive authentication-related header was observed over plaintext HTTP.",

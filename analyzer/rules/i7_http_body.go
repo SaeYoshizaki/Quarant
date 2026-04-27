@@ -8,7 +8,7 @@ func (r *I7HTTPBodySecretRule) Severity() Severity { return SeverityCritical }
 func (r *I7HTTPBodySecretRule) Type() string       { return "INSECURE_HTTP_BODY_SECRET" }
 
 func (r *I7HTTPBodySecretRule) Apply(ctx *Context) (Match, bool) {
-	if ctx.HTTP == nil {
+	if ctx == nil || ctx.HTTP == nil || ctx.TLS {
 		return Match{}, false
 	}
 	if len(ctx.HTTP.Body) == 0 {
@@ -19,6 +19,7 @@ func (r *I7HTTPBodySecretRule) Apply(ctx *Context) (Match, bool) {
 		return Match{
 			Message:        msg,
 			Evidence:       ev,
+			Severity:       SeverityCritical,
 			OWASPTags:      uniqueTags("I1", "I3", "I7"),
 			Confidence:     "high",
 			ObservedFact:   "Sensitive value patterns were observed in a plaintext HTTP body.",

@@ -156,6 +156,19 @@ containerlab は、Quarant を通信経路上に配置した場合の検知ロ�
 
 ---
 
+## Severity policy
+
+Quarant の severity は、イベント数を減らすためではなく、どの観測が本当に重いかを揃えて示すために使います。
+
+- `CRITICAL`: 平文 HTTP / Telnet / MQTT などで password、Authorization、Cookie、token、secret のような機微値そのものが通信上に観測された場合
+- `HIGH`: credential の実値までは見えていないが、plaintext API、public/external 宛の危険サービス、public/external 宛の management API など、攻撃面や運用面のリスクが高い場合
+- `WARNING`: 調査推奨レベルの signal。plaintext HTTP request、local-ish な management/setup endpoint、default hostname-like pattern、cloud/backend-like plaintext 通信など
+- `INFO`: debug / observation only。単体では risk event とみなさない補助観測
+
+I3 と I7 が同じ HTTP 通信から同時に出ることはあります。この場合、I3 は interface risk、I7 は exposed secret risk として分けて扱い、`risk_summary.highest_severity` は最も重いイベントを採用します。
+
+---
+
 ## OWASP IoT Top 10 との対応
 
 | 項目 | 状態 | Quarant での扱い |

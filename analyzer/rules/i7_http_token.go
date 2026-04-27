@@ -8,7 +8,7 @@ func (r *I7HTTPTokenLeakRule) Severity() Severity { return SeverityCritical }
 func (r *I7HTTPTokenLeakRule) Type() string       { return "INSECURE_HTTP_TOKEN" }
 
 func (r *I7HTTPTokenLeakRule) Apply(ctx *Context) (Match, bool) {
-	if ctx.HTTP == nil {
+	if ctx == nil || ctx.HTTP == nil || ctx.TLS {
 		return Match{}, false
 	}
 
@@ -16,6 +16,7 @@ func (r *I7HTTPTokenLeakRule) Apply(ctx *Context) (Match, bool) {
 		return Match{
 			Message:        "Sensitive token or identifier-like parameter was observed in a plaintext HTTP URL.",
 			Evidence:       ev,
+			Severity:       SeverityCritical,
 			OWASPTags:      uniqueTags("I1", "I3", "I7"),
 			Confidence:     "high",
 			ObservedFact:   "Sensitive token or identifier-like query parameter was observed over plaintext HTTP.",

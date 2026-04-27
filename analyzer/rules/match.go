@@ -4,6 +4,7 @@ type Severity string
 
 const (
 	SeverityInfo     Severity = "INFO"
+	SeverityLow      Severity = "LOW"
 	SeverityWarning  Severity = "WARNING"
 	SeverityHigh     Severity = "HIGH"
 	SeverityCritical Severity = "CRITICAL"

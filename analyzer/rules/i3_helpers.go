@@ -170,28 +170,40 @@ func isManagementEndpoint(path string) bool {
 	return false
 }
 
-func i3ManagementSeverity(path string, plaintext bool) Severity {
+func i3ManagementSeverity(ctx *Context, path string, plaintext bool) Severity {
 	path = strings.ToLower(strings.TrimSpace(path))
-	for _, hint := range i3ManagementHighHints {
-		if strings.Contains(path, hint) {
-			if plaintext {
+	if ctx != nil {
+		if IsPublicIP(ctx.DstIP) {
+			return SeverityHigh
+		}
+		if ctx.HTTP != nil {
+			if _, ok := DetectSensitiveQuery(ctx.HTTP.Query); ok {
 				return SeverityHigh
 			}
+			if _, ok := DetectSensitiveHeader(ctx.HTTP.Headers); ok {
+				return SeverityHigh
+			}
+			if _, _, ok := DetectSensitiveHTTPBody(ctx.HTTP.ContentType, ctx.HTTP.Body); ok {
+				return SeverityHigh
+			}
+		}
+	}
+	for _, hint := range i3ManagementHighHints {
+		if strings.Contains(path, hint) {
 			return SeverityWarning
 		}
 	}
 	for _, hint := range i3ManagementMediumHints {
 		if strings.Contains(path, hint) {
-			if plaintext {
-				return SeverityWarning
-			}
-			return SeverityInfo
+			return SeverityWarning
 		}
 	}
-	if plaintext {
-		return SeverityWarning
+	if plaintext && ctx != nil && ctx.HTTP != nil {
+		if host := i3Header(ctx.HTTP, "host"); isCloudOrBackendHost(host) || isCloudOrBackendPath(path) {
+			return SeverityHigh
+		}
 	}
-	return SeverityInfo
+	return SeverityWarning
 }
 
 func isCloudOrBackendHost(host string) bool {
@@ -297,13 +309,10 @@ func maskSensitiveQueryKeys(values url.Values, keys []string) string {
 }
 
 func i3AuthTokenSeverity(keys []string) Severity {
-	for _, key := range keys {
-		switch key {
-		case "password", "passwd", "token", "access_token", "refresh_token", "api_key", "apikey", "session_id", "secret", "jwt":
-			return SeverityHigh
-		}
+	if len(keys) == 0 {
+		return SeverityWarning
 	}
-	return SeverityWarning
+	return SeverityHigh
 }
 
 func i3HasQuerySupportHint(values url.Values) bool {

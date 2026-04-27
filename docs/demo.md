@@ -126,6 +126,9 @@ grep -E 'I3_|I7_' events.jsonl | tail -n 30
 確認ポイント:
 
 - `token=abcdef` ではなく `token=***` としてマスクされる
+- `I7_HTTP_PLAINTEXT` は `WARNING`
+- `I3_AUTH_TOKEN_IN_URL` は `HIGH`
+- `I7_HTTP_TOKEN` は `CRITICAL`
 - `owasp_tags` に `I1`, `I3`, `I7` が含まれる
 - `observed_fact`, `inference`, `limitation`, `recommendation` が出る
 - `I3_MOBILE_APP_BACKEND_PATTERN_OBSERVED` は、curl のような CLI User-Agent では出ない
@@ -189,6 +192,8 @@ grep 'I9_' events.jsonl | tail -n 20
 
 - setup / onboarding らしい endpoint として扱われる
 - `device.local` は default hostname-like pattern として扱われる
+- `I9_SETUP_ENDPOINT_STILL_ACTIVE` は `WARNING`
+- `I9_DEFAULT_HOSTNAME_PATTERN` は `WARNING`
 - factory default のまま残っているとは断定しない
 
 ---
@@ -268,14 +273,15 @@ Ubuntu 上で network interface を指定して Quarant を実行し、実際の
 `events-ubuntu-i3-token.jsonl` では、主に以下を確認します。
 
 - `I3_API_OVER_PLAINTEXT`: API らしい endpoint が平文 HTTP で観測された
-- `I3_AUTH_TOKEN_IN_URL`: URL query に token が含まれていた
-- `I7_HTTP_TOKEN`: 平文 HTTP 上で token-like value が観測された
+- `I3_AUTH_TOKEN_IN_URL`: URL query に token が含まれていた (`HIGH`)
+- `I7_HTTP_PLAINTEXT`: 平文 HTTP 自体の signal (`WARNING`)
+- `I7_HTTP_TOKEN`: 平文 HTTP 上で token-like value が観測された (`CRITICAL`)
 - `evidence` が `token=***` になっており、実値は保存されていない
 
 `events-ubuntu-i9-setup.jsonl` では、主に以下を確認します。
 
-- `I9_SETUP_ENDPOINT_STILL_ACTIVE`: setup / onboarding らしい endpoint が見えた
-- `I9_DEFAULT_HOSTNAME_PATTERN`: `device.local` のような default hostname-like pattern が見えた
+- `I9_SETUP_ENDPOINT_STILL_ACTIVE`: setup / onboarding らしい endpoint が見えた (`WARNING`)
+- `I9_DEFAULT_HOSTNAME_PATTERN`: `device.local` のような default hostname-like pattern が見えた (`WARNING`)
 - factory default 状態そのものは断定していない
 
 `device-inventory-ubuntu-sample.json` では、主に以下を確認します。

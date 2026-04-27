@@ -112,7 +112,7 @@ func (r *I3ManagementAPIExposedRule) Apply(ctx *Context) (Match, bool) {
 		RuleID:         "I3_MANAGEMENT_API_EXPOSED",
 		Type:           "I3_MANAGEMENT_API_EXPOSED",
 		Category:       "I3",
-		Severity:       i3ManagementSeverity(path, plaintext),
+		Severity:       i3ManagementSeverity(ctx, path, plaintext),
 		Message:        "Management or configuration endpoint-like communication was observed.",
 		Evidence:       fmt.Sprintf("path=%s host=%s plaintext=%t", path, host, plaintext),
 		OWASPTags:      uniqueTags("I2", "I3", "I7", "I9"),

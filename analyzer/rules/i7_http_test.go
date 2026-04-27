@@ -21,6 +21,9 @@ func TestI7HTTPQueryExpandedKeys(t *testing.T) {
 	if match.Evidence != "refresh_token=***" {
 		t.Fatalf("unexpected evidence: %s", match.Evidence)
 	}
+	if match.Severity != SeverityCritical {
+		t.Fatalf("expected CRITICAL severity, got %s", match.Severity)
+	}
 }
 
 func TestI7HTTPQuerySessionRequiresSensitiveValueShape(t *testing.T) {
@@ -228,6 +231,52 @@ func TestI7HTTPBodyDetectsMultipartSecrets(t *testing.T) {
 	}
 	if match.Evidence != "mqtt_pass=***" {
 		t.Fatalf("unexpected evidence: %s", match.Evidence)
+	}
+}
+
+func TestI7HTTPPlaintextOnlyIsWarning(t *testing.T) {
+	match, ok := (&I7HTTPPlaintextRule{}).Apply(&Context{
+		HTTP: &HTTPInfo{
+			Method:  "GET",
+			Path:    "/",
+			Headers: map[string]string{"host": "device.local"},
+		},
+	})
+	if !ok {
+		t.Fatal("expected plaintext HTTP signal")
+	}
+	if match.Severity != SeverityWarning {
+		t.Fatalf("expected WARNING severity, got %s", match.Severity)
+	}
+}
+
+func TestI7HTTPRulesDoNotFireOnTLSContext(t *testing.T) {
+	ctx := &Context{
+		TLS: true,
+		HTTP: &HTTPInfo{
+			Method:      "GET",
+			Path:        "/api/config",
+			Query:       map[string][]string{"token": {"abcdef1234567890ABCDEF"}},
+			Headers:     map[string]string{"authorization": "Bearer abcdef1234567890ABCDEF", "cookie": "sid=abcdef1234567890ABCDEF"},
+			ContentType: "application/json",
+			Body:        []byte(`{"password":"secret-value"}`),
+		},
+	}
+
+	if _, ok := (&I7HTTPPlaintextRule{}).Apply(ctx); ok {
+		t.Fatal("did not expect plaintext HTTP signal on TLS context")
+	}
+	if _, ok := (&I7HTTPTokenLeakRule{}).Apply(ctx); ok {
+		t.Fatal("did not expect HTTP token signal on TLS context")
+	}
+	if _, ok := (&I7HTTPAuthRule{}).Apply(ctx); ok {
+		t.Fatal("did not expect HTTP auth signal on TLS context")
+	}
+	if _, ok := (&I7HTTPBodySecretRule{}).Apply(ctx); ok {
+		t.Fatal("did not expect HTTP body secret signal on TLS context")
+	}
+	if _, ok := (&I7HTTPCookieRule{}).Apply(ctx); ok {
+		t.Fatal("did not expect HTTP cookie signal on TLS context")
 	}
 }
 

@@ -45,7 +45,7 @@ type I9DefaultHostnamePatternRule struct{}
 
 func (r *I9DefaultHostnamePatternRule) ID() string         { return "I9_DEFAULT_HOSTNAME_PATTERN" }
 func (r *I9DefaultHostnamePatternRule) Category() string   { return "I9" }
-func (r *I9DefaultHostnamePatternRule) Severity() Severity { return SeverityInfo }
+func (r *I9DefaultHostnamePatternRule) Severity() Severity { return SeverityWarning }
 func (r *I9DefaultHostnamePatternRule) Type() string       { return "I9_DEFAULT_HOSTNAME_PATTERN" }
 
 func (r *I9DefaultHostnamePatternRule) Apply(ctx *Context) (Match, bool) {
@@ -58,11 +58,7 @@ func (r *I9DefaultHostnamePatternRule) Apply(ctx *Context) (Match, bool) {
 		return Match{}, false
 	}
 
-	severity := SeverityInfo
 	confidence := "low"
-	if i9ShouldElevateHostnameSeverity(ctx) {
-		severity = SeverityWarning
-	}
 	if ctx.FamilyConfidenceAtLeast("medium") || ctx.VendorConfidenceAtLeast("medium") {
 		confidence = "medium"
 	}
@@ -72,7 +68,7 @@ func (r *I9DefaultHostnamePatternRule) Apply(ctx *Context) (Match, bool) {
 		Evidence:       fmt.Sprintf("source=%s hostname=%s", source, value),
 		OWASPTags:      uniqueTags("I9"),
 		Confidence:     confidence,
-		Severity:       severity,
+		Severity:       SeverityWarning,
 		ObservedFact:   "Default hostname-like pattern was observed.",
 		Inference:      "This may indicate that the device still uses a factory-like or generic hostname.",
 		Limitation:     "Passive monitoring cannot confirm whether other default settings remain unchanged.",
@@ -184,24 +180,6 @@ func i9LooksDefaultHostname(value string) (string, bool) {
 		}
 	}
 	return "", false
-}
-
-func i9ShouldElevateHostnameSeverity(ctx *Context) bool {
-	if ctx == nil {
-		return false
-	}
-	if ctx.HTTP != nil {
-		if _, ok := i9SetupEndpointHint(ctx.HTTP.Path); ok {
-			return true
-		}
-		if isManagementEndpoint(ctx.HTTP.Path) {
-			return true
-		}
-	}
-	if _, ok := InsecureServiceNameByPort(ctx.DstPort); ok {
-		return true
-	}
-	return false
 }
 
 func init() {

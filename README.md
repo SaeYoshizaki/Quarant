@@ -25,6 +25,8 @@ It converts passively observable network behavior into explainable risk signals.
 
 Quarant は、これらを「脆弱性の断定」ではなく、**パッシブ監視で観測できる risk signal** として整理し、観測事実・推定・限界・推奨アクションを分けて記録します。
 
+severity は、原則として `CRITICAL=平文で機微値そのものが見えた場合`、`HIGH=外部通信や management/API risk`、`WARNING=調査推奨 signal`、`INFO=debug/observation only` の基準で整理しています。
+
 ---
 
 ## 主な機能
@@ -165,9 +167,11 @@ curl -H "Host: api.vendor-cloud.test" "http://example.com/api/config?token=abcde
 - `I3_API_OVER_PLAINTEXT`
 - `I3_AUTH_TOKEN_IN_URL`
 - `I3_WEAK_ECOSYSTEM_CRYPTO_SIGNAL`
+- `I7_HTTP_PLAINTEXT`
 - `I7_HTTP_TOKEN`
 
 `token` の値は `token=***` のようにマスクされます。
+この例では `I7_HTTP_TOKEN` は `CRITICAL`、`I3_AUTH_TOKEN_IN_URL` は `HIGH` です。
 
 ### I9: setup endpoint と default hostname-like signal
 
@@ -179,6 +183,8 @@ curl -H "Host: device.local" "http://example.com/setup"
 
 - `I9_SETUP_ENDPOINT_STILL_ACTIVE`
 - `I9_DEFAULT_HOSTNAME_PATTERN`
+
+どちらも調査推奨 signal として `WARNING` です。
 
 より詳しいデモ手順は [docs/demo.md](docs/demo.md) にまとめています。
 
