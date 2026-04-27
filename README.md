@@ -80,6 +80,22 @@ sudo ./build/quarant -i <interface> -inventory-out device_inventory.json -invent
 - severity counts
 - OWASP tag counts
 - last risk event
+- `risk_summary` による人向けのリスク要約
+
+`risk_summary` には、最高 severity、主要な OWASP tag、直近のリスクイベント、次に確認すべき内容がまとめられます。
+
+```json
+{
+  "risk_summary": {
+    "risk_event_count": 14,
+    "highest_severity": "CRITICAL",
+    "top_owasp_tags": ["I7", "I3", "I9", "I2", "I1"],
+    "top_severities": ["WARNING", "HIGH", "CRITICAL"],
+    "last_risk_event_type": "I9_DEFAULT_HOSTNAME_PATTERN",
+    "recommended_next_action": "Review plaintext API usage, token handling, and ecosystem interface transport security."
+  }
+}
+```
 
 ---
 
@@ -216,7 +232,7 @@ Quarant は研究・開発中のプロトタイプです。
 - I2 / I3 / I7 を中心に、パッシブ監視で根拠を持って観測しやすい risk signal を実装
 - I6 を privacy-risk signal として実装
 - I4 / I5 を update-risk / known-vulnerable-family enrichment として実装
-- I8 として device inventory / per-device risk summary を実装
+- I8 として device inventory / per-device risk summary / `risk_summary` を実装
 - I1 / I9 を関連シグナルとして整理
 - Ubuntu 上で interface 指定による実行と代表イベント出力を確認
 

@@ -44,7 +44,7 @@ rule engine
   ↓
 outputs
   - events.jsonl
-  - device_inventory.json
+  - device_inventory.json with per-device risk_summary
   - simple Web viewer
 ```
 
@@ -118,6 +118,41 @@ containerlab は、Quarant を通信経路上に配置した場合の検知ロ�
 ```
 
 `owasp_tags` は、1つのイベントが複数の OWASP 項目に関係する場合に使います。たとえば、HTTP URL に token が含まれる場合、I1、I3、I7 のすべてに関係します。
+
+---
+
+## Device inventory と risk_summary
+
+`device_inventory.json` は、観測した端末ごとの状態をまとめるための snapshot です。
+
+主な情報:
+
+- `first_seen` / `last_seen`
+- observed hosts / ports / protocols / SNI
+- category / vendor / family candidate
+- `risk_event_count`
+- `severity_counts`
+- `owasp_tag_counts`
+- `last_risk_event_type`
+- `risk_summary`
+
+`risk_summary` は、人が読みやすいように既存の集計情報から作る要約です。raw evidence や token / password の実値は含めません。
+
+```json
+{
+  "risk_summary": {
+    "risk_event_count": 14,
+    "highest_severity": "CRITICAL",
+    "top_owasp_tags": ["I7", "I3", "I9", "I2", "I1"],
+    "top_severities": ["WARNING", "HIGH", "CRITICAL"],
+    "last_risk_event_type": "I9_DEFAULT_HOSTNAME_PATTERN",
+    "last_risk_event_ts": "2026-04-27T02:10:03Z",
+    "recommended_next_action": "Review plaintext API usage, token handling, and ecosystem interface transport security."
+  }
+}
+```
+
+`risk_summary` は、詳細な診断結果ではなく、利用者や開発者が次に確認すべきポイントを短く示すための補助情報です。
 
 ---
 
@@ -267,6 +302,7 @@ I8 は device-management support として扱います。Quarant は device inve
 - per-device severity counts
 - per-device OWASP tag counts
 - last risk event
+- `risk_summary` による最高 severity、主要 OWASP tag、推奨確認事項の要約
 
 ### I9: Insecure Default Settings
 
