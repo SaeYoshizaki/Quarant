@@ -58,6 +58,48 @@ func TestEnrichUserGuidanceForHTTPPlaintext(t *testing.T) {
 	}
 }
 
+func TestEnrichUserGuidanceForTLSEvent(t *testing.T) {
+	event := &Event{RuleID: "I7_TLS_WEAK_CIPHER_OFFERED"}
+	catalog := knowledge.UserActionCatalog{
+		"UPDATE_FIRMWARE":   {Label: "Update", Description: "Update firmware", Difficulty: "easy"},
+		"REVIEW_VENDOR_APP": {Label: "Review", Description: "Review vendor app", Difficulty: "easy"},
+		"ISOLATE_DEVICE":    {Label: "Isolate", Description: "Isolate device", Difficulty: "medium"},
+	}
+
+	EnrichUserGuidance(event, catalog)
+
+	if event.UserTitle == "" || event.UserMessage == "" || event.UserImpact == "" {
+		t.Fatalf("expected TLS user guidance fields, got %+v", event)
+	}
+	if len(event.ActionIDs) == 0 {
+		t.Fatalf("expected TLS action ids, got %+v", event)
+	}
+	if len(event.UserActions) == 0 {
+		t.Fatalf("expected TLS user actions, got %+v", event)
+	}
+}
+
+func TestEnrichUserGuidanceForI9Event(t *testing.T) {
+	event := &Event{RuleID: "I9_DEFAULT_HOSTNAME_PATTERN"}
+	catalog := knowledge.UserActionCatalog{
+		"CHANGE_DEFAULT_PASSWORD": {Label: "Change", Description: "Change password", Difficulty: "easy"},
+		"DISABLE_UNUSED_SERVICE":  {Label: "Disable", Description: "Disable service", Difficulty: "medium"},
+		"UPDATE_FIRMWARE":         {Label: "Update", Description: "Update firmware", Difficulty: "easy"},
+	}
+
+	EnrichUserGuidance(event, catalog)
+
+	if event.UserTitle == "" || event.UserMessage == "" || event.UserImpact == "" {
+		t.Fatalf("expected I9 user guidance fields, got %+v", event)
+	}
+	if len(event.ActionIDs) == 0 {
+		t.Fatalf("expected I9 action ids, got %+v", event)
+	}
+	if len(event.UserActions) == 0 {
+		t.Fatalf("expected I9 user actions, got %+v", event)
+	}
+}
+
 func TestBuildQuarantineRecommendationEventFromCompositeRisk(t *testing.T) {
 	handler := &FlowHandler{
 		knowledge: &knowledge.DB{

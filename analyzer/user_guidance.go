@@ -20,6 +20,13 @@ func EnrichUserGuidance(e *Event, catalog knowledge.UserActionCatalog) {
 	}
 
 	switch eventIdentifier(e) {
+	case "I7_TLS_WEAK_VERSION_OBSERVED", "I7_TLS_WEAK_CIPHER_OFFERED", "I7_TLS_ONLY_LEGACY_CIPHERS_OFFERED", "I7_TLS_WEAK_CIPHER_SELECTED", "I7_TLS_WEAK_CIPHER_SUITE_OBSERVED", "I7_TLS_CERTIFICATE_ANOMALY_OBSERVED":
+		applyUserGuidanceTemplate(e, userGuidanceTemplate{
+			title:     "古い暗号方式が使われている可能性があります",
+			message:   "この端末の暗号化通信に、古い TLS 設定や証明書の不整合が含まれている可能性があります。通信内容そのものは見ていませんが、設定の見直しをおすすめします。",
+			impact:    "古い暗号方式や証明書設定が残っていると、将来の接続トラブルや安全性の低下につながる可能性があります。",
+			actionIDs: []string{"UPDATE_FIRMWARE", "REVIEW_VENDOR_APP", "ISOLATE_DEVICE"},
+		})
 	case "I7_HTTP_PLAINTEXT":
 		applyUserGuidanceTemplate(e, userGuidanceTemplate{
 			title:     "暗号化されていない通信を検出しました",
@@ -54,6 +61,20 @@ func EnrichUserGuidance(e *Event, catalog knowledge.UserActionCatalog) {
 			message:   "この端末で、古い管理機能や暗号化されていない機能が有効になっている可能性があります。使っていない機能を見直してください。",
 			impact:    "不要な機能が残っていると、家庭内ネットワークから操作されたり情報を見られたりする可能性があります。",
 			actionIDs: []string{"DISABLE_UNUSED_SERVICE", "UPDATE_FIRMWARE", "REVIEW_VENDOR_APP"},
+		})
+	case "I3_API_OVER_PLAINTEXT", "I3_AUTH_TOKEN_IN_URL", "I3_MANAGEMENT_API_EXPOSED", "I3_WEAK_ECOSYSTEM_CRYPTO_SIGNAL", "I3_MOBILE_APP_BACKEND_PATTERN_OBSERVED", "I3_UNEXPECTED_CLOUD_ENDPOINT":
+		applyUserGuidanceTemplate(e, userGuidanceTemplate{
+			title:     "管理用の通信が安全でない可能性があります",
+			message:   "この端末で、管理画面、API、アプリ連携、クラウド接続に関わる通信の確認が必要かもしれません。公式アプリや設定画面で通信方法を見直してください。",
+			impact:    "設定や認証に関わる通信の保護が弱いと、後から端末設定や接続先の確認が必要になる場合があります。",
+			actionIDs: []string{"ENABLE_HTTPS", "CHANGE_DEFAULT_PASSWORD", "REVIEW_VENDOR_APP"},
+		})
+	case "I9_SETUP_ENDPOINT_STILL_ACTIVE", "I9_DEFAULT_HOSTNAME_PATTERN":
+		applyUserGuidanceTemplate(e, userGuidanceTemplate{
+			title:     "初期設定のまま使われている可能性があります",
+			message:   "この端末では、初期設定用の画面や初期状態らしい名前が残っている可能性があります。セットアップ完了後の設定を確認してください。",
+			impact:    "初期設定のままだと、不要な機能が残ったり、推測しやすい設定のまま使われたりする可能性があります。",
+			actionIDs: []string{"CHANGE_DEFAULT_PASSWORD", "DISABLE_UNUSED_SERVICE", "UPDATE_FIRMWARE"},
 		})
 	case "I4_INSECURE_FIRMWARE_UPDATE_HTTP", "I4_FIRMWARE_UPDATE_OBSERVED":
 		applyUserGuidanceTemplate(e, userGuidanceTemplate{

@@ -198,6 +198,11 @@ func loadJSON(path string, out any) error {
 	return nil
 }
 
+func optionalKnowledgeFileMissing(path string) bool {
+	_, err := os.Stat(path)
+	return err != nil && os.IsNotExist(err)
+}
+
 func LoadDeviceCategories() (*DeviceCategories, error) {
 	path := filepath.Join(knowledgeDir, "device_categories.json")
 
@@ -310,6 +315,9 @@ func LoadI6StorageSignalPatterns() (*I6StorageSignalPatterns, error) {
 
 func LoadUserActionCatalog() (UserActionCatalog, error) {
 	path := filepath.Join(knowledgeDir, "user_actions.json")
+	if optionalKnowledgeFileMissing(path) {
+		return UserActionCatalog{}, nil
+	}
 
 	var v UserActionCatalog
 	if err := loadJSON(path, &v); err != nil {
@@ -321,6 +329,12 @@ func LoadUserActionCatalog() (UserActionCatalog, error) {
 
 func LoadKnownDevices() (*KnownDevicesCatalog, error) {
 	path := filepath.Join(knowledgeDir, "known_devices.json")
+	if optionalKnowledgeFileMissing(path) {
+		return &KnownDevicesCatalog{
+			Devices: nil,
+			index:   map[string]KnownDeviceRecord{},
+		}, nil
+	}
 
 	var v KnownDevicesFile
 	if err := loadJSON(path, &v); err != nil {
