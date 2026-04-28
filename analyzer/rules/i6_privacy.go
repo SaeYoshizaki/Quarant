@@ -559,10 +559,10 @@ func (r *I6PrivacyRule) applyBehaviorBaselineAll(ctx *Context, category, commTyp
 	if ctx.TLS {
 		if hasInference && host != "" && isExternal && !hostMatchesRepresentativeDomains(host, representativeDomains) {
 			out = append(out, Match{
-				RuleID:   "I6_TLS_BASELINE_UNEXPECTED_DOMAIN",
-				Type:     "I6_TLS_BASELINE_UNEXPECTED_DOMAIN",
+				RuleID:   "I6_TLS_UNEXPECTED_SNI_OBSERVED",
+				Type:     "I6_TLS_UNEXPECTED_SNI_OBSERVED",
 				Category: "I6",
-				Severity: baselineSeverity,
+				Severity: SeverityLow,
 				Message: formatBaselineMessage(
 					"Observed TLS SNI does not fit the learned category baseline",
 					suspicious,

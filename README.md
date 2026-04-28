@@ -36,6 +36,7 @@ severity は、原則として `CRITICAL=平文で機微値そのものが見え
 - HTTP request / response 解析
 - TLS ClientHello / ServerHello 解析
 - SNI / JA3 / TLS version / cipher suite の観測
+- TLS metadata ベースの risk signal
 - MQTT / Telnet の平文 credential / payload 解析
 - デバイス category / vendor / family の候補推定
 - OWASP IoT Top 10 に関連する risk event 出力

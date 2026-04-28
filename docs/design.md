@@ -342,16 +342,27 @@ Quarant は TLS ClientHello と ServerHello の観測に対応しています。
 
 - TLS ClientHello の検出
 - SNI の取得
+- supported_versions の取得
 - JA3 fingerprint の生成
 - TLS ServerHello の検出
-- TLS version / cipher suite の取得
+- TLS version / selected cipher / offered cipher suites の取得
+- 一部の証明書情報の取得
 - ClientHello + ServerHello を組み合わせた TLS metadata 観測
+- 古い TLS バージョン、弱い cipher suite、証明書異常、想定外 SNI の risk signal 化
 
 制約:
 
 - TLS 1.3 では、Certificate などの後続ハンドシェイクメッセージが暗号化されるため取得できない場合があります。
 - Certificate 情報の取得は TLS 1.2 など一部の通信に限定されます。
 - HTTPS の本文は復号しません。
+- MITM / SSL stripping は行いません。
+
+見えるもの / 見えないもの:
+
+| 種別 | 具体例 |
+| --- | --- |
+| 見える | SNI, TLS version, supported_versions, selected cipher, offered cipher suites, JA3, certificate metadata |
+| 見えない | HTTPS body, Cookie, Authorization header, API response, encrypted payload |
 
 ---
 
