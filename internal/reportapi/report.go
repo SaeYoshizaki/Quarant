@@ -15,10 +15,25 @@ type Event struct {
 	Type      string    `json:"type"`
 	Severity  string    `json:"severity"`
 
-	RuleID   string `json:"rule_id,omitempty"`
-	Category string `json:"category,omitempty"`
-	FlowKey  string `json:"flow_key,omitempty"`
-	Evidence string `json:"evidence,omitempty"`
+	RuleID                  string       `json:"rule_id,omitempty"`
+	Category                string       `json:"category,omitempty"`
+	FlowKey                 string       `json:"flow_key,omitempty"`
+	Evidence                string       `json:"evidence,omitempty"`
+	ObservedFact            string       `json:"observed_fact,omitempty"`
+	Inference               string       `json:"inference,omitempty"`
+	Limitation              string       `json:"limitation,omitempty"`
+	Recommendation          string       `json:"recommendation,omitempty"`
+	UserTitle               string       `json:"user_title,omitempty"`
+	UserMessage             string       `json:"user_message,omitempty"`
+	UserImpact              string       `json:"user_impact,omitempty"`
+	ActionIDs               []string     `json:"action_ids,omitempty"`
+	UserActions             []UserAction `json:"user_actions,omitempty"`
+	RecommendedAction       string       `json:"recommended_action,omitempty"`
+	DryRun                  bool         `json:"dry_run,omitempty"`
+	SuggestedFirewallAction string       `json:"suggested_firewall_action,omitempty"`
+	DeviceKey               string       `json:"device_key,omitempty"`
+	DeviceLabel             string       `json:"device_label,omitempty"`
+	DeviceStatus            string       `json:"device_status,omitempty"`
 
 	SrcIP   string `json:"src_ip,omitempty"`
 	SrcPort uint16 `json:"src_port,omitempty"`
@@ -28,21 +43,33 @@ type Event struct {
 	Message string `json:"message,omitempty"`
 }
 
+type UserAction struct {
+	ID          string `json:"id,omitempty"`
+	Label       string `json:"label,omitempty"`
+	Description string `json:"description,omitempty"`
+	Difficulty  string `json:"difficulty,omitempty"`
+	Priority    int    `json:"priority,omitempty"`
+	Fallback    string `json:"fallback,omitempty"`
+}
+
 type KV struct {
 	Key   string `json:"key"`
 	Count int    `json:"count"`
 }
 
 type Report struct {
-	GeneratedAt string  `json:"generated_at"`
-	Source      string  `json:"source"`
-	TotalEvents int     `json:"total_events"`
-	Window      Window  `json:"window"`
-	Severity    []KV    `json:"severity"`
-	Rules       []KV    `json:"rules"`
-	Categories  []KV    `json:"categories"`
-	Sources     []KV    `json:"sources"`
-	Events      []Event `json:"events"`
+	GeneratedAt          string  `json:"generated_at"`
+	Source               string  `json:"source"`
+	TotalEvents          int     `json:"total_events"`
+	UserNotifications    int     `json:"user_notifications"`
+	QuarantineCandidates int     `json:"quarantine_candidates"`
+	UnknownDevices       int     `json:"unknown_devices"`
+	Window               Window  `json:"window"`
+	Severity             []KV    `json:"severity"`
+	Rules                []KV    `json:"rules"`
+	Categories           []KV    `json:"categories"`
+	Sources              []KV    `json:"sources"`
+	Events               []Event `json:"events"`
 }
 
 type Window struct {
@@ -65,6 +92,9 @@ func LoadReport(path string) (Report, error) {
 	ruleCount := map[string]int{}
 	categoryCount := map[string]int{}
 	sourceCount := map[string]int{}
+	unknownDevices := map[string]bool{}
+	userNotifications := 0
+	quarantineCandidates := 0
 
 	var first time.Time
 	var last time.Time
@@ -97,6 +127,21 @@ func LoadReport(path string) (Report, error) {
 		if e.SrcIP != "" {
 			sourceCount[e.SrcIP]++
 		}
+		if e.UserTitle != "" {
+			userNotifications++
+		}
+		if e.RuleID == "R1_QUARANTINE_RECOMMENDATION" || e.Type == "R1_QUARANTINE_RECOMMENDATION" {
+			quarantineCandidates++
+		}
+		if e.RuleID == "I8_UNREGISTERED_DEVICE_ACTIVE" || e.Type == "I8_UNREGISTERED_DEVICE_ACTIVE" {
+			key := strings.TrimSpace(e.DeviceKey)
+			if key == "" {
+				key = strings.TrimSpace(e.SrcIP)
+			}
+			if key != "" {
+				unknownDevices[key] = true
+			}
+		}
 
 		if first.IsZero() || e.Timestamp.Before(first) {
 			first = e.Timestamp
@@ -117,14 +162,17 @@ func LoadReport(path string) (Report, error) {
 	})
 
 	rep := Report{
-		GeneratedAt: time.Now().UTC().Format(time.RFC3339),
-		Source:      path,
-		TotalEvents: len(events),
-		Severity:    toSortedKV(severityCount),
-		Rules:       toSortedKV(ruleCount),
-		Categories:  toSortedKV(categoryCount),
-		Sources:     toSortedKV(sourceCount),
-		Events:      events,
+		GeneratedAt:          time.Now().UTC().Format(time.RFC3339),
+		Source:               path,
+		TotalEvents:          len(events),
+		UserNotifications:    userNotifications,
+		QuarantineCandidates: quarantineCandidates,
+		UnknownDevices:       len(unknownDevices),
+		Severity:             toSortedKV(severityCount),
+		Rules:                toSortedKV(ruleCount),
+		Categories:           toSortedKV(categoryCount),
+		Sources:              toSortedKV(sourceCount),
+		Events:               events,
 	}
 	if !first.IsZero() {
 		rep.Window.Start = first.UTC().Format(time.RFC3339)

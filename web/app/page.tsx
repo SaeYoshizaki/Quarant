@@ -33,6 +33,15 @@ import {
 
 type EventSeverity = "CRITICAL" | "HIGH" | "WARNING" | "INFO" | string;
 
+type UserAction = {
+  id?: string;
+  label?: string;
+  description?: string;
+  difficulty?: string;
+  priority?: number;
+  fallback?: string;
+};
+
 type Event = {
   ts: string;
   type?: string;
@@ -41,6 +50,21 @@ type Event = {
   category?: string;
   flow_key?: string;
   evidence?: string;
+  observed_fact?: string;
+  inference?: string;
+  limitation?: string;
+  recommendation?: string;
+  user_title?: string;
+  user_message?: string;
+  user_impact?: string;
+  action_ids?: string[];
+  user_actions?: UserAction[];
+  recommended_action?: string;
+  dry_run?: boolean;
+  suggested_firewall_action?: string;
+  device_key?: string;
+  device_label?: string;
+  device_status?: string;
   src_ip?: string;
   src_port?: number;
   dst_ip?: string;
@@ -57,6 +81,9 @@ type Report = {
   generated_at: string;
   source: string;
   total_events: number;
+  user_notifications: number;
+  quarantine_candidates: number;
+  unknown_devices: number;
   window?: {
     start?: string;
     end?: string;
@@ -107,6 +134,21 @@ function formatTimeShort(value?: string): string {
 function endpoint(ip?: string, port?: number): string {
   if (!ip) return "-";
   return port ? `${ip}:${port}` : ip;
+}
+
+function severityRank(severity?: EventSeverity): number {
+  switch (severity) {
+    case "CRITICAL":
+      return 4;
+    case "HIGH":
+      return 3;
+    case "WARNING":
+      return 2;
+    case "INFO":
+      return 1;
+    default:
+      return 0;
+  }
 }
 
 function summarize(filteredEvents: Event[]): Summary {
@@ -281,9 +323,184 @@ function EventRow({ event, index }: { event: Event; index: number }) {
                 </p>
               </div>
             )}
+            {event.observed_fact && (
+              <div>
+                <p className="text-xs font-medium text-muted-foreground">
+                  Observed Fact
+                </p>
+                <p>{event.observed_fact}</p>
+              </div>
+            )}
+            {event.inference && (
+              <div>
+                <p className="text-xs font-medium text-muted-foreground">
+                  Inference
+                </p>
+                <p>{event.inference}</p>
+              </div>
+            )}
+            {event.limitation && (
+              <div>
+                <p className="text-xs font-medium text-muted-foreground">
+                  Limitation
+                </p>
+                <p>{event.limitation}</p>
+              </div>
+            )}
+            {event.recommendation && (
+              <div>
+                <p className="text-xs font-medium text-muted-foreground">
+                  Recommendation
+                </p>
+                <p>{event.recommendation}</p>
+              </div>
+            )}
           </div>
         </div>
       </CollapsibleContent>
+    </Collapsible>
+  );
+}
+
+function DeviceStatusBadge({ status }: { status?: string }) {
+  const value = status || "unknown";
+  const styles: Record<string, string> = {
+    allowed: "border-emerald-500/30 bg-emerald-500/10 text-emerald-700",
+    unknown: "border-amber-500/30 bg-amber-500/10 text-amber-700",
+    blocked_candidate: "border-rose-500/30 bg-rose-500/10 text-rose-700",
+    ignored: "border-slate-500/30 bg-slate-500/10 text-slate-700",
+  };
+
+  return (
+    <Badge variant="outline" className={cn("text-[11px]", styles[value] || "")}>
+      {value}
+    </Badge>
+  );
+}
+
+function UserNotificationCard({ event }: { event: Event }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const title = event.user_title || event.rule_id || event.type || "Notification";
+  const deviceLabel = event.device_label || event.device_key || event.src_ip || "-";
+  const actions = (event.user_actions || []).slice().sort((a, b) => {
+    return (a.priority || 999) - (b.priority || 999);
+  });
+
+  return (
+    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+      <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="space-y-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <SeverityBadge severity={event.severity} />
+              <DeviceStatusBadge status={event.device_status} />
+              {event.dry_run && (
+                <Badge variant="secondary" className="text-[11px]">
+                  dry-run
+                </Badge>
+              )}
+            </div>
+            <h3 className="text-base font-semibold tracking-tight">{title}</h3>
+            <p className="text-sm text-muted-foreground">
+              {deviceLabel} / {formatTimeShort(event.ts)}
+            </p>
+          </div>
+        </div>
+
+        {event.user_message && (
+          <p className="mt-3 text-sm leading-6">{event.user_message}</p>
+        )}
+        {event.user_impact && (
+          <p className="mt-2 text-sm leading-6 text-muted-foreground">
+            {event.user_impact}
+          </p>
+        )}
+
+        {actions.length > 0 && (
+          <div className="mt-4 rounded-lg bg-muted/40 p-3">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+              First Actions
+            </p>
+            <div className="mt-2 space-y-2">
+              {actions.slice(0, 4).map((action) => (
+                <div key={action.id} className="rounded-md bg-background p-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <p className="text-sm font-medium">{action.label}</p>
+                    {action.difficulty && (
+                      <Badge variant="outline" className="text-[11px]">
+                        {action.difficulty}
+                      </Badge>
+                    )}
+                  </div>
+                  {action.description && (
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      {action.description}
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <CollapsibleTrigger asChild>
+          <button className="mt-4 flex items-center gap-2 text-sm font-medium text-foreground/80 hover:text-foreground">
+            {isOpen ? (
+              <ChevronDown className="size-4" />
+            ) : (
+              <ChevronRight className="size-4" />
+            )}
+            技術的な根拠を見る
+          </button>
+        </CollapsibleTrigger>
+
+        <CollapsibleContent>
+          <div className="mt-3 grid gap-3 rounded-lg border border-border bg-muted/20 p-3 text-sm md:grid-cols-2">
+            {event.observed_fact && (
+              <div>
+                <p className="text-xs font-medium text-muted-foreground">
+                  Observed Fact
+                </p>
+                <p className="mt-1">{event.observed_fact}</p>
+              </div>
+            )}
+            {event.inference && (
+              <div>
+                <p className="text-xs font-medium text-muted-foreground">
+                  Inference
+                </p>
+                <p className="mt-1">{event.inference}</p>
+              </div>
+            )}
+            {event.limitation && (
+              <div>
+                <p className="text-xs font-medium text-muted-foreground">
+                  Limitation
+                </p>
+                <p className="mt-1">{event.limitation}</p>
+              </div>
+            )}
+            {event.recommendation && (
+              <div>
+                <p className="text-xs font-medium text-muted-foreground">
+                  Recommendation
+                </p>
+                <p className="mt-1">{event.recommendation}</p>
+              </div>
+            )}
+            {event.evidence && (
+              <div className="md:col-span-2">
+                <p className="text-xs font-medium text-muted-foreground">
+                  Evidence
+                </p>
+                <p className="mt-1 whitespace-pre-wrap rounded bg-background p-2 font-mono text-xs">
+                  {event.evidence}
+                </p>
+              </div>
+            )}
+          </div>
+        </CollapsibleContent>
+      </div>
     </Collapsible>
   );
 }
@@ -459,6 +676,12 @@ export default function QuarantDashboard() {
       event.rule_id,
       event.category,
       event.flow_key,
+      event.device_key,
+      event.device_label,
+      event.device_status,
+      event.user_title,
+      event.user_message,
+      event.user_impact,
       event.src_ip,
       event.dst_ip,
       event.message,
@@ -471,6 +694,15 @@ export default function QuarantDashboard() {
   });
 
   const stats = summarize(filteredEvents);
+  const userFacingEvents = filteredEvents
+    .filter((event) => Boolean(event.user_title))
+    .slice()
+    .sort((a, b) => {
+      if (severityRank(a.severity) !== severityRank(b.severity)) {
+        return severityRank(b.severity) - severityRank(a.severity);
+      }
+      return new Date(b.ts).getTime() - new Date(a.ts).getTime();
+    });
 
   return (
     <div className="min-h-screen bg-background">
@@ -529,7 +761,7 @@ export default function QuarantDashboard() {
           </div>
         )}
 
-        <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-5">
+        <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-4 xl:grid-cols-8">
           <SummaryCard
             label="Total Events"
             value={stats.total}
@@ -559,7 +791,54 @@ export default function QuarantDashboard() {
             icon={Info}
             variant="info"
           />
+          <SummaryCard
+            label="User Notices"
+            value={report?.user_notifications || userFacingEvents.length}
+            icon={Info}
+            variant="info"
+          />
+          <SummaryCard
+            label="Quarantine"
+            value={report?.quarantine_candidates || 0}
+            icon={AlertTriangle}
+            variant="high"
+          />
+          <SummaryCard
+            label="Unknown Devices"
+            value={report?.unknown_devices || 0}
+            icon={Server}
+            variant="warning"
+          />
         </div>
+
+        <section className="mb-4 rounded-2xl border border-border bg-card p-4">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <h2 className="text-lg font-semibold tracking-tight">
+                ユーザー向け通知
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                専門用語を抑えて、まず確認したいことを上に表示しています。
+              </p>
+            </div>
+            <Badge variant="outline">{userFacingEvents.length} items</Badge>
+          </div>
+
+          <div className="mt-4 space-y-3">
+            {userFacingEvents.length > 0 ? (
+              userFacingEvents.map((event, index) => (
+                <UserNotificationCard
+                  key={`${event.ts}-${event.rule_id || event.type || "notification"}-${index}`}
+                  event={event}
+                />
+              ))
+            ) : (
+              <div className="rounded-xl border border-dashed border-border px-4 py-8 text-center text-sm text-muted-foreground">
+                現在のフィルタ条件では、ユーザー向け通知はありません。
+              </div>
+            )}
+          </div>
+        </section>
 
         <div className="flex flex-col gap-4 lg:flex-row">
           <div className="min-w-0 flex-1">

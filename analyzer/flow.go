@@ -626,6 +626,9 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 
 	d := h.devices.GetOrCreate(srcIP)
 	observeDeviceFlow(d, now, dstPort, observedProtocolsForFlow(dstPort, httpInfo, mqttInfo, telnetInfo, st.TLSClientSeen))
+	for _, event := range h.buildDeviceNotificationEvents(now, key, srcIP, dstIP, srcPort, dstPort, d) {
+		_ = h.sink.Write(event)
+	}
 	localClassification := d.Classification
 	localDeviceCategory := localClassification.NormalizedCategory()
 	localInferenceSource := string(localClassification.InferenceSource)
@@ -842,13 +845,17 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 	if composite := buildCompositeRiskMatch(ctx, matches); composite != nil {
 		matches = append(matches, *composite)
 	}
+	if quarantine := h.buildQuarantineRecommendationEvent(now, key, srcIP, dstIP, srcPort, dstPort, d, matches); quarantine != nil {
+		_ = h.sink.Write(*quarantine)
+		d.RecordRiskEvent(now, quarantine.Type, string(quarantine.Severity), []string{quarantine.Category})
+	}
 
 	for _, m := range matches {
 		if st.AlreadyReported(m.RuleID) {
 			continue
 		}
 
-		_ = h.sink.Write(Event{
+		event := Event{
 			Timestamp:      now,
 			Type:           m.Type,
 			Severity:       Severity(m.Severity),
@@ -868,7 +875,9 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 			DstIP:          dstIP,
 			DstPort:        dstPort,
 			Message:        m.Message,
-		})
+		}
+		h.enrichEvent(&event)
+		_ = h.sink.Write(event)
 
 		deviceProfile := h.devices.GetOrCreate(srcIP)
 		deviceProfile.RecordRiskEvent(now, m.Type, string(m.Severity), m.OWASPTags)

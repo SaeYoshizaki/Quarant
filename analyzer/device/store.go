@@ -31,6 +31,7 @@ func NewProfile(ip string) *DeviceProfile {
 		VendorScores:                 map[string]float64{},
 		FamilyScores:                 map[string]float64{},
 		IdentitySignalObservations:   map[string]ObservationCounter{},
+		NotificationObservations:     map[string]ObservationCounter{},
 		StorageSignalEndpoints:       map[string]ObservationCounter{},
 		StableIdentifierFingerprints: map[string]ObservationCounter{},
 		PIIUseDestinations:           map[string]ObservationCounter{},

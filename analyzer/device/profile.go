@@ -44,6 +44,7 @@ type DeviceProfile struct {
 	JA3 string
 
 	IdentitySignalObservations map[string]ObservationCounter
+	NotificationObservations   map[string]ObservationCounter
 
 	ObservedServices map[string]bool
 	InsecureServices map[string]bool
@@ -150,6 +151,16 @@ func (p *DeviceProfile) ObserveIdentitySignal(kind, value string, nowUnix int64)
 		nowUnix = 1
 	}
 	return observeWithinWindow(p.IdentitySignalObservations, kind+"|"+value, nowUnix)
+}
+
+func (p *DeviceProfile) ObserveNotification(name string, nowUnix int64) int {
+	if p == nil || name == "" {
+		return 0
+	}
+	if p.NotificationObservations == nil {
+		p.NotificationObservations = make(map[string]ObservationCounter)
+	}
+	return observeWithinWindow(p.NotificationObservations, name, nowUnix)
 }
 
 func (p *DeviceProfile) IdentitySignalRepeatCount(kind, value string) int {

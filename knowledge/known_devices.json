@@ -1,0 +1,12 @@
+{
+  "devices": [
+    {
+      "device_key": "10.0.1.2",
+      "label": "Test PC",
+      "trusted": true,
+      "status": "allowed",
+      "category": "pc",
+      "notes": "containerlab pc1"
+    }
+  ]
+}

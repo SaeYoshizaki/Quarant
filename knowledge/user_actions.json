@@ -1,0 +1,50 @@
+{
+  "CONFIRM_DEVICE_OWNER": {
+    "label": "自分の端末か確認する",
+    "difficulty": "easy",
+    "description": "端末名、IPアドレス、接続時刻を見て、自分や家族が使っている機器か確認してください。",
+    "fallback": "心当たりがない場合は、ルーターの管理画面で接続を制限することを検討してください。"
+  },
+  "LABEL_DEVICE": {
+    "label": "端末に名前を付ける",
+    "difficulty": "easy",
+    "description": "カメラ、テレビ、スマートスピーカーなど、自分が分かる名前を付けて管理しやすくしてください。",
+    "fallback": "分からない場合は未確認のままにして、後で確認してください。"
+  },
+  "UPDATE_FIRMWARE": {
+    "label": "ファームウェアを更新する",
+    "difficulty": "easy",
+    "description": "メーカー公式アプリや管理画面から、最新のアップデートがあるか確認してください。",
+    "fallback": "更新が提供されていない場合は、古い機器として扱い、インターネット接続の制限を検討してください。"
+  },
+  "ENABLE_HTTPS": {
+    "label": "HTTPSを有効にする",
+    "difficulty": "medium",
+    "description": "端末の設定画面で、管理画面やAPI通信にHTTPSを使う設定があるか確認してください。",
+    "fallback": "HTTPSに変更できない場合は、外出先や公共Wi-Fiから利用せず、家庭内ネットワークだけで使うことを検討してください。"
+  },
+  "CHANGE_DEFAULT_PASSWORD": {
+    "label": "初期パスワードを変更する",
+    "difficulty": "easy",
+    "description": "端末の管理画面や公式アプリで、初期パスワードや推測されやすいパスワードを変更してください。",
+    "fallback": "変更方法が分からない場合は、メーカーの公式マニュアルを確認してください。"
+  },
+  "DISABLE_UNUSED_SERVICE": {
+    "label": "不要な機能を無効にする",
+    "difficulty": "medium",
+    "description": "Telnet、FTP、古い管理画面など、使っていない機能が有効になっていないか確認してください。",
+    "fallback": "無効化できない場合は、その端末のインターネット接続を制限することを検討してください。"
+  },
+  "ISOLATE_DEVICE": {
+    "label": "一時的に隔離する",
+    "difficulty": "medium",
+    "description": "心当たりがない端末や高リスクな端末は、ゲストネットワークへ移す、またはインターネット接続を制限してください。",
+    "fallback": "操作が難しい場合は、端末の電源を切るだけでも一時的な対策になります。"
+  },
+  "REVIEW_VENDOR_APP": {
+    "label": "メーカー公式アプリで状態を確認する",
+    "difficulty": "easy",
+    "description": "メーカー公式アプリで、アップデート、ログイン履歴、接続先、セキュリティ設定を確認してください。",
+    "fallback": "公式アプリがない場合は、メーカー公式サイトのサポート情報を確認してください。"
+  }
+}

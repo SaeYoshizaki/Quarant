@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 const knowledgeDir = "knowledge"
@@ -157,6 +158,33 @@ type I6StorageSignalPatterns struct {
 	Patterns []I6StorageSignalPattern `json:"patterns"`
 }
 
+type UserActionDefinition struct {
+	Label       string `json:"label"`
+	Difficulty  string `json:"difficulty"`
+	Description string `json:"description"`
+	Fallback    string `json:"fallback"`
+}
+
+type UserActionCatalog map[string]UserActionDefinition
+
+type KnownDeviceRecord struct {
+	DeviceKey string `json:"device_key"`
+	Label     string `json:"label"`
+	Trusted   bool   `json:"trusted"`
+	Status    string `json:"status"`
+	Category  string `json:"category"`
+	Notes     string `json:"notes"`
+}
+
+type KnownDevicesFile struct {
+	Devices []KnownDeviceRecord `json:"devices"`
+}
+
+type KnownDevicesCatalog struct {
+	Devices []KnownDeviceRecord `json:"devices"`
+	index   map[string]KnownDeviceRecord
+}
+
 func loadJSON(path string, out any) error {
 	data, err := os.ReadFile(path)
 	if err != nil {
@@ -280,6 +308,40 @@ func LoadI6StorageSignalPatterns() (*I6StorageSignalPatterns, error) {
 	return &v, nil
 }
 
+func LoadUserActionCatalog() (UserActionCatalog, error) {
+	path := filepath.Join(knowledgeDir, "user_actions.json")
+
+	var v UserActionCatalog
+	if err := loadJSON(path, &v); err != nil {
+		return nil, err
+	}
+
+	return v, nil
+}
+
+func LoadKnownDevices() (*KnownDevicesCatalog, error) {
+	path := filepath.Join(knowledgeDir, "known_devices.json")
+
+	var v KnownDevicesFile
+	if err := loadJSON(path, &v); err != nil {
+		return nil, err
+	}
+
+	catalog := &KnownDevicesCatalog{
+		Devices: v.Devices,
+		index:   make(map[string]KnownDeviceRecord, len(v.Devices)),
+	}
+	for _, device := range v.Devices {
+		key := strings.TrimSpace(device.DeviceKey)
+		if key == "" {
+			continue
+		}
+		catalog.index[key] = device
+	}
+
+	return catalog, nil
+}
+
 type DB struct {
 	DeviceCategories   *DeviceCategories
 	CommunicationTypes *CommunicationTypes
@@ -291,6 +353,8 @@ type DB struct {
 	I5Vulnerable       *I5VulnerableComponents
 	DeviceFamilies     *DeviceFamilySignatures
 	I6StorageSignals   *I6StorageSignalPatterns
+	UserActions        UserActionCatalog
+	KnownDevices       *KnownDevicesCatalog
 }
 
 func LoadAll() (*DB, error) {
@@ -344,6 +408,16 @@ func LoadAll() (*DB, error) {
 		return nil, err
 	}
 
+	userActions, err := LoadUserActionCatalog()
+	if err != nil {
+		return nil, err
+	}
+
+	knownDevices, err := LoadKnownDevices()
+	if err != nil {
+		return nil, err
+	}
+
 	return &DB{
 		DeviceCategories:   deviceCategories,
 		CommunicationTypes: communicationTypes,
@@ -355,7 +429,25 @@ func LoadAll() (*DB, error) {
 		I5Vulnerable:       i5Vulnerable,
 		DeviceFamilies:     deviceFamilies,
 		I6StorageSignals:   i6StorageSignals,
+		UserActions:        userActions,
+		KnownDevices:       knownDevices,
 	}, nil
+}
+
+func (c *KnownDevicesCatalog) Lookup(keys ...string) (KnownDeviceRecord, bool) {
+	if c == nil || len(c.index) == 0 {
+		return KnownDeviceRecord{}, false
+	}
+	for _, key := range keys {
+		key = strings.TrimSpace(key)
+		if key == "" {
+			continue
+		}
+		if record, ok := c.index[key]; ok {
+			return record, true
+		}
+	}
+	return KnownDeviceRecord{}, false
 }
 
 func (db *DB) IsKnownCategory(category string) bool {
