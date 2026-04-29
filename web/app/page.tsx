@@ -1,23 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import {
-  RefreshCw,
-  Search,
-  ChevronDown,
-  ChevronRight,
-  AlertTriangle,
-  AlertCircle,
-  Info,
-  Server,
-  Clock,
-  Activity,
-  ArrowRight,
-} from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Fragment, useEffect, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { RefreshCw, Search, ChevronRight } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -26,21 +14,23 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { cn } from "@/lib/utils";
 
-type EventSeverity = "CRITICAL" | "HIGH" | "WARNING" | "INFO" | string;
-
-type UserAction = {
-  id?: string;
-  label?: string;
-  description?: string;
-  difficulty?: string;
-  priority?: number;
-  fallback?: string;
-};
+type EventSeverity =
+  | "CRITICAL"
+  | "HIGH"
+  | "MEDIUM"
+  | "WARNING"
+  | "LOW"
+  | "INFO"
+  | string;
 
 type Event = {
   ts: string;
@@ -49,19 +39,13 @@ type Event = {
   rule_id?: string;
   category?: string;
   flow_key?: string;
+  owasp_tags?: string[];
+  confidence?: string;
   evidence?: string;
   observed_fact?: string;
   inference?: string;
   limitation?: string;
   recommendation?: string;
-  user_title?: string;
-  user_message?: string;
-  user_impact?: string;
-  action_ids?: string[];
-  user_actions?: UserAction[];
-  recommended_action?: string;
-  dry_run?: boolean;
-  suggested_firewall_action?: string;
   device_key?: string;
   device_label?: string;
   device_status?: string;
@@ -95,14 +79,90 @@ type Report = {
   events: Event[];
 };
 
-type Summary = {
-  critical: number;
-  high: number;
-  warning: number;
-  info: number;
-  sources: number;
-  total: number;
+type InventoryRiskSummary = {
+  risk_event_count?: number;
+  highest_severity?: string;
+  top_owasp_tags?: string[];
+  top_severities?: string[];
+  last_risk_event_type?: string;
+  last_risk_event_ts?: string;
+  recommended_next_action?: string;
 };
+
+type InventoryDevice = {
+  ip: string;
+  first_seen?: string;
+  last_seen?: string;
+  observed_protocols?: string[];
+  observed_ports?: number[];
+  observed_hosts?: string[];
+  observed_sni?: string[];
+  category_candidate?: string;
+  category_confidence?: string;
+  vendor_candidate?: string;
+  vendor_confidence?: string;
+  family_candidate?: string;
+  family_confidence?: string;
+  risk_event_count?: number;
+  severity_counts?: Record<string, number>;
+  owasp_tag_counts?: Record<string, number>;
+  last_risk_event_type?: string;
+  last_risk_event_ts?: string;
+  risk_summary?: InventoryRiskSummary;
+};
+
+type InventoryReport = {
+  generated_at?: string;
+  devices?: InventoryDevice[];
+};
+
+type FlowRecord = {
+  ts: string;
+  flow_key?: string;
+  src_ip?: string;
+  src_port?: number;
+  dst_ip?: string;
+  dst_port?: number;
+  protocol?: string;
+  app_protocol?: string;
+  host?: string;
+  sni?: string;
+  http_method?: string;
+  http_path?: string;
+  bytes_out?: number;
+  bytes_in?: number;
+  packet_count?: number;
+  direction?: string;
+  device_label?: string;
+  device_category?: string;
+  observed_destination?: string;
+};
+
+type HostRow = {
+  ip: string;
+  labelCandidate: string;
+  categoryCandidate: string;
+  vendorCandidate: string;
+  familyCandidate: string;
+  confidence: string;
+  risk: string;
+  signals: number;
+  owasp: string[];
+  protocols: string[];
+  ports: number[];
+  topDestination: string;
+  externalDestinationCount: number;
+  firstSeen?: string;
+  lastSeen?: string;
+  hosts: string[];
+  sni: string[];
+  macAddress: string;
+  events: Event[];
+  flows: FlowRecord[];
+  inventory?: InventoryDevice;
+};
+
+type ViewName = "overview" | "devices" | "events";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:8080";
@@ -112,6 +172,7 @@ function formatTime(value?: string): string {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
   return date.toLocaleString("ja-JP", {
+    year: "numeric",
     month: "2-digit",
     day: "2-digit",
     hour: "2-digit",
@@ -120,15 +181,18 @@ function formatTime(value?: string): string {
   });
 }
 
-function formatTimeShort(value?: string): string {
-  if (!value) return "-";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleTimeString("ja-JP", {
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-  });
+function formatWindow(start?: string, end?: string): string {
+  if (!start || !end) return "-";
+  const startDate = new Date(start);
+  const endDate = new Date(end);
+  if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime())) {
+    return "-";
+  }
+  const hours = Math.max(
+    1,
+    Math.round((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60))
+  );
+  return `${hours}h`;
 }
 
 function endpoint(ip?: string, port?: number): string {
@@ -136,13 +200,17 @@ function endpoint(ip?: string, port?: number): string {
   return port ? `${ip}:${port}` : ip;
 }
 
-function severityRank(severity?: EventSeverity): number {
-  switch (severity) {
+function severityRank(severity?: string): number {
+  switch ((severity || "").toUpperCase()) {
     case "CRITICAL":
-      return 4;
+      return 6;
     case "HIGH":
-      return 3;
+      return 5;
+    case "MEDIUM":
+      return 4;
     case "WARNING":
+      return 3;
+    case "LOW":
       return 2;
     case "INFO":
       return 1;
@@ -151,496 +219,1068 @@ function severityRank(severity?: EventSeverity): number {
   }
 }
 
-function summarize(filteredEvents: Event[]): Summary {
-  return {
-    critical: filteredEvents.filter((e) => e.severity === "CRITICAL").length,
-    high: filteredEvents.filter((e) => e.severity === "HIGH").length,
-    warning: filteredEvents.filter((e) => e.severity === "WARNING").length,
-    info: filteredEvents.filter((e) => e.severity === "INFO").length,
-    sources: new Set(filteredEvents.map((e) => e.src_ip).filter(Boolean)).size,
-    total: filteredEvents.length,
-  };
+function topSeverity(events: Event[], inventory?: InventoryDevice): string {
+  const candidates = new Set<string>();
+  events.forEach((event) => {
+    if (event.severity) candidates.add(event.severity);
+  });
+  Object.entries(inventory?.severity_counts || {}).forEach(([key, count]) => {
+    if (count > 0) candidates.add(key);
+  });
+  const sorted = Array.from(candidates).sort(
+    (a, b) => severityRank(b) - severityRank(a)
+  );
+  return sorted[0] || "INFO";
 }
 
-function SummaryCard({
-  label,
-  value,
-  icon: Icon,
-  variant = "default",
-}: {
-  label: string;
-  value: number;
-  icon: React.ElementType;
-  variant?: "default" | "critical" | "high" | "warning" | "info";
-}) {
-  const variantStyles = {
-    default: "border-border",
-    critical:
-      "border-[var(--severity-critical)]/30 bg-[var(--severity-critical-bg)]",
-    high: "border-[var(--severity-high)]/30 bg-[var(--severity-high-bg)]",
-    warning:
-      "border-[var(--severity-warning)]/30 bg-[var(--severity-warning-bg)]",
-    info: "border-[var(--severity-info)]/30 bg-[var(--severity-info-bg)]",
+function uniqueStrings(values: Array<string | undefined | null>): string[] {
+  return Array.from(
+    new Set(values.map((value) => (value || "").trim()).filter(Boolean))
+  ).sort((a, b) => a.localeCompare(b));
+}
+
+function uniqueNumbers(values: Array<number | undefined | null>): number[] {
+  return Array.from(
+    new Set(values.filter((value): value is number => typeof value === "number"))
+  ).sort((a, b) => a - b);
+}
+
+function joinLimited(values: string[], limit = 3): string {
+  if (values.length === 0) return "-";
+  if (values.length <= limit) return values.join(", ");
+  return `${values.slice(0, limit).join(", ")} +${values.length - limit}`;
+}
+
+function normalizeDestination(flow: FlowRecord): string {
+  return (
+    flow.observed_destination ||
+    flow.sni ||
+    flow.host ||
+    flow.dst_ip ||
+    "-"
+  );
+}
+
+function formatOWASP(tags?: string[]): string {
+  if (!tags || tags.length === 0) return "-";
+  return tags.join(", ");
+}
+
+function parseRuleCategory(rule?: string): string[] {
+  const token = (rule || "").toUpperCase();
+  const match = token.match(/^I\d+/);
+  return match ? [match[0]] : [];
+}
+
+function eventOWASP(event: Event): string[] {
+  const tags = uniqueStrings([...(event.owasp_tags || []), ...parseRuleCategory(event.rule_id || event.type)]);
+  return tags;
+}
+
+function humanizeCategoryCandidate(value?: string): string {
+  const token = (value || "").trim();
+  if (!token) return "未分類IoT機器";
+  if (/unknown/i.test(token)) return "未分類IoT機器";
+
+  const map: Record<string, string> = {
+    camera: "スマートカメラ候補",
+    thermostat: "サーモスタット候補",
+    smarttv: "スマートTV候補",
+    tv: "スマートTV候補",
+    controller: "IoTコントローラー候補",
+    speaker: "スマートスピーカー候補",
+    lock: "スマートロック候補",
+    doorbell: "スマートドアベル候補",
+  };
+  const normalized = token.toLowerCase().replace(/[^a-z0-9]/g, "");
+  for (const [key, label] of Object.entries(map)) {
+    if (normalized.includes(key)) return label;
+  }
+
+  if (token.endsWith("候補")) return token;
+  return `${token}候補`;
+}
+
+function humanizeLabelCandidate(value?: string, family?: string): string {
+  const token = (value || family || "").trim();
+  if (!token) return "未分類IoT機器";
+  if (/unknown/i.test(token)) return "未分類IoT機器";
+  return token.endsWith("候補") ? token : `${token}候補`;
+}
+
+function summarizeObservation(values: string[], prefix: string): string[] {
+  return values.slice(0, 3).map((value) => `${prefix} ${value}`);
+}
+
+function deriveInferenceReasons(host: HostRow): string[] {
+  const reasons = [
+    ...summarizeObservation(host.sni, "TLS SNI observed:"),
+    ...summarizeObservation(host.hosts, "HTTP Host observed:"),
+    ...host.ports.slice(0, 4).map((port) => `Port ${port} traffic was observed.`),
+    ...host.protocols.slice(0, 3).map((protocol) => `${protocol} communication was observed.`),
+  ];
+  return reasons.length > 0 ? reasons : ["Passive observations are limited; candidate classification remains provisional."];
+}
+
+function aggregateHosts(
+  events: Event[],
+  inventory: InventoryDevice[],
+  flows: FlowRecord[]
+): HostRow[] {
+  const byIP = new Map<string, HostRow>();
+
+  const ensureHost = (ip: string): HostRow => {
+    const existing = byIP.get(ip);
+    if (existing) return existing;
+    const created: HostRow = {
+      ip,
+      labelCandidate: "",
+      categoryCandidate: "",
+      vendorCandidate: "",
+      familyCandidate: "",
+      confidence: "unknown",
+      risk: "INFO",
+      signals: 0,
+      owasp: [],
+      protocols: [],
+      ports: [],
+      topDestination: "-",
+      externalDestinationCount: 0,
+      hosts: [],
+      sni: [],
+      macAddress: "-",
+      events: [],
+      flows: [],
+    };
+    byIP.set(ip, created);
+    return created;
   };
 
-  const iconStyles = {
-    default: "text-muted-foreground",
-    critical: "text-[var(--severity-critical)]",
-    high: "text-[var(--severity-high)]",
-    warning: "text-[var(--severity-warning)]",
-    info: "text-[var(--severity-info)]",
+  inventory.forEach((device) => {
+    if (!device.ip) return;
+    const host = ensureHost(device.ip);
+    host.inventory = device;
+    host.categoryCandidate = device.category_candidate || host.categoryCandidate;
+    host.vendorCandidate = device.vendor_candidate || host.vendorCandidate;
+    host.familyCandidate = device.family_candidate || host.familyCandidate;
+    host.labelCandidate =
+      device.family_candidate ||
+      device.vendor_candidate ||
+      device.category_candidate ||
+      host.labelCandidate;
+    host.confidence =
+      device.family_confidence ||
+      device.vendor_confidence ||
+      device.category_confidence ||
+      host.confidence;
+    host.protocols = uniqueStrings([
+      ...host.protocols,
+      ...(device.observed_protocols || []),
+    ]);
+    host.ports = uniqueNumbers([...host.ports, ...(device.observed_ports || [])]);
+    host.hosts = uniqueStrings([...host.hosts, ...(device.observed_hosts || [])]);
+    host.sni = uniqueStrings([...host.sni, ...(device.observed_sni || [])]);
+    host.firstSeen = device.first_seen || host.firstSeen;
+    host.lastSeen = device.last_seen || host.lastSeen;
+  });
+
+  events.forEach((event) => {
+    const ip = event.src_ip || event.device_key;
+    if (!ip) return;
+    const host = ensureHost(ip);
+    host.events.push(event);
+  });
+
+  flows.forEach((flow) => {
+    if (!flow.src_ip) return;
+    const host = ensureHost(flow.src_ip);
+    host.flows.push(flow);
+    host.protocols = uniqueStrings([
+      ...host.protocols,
+      flow.app_protocol,
+      flow.protocol,
+    ]);
+    host.ports = uniqueNumbers([
+      ...host.ports,
+      flow.src_port,
+      flow.dst_port,
+    ]);
+    host.hosts = uniqueStrings([...host.hosts, flow.host]);
+    host.sni = uniqueStrings([...host.sni, flow.sni]);
+    if (!host.labelCandidate) {
+      host.labelCandidate = flow.device_label || flow.device_category || "";
+    }
+    if (!host.categoryCandidate) {
+      host.categoryCandidate = flow.device_category || "";
+    }
+  });
+
+  const hosts = Array.from(byIP.values()).map((host) => {
+    const eventOWASPSet = uniqueStrings(host.events.flatMap((event) => eventOWASP(event)));
+    const destinationCounts = new Map<string, number>();
+    host.flows.forEach((flow) => {
+      const destination = normalizeDestination(flow);
+      destinationCounts.set(destination, (destinationCounts.get(destination) || 0) + 1);
+    });
+    const topDestination =
+      Array.from(destinationCounts.entries()).sort((a, b) => {
+        if (a[1] === b[1]) return a[0].localeCompare(b[0]);
+        return b[1] - a[1];
+      })[0]?.[0] || "-";
+
+    const externalDestinationCount = uniqueStrings(
+      host.flows
+        .filter((flow) => flow.direction === "external")
+        .map((flow) => normalizeDestination(flow))
+    ).length;
+    const inventoryOWASP = host.inventory?.risk_summary?.top_owasp_tags
+      ? host.inventory.risk_summary.top_owasp_tags
+      : host.inventory?.owasp_tag_counts
+        ? Object.entries(host.inventory.owasp_tag_counts)
+            .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+            .map(([key]) => key)
+        : undefined;
+
+    return {
+      ...host,
+      labelCandidate: humanizeLabelCandidate(
+        host.labelCandidate,
+        host.familyCandidate || host.categoryCandidate
+      ),
+      categoryCandidate: humanizeCategoryCandidate(host.categoryCandidate),
+      vendorCandidate: host.vendorCandidate || "不明候補",
+      familyCandidate: host.familyCandidate || "不明候補",
+      confidence: host.confidence || "unknown",
+      risk: topSeverity(host.events, host.inventory),
+      signals:
+        host.inventory?.risk_summary?.risk_event_count ||
+        host.inventory?.risk_event_count ||
+        host.events.length,
+      owasp: inventoryOWASP || eventOWASPSet,
+      topDestination,
+      externalDestinationCount,
+      firstSeen:
+        host.firstSeen ||
+        host.events.slice().sort((a, b) => a.ts.localeCompare(b.ts))[0]?.ts,
+      lastSeen:
+        host.lastSeen ||
+        host.events
+          .slice()
+          .sort((a, b) => b.ts.localeCompare(a.ts))[0]?.ts,
+      macAddress: "-",
+      events: host.events.slice().sort((a, b) => b.ts.localeCompare(a.ts)),
+      flows: host.flows.slice().sort((a, b) => b.ts.localeCompare(a.ts)),
+    };
+  });
+
+  return hosts.sort((a, b) => {
+    if (severityRank(a.risk) === severityRank(b.risk)) {
+      return a.ip.localeCompare(b.ip);
+    }
+    return severityRank(b.risk) - severityRank(a.risk);
+  });
+}
+
+function linkClassName(active = false): string {
+  return cn(
+    "inline-flex items-center border-b-2 px-4 py-3 text-sm",
+    active
+      ? "border-[#2563eb] text-foreground"
+      : "border-transparent text-muted-foreground hover:text-foreground"
+  );
+}
+
+function SeverityBadge({ severity }: { severity?: string }) {
+  const value = (severity || "UNKNOWN").toUpperCase();
+  const styles: Record<string, string> = {
+    CRITICAL:
+      "border-[#d92d20] bg-[#fff1f1] text-[#b42318]",
+    HIGH: "border-[#f79009] bg-[#fff7ed] text-[#b54708]",
+    MEDIUM: "border-[#f6c343] bg-[#fffbea] text-[#8a6116]",
+    WARNING: "border-[#f6c343] bg-[#fffbea] text-[#8a6116]",
+    LOW: "border-[#60a5fa] bg-[#eff6ff] text-[#1d4ed8]",
+    INFO: "border-[#cbd5e1] bg-[#f8fafc] text-[#475569]",
   };
 
   return (
-    <div
+    <span
       className={cn(
-        "flex items-center gap-3 rounded-md border bg-card px-4 py-3",
-        variantStyles[variant]
+        "inline-flex min-w-[74px] justify-center rounded border px-2 py-0.5 text-[11px] font-semibold tracking-[0.02em]",
+        styles[value] || "border-border bg-muted text-foreground"
       )}
     >
-      <Icon className={cn("size-5 shrink-0", iconStyles[variant])} />
-      <div className="min-w-0">
-        <p className="text-xs text-muted-foreground">{label}</p>
-        <p className="text-xl font-semibold tabular-nums">{value}</p>
+      {value}
+    </span>
+  );
+}
+
+function OWASPLabel({ tag }: { tag: string }) {
+  return (
+    <span className="inline-flex rounded border border-border bg-[#f8fafc] px-1.5 py-0.5 text-[11px] text-[#334155]">
+      {tag}
+    </span>
+  );
+}
+
+function Section({
+  title,
+  description,
+  children,
+}: {
+  title: string;
+  description?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="border border-border bg-card">
+      <div className="border-b border-border px-5 py-4">
+        <h2 className="text-lg font-semibold">{title}</h2>
+        {description ? (
+          <p className="mt-1 text-sm text-muted-foreground">{description}</p>
+        ) : null}
       </div>
+      <div className="px-5 py-4">{children}</div>
+    </section>
+  );
+}
+
+function SummaryLine({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="border border-border bg-[#fcfcfd] px-4 py-3 text-sm text-[#334155]">
+      {children}
     </div>
   );
 }
 
-function SeverityBadge({ severity }: { severity?: EventSeverity }) {
-  if (!severity) {
-    return (
-      <Badge variant="secondary" className="font-mono text-xs">
-        UNKNOWN
-      </Badge>
-    );
-  }
-
-  const styles: Record<string, string> = {
-    CRITICAL:
-      "bg-[var(--severity-critical)] text-white hover:bg-[var(--severity-critical)]",
-    HIGH: "bg-[var(--severity-high)] text-white hover:bg-[var(--severity-high)]",
-    WARNING:
-      "bg-[var(--severity-warning)] text-white hover:bg-[var(--severity-warning)]",
-    INFO: "bg-[var(--severity-info)] text-white hover:bg-[var(--severity-info)]",
-  };
-
+function JsonDisclosure({
+  label,
+  value,
+}: {
+  label: string;
+  value: unknown;
+}) {
   return (
-    <Badge
-      className={cn("font-mono text-xs", styles[severity] || "")}
-      variant={styles[severity] ? "default" : "secondary"}
-    >
-      {severity}
-    </Badge>
+    <details className="border border-border bg-[#fcfcfd]">
+      <summary className="cursor-pointer px-3 py-2 text-sm text-[#2563eb]">
+        {label}
+      </summary>
+      <pre className="overflow-x-auto border-t border-border px-3 py-3 text-xs leading-5 text-[#334155]">
+        {JSON.stringify(value, null, 2)}
+      </pre>
+    </details>
   );
 }
 
-function EventRow({ event, index }: { event: Event; index: number }) {
-  const [isOpen, setIsOpen] = useState(false);
-  const rule = event.rule_id || event.type || "-";
+function OverviewView({
+  report,
+  hosts,
+  onOpenHost,
+}: {
+  report: Report | null;
+  hosts: HostRow[];
+  onOpenHost: (ip: string) => void;
+}) {
+  const events = report?.events || [];
+  const riskSignals = events
+    .filter((event) => severityRank(event.severity) >= severityRank("LOW"))
+    .slice()
+    .sort((a, b) => {
+      if (severityRank(a.severity) !== severityRank(b.severity)) {
+        return severityRank(b.severity) - severityRank(a.severity);
+      }
+      return b.ts.localeCompare(a.ts);
+    });
+
+  const highCritical = events.filter(
+    (event) => severityRank(event.severity) >= severityRank("HIGH")
+  ).length;
 
   return (
-    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-      <CollapsibleTrigger asChild>
-        <button
-          className={cn(
-            "grid w-full grid-cols-[100px_80px_1fr_180px_2fr] items-center gap-3 border-b border-border px-3 py-2.5 text-left text-sm transition-colors hover:bg-muted/50",
-            isOpen && "bg-muted/30"
-          )}
-        >
-          <span className="font-mono text-xs text-muted-foreground">
-            {formatTimeShort(event.ts)}
-          </span>
-          <SeverityBadge severity={event.severity} />
-          <span className="truncate font-medium" title={rule}>
-            {rule}
-          </span>
-          <span className="flex items-center gap-1.5 font-mono text-xs text-muted-foreground">
-            <span className="truncate" title={event.src_ip}>
-              {event.src_ip || "-"}
-            </span>
-            <ArrowRight className="size-3 shrink-0" />
-            <span className="truncate" title={event.dst_ip}>
-              {event.dst_ip || "-"}
-            </span>
-          </span>
-          <span className="flex items-center gap-2">
-            <span className="truncate text-muted-foreground">
-              {event.message || "No message"}
-            </span>
-            {isOpen ? (
-              <ChevronDown className="size-4 shrink-0 text-muted-foreground" />
-            ) : (
-              <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
-            )}
-          </span>
-        </button>
-      </CollapsibleTrigger>
-      <CollapsibleContent>
-        <div className="border-b border-border bg-muted/20 px-3 py-3">
-          <div className="grid gap-3 text-sm md:grid-cols-2 lg:grid-cols-4">
-            <div>
-              <p className="text-xs font-medium text-muted-foreground">
-                Source
-              </p>
-              <p className="font-mono">
-                {endpoint(event.src_ip, event.src_port)}
-              </p>
-            </div>
-            <div>
-              <p className="text-xs font-medium text-muted-foreground">
-                Destination
-              </p>
-              <p className="font-mono">
-                {endpoint(event.dst_ip, event.dst_port)}
-              </p>
-            </div>
-            <div>
-              <p className="text-xs font-medium text-muted-foreground">Type</p>
-              <p>{event.type || "-"}</p>
-            </div>
-            <div>
-              <p className="text-xs font-medium text-muted-foreground">
-                Category
-              </p>
-              <p>{event.category || "-"}</p>
-            </div>
-            {event.flow_key && (
-              <div className="md:col-span-2">
-                <p className="text-xs font-medium text-muted-foreground">
-                  Flow Key
-                </p>
-                <p className="font-mono text-xs">{event.flow_key}</p>
-              </div>
-            )}
-            {event.evidence && (
-              <div className="md:col-span-2 lg:col-span-4">
-                <p className="text-xs font-medium text-muted-foreground">
-                  Evidence
-                </p>
-                <p className="mt-1 whitespace-pre-wrap rounded bg-card p-2 font-mono text-xs">
-                  {event.evidence}
-                </p>
-              </div>
-            )}
-            {event.observed_fact && (
-              <div>
-                <p className="text-xs font-medium text-muted-foreground">
-                  Observed Fact
-                </p>
-                <p>{event.observed_fact}</p>
-              </div>
-            )}
-            {event.inference && (
-              <div>
-                <p className="text-xs font-medium text-muted-foreground">
-                  Inference
-                </p>
-                <p>{event.inference}</p>
-              </div>
-            )}
-            {event.limitation && (
-              <div>
-                <p className="text-xs font-medium text-muted-foreground">
-                  Limitation
-                </p>
-                <p>{event.limitation}</p>
-              </div>
-            )}
-            {event.recommendation && (
-              <div>
-                <p className="text-xs font-medium text-muted-foreground">
-                  Recommendation
-                </p>
-                <p>{event.recommendation}</p>
-              </div>
-            )}
+    <div className="space-y-6">
+      <Section
+        title="Overview"
+        description="全体の観測結果を読み取り専用で確認するレポートビューです。"
+      >
+        <div className="space-y-4">
+          <SummaryLine>
+            {events.length}件のイベント ・ {riskSignals.length}件のリスクシグナル ・{" "}
+            {highCritical}件の High/Critical ・ {hosts.length}台のデバイス ・ 観測期間{" "}
+            {formatWindow(report?.window?.start, report?.window?.end)}
+          </SummaryLine>
+
+          <div className="space-y-2">
+            <div className="text-sm font-medium">Risk Signals</div>
+            <Table className="text-[13px]">
+              <TableHeader>
+                <TableRow className="bg-[#fafafa] hover:bg-[#fafafa]">
+                  <TableHead>Severity</TableHead>
+                  <TableHead>Rule ID</TableHead>
+                  <TableHead>OWASP Tags</TableHead>
+                  <TableHead>Confidence</TableHead>
+                  <TableHead>Observed Fact</TableHead>
+                  <TableHead>Evidence</TableHead>
+                  <TableHead>Device IP</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {riskSignals.length > 0 ? (
+                  riskSignals.map((event, index) => (
+                    <TableRow key={`${event.ts}-${event.rule_id}-${index}`}>
+                      <TableCell><SeverityBadge severity={event.severity} /></TableCell>
+                      <TableCell className="font-mono text-xs">
+                        {event.rule_id || event.type || "-"}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-wrap gap-1">
+                          {eventOWASP(event).map((tag) => (
+                            <OWASPLabel key={tag} tag={tag} />
+                          ))}
+                        </div>
+                      </TableCell>
+                      <TableCell>{event.confidence || "-"}</TableCell>
+                      <TableCell className="max-w-[280px] whitespace-normal">
+                        {event.observed_fact || "-"}
+                      </TableCell>
+                      <TableCell className="max-w-[260px] whitespace-normal font-mono text-xs text-muted-foreground">
+                        {event.evidence || "-"}
+                      </TableCell>
+                      <TableCell>
+                        <button
+                          onClick={() => event.src_ip && onOpenHost(event.src_ip)}
+                          className="text-[#2563eb] hover:underline"
+                        >
+                          {event.src_ip || "-"}
+                        </button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center text-muted-foreground">
+                      観測対象のリスクシグナルはありません。
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+
+          <div className="space-y-2">
+            <div className="text-sm font-medium">All Events</div>
+            <Table className="text-[13px]">
+              <TableHeader>
+                <TableRow className="bg-[#fafafa] hover:bg-[#fafafa]">
+                  <TableHead>Time</TableHead>
+                  <TableHead>Severity</TableHead>
+                  <TableHead>Rule ID</TableHead>
+                  <TableHead>OWASP</TableHead>
+                  <TableHead>Confidence</TableHead>
+                  <TableHead>Source → Destination</TableHead>
+                  <TableHead>Evidence</TableHead>
+                  <TableHead>Message</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {events.map((event, index) => (
+                  <TableRow key={`${event.ts}-${event.rule_id || event.type}-${index}`}>
+                    <TableCell className="font-mono text-xs">{formatTime(event.ts)}</TableCell>
+                    <TableCell><SeverityBadge severity={event.severity} /></TableCell>
+                    <TableCell className="font-mono text-xs">
+                      {event.rule_id || event.type || "-"}
+                    </TableCell>
+                    <TableCell>{formatOWASP(eventOWASP(event))}</TableCell>
+                    <TableCell>{event.confidence || "-"}</TableCell>
+                    <TableCell className="font-mono text-xs">
+                      {endpoint(event.src_ip, event.src_port)} {"->"}{" "}
+                      {endpoint(event.dst_ip, event.dst_port)}
+                    </TableCell>
+                    <TableCell className="max-w-[240px] whitespace-normal font-mono text-xs text-muted-foreground">
+                      {event.evidence || "-"}
+                    </TableCell>
+                    <TableCell className="max-w-[280px] whitespace-normal">
+                      {event.message || "-"}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </div>
         </div>
-      </CollapsibleContent>
-    </Collapsible>
+      </Section>
+    </div>
   );
 }
 
-function DeviceStatusBadge({ status }: { status?: string }) {
-  const value = status || "unknown";
-  const styles: Record<string, string> = {
-    allowed: "border-emerald-500/30 bg-emerald-500/10 text-emerald-700",
-    unknown: "border-amber-500/30 bg-amber-500/10 text-amber-700",
-    blocked_candidate: "border-rose-500/30 bg-rose-500/10 text-rose-700",
-    ignored: "border-slate-500/30 bg-slate-500/10 text-slate-700",
-  };
+function DevicesView({
+  hosts,
+  onOpenHost,
+}: {
+  hosts: HostRow[];
+  onOpenHost: (ip: string) => void;
+}) {
+  const withSignals = hosts.filter((host) => host.signals > 0).length;
+  const unclassified = hosts.filter((host) =>
+    host.categoryCandidate.includes("未分類")
+  ).length;
+  const externalDestinations = uniqueStrings(
+    hosts.flatMap((host) =>
+      host.flows
+        .filter((flow) => flow.direction === "external")
+        .map((flow) => normalizeDestination(flow))
+    )
+  ).length;
 
   return (
-    <Badge variant="outline" className={cn("text-[11px]", styles[value] || "")}>
-      {value}
-    </Badge>
+    <div className="space-y-6">
+      <Section
+        title="Devices"
+        description="観測されたホストを候補情報つきで一覧表示します。"
+      >
+        <div className="space-y-4">
+          <SummaryLine>
+            {hosts.length} hosts observed ・ {withSignals} with risk signals ・{" "}
+            {unclassified} unclassified ・ {externalDestinations} external destinations
+          </SummaryLine>
+
+          <div className="space-y-2">
+            <div className="text-sm font-medium">Observed Hosts</div>
+            <Table className="text-[13px]">
+              <TableHeader>
+                <TableRow className="bg-[#fafafa] hover:bg-[#fafafa]">
+                  <TableHead>IP Address</TableHead>
+                  <TableHead>Label / Candidate</TableHead>
+                  <TableHead>Category Candidate</TableHead>
+                  <TableHead>Vendor Candidate</TableHead>
+                  <TableHead>Risk</TableHead>
+                  <TableHead>Signals</TableHead>
+                  <TableHead>OWASP</TableHead>
+                  <TableHead>Protocols</TableHead>
+                  <TableHead>Top Destination</TableHead>
+                  <TableHead>Last Seen</TableHead>
+                  <TableHead>Detail</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {hosts.map((host) => (
+                  <TableRow key={host.ip}>
+                    <TableCell className="font-mono text-xs">{host.ip}</TableCell>
+                    <TableCell>{host.labelCandidate}</TableCell>
+                    <TableCell>{host.categoryCandidate}</TableCell>
+                    <TableCell>{host.vendorCandidate}</TableCell>
+                    <TableCell><SeverityBadge severity={host.risk} /></TableCell>
+                    <TableCell>{host.signals}</TableCell>
+                    <TableCell>{joinLimited(host.owasp, 3)}</TableCell>
+                    <TableCell>{joinLimited(host.protocols, 3)}</TableCell>
+                    <TableCell className="max-w-[180px] truncate" title={host.topDestination}>
+                      {host.topDestination}
+                    </TableCell>
+                    <TableCell className="font-mono text-xs">
+                      {formatTime(host.lastSeen)}
+                    </TableCell>
+                    <TableCell>
+                      <button
+                        onClick={() => onOpenHost(host.ip)}
+                        className="text-[#2563eb] hover:underline"
+                      >
+                        Host Report
+                      </button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
+      </Section>
+    </div>
   );
 }
 
-function UserNotificationCard({ event }: { event: Event }) {
-  const [isOpen, setIsOpen] = useState(false);
-  const title = event.user_title || event.rule_id || event.type || "Notification";
-  const deviceLabel = event.device_label || event.device_key || event.src_ip || "-";
-  const actions = (event.user_actions || []).slice().sort((a, b) => {
-    return (a.priority || 999) - (b.priority || 999);
+function HostReportView({
+  host,
+  onBack,
+}: {
+  host: HostRow;
+  onBack: () => void;
+}) {
+  const highCritical = host.events.filter(
+    (event) => severityRank(event.severity) >= severityRank("HIGH")
+  ).length;
+  const relatedEvents = host.events.slice().sort((a, b) => b.ts.localeCompare(a.ts));
+  const topDestinations = uniqueStrings(
+    host.flows
+      .filter((flow) => flow.direction === "external")
+      .map((flow) => normalizeDestination(flow))
+  );
+  const inferenceReasons = deriveInferenceReasons(host);
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center gap-3">
+        <button onClick={onBack} className="text-sm text-[#2563eb] hover:underline">
+          Devices
+        </button>
+        <ChevronRight className="size-4 text-muted-foreground" />
+        <div className="text-sm text-muted-foreground">Host Report</div>
+      </div>
+
+      <Section
+        title={`Host Report: ${host.ip}`}
+        description="1台のホストについて、観測情報と候補情報を分けて表示します。"
+      >
+        <div className="space-y-4">
+          <SummaryLine>
+            {host.signals} risk signals ・ {highCritical} high/critical ・{" "}
+            {host.protocols.length} protocols ・ {host.externalDestinationCount} external destinations ・{" "}
+            {uniqueStrings(host.owasp).length} OWASP categories
+          </SummaryLine>
+
+          <div className="grid gap-4 lg:grid-cols-2">
+            <div className="border border-border">
+              <div className="border-b border-border bg-[#fafafa] px-4 py-2 text-sm font-medium">
+                Device Profile
+              </div>
+              <div className="space-y-4 px-4 py-4 text-sm">
+                <div>
+                  <div className="mb-2 font-medium">Observed</div>
+                  <dl className="grid grid-cols-[150px_1fr] gap-y-2">
+                    <dt className="text-muted-foreground">IP Address</dt>
+                    <dd className="font-mono text-xs">{host.ip}</dd>
+                    <dt className="text-muted-foreground">MAC Address</dt>
+                    <dd>{host.macAddress}</dd>
+                    <dt className="text-muted-foreground">First Seen</dt>
+                    <dd className="font-mono text-xs">{formatTime(host.firstSeen)}</dd>
+                    <dt className="text-muted-foreground">Last Seen</dt>
+                    <dd className="font-mono text-xs">{formatTime(host.lastSeen)}</dd>
+                    <dt className="text-muted-foreground">Protocols</dt>
+                    <dd>{joinLimited(host.protocols, 5)}</dd>
+                    <dt className="text-muted-foreground">Ports</dt>
+                    <dd className="font-mono text-xs">
+                      {host.ports.length > 0 ? host.ports.join(", ") : "-"}
+                    </dd>
+                  </dl>
+                </div>
+
+                <div>
+                  <div className="mb-2 font-medium">Inferred / Candidate</div>
+                  <dl className="grid grid-cols-[150px_1fr] gap-y-2">
+                    <dt className="text-muted-foreground">Label Candidate</dt>
+                    <dd>{host.labelCandidate}</dd>
+                    <dt className="text-muted-foreground">Category Candidate</dt>
+                    <dd>{host.categoryCandidate}</dd>
+                    <dt className="text-muted-foreground">Vendor Candidate</dt>
+                    <dd>{host.vendorCandidate}</dd>
+                    <dt className="text-muted-foreground">Family Candidate</dt>
+                    <dd>{host.familyCandidate}</dd>
+                    <dt className="text-muted-foreground">Confidence</dt>
+                    <dd>{host.confidence}</dd>
+                  </dl>
+                </div>
+
+                <div>
+                  <div className="mb-2 font-medium">Inference Reasons</div>
+                  <ul className="space-y-1 text-sm text-[#334155]">
+                    {inferenceReasons.map((reason) => (
+                      <li key={reason}>- {reason}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div className="border border-border">
+                <div className="border-b border-border bg-[#fafafa] px-4 py-2 text-sm font-medium">
+                  Observed Communication
+                </div>
+                <div className="px-4 py-4 text-sm">
+                  <dl className="grid grid-cols-[150px_1fr] gap-y-2">
+                    <dt className="text-muted-foreground">Protocols Observed</dt>
+                    <dd>{joinLimited(host.protocols, 6)}</dd>
+                    <dt className="text-muted-foreground">Common Ports</dt>
+                    <dd className="font-mono text-xs">
+                      {host.ports.length > 0 ? host.ports.join(", ") : "-"}
+                    </dd>
+                    <dt className="text-muted-foreground">Top Destinations</dt>
+                    <dd>{joinLimited(topDestinations, 4)}</dd>
+                    <dt className="text-muted-foreground">TLS SNI</dt>
+                    <dd>{joinLimited(host.sni, 4)}</dd>
+                    <dt className="text-muted-foreground">HTTP Hosts</dt>
+                    <dd>{joinLimited(host.hosts, 4)}</dd>
+                  </dl>
+                </div>
+              </div>
+
+              <div className="border border-border">
+                <div className="border-b border-border bg-[#fafafa] px-4 py-2 text-sm font-medium">
+                  Risk Signals
+                </div>
+                <div className="p-0">
+                  <Table className="text-[13px]">
+                    <TableHeader>
+                      <TableRow className="bg-[#fafafa] hover:bg-[#fafafa]">
+                        <TableHead>Severity</TableHead>
+                        <TableHead>Rule ID</TableHead>
+                        <TableHead>OWASP Tags</TableHead>
+                        <TableHead>Confidence</TableHead>
+                        <TableHead>Observed Fact</TableHead>
+                        <TableHead>Evidence</TableHead>
+                        <TableHead>Inference</TableHead>
+                        <TableHead>Limitation</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {relatedEvents.map((event, index) => (
+                        <TableRow key={`${event.ts}-${event.rule_id || event.type}-${index}`}>
+                          <TableCell><SeverityBadge severity={event.severity} /></TableCell>
+                          <TableCell className="font-mono text-xs">
+                            {event.rule_id || event.type || "-"}
+                          </TableCell>
+                          <TableCell>{formatOWASP(eventOWASP(event))}</TableCell>
+                          <TableCell>{event.confidence || "-"}</TableCell>
+                          <TableCell className="max-w-[220px] whitespace-normal">
+                            {event.observed_fact || "-"}
+                          </TableCell>
+                          <TableCell className="max-w-[220px] whitespace-normal font-mono text-xs text-muted-foreground">
+                            {event.evidence || "-"}
+                          </TableCell>
+                          <TableCell className="max-w-[220px] whitespace-normal">
+                            {event.inference || "-"}
+                          </TableCell>
+                          <TableCell className="max-w-[220px] whitespace-normal">
+                            {event.limitation || "-"}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <div className="text-sm font-medium">Related Events</div>
+            <Table className="text-[13px]">
+              <TableHeader>
+                <TableRow className="bg-[#fafafa] hover:bg-[#fafafa]">
+                  <TableHead>Time</TableHead>
+                  <TableHead>Severity</TableHead>
+                  <TableHead>Rule ID</TableHead>
+                  <TableHead>Destination</TableHead>
+                  <TableHead>Evidence</TableHead>
+                  <TableHead>Message</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {relatedEvents.map((event, index) => (
+                  <TableRow key={`${event.ts}-related-${index}`}>
+                    <TableCell className="font-mono text-xs">{formatTime(event.ts)}</TableCell>
+                    <TableCell><SeverityBadge severity={event.severity} /></TableCell>
+                    <TableCell className="font-mono text-xs">
+                      {event.rule_id || event.type || "-"}
+                    </TableCell>
+                    <TableCell className="font-mono text-xs">
+                      {endpoint(event.dst_ip, event.dst_port)}
+                    </TableCell>
+                    <TableCell className="max-w-[240px] whitespace-normal font-mono text-xs text-muted-foreground">
+                      {event.evidence || "-"}
+                    </TableCell>
+                    <TableCell className="max-w-[280px] whitespace-normal">
+                      {event.message || "-"}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+
+          <JsonDisclosure label="Raw JSON" value={host} />
+        </div>
+      </Section>
+    </div>
+  );
+}
+
+function EventDetails({ event }: { event: Event }) {
+  return (
+    <div className="grid gap-3 border-t border-border bg-[#fcfcfd] px-4 py-4 text-sm">
+      <div>
+        <div className="text-xs text-muted-foreground">Observed Fact</div>
+        <div>{event.observed_fact || "-"}</div>
+      </div>
+      <div>
+        <div className="text-xs text-muted-foreground">Evidence</div>
+        <div className="font-mono text-xs text-[#475569]">{event.evidence || "-"}</div>
+      </div>
+      <div>
+        <div className="text-xs text-muted-foreground">Inference</div>
+        <div>{event.inference || "-"}</div>
+      </div>
+      <div>
+        <div className="text-xs text-muted-foreground">Limitation</div>
+        <div>{event.limitation || "-"}</div>
+      </div>
+      <div>
+        <div className="text-xs text-muted-foreground">Recommendation</div>
+        <div>{event.recommendation || "-"}</div>
+      </div>
+      <JsonDisclosure label="Raw JSON" value={event} />
+    </div>
+  );
+}
+
+function EventsView({
+  report,
+  hosts,
+}: {
+  report: Report | null;
+  hosts: HostRow[];
+}) {
+  const [query, setQuery] = useState("");
+  const [severityFilter, setSeverityFilter] = useState("all");
+  const [owaspFilter, setOwaspFilter] = useState("all");
+  const [ruleFilter, setRuleFilter] = useState("all");
+  const [deviceFilter, setDeviceFilter] = useState("all");
+  const [openRows, setOpenRows] = useState<Record<string, boolean>>({});
+
+  const events = report?.events || [];
+  const owaspOptions = uniqueStrings(events.flatMap((event) => eventOWASP(event)));
+  const ruleOptions = uniqueStrings(events.map((event) => event.rule_id || event.type));
+  const deviceOptions = uniqueStrings(hosts.map((host) => host.ip));
+
+  const filtered = events.filter((event) => {
+    const tags = eventOWASP(event);
+    const haystack = [
+      event.rule_id,
+      event.type,
+      event.message,
+      event.evidence,
+      event.observed_fact,
+      event.src_ip,
+      event.dst_ip,
+      ...tags,
+    ]
+      .join(" ")
+      .toLowerCase();
+
+    if (severityFilter !== "all" && (event.severity || "") !== severityFilter) {
+      return false;
+    }
+    if (owaspFilter !== "all" && !tags.includes(owaspFilter)) {
+      return false;
+    }
+    if (ruleFilter !== "all" && (event.rule_id || event.type || "") !== ruleFilter) {
+      return false;
+    }
+    if (deviceFilter !== "all" && (event.src_ip || "") !== deviceFilter) {
+      return false;
+    }
+    if (query.trim() && !haystack.includes(query.trim().toLowerCase())) {
+      return false;
+    }
+    return true;
   });
 
   return (
-    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-      <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div className="space-y-2">
-            <div className="flex flex-wrap items-center gap-2">
-              <SeverityBadge severity={event.severity} />
-              <DeviceStatusBadge status={event.device_status} />
-              {event.dry_run && (
-                <Badge variant="secondary" className="text-[11px]">
-                  dry-run
-                </Badge>
-              )}
+    <div className="space-y-6">
+      <Section
+        title="Events"
+        description="全イベントを検索・フィルタし、根拠と制約を確認します。"
+      >
+        <div className="space-y-4">
+          <div className="grid gap-3 lg:grid-cols-[minmax(0,2fr)_repeat(4,minmax(0,1fr))]">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="Search message, evidence, observed fact, device, or rule"
+                className="pl-9"
+              />
             </div>
-            <h3 className="text-base font-semibold tracking-tight">{title}</h3>
-            <p className="text-sm text-muted-foreground">
-              {deviceLabel} / {formatTimeShort(event.ts)}
-            </p>
+            <Select value={severityFilter} onValueChange={setSeverityFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder="Severity" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Severity</SelectItem>
+                {uniqueStrings(events.map((event) => event.severity)).map((value) => (
+                  <SelectItem key={value} value={value}>
+                    {value}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={owaspFilter} onValueChange={setOwaspFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder="OWASP" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All OWASP</SelectItem>
+                {owaspOptions.map((value) => (
+                  <SelectItem key={value} value={value}>
+                    {value}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={ruleFilter} onValueChange={setRuleFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder="Rule ID" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Rules</SelectItem>
+                {ruleOptions.map((value) => (
+                  <SelectItem key={value} value={value}>
+                    {value}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={deviceFilter} onValueChange={setDeviceFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder="Device / IP" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Devices</SelectItem>
+                {deviceOptions.map((value) => (
+                  <SelectItem key={value} value={value}>
+                    {value}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <SummaryLine>{filtered.length} events shown</SummaryLine>
+
+          <div className="border border-border">
+            <Table className="text-[13px]">
+              <TableHeader>
+                <TableRow className="bg-[#fafafa] hover:bg-[#fafafa]">
+                  <TableHead>Time</TableHead>
+                  <TableHead>Severity</TableHead>
+                  <TableHead>Rule ID</TableHead>
+                  <TableHead>OWASP</TableHead>
+                  <TableHead>Confidence</TableHead>
+                  <TableHead>Source</TableHead>
+                  <TableHead>Destination</TableHead>
+                  <TableHead>Evidence</TableHead>
+                  <TableHead>Observed Fact</TableHead>
+                  <TableHead>Message</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filtered.map((event, index) => {
+                  const rowKey = `${event.ts}-${event.rule_id || event.type}-${index}`;
+                  const isOpen = Boolean(openRows[rowKey]);
+
+                  return (
+                    <Fragment key={rowKey}>
+                      <TableRow
+                        className="cursor-pointer"
+                        onClick={() =>
+                          setOpenRows((current) => ({
+                            ...current,
+                            [rowKey]: !current[rowKey],
+                          }))
+                        }
+                      >
+                        <TableCell className="font-mono text-xs">{formatTime(event.ts)}</TableCell>
+                        <TableCell><SeverityBadge severity={event.severity} /></TableCell>
+                        <TableCell className="font-mono text-xs">
+                          {event.rule_id || event.type || "-"}
+                        </TableCell>
+                        <TableCell>{formatOWASP(eventOWASP(event))}</TableCell>
+                        <TableCell>{event.confidence || "-"}</TableCell>
+                        <TableCell className="font-mono text-xs">
+                          {endpoint(event.src_ip, event.src_port)}
+                        </TableCell>
+                        <TableCell className="font-mono text-xs">
+                          {endpoint(event.dst_ip, event.dst_port)}
+                        </TableCell>
+                        <TableCell className="max-w-[200px] whitespace-normal font-mono text-xs text-muted-foreground">
+                          {event.evidence || "-"}
+                        </TableCell>
+                        <TableCell className="max-w-[220px] whitespace-normal">
+                          {event.observed_fact || "-"}
+                        </TableCell>
+                        <TableCell className="max-w-[220px] whitespace-normal">
+                          {event.message || "-"}
+                        </TableCell>
+                      </TableRow>
+                      {isOpen ? (
+                        <TableRow className="hover:bg-transparent">
+                          <TableCell colSpan={10} className="p-0">
+                            <EventDetails event={event} />
+                          </TableCell>
+                        </TableRow>
+                      ) : null}
+                    </Fragment>
+                  );
+                })}
+              </TableBody>
+            </Table>
           </div>
         </div>
-
-        {event.user_message && (
-          <p className="mt-3 text-sm leading-6">{event.user_message}</p>
-        )}
-        {event.user_impact && (
-          <p className="mt-2 text-sm leading-6 text-muted-foreground">
-            {event.user_impact}
-          </p>
-        )}
-
-        {actions.length > 0 && (
-          <div className="mt-4 rounded-lg bg-muted/40 p-3">
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-              First Actions
-            </p>
-            <div className="mt-2 space-y-2">
-              {actions.slice(0, 4).map((action) => (
-                <div key={action.id} className="rounded-md bg-background p-3">
-                  <div className="flex items-start justify-between gap-3">
-                    <p className="text-sm font-medium">{action.label}</p>
-                    {action.difficulty && (
-                      <Badge variant="outline" className="text-[11px]">
-                        {action.difficulty}
-                      </Badge>
-                    )}
-                  </div>
-                  {action.description && (
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      {action.description}
-                    </p>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        <CollapsibleTrigger asChild>
-          <button className="mt-4 flex items-center gap-2 text-sm font-medium text-foreground/80 hover:text-foreground">
-            {isOpen ? (
-              <ChevronDown className="size-4" />
-            ) : (
-              <ChevronRight className="size-4" />
-            )}
-            技術的な根拠を見る
-          </button>
-        </CollapsibleTrigger>
-
-        <CollapsibleContent>
-          <div className="mt-3 grid gap-3 rounded-lg border border-border bg-muted/20 p-3 text-sm md:grid-cols-2">
-            {event.observed_fact && (
-              <div>
-                <p className="text-xs font-medium text-muted-foreground">
-                  Observed Fact
-                </p>
-                <p className="mt-1">{event.observed_fact}</p>
-              </div>
-            )}
-            {event.inference && (
-              <div>
-                <p className="text-xs font-medium text-muted-foreground">
-                  Inference
-                </p>
-                <p className="mt-1">{event.inference}</p>
-              </div>
-            )}
-            {event.limitation && (
-              <div>
-                <p className="text-xs font-medium text-muted-foreground">
-                  Limitation
-                </p>
-                <p className="mt-1">{event.limitation}</p>
-              </div>
-            )}
-            {event.recommendation && (
-              <div>
-                <p className="text-xs font-medium text-muted-foreground">
-                  Recommendation
-                </p>
-                <p className="mt-1">{event.recommendation}</p>
-              </div>
-            )}
-            {event.evidence && (
-              <div className="md:col-span-2">
-                <p className="text-xs font-medium text-muted-foreground">
-                  Evidence
-                </p>
-                <p className="mt-1 whitespace-pre-wrap rounded bg-background p-2 font-mono text-xs">
-                  {event.evidence}
-                </p>
-              </div>
-            )}
-          </div>
-        </CollapsibleContent>
-      </div>
-    </Collapsible>
-  );
-}
-
-function FilterBar({
-  severity,
-  setSeverity,
-  rule,
-  setRule,
-  query,
-  setQuery,
-  severityOptions,
-  ruleOptions,
-}: {
-  severity: string;
-  setSeverity: (value: string) => void;
-  rule: string;
-  setRule: (value: string) => void;
-  query: string;
-  setQuery: (value: string) => void;
-  severityOptions: KV[];
-  ruleOptions: KV[];
-}) {
-  return (
-    <div className="flex flex-wrap items-center gap-2">
-      <Select value={severity} onValueChange={setSeverity}>
-        <SelectTrigger className="h-8 w-[140px] text-xs">
-          <SelectValue placeholder="All Severity" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">All Severity</SelectItem>
-          {severityOptions.map((item) => (
-            <SelectItem key={item.key} value={item.key}>
-              {item.key} ({item.count})
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-
-      <Select value={rule} onValueChange={setRule}>
-        <SelectTrigger className="h-8 w-[180px] text-xs">
-          <SelectValue placeholder="All Rules" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">All Rules</SelectItem>
-          {ruleOptions.map((item) => (
-            <SelectItem key={item.key} value={item.key}>
-              {item.key} ({item.count})
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-
-      <div className="relative">
-        <Search className="absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          type="search"
-          placeholder="Search events..."
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          className="h-8 w-[200px] pl-8 text-xs"
-        />
-      </div>
+      </Section>
     </div>
   );
 }
 
-function TopListCollapsible({
-  title,
-  items,
-  defaultOpen = false,
-}: {
-  title: string;
-  items: KV[];
-  defaultOpen?: boolean;
-}) {
-  const [isOpen, setIsOpen] = useState(defaultOpen);
+export default function QuarantReportViewer() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
-  return (
-    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-      <CollapsibleTrigger className="flex w-full items-center justify-between rounded-md px-3 py-2 text-sm font-medium hover:bg-muted/50">
-        <span>{title}</span>
-        {isOpen ? (
-          <ChevronDown className="size-4 text-muted-foreground" />
-        ) : (
-          <ChevronRight className="size-4 text-muted-foreground" />
-        )}
-      </CollapsibleTrigger>
-      <CollapsibleContent>
-        <div className="space-y-1 px-3 pb-2">
-          {items.length > 0 ? (
-            items.slice(0, 5).map((item) => (
-              <div
-                key={item.key}
-                className="flex items-center justify-between py-1 text-sm"
-              >
-                <span className="truncate text-muted-foreground">
-                  {item.key}
-                </span>
-                <span className="ml-2 tabular-nums">{item.count}</span>
-              </div>
-            ))
-          ) : (
-            <p className="py-1 text-sm text-muted-foreground">No data</p>
-          )}
-        </div>
-      </CollapsibleContent>
-    </Collapsible>
-  );
-}
-
-export default function QuarantDashboard() {
   const [report, setReport] = useState<Report | null>(null);
-  const [severity, setSeverity] = useState<string>("all");
-  const [rule, setRule] = useState<string>("all");
-  const [query, setQuery] = useState<string>("");
-  const [autoRefresh, setAutoRefresh] = useState<boolean>(false);
-  const [status, setStatus] = useState<string>("Loading...");
-  const [error, setError] = useState<string>("");
-  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [inventory, setInventory] = useState<InventoryReport | null>(null);
+  const [flows, setFlows] = useState<FlowRecord[]>([]);
+  const [status, setStatus] = useState("Loading...");
+  const [error, setError] = useState("");
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
-  async function loadReport(): Promise<void> {
+  const viewParam = searchParams.get("view");
+  const activeView: ViewName =
+    viewParam === "devices" || viewParam === "events" ? viewParam : "overview";
+  const activeHost = searchParams.get("host");
+
+  async function loadData(): Promise<void> {
     try {
       setIsRefreshing(true);
       setError("");
 
-      const response = await fetch(`${API_BASE_URL}/api/report`, {
-        cache: "no-store",
-      });
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
+      const [reportResponse, inventoryResponse, flowsResponse] =
+        await Promise.all([
+          fetch(`${API_BASE_URL}/api/report`, { cache: "no-store" }),
+          fetch(`${API_BASE_URL}/api/inventory`, { cache: "no-store" }),
+          fetch(`${API_BASE_URL}/api/flows`, { cache: "no-store" }),
+        ]);
+
+      if (!reportResponse.ok) {
+        throw new Error(`report HTTP ${reportResponse.status}`);
       }
 
-      const nextReport: Report = await response.json();
+      const [nextReport, nextInventory, nextFlows] = await Promise.all([
+        reportResponse.json() as Promise<Report>,
+        inventoryResponse.ok
+          ? (inventoryResponse.json() as Promise<InventoryReport>)
+          : Promise.resolve({ devices: [] }),
+        flowsResponse.ok
+          ? (flowsResponse.json() as Promise<FlowRecord[]>)
+          : Promise.resolve([]),
+      ]);
+
       setReport(nextReport);
-      setLastUpdated(new Date());
+      setInventory(nextInventory);
+      setFlows(nextFlows);
       setStatus("Connected");
-    } catch (err) {
-      const message = err instanceof Error ? err.message : "Unknown error";
+      setLastUpdated(new Date());
+    } catch (fetchError) {
+      const message =
+        fetchError instanceof Error ? fetchError.message : "Unknown error";
       setError(message);
       setStatus("Error");
     } finally {
@@ -649,269 +1289,100 @@ export default function QuarantDashboard() {
   }
 
   useEffect(() => {
-    void loadReport();
+    void loadData();
   }, []);
 
-  useEffect(() => {
-    if (!autoRefresh) return undefined;
+  function setView(view: ViewName, host?: string): void {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("view", view);
+    if (host) {
+      params.set("host", host);
+    } else {
+      params.delete("host");
+    }
+    const query = params.toString();
+    router.replace(query ? `${pathname}?${query}` : pathname);
+  }
 
-    const id = window.setInterval(() => {
-      void loadReport();
-    }, 5000);
-
-    return () => window.clearInterval(id);
-  }, [autoRefresh]);
-
-  const filteredEvents = (report?.events || []).filter((event) => {
-    if (severity !== "all" && event.severity !== severity) return false;
-
-    const eventRule = event.rule_id || event.type || "";
-    if (rule !== "all" && eventRule !== rule) return false;
-
-    const trimmedQuery = query.trim().toLowerCase();
-    if (!trimmedQuery) return true;
-
-    const haystack = [
-      event.type,
-      event.rule_id,
-      event.category,
-      event.flow_key,
-      event.device_key,
-      event.device_label,
-      event.device_status,
-      event.user_title,
-      event.user_message,
-      event.user_impact,
-      event.src_ip,
-      event.dst_ip,
-      event.message,
-      event.evidence,
-    ]
-      .join(" ")
-      .toLowerCase();
-
-    return haystack.includes(trimmedQuery);
-  });
-
-  const stats = summarize(filteredEvents);
-  const userFacingEvents = filteredEvents
-    .filter((event) => Boolean(event.user_title))
-    .slice()
-    .sort((a, b) => {
-      if (severityRank(a.severity) !== severityRank(b.severity)) {
-        return severityRank(b.severity) - severityRank(a.severity);
-      }
-      return new Date(b.ts).getTime() - new Date(a.ts).getTime();
-    });
+  const hosts = aggregateHosts(report?.events || [], inventory?.devices || [], flows);
+  const selectedHost = hosts.find((host) => host.ip === activeHost);
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-10 border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80">
-        <div className="mx-auto flex max-w-screen-2xl items-center justify-between gap-4 px-4 py-3">
-          <div className="flex items-center gap-4">
-            <h1 className="text-lg font-semibold tracking-tight">Quarant</h1>
-            <div className="hidden items-center gap-2 text-xs text-muted-foreground sm:flex">
-              <Server className="size-3.5" />
-              <span className="font-mono">{API_BASE_URL}</span>
+    <div className="min-h-screen bg-white text-[#0f172a]">
+      <header className="border-b border-border bg-white">
+        <div className="mx-auto max-w-[1440px] px-7 py-5">
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <h1 className="text-[42px] font-semibold tracking-[-0.03em]">
+                Quarant
+              </h1>
+              <p className="mt-1 text-lg text-[#475569]">
+                IoT Passive Observation Report Viewer
+              </p>
+            </div>
+
+            <div className="text-right text-sm text-[#475569]">
+              <div>API: {API_BASE_URL}</div>
+              <div>Status: {status}</div>
+              <div>Updated: {lastUpdated ? formatTime(lastUpdated.toISOString()) : "-"}</div>
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <Clock className="size-3.5" />
-              <span>
-                {lastUpdated ? formatTime(lastUpdated.toISOString()) : "-"}
-              </span>
-            </div>
+          <nav className="mt-5 flex items-center gap-2">
+            <button
+              onClick={() => setView("overview")}
+              className={linkClassName(activeView === "overview" && !selectedHost)}
+            >
+              Overview
+            </button>
+            <button
+              onClick={() => setView("devices")}
+              className={linkClassName(activeView === "devices" || Boolean(selectedHost))}
+            >
+              Devices
+            </button>
+            <button
+              onClick={() => setView("events")}
+              className={linkClassName(activeView === "events")}
+            >
+              Events
+            </button>
 
-            <div className="flex items-center gap-1.5">
-              <Button
-                variant={autoRefresh ? "default" : "outline"}
-                size="sm"
-                onClick={() => setAutoRefresh((v) => !v)}
-                className="h-7 gap-1.5 text-xs"
-              >
-                <Activity className="size-3.5" />
-                Auto {autoRefresh ? "ON" : "OFF"}
-              </Button>
+            <div className="ml-auto">
               <Button
                 variant="outline"
-                size="sm"
-                onClick={() => void loadReport()}
+                onClick={() => void loadData()}
                 disabled={isRefreshing}
-                className="h-7 gap-1.5 text-xs"
+                className="h-9 rounded-none border-[#d0d5dd]"
               >
-                <RefreshCw
-                  className={cn("size-3.5", isRefreshing && "animate-spin")}
-                />
+                <RefreshCw className={cn("mr-2 size-4", isRefreshing && "animate-spin")} />
                 Refresh
               </Button>
             </div>
-          </div>
+          </nav>
         </div>
       </header>
 
-      <main className="mx-auto max-w-screen-2xl px-4 py-4">
-        {error && (
-          <div className="mb-4 rounded-md border border-[var(--severity-critical)]/30 bg-[var(--severity-critical-bg)] px-4 py-2 text-sm">
-            <span className="font-medium text-[var(--severity-critical)]">
-              Connection Error:
-            </span>{" "}
-            {error}
+      <main className="mx-auto max-w-[1440px] px-7 py-8">
+        {error ? (
+          <div className="mb-6 border border-[#fda29b] bg-[#fff5f4] px-4 py-3 text-sm text-[#b42318]">
+            API 接続に失敗しました: {error}
           </div>
+        ) : null}
+
+        {selectedHost ? (
+          <HostReportView host={selectedHost} onBack={() => setView("devices")} />
+        ) : activeView === "devices" ? (
+          <DevicesView hosts={hosts} onOpenHost={(ip) => setView("devices", ip)} />
+        ) : activeView === "events" ? (
+          <EventsView report={report} hosts={hosts} />
+        ) : (
+          <OverviewView
+            report={report}
+            hosts={hosts}
+            onOpenHost={(ip) => setView("devices", ip)}
+          />
         )}
-
-        <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-4 xl:grid-cols-8">
-          <SummaryCard
-            label="Total Events"
-            value={stats.total}
-            icon={Activity}
-          />
-          <SummaryCard
-            label="Critical"
-            value={stats.critical}
-            icon={AlertCircle}
-            variant="critical"
-          />
-          <SummaryCard
-            label="High"
-            value={stats.high}
-            icon={AlertTriangle}
-            variant="high"
-          />
-          <SummaryCard
-            label="Warning"
-            value={stats.warning}
-            icon={AlertTriangle}
-            variant="warning"
-          />
-          <SummaryCard
-            label="Source IPs"
-            value={stats.sources}
-            icon={Info}
-            variant="info"
-          />
-          <SummaryCard
-            label="User Notices"
-            value={report?.user_notifications || userFacingEvents.length}
-            icon={Info}
-            variant="info"
-          />
-          <SummaryCard
-            label="Quarantine"
-            value={report?.quarantine_candidates || 0}
-            icon={AlertTriangle}
-            variant="high"
-          />
-          <SummaryCard
-            label="Unknown Devices"
-            value={report?.unknown_devices || 0}
-            icon={Server}
-            variant="warning"
-          />
-        </div>
-
-        <section className="mb-4 rounded-2xl border border-border bg-card p-4">
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <h2 className="text-lg font-semibold tracking-tight">
-                ユーザー向け通知
-              </h2>
-              <p className="text-sm text-muted-foreground">
-                専門用語を抑えて、まず確認したいことを上に表示しています。
-              </p>
-            </div>
-            <Badge variant="outline">{userFacingEvents.length} items</Badge>
-          </div>
-
-          <div className="mt-4 space-y-3">
-            {userFacingEvents.length > 0 ? (
-              userFacingEvents.map((event, index) => (
-                <UserNotificationCard
-                  key={`${event.ts}-${event.rule_id || event.type || "notification"}-${index}`}
-                  event={event}
-                />
-              ))
-            ) : (
-              <div className="rounded-xl border border-dashed border-border px-4 py-8 text-center text-sm text-muted-foreground">
-                現在のフィルタ条件では、ユーザー向け通知はありません。
-              </div>
-            )}
-          </div>
-        </section>
-
-        <div className="flex flex-col gap-4 lg:flex-row">
-          <div className="min-w-0 flex-1">
-            <div className="rounded-md border border-border bg-card">
-              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-3 py-2">
-                <FilterBar
-                  severity={severity}
-                  setSeverity={setSeverity}
-                  rule={rule}
-                  setRule={setRule}
-                  query={query}
-                  setQuery={setQuery}
-                  severityOptions={report?.severity || []}
-                  ruleOptions={report?.rules || []}
-                />
-                <span className="text-xs text-muted-foreground">
-                  {filteredEvents.length} events
-                  {report?.total_events && filteredEvents.length !== report.total_events
-                    ? ` / ${report.total_events} total`
-                    : ""}
-                </span>
-              </div>
-
-              <div className="grid grid-cols-[100px_80px_1fr_180px_2fr] items-center gap-3 border-b border-border bg-muted/30 px-3 py-2 text-xs font-medium text-muted-foreground">
-                <span>Time</span>
-                <span>Severity</span>
-                <span>Rule</span>
-                <span>Source → Dest</span>
-                <span>Message</span>
-              </div>
-
-              <div className="max-h-[calc(100vh-320px)] overflow-y-auto">
-                {filteredEvents.length > 0 ? (
-                  filteredEvents.map((event, index) => (
-                    <EventRow
-                      key={`${event.ts}-${event.rule_id || event.type || "event"}-${index}`}
-                      event={event}
-                      index={index}
-                    />
-                  ))
-                ) : (
-                  <div className="px-4 py-12 text-center">
-                    <p className="text-sm text-muted-foreground">
-                      {report
-                        ? "No events match the current filters"
-                        : "Loading events..."}
-                    </p>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-
-          <aside className="w-full shrink-0 lg:w-64">
-            <div className="rounded-md border border-border bg-card">
-              <TopListCollapsible
-                title="Top Rules"
-                items={report?.rules || []}
-                defaultOpen={true}
-              />
-              <div className="border-t border-border" />
-              <TopListCollapsible
-                title="Top Categories"
-                items={report?.categories || []}
-              />
-              <div className="border-t border-border" />
-              <TopListCollapsible
-                title="Top Source IPs"
-                items={report?.sources || []}
-              />
-            </div>
-          </aside>
-        </div>
       </main>
     </div>
   );

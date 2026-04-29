@@ -36,8 +36,12 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	flowSink, err := analyzer.NewJSONSink("flows.jsonl")
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	handler := analyzer.NewFlowHandler(sink, *debug, db)
+	handler := analyzer.NewFlowHandler(sink, flowSink, *debug, db)
 	var inventoryWriter *analyzer.DeviceInventoryWriter
 	if *inventoryOut != "" {
 		inventoryWriter = analyzer.NewDeviceInventoryWriter(*inventoryOut, *inventoryInterval, handler.DeviceInventory)

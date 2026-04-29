@@ -15,16 +15,18 @@ import (
 )
 
 type FlowHandler struct {
-	sink      *JSONLSink
+	eventSink *JSONLSink
+	flowSink  *JSONLSink
 	cache     *FlowCache
 	debug     bool
 	devices   *device.Store
 	knowledge *knowledge.DB
 }
 
-func NewFlowHandler(sink *JSONLSink, debug bool, db *knowledge.DB) *FlowHandler {
+func NewFlowHandler(eventSink, flowSink *JSONLSink, debug bool, db *knowledge.DB) *FlowHandler {
 	return &FlowHandler{
-		sink:      sink,
+		eventSink: eventSink,
+		flowSink:  flowSink,
 		cache:     NewFlowCache(16*1024, 1*time.Hour),
 		debug:     debug,
 		devices:   device.NewStore(),
@@ -209,7 +211,7 @@ func (h *FlowHandler) writeDeviceDebug(now time.Time, srcIP string, d *device.De
 	detailReasons := humanizeReasons(reasons)
 	identity := d.Identity
 
-	_ = h.sink.Write(Event{
+	_ = h.eventSink.Write(Event{
 		Timestamp: now,
 		Type:      "DEVICE_DEBUG",
 		Severity:  SeverityInfo,
@@ -509,6 +511,144 @@ func i4LegacySignals(d *device.DeviceProfile) []string {
 	return signals
 }
 
+func (h *FlowHandler) updateFlowState(st *FlowState, srcIP, dstIP string, srcPort, dstPort uint16, payloadLen int) {
+	if st == nil {
+		return
+	}
+	if st.SrcIP == "" {
+		st.SrcIP = srcIP
+		st.SrcPort = srcPort
+		st.DstIP = dstIP
+		st.DstPort = dstPort
+	}
+	st.PacketCount++
+
+	// Limitation: byte counters are estimated from captured TCP payload length, not full wire bytes.
+	if srcIP == st.SrcIP && srcPort == st.SrcPort && dstIP == st.DstIP && dstPort == st.DstPort {
+		st.ClientBytes += int64(payloadLen)
+		return
+	}
+	if srcIP == st.DstIP && srcPort == st.DstPort && dstIP == st.SrcIP && dstPort == st.SrcPort {
+		st.ServerBytes += int64(payloadLen)
+		return
+	}
+	st.ClientBytes += int64(payloadLen)
+}
+
+func (h *FlowHandler) updateFlowMetadata(st *FlowState, httpInfo *rules.HTTPInfo, mqttInfo *rules.MQTTInfo, telnetInfo *rules.TelnetInfo) {
+	if st == nil {
+		return
+	}
+	if httpInfo != nil {
+		st.HTTPSeen = true
+		if host := strings.TrimSpace(httpInfo.Headers["host"]); host != "" {
+			st.HTTPHost = host
+		}
+		if method := strings.TrimSpace(httpInfo.Method); method != "" {
+			st.HTTPMethod = method
+		}
+		if path := strings.TrimSpace(httpInfo.Path); path != "" {
+			st.HTTPPath = path
+		}
+	}
+	if mqttInfo != nil {
+		st.MQTTSeen = true
+	}
+	if telnetInfo != nil {
+		st.TelnetSeen = true
+	}
+}
+
+func (h *FlowHandler) writeFlowRecordSnapshot(now time.Time, key string, st *FlowState, final bool) {
+	if h == nil || h.flowSink == nil || st == nil {
+		return
+	}
+	record := h.buildFlowRecord(now, key, st)
+	metaFingerprint := strings.Join([]string{
+		record.Protocol,
+		record.AppProtocol,
+		record.Host,
+		record.SNI,
+		record.HTTPMethod,
+		record.HTTPPath,
+		record.Direction,
+		record.DeviceCategory,
+		record.ObservedDestination,
+	}, "|")
+	if !final &&
+		st.PacketCount > 1 &&
+		st.PacketCount%10 != 0 &&
+		now.Sub(st.LastFlowLogAt) < 2*time.Second &&
+		metaFingerprint == st.LastFlowMetaFingerprint {
+		return
+	}
+	_ = h.flowSink.WriteFlow(record)
+	st.LastFlowLogAt = now
+	st.LastFlowMetaFingerprint = metaFingerprint
+}
+
+func (h *FlowHandler) buildFlowRecord(now time.Time, key string, st *FlowState) FlowRecord {
+	sni := ""
+	if st.TLSClientInfo != nil {
+		sni = strings.TrimSpace(st.TLSClientInfo.SNI)
+	}
+	host := strings.TrimSpace(st.HTTPHost)
+	protocol, appProtocol := classifyFlowProtocol(st)
+	deviceCategory := ""
+	if h != nil && h.devices != nil && strings.TrimSpace(st.SrcIP) != "" {
+		deviceCategory = normalizeDeviceCategory(h.devices.GetOrCreate(st.SrcIP))
+	}
+	return FlowRecord{
+		Timestamp:           now,
+		FlowKey:             key,
+		SrcIP:               st.SrcIP,
+		SrcPort:             st.SrcPort,
+		DstIP:               st.DstIP,
+		DstPort:             st.DstPort,
+		Protocol:            protocol,
+		AppProtocol:         appProtocol,
+		Host:                host,
+		SNI:                 sni,
+		HTTPMethod:          strings.TrimSpace(st.HTTPMethod),
+		HTTPPath:            strings.TrimSpace(st.HTTPPath),
+		BytesOut:            st.ClientBytes,
+		BytesIn:             st.ServerBytes,
+		PacketCount:         st.PacketCount,
+		Direction:           flowDirection(st.DstIP),
+		DeviceLabel:         "",
+		DeviceCategory:      deviceCategory,
+		ObservedDestination: observedDestination(sni, host, st.DstIP),
+	}
+}
+
+func classifyFlowProtocol(st *FlowState) (string, string) {
+	if st == nil {
+		return "tcp", ""
+	}
+	if st.TLSClientSeen || st.TLSServerSeen {
+		switch {
+		case st.HTTPSeen:
+			return "tls", "https"
+		case st.MQTTSeen:
+			return "tls", "mqtts"
+		case st.DstPort == 443 || st.DstPort == 8443 || st.DstPort == 9443 || st.DstPort == 10443:
+			return "tls", "https"
+		default:
+			return "tls", ""
+		}
+	}
+	switch {
+	case st.HTTPSeen:
+		return "http", "http"
+	case st.MQTTSeen:
+		return "mqtt", "mqtt"
+	case st.TelnetSeen:
+		return "telnet", "telnet"
+	default:
+		return "tcp", ""
+	}
+}
+
 func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 	tcpLayer := packet.Layer(layers.LayerTypeTCP)
 	srcIP, dstIP, ok := packetIPStrings(packet)
@@ -524,10 +664,7 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 
 	key := flowKeyTCP(srcIP, srcPort, dstIP, dstPort)
 	st := h.cache.GetOrCreate(key, now)
-	if st.DstIP == "" {
-		st.DstIP = dstIP
-		st.DstPort = dstPort
-	}
+	h.updateFlowState(st, srcIP, dstIP, srcPort, dstPort, len(tcp.Payload))
 
 	capturePayload := rules.NeedsPayloadCapture(dstPort) || rules.NeedsPayloadCapture(srcPort)
 	isHTTPClientToServer := rules.IsHTTPPort(dstPort)
@@ -569,7 +706,7 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 					msg += " cert=nil"
 				}
 
-				_ = h.sink.Write(Event{
+				_ = h.eventSink.Write(Event{
 					Timestamp: now,
 					Type:      "TLS_SERVER_DEBUG",
 					Severity:  SeverityInfo,
@@ -623,11 +760,13 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 		device.AddHTTPBehaviorHints(d, httpInfo, dstPort, isTLSClientToServer)
 		h.writeDeviceDebug(now, srcIP, d)
 	}
+	h.updateFlowMetadata(st, httpInfo, mqttInfo, telnetInfo)
 
 	d := h.devices.GetOrCreate(srcIP)
 	observeDeviceFlow(d, now, dstPort, observedProtocolsForFlow(dstPort, httpInfo, mqttInfo, telnetInfo, st.TLSClientSeen))
+	h.writeFlowRecordSnapshot(now, key, st, false)
 	for _, event := range h.buildDeviceNotificationEvents(now, key, srcIP, dstIP, srcPort, dstPort, d) {
-		_ = h.sink.Write(event)
+		_ = h.eventSink.Write(event)
 	}
 	localClassification := d.Classification
 	localDeviceCategory := localClassification.NormalizedCategory()
@@ -772,7 +911,7 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 			deviceInferenceReasons,
 		)
 
-		_ = h.sink.Write(Event{
+		_ = h.eventSink.Write(Event{
 			Timestamp: now,
 			Type:      "I6_DEBUG",
 			Severity:  SeverityInfo,
@@ -846,7 +985,7 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 		matches = append(matches, *composite)
 	}
 	if quarantine := h.buildQuarantineRecommendationEvent(now, key, srcIP, dstIP, srcPort, dstPort, d, matches); quarantine != nil {
-		_ = h.sink.Write(*quarantine)
+		_ = h.eventSink.Write(*quarantine)
 		d.RecordRiskEvent(now, quarantine.Type, string(quarantine.Severity), []string{quarantine.Category})
 	}
 
@@ -877,7 +1016,7 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 			Message:        m.Message,
 		}
 		h.enrichEvent(&event)
-		_ = h.sink.Write(event)
+		_ = h.eventSink.Write(event)
 
 		deviceProfile := h.devices.GetOrCreate(srcIP)
 		deviceProfile.RecordRiskEvent(now, m.Type, string(m.Severity), m.OWASPTags)
@@ -891,7 +1030,9 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 	}
 
 	if now.Unix()%10 == 0 {
-		h.cache.Cleanup(now)
+		h.cache.Cleanup(now, func(key string, st *FlowState) {
+			h.writeFlowRecordSnapshot(now, key, st, true)
+		})
 	}
 
 	if h.debug && capturePayload && len(tcp.Payload) > 0 {
@@ -899,7 +1040,7 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 		if len(p) > 256 {
 			p = p[:256]
 		}
-		_ = h.sink.Write(Event{
+		_ = h.eventSink.Write(Event{
 			Timestamp: now,
 			Type:      "PAYLOAD_DEBUG",
 			Severity:  SeverityInfo,

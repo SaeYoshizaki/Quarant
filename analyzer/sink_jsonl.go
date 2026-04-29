@@ -20,10 +20,18 @@ func NewJSONSink(path string) (*JSONLSink, error) {
 }
 
 func (s *JSONLSink) Write(event Event) error {
+	return s.writeValue(event)
+}
+
+func (s *JSONLSink) WriteFlow(flow FlowRecord) error {
+	return s.writeValue(flow)
+}
+
+func (s *JSONLSink) writeValue(v any) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	data, err := json.Marshal(event)
+	data, err := json.Marshal(v)
 	if err != nil {
 		return err
 	}

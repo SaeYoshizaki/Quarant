@@ -11,6 +11,8 @@ import (
 
 func main() {
 	inPath := flag.String("in", "events.jsonl", "input events.jsonl path")
+	flowsPath := flag.String("flows-in", "flows.jsonl", "input flows.jsonl path")
+	inventoryPath := flag.String("inventory-in", "device_inventory.json", "input device inventory JSON path")
 	addr := flag.String("addr", "127.0.0.1:8080", "HTTP listen address")
 	flag.Parse()
 
@@ -32,9 +34,50 @@ func main() {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 	})
+	mux.HandleFunc("/api/activity/summary", func(w http.ResponseWriter, r *http.Request) {
+		rep, err := reportapi.LoadActivitySummary(*inPath, *flowsPath)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		enc := json.NewEncoder(w)
+		enc.SetIndent("", "  ")
+		if err := enc.Encode(rep); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+	})
+	mux.HandleFunc("/api/inventory", func(w http.ResponseWriter, r *http.Request) {
+		rep, err := reportapi.LoadInventory(*inventoryPath)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		enc := json.NewEncoder(w)
+		enc.SetIndent("", "  ")
+		if err := enc.Encode(rep); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+	})
+	mux.HandleFunc("/api/flows", func(w http.ResponseWriter, r *http.Request) {
+		rep, err := reportapi.LoadFlows(*flowsPath)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		enc := json.NewEncoder(w)
+		enc.SetIndent("", "  ")
+		if err := enc.Encode(rep); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+	})
 
 	log.Printf("quarant api listening on http://%s", *addr)
 	log.Printf("reading events from %s", *inPath)
+	log.Printf("reading flows from %s", *flowsPath)
+	log.Printf("reading inventory from %s", *inventoryPath)
 	if err := http.ListenAndServe(*addr, withCORS(mux)); err != nil {
 		log.Fatal(err)
 	}

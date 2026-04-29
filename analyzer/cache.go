@@ -16,14 +16,31 @@ type FlowState struct {
 
 	Reported map[string]bool
 
+	SrcIP   string
+	SrcPort uint16
 	DstIP   string
 	DstPort uint16
+
+	PacketCount int
+	ClientBytes int64
+	ServerBytes int64
 
 	TLSClientSeen bool
 	TLSClientInfo *rules.TLSClientHelloInfo
 
 	TLSServerSeen bool
 	TLSServerInfo *rules.TLSServerInfo
+
+	HTTPSeen   bool
+	HTTPHost   string
+	HTTPMethod string
+	HTTPPath   string
+
+	MQTTSeen   bool
+	TelnetSeen bool
+
+	LastFlowLogAt           time.Time
+	LastFlowMetaFingerprint string
 
 	DNSNames []string
 }
@@ -107,12 +124,15 @@ func (c *FlowCache) AppendServerUpToLimit(st *FlowState, chunk []byte) {
 	st.ServerData = append(st.ServerData, chunk...)
 }
 
-func (c *FlowCache) Cleanup(now time.Time) {
+func (c *FlowCache) Cleanup(now time.Time, onEvict func(string, *FlowState)) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
 	for k, st := range c.m {
 		if now.Sub(st.LastSeen) > c.ttl {
+			if onEvict != nil {
+				onEvict(k, st)
+			}
 			delete(c.m, k)
 		}
 	}

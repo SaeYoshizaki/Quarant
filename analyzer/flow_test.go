@@ -95,3 +95,66 @@ func TestFlowHandlerDeviceInventorySnapshot(t *testing.T) {
 		t.Fatalf("unexpected protocols: %v", snapshots[0].ObservedProtocols)
 	}
 }
+
+func TestObservedDestinationPriority(t *testing.T) {
+	if got := observedDestination("api.example.com", "www.example.com", "34.117.59.81"); got != "api.example.com" {
+		t.Fatalf("expected SNI priority, got %q", got)
+	}
+	if got := observedDestination("", "www.example.com", "34.117.59.81"); got != "www.example.com" {
+		t.Fatalf("expected host fallback, got %q", got)
+	}
+	if got := observedDestination("", "", "34.117.59.81"); got != "34.117.59.81" {
+		t.Fatalf("expected dst fallback, got %q", got)
+	}
+}
+
+func TestFlowDirectionClassification(t *testing.T) {
+	cases := []struct {
+		dstIP string
+		want  string
+	}{
+		{dstIP: "192.168.1.10", want: "local"},
+		{dstIP: "10.0.0.1", want: "local"},
+		{dstIP: "127.0.0.1", want: "local"},
+		{dstIP: "169.254.10.20", want: "local"},
+		{dstIP: "34.117.59.81", want: "external"},
+		{dstIP: "", want: "unknown"},
+	}
+	for _, tt := range cases {
+		if got := flowDirection(tt.dstIP); got != tt.want {
+			t.Fatalf("flowDirection(%q)=%q, want %q", tt.dstIP, got, tt.want)
+		}
+	}
+}
+
+func TestBuildFlowRecordUsesStateMetadata(t *testing.T) {
+	h := &FlowHandler{devices: device.NewStore()}
+	d := h.devices.GetOrCreate("192.168.1.10")
+	d.Classification = device.Classification{Category: "Camera"}
+
+	st := &FlowState{
+		SrcIP:         "192.168.1.10",
+		SrcPort:       52344,
+		DstIP:         "34.117.59.81",
+		DstPort:       443,
+		PacketCount:   42,
+		ClientBytes:   3210,
+		ServerBytes:   15420,
+		TLSClientSeen: true,
+		TLSClientInfo: &rules.TLSClientHelloInfo{SNI: "api.example.com"},
+	}
+
+	record := h.buildFlowRecord(time.Date(2026, 4, 28, 12, 0, 0, 0, time.UTC), flowKeyTCP(st.SrcIP, st.SrcPort, st.DstIP, st.DstPort), st)
+	if record.Protocol != "tls" || record.AppProtocol != "https" {
+		t.Fatalf("unexpected protocol fields: %+v", record)
+	}
+	if record.ObservedDestination != "api.example.com" {
+		t.Fatalf("unexpected observed destination: %+v", record)
+	}
+	if record.Direction != "external" {
+		t.Fatalf("unexpected direction: %+v", record)
+	}
+	if record.DeviceCategory != "Camera" {
+		t.Fatalf("unexpected device category: %+v", record)
+	}
+}
