@@ -123,7 +123,6 @@ type activityEvent struct {
 }
 
 func LoadActivitySummary(eventsPath, flowsPath string) (ActivitySummaryResponse, error) {
-	// This API normalizes "today" in UTC so hourly buckets are deterministic regardless of host local timezone.
 	now := time.Now().UTC()
 	dayStart := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
 	dayEnd := dayStart.Add(24 * time.Hour)

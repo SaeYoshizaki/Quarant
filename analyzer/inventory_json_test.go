@@ -87,7 +87,6 @@ func TestInventorySnapshotExcludesDebugEventsAndSecretValues(t *testing.T) {
 	p.Protocols["http"] = true
 	p.Ports[80] = true
 
-	// Risk summary is only driven by explicit risk events, not debug output.
 	p.RecordRiskEvent(now.Add(time.Minute), "I7_HTTP_AUTH", "HIGH", []string{"I1", "I3", "I7"})
 	data, err := MarshalDeviceInventoryReport(now, []device.InventorySnapshot{p.Snapshot()})
 	if err != nil {

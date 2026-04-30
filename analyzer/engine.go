@@ -17,14 +17,30 @@ func NewEngine(handler *FlowHandler) *Engine {
 	}
 }
 
-func (e *Engine) Run(interfaceName string) error {
+func (e *Engine) RunLive(interfaceName string) error {
 	handle, err := pcap.OpenLive(interfaceName, 65535, true, pcap.BlockForever)
 	if err != nil {
 		return err
 	}
+	defer handle.Close()
+
+	return e.runHandle(handle, "listening on "+interfaceName)
+}
+
+func (e *Engine) RunOffline(path string) error {
+	handle, err := pcap.OpenOffline(path)
+	if err != nil {
+		return err
+	}
+	defer handle.Close()
+
+	return e.runHandle(handle, "reading pcap "+path)
+}
+
+func (e *Engine) runHandle(handle *pcap.Handle, status string) error {
 	packetSource := gopacket.NewPacketSource(handle, handle.LinkType())
 
-	log.Println("listening on", interfaceName)
+	log.Println(status)
 	for packet := range packetSource.Packets() {
 		e.handler.HandlePacket(packet)
 	}

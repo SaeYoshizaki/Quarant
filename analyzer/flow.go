@@ -523,7 +523,6 @@ func (h *FlowHandler) updateFlowState(st *FlowState, srcIP, dstIP string, srcPor
 	}
 	st.PacketCount++
 
-	// Limitation: byte counters are estimated from captured TCP payload length, not full wire bytes.
 	if srcIP == st.SrcIP && srcPort == st.SrcPort && dstIP == st.DstIP && dstPort == st.DstPort {
 		st.ClientBytes += int64(payloadLen)
 		return

@@ -10,6 +10,14 @@ It converts passively observable network behavior into explainable risk signals.
 
 `cmd/quarant` では、`-inventory-out device_inventory.json` と `-inventory-interval 10s` で I8 向けの device inventory snapshot を別 JSON として確認できます。
 
+OpenWrt などで取得した `pcap` を Parrot PC 上でオフライン解析したい場合は、`-pcap <path>` を使えます。`-pcap` 指定時は既存の解析ロジックで `events.jsonl` / `flows.jsonl` を生成し、pcap を最後まで読み終えると正常終了します。
+
+```bash
+./build/quarant -pcap mac-test.pcap -debug
+```
+
+ライブキャプチャは従来どおり `-i <interface>` を使います。
+
 ## 家庭ユーザー向け通知レイヤ
 
 Quarant はパッシブ監視を前提にしつつ、家庭ユーザー向けの通知レイヤも持てるようになりました。

@@ -12,6 +12,7 @@ import (
 func main() {
 	debug := flag.Bool("debug", false, "enable debug payload logging")
 	iface := flag.String("i", "eth1", "interface to capture on")
+	pcapPath := flag.String("pcap", "", "path to a pcap file for offline analysis")
 	inventoryOut := flag.String("inventory-out", "device_inventory.json", "path to write device inventory snapshot JSON (empty to disable)")
 	inventoryInterval := flag.Duration("inventory-interval", 10*time.Second, "interval to refresh device inventory snapshot JSON")
 	flag.Parse()
@@ -50,7 +51,12 @@ func main() {
 	}
 	engine := analyzer.NewEngine(handler)
 
-	if err := engine.Run(*iface); err != nil {
+	if *pcapPath != "" {
+		err = engine.RunOffline(*pcapPath)
+	} else {
+		err = engine.RunLive(*iface)
+	}
+	if err != nil {
 		log.Fatal(err)
 	}
 }
