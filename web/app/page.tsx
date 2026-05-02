@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, Suspense, useDeferredValue, useEffect, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { RefreshCw, Search, ChevronRight } from "lucide-react";
 
@@ -165,7 +165,7 @@ type HostRow = {
 type ViewName = "overview" | "devices" | "events";
 
 const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:8080";
+  process.env.NEXT_PUBLIC_API_BASE_URL || "";
 
 function formatTime(value?: string): string {
   if (!value) return "-";
@@ -264,6 +264,14 @@ function normalizeDestination(flow: FlowRecord): string {
 function formatOWASP(tags?: string[]): string {
   if (!tags || tags.length === 0) return "-";
   return tags.join(", ");
+}
+
+function topKV(items?: KV[], limit = 5): KV[] {
+  return (items || []).slice(0, limit);
+}
+
+function metricValue(items: KV[] | undefined, key: string): number {
+  return (items || []).find((item) => item.key === key)?.count || 0;
 }
 
 function parseRuleCategory(rule?: string): string[] {
@@ -552,6 +560,30 @@ function SummaryLine({ children }: { children: React.ReactNode }) {
   );
 }
 
+function MetricCard({
+  label,
+  value,
+  helper,
+}: {
+  label: string;
+  value: string | number;
+  helper?: string;
+}) {
+  return (
+    <div className="border border-border bg-card px-4 py-4">
+      <div className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#667085]">
+        {label}
+      </div>
+      <div className="mt-2 font-mono text-3xl font-semibold text-[#101828]">
+        {value}
+      </div>
+      {helper ? (
+        <div className="mt-1 text-xs text-[#667085]">{helper}</div>
+      ) : null}
+    </div>
+  );
+}
+
 function JsonDisclosure({
   label,
   value,
@@ -594,12 +626,16 @@ function OverviewView({
   const highCritical = events.filter(
     (event) => severityRank(event.severity) >= severityRank("HIGH")
   ).length;
+  const sourceLabel = report?.source || "-";
+  const highCount = metricValue(report?.severity, "HIGH");
+  const criticalCount = metricValue(report?.severity, "CRITICAL");
+  const warningCount = metricValue(report?.severity, "WARNING");
 
   return (
     <div className="space-y-6">
       <Section
         title="Overview"
-        description="全体の観測結果を読み取り専用で確認するレポートビューです。"
+        description="観測入力の由来、件数、主要カテゴリを最初に把握するためのサマリです。"
       >
         <div className="space-y-4">
           <SummaryLine>
@@ -607,6 +643,105 @@ function OverviewView({
             {highCritical}件の High/Critical ・ {hosts.length}台のデバイス ・ 観測期間{" "}
             {formatWindow(report?.window?.start, report?.window?.end)}
           </SummaryLine>
+
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+            <MetricCard
+              label="Total Events"
+              value={report?.total_events || 0}
+              helper={`source: ${sourceLabel}`}
+            />
+            <MetricCard
+              label="High / Critical"
+              value={highCount + criticalCount}
+              helper={`critical ${criticalCount} / high ${highCount}`}
+            />
+            <MetricCard
+              label="Warnings"
+              value={warningCount}
+              helper="medium-confidence observations included"
+            />
+            <MetricCard
+              label="Observed Devices"
+              value={hosts.length}
+              helper={`${report?.unknown_devices || 0} unknown devices`}
+            />
+            <MetricCard
+              label="User / Quarantine"
+              value={`${report?.user_notifications || 0} / ${report?.quarantine_candidates || 0}`}
+              helper="user notifications / quarantine candidates"
+            />
+          </div>
+
+          <div className="grid gap-4 xl:grid-cols-3">
+            <div className="border border-border">
+              <div className="border-b border-border bg-[#fafafa] px-4 py-2 text-sm font-medium">
+                Top Rules
+              </div>
+              <div className="divide-y divide-border">
+                {topKV(report?.rules).length > 0 ? (
+                  topKV(report?.rules).map((item) => (
+                    <div
+                      key={item.key}
+                      className="flex items-center justify-between px-4 py-2 text-sm"
+                    >
+                      <span className="font-mono text-xs text-[#334155]">{item.key}</span>
+                      <span className="font-mono text-xs text-[#667085]">{item.count}</span>
+                    </div>
+                  ))
+                ) : (
+                  <div className="px-4 py-3 text-sm text-muted-foreground">
+                    No rule summary available.
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="border border-border">
+              <div className="border-b border-border bg-[#fafafa] px-4 py-2 text-sm font-medium">
+                Top OWASP Categories
+              </div>
+              <div className="divide-y divide-border">
+                {topKV(report?.categories).length > 0 ? (
+                  topKV(report?.categories).map((item) => (
+                    <div
+                      key={item.key}
+                      className="flex items-center justify-between px-4 py-2 text-sm"
+                    >
+                      <span>{item.key}</span>
+                      <span className="font-mono text-xs text-[#667085]">{item.count}</span>
+                    </div>
+                  ))
+                ) : (
+                  <div className="px-4 py-3 text-sm text-muted-foreground">
+                    No category summary available.
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="border border-border">
+              <div className="border-b border-border bg-[#fafafa] px-4 py-2 text-sm font-medium">
+                Top Source IP
+              </div>
+              <div className="divide-y divide-border">
+                {topKV(report?.sources).length > 0 ? (
+                  topKV(report?.sources).map((item) => (
+                    <div
+                      key={item.key}
+                      className="flex items-center justify-between px-4 py-2 text-sm"
+                    >
+                      <span className="font-mono text-xs text-[#334155]">{item.key}</span>
+                      <span className="font-mono text-xs text-[#667085]">{item.count}</span>
+                    </div>
+                  ))
+                ) : (
+                  <div className="px-4 py-3 text-sm text-muted-foreground">
+                    No source summary available.
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
 
           <div className="space-y-2">
             <div className="text-sm font-medium">Risk Signals</div>
@@ -667,6 +802,12 @@ function OverviewView({
 
           <div className="space-y-2">
             <div className="text-sm font-medium">All Events</div>
+            {events.length === 0 ? (
+              <SummaryLine>
+                この `report` にはイベント配列が含まれていません。summary-only の
+                `report.json` を読み込んでいる場合、Overview の集計だけが表示されます。
+              </SummaryLine>
+            ) : null}
             <Table className="text-[13px]">
               <TableHeader>
                 <TableRow className="bg-[#fafafa] hover:bg-[#fafafa]">
@@ -718,6 +859,43 @@ function DevicesView({
   hosts: HostRow[];
   onOpenHost: (ip: string) => void;
 }) {
+  const [query, setQuery] = useState("");
+  const [riskFilter, setRiskFilter] = useState("all");
+  const [owaspFilter, setOwaspFilter] = useState("all");
+  const deferredQuery = useDeferredValue(query);
+
+  const owaspOptions = uniqueStrings(hosts.flatMap((host) => host.owasp));
+  const filteredHosts = hosts.filter((host) => {
+    const haystack = [
+      host.ip,
+      host.labelCandidate,
+      host.categoryCandidate,
+      host.vendorCandidate,
+      host.familyCandidate,
+      host.topDestination,
+      ...host.protocols,
+      ...host.hosts,
+      ...host.sni,
+      ...host.owasp,
+    ]
+      .join(" ")
+      .toLowerCase();
+
+    if (riskFilter !== "all" && host.risk !== riskFilter) {
+      return false;
+    }
+    if (owaspFilter !== "all" && !host.owasp.includes(owaspFilter)) {
+      return false;
+    }
+    if (
+      deferredQuery.trim() &&
+      !haystack.includes(deferredQuery.trim().toLowerCase())
+    ) {
+      return false;
+    }
+    return true;
+  });
+
   const withSignals = hosts.filter((host) => host.signals > 0).length;
   const unclassified = hosts.filter((host) =>
     host.categoryCandidate.includes("未分類")
@@ -742,6 +920,46 @@ function DevicesView({
             {unclassified} unclassified ・ {externalDestinations} external destinations
           </SummaryLine>
 
+          <div className="grid gap-3 lg:grid-cols-[minmax(0,2fr)_repeat(2,minmax(0,1fr))]">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="Search IP, candidate label, vendor, protocol, destination, or SNI"
+                className="pl-9"
+              />
+            </div>
+            <Select value={riskFilter} onValueChange={setRiskFilter}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Risk" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Risk</SelectItem>
+                {uniqueStrings(hosts.map((host) => host.risk)).map((value) => (
+                  <SelectItem key={value} value={value}>
+                    {value}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={owaspFilter} onValueChange={setOwaspFilter}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="OWASP" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All OWASP</SelectItem>
+                {owaspOptions.map((value) => (
+                  <SelectItem key={value} value={value}>
+                    {value}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <SummaryLine>{filteredHosts.length} hosts shown</SummaryLine>
+
           <div className="space-y-2">
             <div className="text-sm font-medium">Observed Hosts</div>
             <Table className="text-[13px]">
@@ -761,7 +979,7 @@ function DevicesView({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {hosts.map((host) => (
+                {filteredHosts.length > 0 ? filteredHosts.map((host) => (
                   <TableRow key={host.ip}>
                     <TableCell className="font-mono text-xs">{host.ip}</TableCell>
                     <TableCell>{host.labelCandidate}</TableCell>
@@ -786,7 +1004,13 @@ function DevicesView({
                       </button>
                     </TableCell>
                   </TableRow>
-                ))}
+                )) : (
+                  <TableRow>
+                    <TableCell colSpan={11} className="text-center text-muted-foreground">
+                      条件に一致する host はありません。
+                    </TableCell>
+                  </TableRow>
+                )}
               </TableBody>
             </Table>
           </div>
@@ -1005,6 +1229,24 @@ function HostReportView({
 function EventDetails({ event }: { event: Event }) {
   return (
     <div className="grid gap-3 border-t border-border bg-[#fcfcfd] px-4 py-4 text-sm">
+      <div className="grid gap-3 md:grid-cols-4">
+        <div>
+          <div className="text-xs text-muted-foreground">Severity</div>
+          <div className="mt-1"><SeverityBadge severity={event.severity} /></div>
+        </div>
+        <div>
+          <div className="text-xs text-muted-foreground">Rule ID</div>
+          <div className="font-mono text-xs">{event.rule_id || event.type || "-"}</div>
+        </div>
+        <div>
+          <div className="text-xs text-muted-foreground">OWASP</div>
+          <div>{formatOWASP(eventOWASP(event))}</div>
+        </div>
+        <div>
+          <div className="text-xs text-muted-foreground">Device / Source</div>
+          <div className="font-mono text-xs">{event.device_key || event.src_ip || "-"}</div>
+        </div>
+      </div>
       <div>
         <div className="text-xs text-muted-foreground">Observed Fact</div>
         <div>{event.observed_fact || "-"}</div>
@@ -1043,20 +1285,27 @@ function EventsView({
   const [ruleFilter, setRuleFilter] = useState("all");
   const [deviceFilter, setDeviceFilter] = useState("all");
   const [openRows, setOpenRows] = useState<Record<string, boolean>>({});
+  const deferredQuery = useDeferredValue(query);
 
   const events = report?.events || [];
   const owaspOptions = uniqueStrings(events.flatMap((event) => eventOWASP(event)));
   const ruleOptions = uniqueStrings(events.map((event) => event.rule_id || event.type));
-  const deviceOptions = uniqueStrings(hosts.map((host) => host.ip));
+  const deviceOptions = uniqueStrings(
+    events.flatMap((event) => [event.device_key, event.device_label, event.src_ip])
+  );
 
   const filtered = events.filter((event) => {
     const tags = eventOWASP(event);
     const haystack = [
       event.rule_id,
       event.type,
+      event.category,
       event.message,
       event.evidence,
       event.observed_fact,
+      event.inference,
+      event.device_key,
+      event.device_label,
       event.src_ip,
       event.dst_ip,
       ...tags,
@@ -1073,10 +1322,16 @@ function EventsView({
     if (ruleFilter !== "all" && (event.rule_id || event.type || "") !== ruleFilter) {
       return false;
     }
-    if (deviceFilter !== "all" && (event.src_ip || "") !== deviceFilter) {
+    if (
+      deviceFilter !== "all" &&
+      ![event.device_key, event.device_label, event.src_ip].includes(deviceFilter)
+    ) {
       return false;
     }
-    if (query.trim() && !haystack.includes(query.trim().toLowerCase())) {
+    if (
+      deferredQuery.trim() &&
+      !haystack.includes(deferredQuery.trim().toLowerCase())
+    ) {
       return false;
     }
     return true;
@@ -1095,12 +1350,12 @@ function EventsView({
               <Input
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                placeholder="Search message, evidence, observed fact, device, or rule"
+                placeholder="Search device, IP, rule, OWASP, observed fact, evidence, or inference"
                 className="pl-9"
               />
             </div>
             <Select value={severityFilter} onValueChange={setSeverityFilter}>
-              <SelectTrigger>
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder="Severity" />
               </SelectTrigger>
               <SelectContent>
@@ -1113,7 +1368,7 @@ function EventsView({
               </SelectContent>
             </Select>
             <Select value={owaspFilter} onValueChange={setOwaspFilter}>
-              <SelectTrigger>
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder="OWASP" />
               </SelectTrigger>
               <SelectContent>
@@ -1126,7 +1381,7 @@ function EventsView({
               </SelectContent>
             </Select>
             <Select value={ruleFilter} onValueChange={setRuleFilter}>
-              <SelectTrigger>
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder="Rule ID" />
               </SelectTrigger>
               <SelectContent>
@@ -1139,7 +1394,7 @@ function EventsView({
               </SelectContent>
             </Select>
             <Select value={deviceFilter} onValueChange={setDeviceFilter}>
-              <SelectTrigger>
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder="Device / IP" />
               </SelectTrigger>
               <SelectContent>
@@ -1172,7 +1427,7 @@ function EventsView({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filtered.map((event, index) => {
+                {filtered.length > 0 ? filtered.map((event, index) => {
                   const rowKey = `${event.ts}-${event.rule_id || event.type}-${index}`;
                   const isOpen = Boolean(openRows[rowKey]);
 
@@ -1219,7 +1474,13 @@ function EventsView({
                       ) : null}
                     </Fragment>
                   );
-                })}
+                }) : (
+                  <TableRow>
+                    <TableCell colSpan={10} className="text-center text-muted-foreground">
+                      条件に一致する event はありません。
+                    </TableCell>
+                  </TableRow>
+                )}
               </TableBody>
             </Table>
           </div>
@@ -1229,7 +1490,7 @@ function EventsView({
   );
 }
 
-export default function QuarantReportViewer() {
+function QuarantReportViewerContent() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -1324,6 +1585,7 @@ export default function QuarantReportViewer() {
             <div className="text-right text-sm text-[#475569]">
               <div>API: {API_BASE_URL}</div>
               <div>Status: {status}</div>
+              <div>Report: {report?.source || "-"}</div>
               <div>Updated: {lastUpdated ? formatTime(lastUpdated.toISOString()) : "-"}</div>
             </div>
           </div>
@@ -1385,5 +1647,13 @@ export default function QuarantReportViewer() {
         )}
       </main>
     </div>
+  );
+}
+
+export default function QuarantReportViewer() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-white" />}>
+      <QuarantReportViewerContent />
+    </Suspense>
   );
 }

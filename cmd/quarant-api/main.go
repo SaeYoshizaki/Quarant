@@ -1,97 +1,32 @@
 package main
 
 import (
-	"encoding/json"
 	"flag"
 	"log"
-	"net/http"
+	"path/filepath"
 
-	"quarant/internal/reportapi"
+	"quarant/internal/viewer"
 )
 
 func main() {
 	inPath := flag.String("in", "events.jsonl", "input events.jsonl path")
+	reportPath := flag.String("report-in", "", "input report JSON path (optional, used for /api/report when set)")
 	flowsPath := flag.String("flows-in", "flows.jsonl", "input flows.jsonl path")
 	inventoryPath := flag.String("inventory-in", "device_inventory.json", "input device inventory JSON path")
 	addr := flag.String("addr", "127.0.0.1:8080", "HTTP listen address")
+	openBrowserFlag := flag.Bool("open", false, "open the local report viewer in a browser")
+	webDist := flag.String("web-dist", filepath.Join("web", "out"), "path to exported web UI assets")
 	flag.Parse()
 
-	mux := http.NewServeMux()
-	mux.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json; charset=utf-8")
-		_ = json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
-	})
-	mux.HandleFunc("/api/report", func(w http.ResponseWriter, r *http.Request) {
-		rep, err := reportapi.LoadReport(*inPath)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		w.Header().Set("Content-Type", "application/json; charset=utf-8")
-		enc := json.NewEncoder(w)
-		enc.SetIndent("", "  ")
-		if err := enc.Encode(rep); err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-		}
-	})
-	mux.HandleFunc("/api/activity/summary", func(w http.ResponseWriter, r *http.Request) {
-		rep, err := reportapi.LoadActivitySummary(*inPath, *flowsPath)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		w.Header().Set("Content-Type", "application/json; charset=utf-8")
-		enc := json.NewEncoder(w)
-		enc.SetIndent("", "  ")
-		if err := enc.Encode(rep); err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-		}
-	})
-	mux.HandleFunc("/api/inventory", func(w http.ResponseWriter, r *http.Request) {
-		rep, err := reportapi.LoadInventory(*inventoryPath)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		w.Header().Set("Content-Type", "application/json; charset=utf-8")
-		enc := json.NewEncoder(w)
-		enc.SetIndent("", "  ")
-		if err := enc.Encode(rep); err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-		}
-	})
-	mux.HandleFunc("/api/flows", func(w http.ResponseWriter, r *http.Request) {
-		rep, err := reportapi.LoadFlows(*flowsPath)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		w.Header().Set("Content-Type", "application/json; charset=utf-8")
-		enc := json.NewEncoder(w)
-		enc.SetIndent("", "  ")
-		if err := enc.Encode(rep); err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-		}
-	})
-
-	log.Printf("quarant api listening on http://%s", *addr)
-	log.Printf("reading events from %s", *inPath)
-	log.Printf("reading flows from %s", *flowsPath)
-	log.Printf("reading inventory from %s", *inventoryPath)
-	if err := http.ListenAndServe(*addr, withCORS(mux)); err != nil {
+	if err := viewer.Serve(viewer.Options{
+		EventsPath:    *inPath,
+		ReportPath:    *reportPath,
+		FlowsPath:     *flowsPath,
+		InventoryPath: *inventoryPath,
+		Addr:          *addr,
+		OpenBrowser:   *openBrowserFlag,
+		WebDist:       *webDist,
+	}); err != nil {
 		log.Fatal(err)
 	}
-}
-
-func withCORS(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		next.ServeHTTP(w, r)
-	})
 }

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 	"sort"
 	"strings"
 	"time"
@@ -80,6 +81,15 @@ type Window struct {
 }
 
 func LoadReport(path string) (Report, error) {
+	switch strings.ToLower(filepath.Ext(path)) {
+	case ".json":
+		return loadReportJSON(path)
+	default:
+		return loadEventsJSONLReport(path)
+	}
+}
+
+func loadEventsJSONLReport(path string) (Report, error) {
 	f, err := os.Open(path)
 	if err != nil {
 		return Report{}, fmt.Errorf("open %s: %w", path, err)
@@ -184,6 +194,107 @@ func LoadReport(path string) (Report, error) {
 	}
 
 	return rep, nil
+}
+
+type rawReport struct {
+	GeneratedAt          string  `json:"generated_at"`
+	Source               string  `json:"source"`
+	TotalEvents          int     `json:"total_events"`
+	UserNotifications    int     `json:"user_notifications"`
+	QuarantineCandidates int     `json:"quarantine_candidates"`
+	UnknownDevices       int     `json:"unknown_devices"`
+	Window               Window  `json:"window"`
+	Severity             []KV    `json:"severity"`
+	Rules                []KV    `json:"rules"`
+	Categories           []KV    `json:"categories"`
+	Sources              []KV    `json:"sources"`
+	SrcIP                []KV    `json:"src_ip"`
+	Flows                []KV    `json:"flows"`
+	Events               []Event `json:"events"`
+}
+
+func loadReportJSON(path string) (Report, error) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return Report{}, fmt.Errorf("read %s: %w", path, err)
+	}
+	if len(strings.TrimSpace(string(data))) == 0 {
+		return Report{}, nil
+	}
+
+	var rep rawReport
+	if err := json.Unmarshal(data, &rep); err != nil {
+		return Report{}, fmt.Errorf("decode %s: %w", path, err)
+	}
+
+	normalized := Report{
+		GeneratedAt:          rep.GeneratedAt,
+		Source:               rep.Source,
+		TotalEvents:          rep.TotalEvents,
+		UserNotifications:    rep.UserNotifications,
+		QuarantineCandidates: rep.QuarantineCandidates,
+		UnknownDevices:       rep.UnknownDevices,
+		Window:               rep.Window,
+		Severity:             rep.Severity,
+		Rules:                rep.Rules,
+		Categories:           rep.Categories,
+		Sources:              rep.Sources,
+		Events:               rep.Events,
+	}
+	if normalized.GeneratedAt == "" {
+		normalized.GeneratedAt = time.Now().UTC().Format(time.RFC3339)
+	}
+	if normalized.Source == "" {
+		normalized.Source = path
+	}
+	if normalized.TotalEvents == 0 && len(normalized.Events) > 0 {
+		normalized.TotalEvents = len(normalized.Events)
+	}
+	if len(normalized.Sources) == 0 && len(rep.SrcIP) > 0 {
+		normalized.Sources = rep.SrcIP
+	}
+	if len(normalized.Categories) == 0 && len(normalized.Events) > 0 {
+		categoryCount := map[string]int{}
+		for _, event := range normalized.Events {
+			if event.Category != "" {
+				categoryCount[event.Category]++
+			}
+		}
+		normalized.Categories = toSortedKV(categoryCount)
+	}
+	if normalized.Window.Start == "" || normalized.Window.End == "" {
+		first, last := eventWindow(normalized.Events)
+		if normalized.Window.Start == "" && !first.IsZero() {
+			normalized.Window.Start = first.UTC().Format(time.RFC3339)
+		}
+		if normalized.Window.End == "" && !last.IsZero() {
+			normalized.Window.End = last.UTC().Format(time.RFC3339)
+		}
+	}
+	sort.Slice(normalized.Events, func(i, j int) bool {
+		if normalized.Events[i].Timestamp.Equal(normalized.Events[j].Timestamp) {
+			return severityRank(normalized.Events[i].Severity) > severityRank(normalized.Events[j].Severity)
+		}
+		return normalized.Events[i].Timestamp.After(normalized.Events[j].Timestamp)
+	})
+	return normalized, nil
+}
+
+func eventWindow(events []Event) (time.Time, time.Time) {
+	var first time.Time
+	var last time.Time
+	for _, event := range events {
+		if event.Timestamp.IsZero() {
+			continue
+		}
+		if first.IsZero() || event.Timestamp.Before(first) {
+			first = event.Timestamp
+		}
+		if event.Timestamp.After(last) {
+			last = event.Timestamp
+		}
+	}
+	return first, last
 }
 
 func toSortedKV(m map[string]int) []KV {
