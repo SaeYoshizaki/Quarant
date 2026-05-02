@@ -38,3 +38,14 @@ func (s *JSONLSink) writeValue(v any) error {
 	_, err = s.file.Write(append(data, '\n'))
 	return err
 }
+
+func (s *JSONLSink) Close() error {
+	if s == nil || s.file == nil {
+		return nil
+	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	err := s.file.Close()
+	s.file = nil
+	return err
+}
