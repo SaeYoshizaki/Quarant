@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"log"
+	"os"
 	"time"
 
 	"quarant/analyzer"
@@ -12,10 +13,14 @@ import (
 func main() {
 	debug := flag.Bool("debug", false, "enable debug payload logging")
 	iface := flag.String("i", "eth1", "interface to capture on")
-	pcapPath := flag.String("pcap", "", "path to a pcap file for offline analysis")
+	pcapPath := flag.String("pcap", "", "pcap file to read, or - to read pcap stream from stdin")
 	inventoryOut := flag.String("inventory-out", "device_inventory.json", "path to write device inventory snapshot JSON (empty to disable)")
 	inventoryInterval := flag.Duration("inventory-interval", 10*time.Second, "interval to refresh device inventory snapshot JSON")
 	flag.Parse()
+
+	if *iface != "" && *pcapPath != "" {
+		log.Fatal("use either -i <interface> or -pcap <file|->, not both")
+	}
 
 	db, err := knowledge.LoadAll()
 	if err != nil {
@@ -51,9 +56,12 @@ func main() {
 	}
 	engine := analyzer.NewEngine(handler)
 
-	if *pcapPath != "" {
+	switch {
+	case *pcapPath == "-":
+		err = engine.RunPCAPStream(os.Stdin)
+	case *pcapPath != "":
 		err = engine.RunOffline(*pcapPath)
-	} else {
+	default:
 		err = engine.RunLive(*iface)
 	}
 	if err != nil {
