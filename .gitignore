@@ -16,4 +16,5 @@ events.jsonl
 build/
 /quarant-api
 /quarant-viewer
+/quarant
 *.zip
