@@ -25,6 +25,7 @@ type Options struct {
 	Addr          string
 	OpenBrowser   bool
 	WebDist       string
+	DemoMode      bool
 }
 
 func Serve(opts Options) error {
@@ -48,6 +49,15 @@ func Serve(opts Options) error {
 	mux.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
+	})
+	mux.HandleFunc("/api/meta", func(w http.ResponseWriter, r *http.Request) {
+		writeJSON(w, map[string]any{
+			"demo_mode":      opts.DemoMode,
+			"events_path":    opts.EventsPath,
+			"report_path":    opts.ReportPath,
+			"flows_path":     opts.FlowsPath,
+			"inventory_path": opts.InventoryPath,
+		})
 	})
 	mux.HandleFunc("/api/report", func(w http.ResponseWriter, r *http.Request) {
 		sourcePath := opts.EventsPath
@@ -102,6 +112,9 @@ func Serve(opts Options) error {
 	}
 	log.Printf("reading flows from %s", opts.FlowsPath)
 	log.Printf("reading inventory from %s", opts.InventoryPath)
+	if opts.DemoMode {
+		log.Printf("demo mode enabled")
+	}
 	if staticServed {
 		log.Printf("serving report viewer from %s", opts.WebDist)
 	} else {

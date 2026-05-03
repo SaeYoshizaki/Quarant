@@ -1,8 +1,14 @@
 "use client";
 
-import { Fragment, Suspense, useDeferredValue, useEffect, useState } from "react";
+import {
+  Fragment,
+  Suspense,
+  useDeferredValue,
+  useEffect,
+  useState,
+} from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { RefreshCw, Search, ChevronRight } from "lucide-react";
+import { RefreshCw, Search } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -163,12 +169,37 @@ type HostRow = {
   inventory?: InventoryDevice;
 };
 
+type ExternalDestinationRow = {
+  key: string;
+  destination: string;
+  port: string;
+  protocol: string;
+  sourceIp: string;
+  sourceCount: number;
+  observedCount: number;
+  firstSeen?: string;
+  lastSeen?: string;
+  relatedSeverity?: string;
+  relatedSignal: string;
+  relatedOwasp: string;
+};
+
 type ViewName = "overview" | "devices" | "events";
+type ViewerMeta = {
+  demo_mode?: boolean;
+  events_path?: string;
+  report_path?: string;
+  flows_path?: string;
+  inventory_path?: string;
+};
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "";
 
-const DEBUG_EVENT_TYPES = new Set(["I6_DEBUG", "DEVICE_DEBUG", "PAYLOAD_DEBUG"]);
+const DEBUG_EVENT_TYPES = new Set([
+  "I6_DEBUG",
+  "DEVICE_DEBUG",
+  "PAYLOAD_DEBUG",
+]);
 
 function formatTime(value?: string): string {
   if (!value) return "-";
@@ -182,6 +213,34 @@ function formatTime(value?: string): string {
     minute: "2-digit",
     second: "2-digit",
   });
+}
+
+function formatReportDateTime(value?: string): string {
+  if (!value) return "-";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+  const seconds = String(date.getSeconds()).padStart(2, "0");
+
+  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+}
+
+function formatCompactDateTime(value?: string): string {
+  if (!value) return "-";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+
+  return `${month}/${day} ${hours}:${minutes}`;
 }
 
 function formatWindow(start?: string, end?: string): string {
@@ -198,9 +257,38 @@ function formatWindow(start?: string, end?: string): string {
   return `${hours}h`;
 }
 
+function formatWindowLabel(start?: string, end?: string): string {
+  if (!start || !end) return "-";
+  return `${formatTime(start)} 〜 ${formatTime(end)}`;
+}
+
+function formatReportWindowLabel(start?: string, end?: string): string {
+  if (!start || !end) return "-";
+  return `${formatReportDateTime(start)} 〜 ${formatReportDateTime(end)}`;
+}
+
 function endpoint(ip?: string, port?: number): string {
   if (!ip) return "-";
   return port ? `${ip}:${port}` : ip;
+}
+
+function baseName(path?: string): string {
+  const value = (path || "").trim();
+  if (!value) return "";
+  const parts = value.split(/[\\/]/);
+  return parts[parts.length - 1] || value;
+}
+
+function formatBytes(bytes: number): string {
+  if (!Number.isFinite(bytes) || bytes <= 0) return "0 B";
+  const units = ["B", "KB", "MB", "GB"];
+  let value = bytes;
+  let unitIndex = 0;
+  while (value >= 1024 && unitIndex < units.length - 1) {
+    value /= 1024;
+    unitIndex += 1;
+  }
+  return `${value.toFixed(unitIndex === 0 ? 0 : 1)} ${units[unitIndex]}`;
 }
 
 function severityRank(severity?: string): number {
@@ -244,7 +332,9 @@ function uniqueStrings(values: Array<string | undefined | null>): string[] {
 
 function uniqueNumbers(values: Array<number | undefined | null>): number[] {
   return Array.from(
-    new Set(values.filter((value): value is number => typeof value === "number"))
+    new Set(
+      values.filter((value): value is number => typeof value === "number")
+    )
   ).sort((a, b) => a - b);
 }
 
@@ -256,50 +346,13 @@ function joinLimited(values: string[], limit = 3): string {
 
 function normalizeDestination(flow: FlowRecord): string {
   return (
-    flow.observed_destination ||
-    flow.sni ||
-    flow.host ||
-    flow.dst_ip ||
-    "-"
+    flow.observed_destination || flow.sni || flow.host || flow.dst_ip || "-"
   );
 }
 
 function formatOWASP(tags?: string[]): string {
   if (!tags || tags.length === 0) return "-";
   return tags.join(", ");
-}
-
-function eventSummary(event: Event): string {
-  return event.observed_fact || event.message || event.evidence || "-";
-}
-
-function shortEvidence(event: Event): string {
-  return event.evidence || event.message || event.observed_fact || "-";
-}
-
-function overallAssessmentText({
-  riskSignalCount,
-  warningCount,
-  highCriticalCount,
-  localDeviceCount,
-  externalDestinationCount,
-}: {
-  riskSignalCount: number;
-  warningCount: number;
-  highCriticalCount: number;
-  localDeviceCount: number;
-  externalDestinationCount: number;
-}): string {
-  if (highCriticalCount > 0) {
-    return `${highCriticalCount}件の high/critical signal を確認しました。優先度の高い通信上のリスクが残っており、早期確認が必要です。`;
-  }
-  if (warningCount > 0) {
-    return `${warningCount}件の warning-level signal を確認しました。断定的な脆弱性ではありませんが、通信挙動から追跡すべきリスクが見えています。`;
-  }
-  if (riskSignalCount > 0) {
-    return `${riskSignalCount}件の観測イベントがありました。重大度は高くありませんが、継続観測で変化を追う価値があります。`;
-  }
-  return `${localDeviceCount}台の local device と ${externalDestinationCount}件の external destination を観測しました。今回の範囲では明確な risk signal は確認されていません。`;
 }
 
 function topKV(items?: KV[], limit = 5): KV[] {
@@ -336,7 +389,9 @@ function isPrivateIPv4(ip?: string): boolean {
   const parts = value.split(".");
   if (parts.length !== 4) return false;
   const octets = parts.map((part) => Number(part));
-  if (octets.some((octet) => !Number.isInteger(octet) || octet < 0 || octet > 255)) {
+  if (
+    octets.some((octet) => !Number.isInteger(octet) || octet < 0 || octet > 255)
+  ) {
     return false;
   }
   if (octets[0] === 10) return true;
@@ -354,7 +409,9 @@ function nonDebugEvents(events: Event[]): Event[] {
 }
 
 function warningOrHigherEvents(events: Event[]): Event[] {
-  return events.filter((event) => severityRank(event.severity) >= severityRank("WARNING"));
+  return events.filter(
+    (event) => severityRank(event.severity) >= severityRank("WARNING")
+  );
 }
 
 function defaultVisibleEvents(events: Event[]): Event[] {
@@ -372,7 +429,10 @@ function parseRuleCategory(rule?: string): string[] {
 }
 
 function eventOWASP(event: Event): string[] {
-  const tags = uniqueStrings([...(event.owasp_tags || []), ...parseRuleCategory(event.rule_id || event.type)]);
+  const tags = uniqueStrings([
+    ...(event.owasp_tags || []),
+    ...parseRuleCategory(event.rule_id || event.type),
+  ]);
   return tags;
 }
 
@@ -415,10 +475,18 @@ function deriveInferenceReasons(host: HostRow): string[] {
   const reasons = [
     ...summarizeObservation(host.sni, "TLS SNI observed:"),
     ...summarizeObservation(host.hosts, "HTTP Host observed:"),
-    ...host.ports.slice(0, 4).map((port) => `Port ${port} traffic was observed.`),
-    ...host.protocols.slice(0, 3).map((protocol) => `${protocol} communication was observed.`),
+    ...host.ports
+      .slice(0, 4)
+      .map((port) => `Port ${port} traffic was observed.`),
+    ...host.protocols
+      .slice(0, 3)
+      .map((protocol) => `${protocol} communication was observed.`),
   ];
-  return reasons.length > 0 ? reasons : ["Passive observations are limited; candidate classification remains provisional."];
+  return reasons.length > 0
+    ? reasons
+    : [
+        "Passive observations are limited; candidate classification remains provisional.",
+      ];
 }
 
 function aggregateHosts(
@@ -459,7 +527,8 @@ function aggregateHosts(
     if (!device.ip) return;
     const host = ensureHost(device.ip);
     host.inventory = device;
-    host.categoryCandidate = device.category_candidate || host.categoryCandidate;
+    host.categoryCandidate =
+      device.category_candidate || host.categoryCandidate;
     host.vendorCandidate = device.vendor_candidate || host.vendorCandidate;
     host.familyCandidate = device.family_candidate || host.familyCandidate;
     host.labelCandidate =
@@ -476,8 +545,14 @@ function aggregateHosts(
       ...host.protocols,
       ...(device.observed_protocols || []),
     ]);
-    host.ports = uniqueNumbers([...host.ports, ...(device.observed_ports || [])]);
-    host.hosts = uniqueStrings([...host.hosts, ...(device.observed_hosts || [])]);
+    host.ports = uniqueNumbers([
+      ...host.ports,
+      ...(device.observed_ports || []),
+    ]);
+    host.hosts = uniqueStrings([
+      ...host.hosts,
+      ...(device.observed_hosts || []),
+    ]);
     host.sni = uniqueStrings([...host.sni, ...(device.observed_sni || [])]);
     host.firstSeen = device.first_seen || host.firstSeen;
     host.lastSeen = device.last_seen || host.lastSeen;
@@ -499,11 +574,7 @@ function aggregateHosts(
       flow.app_protocol,
       flow.protocol,
     ]);
-    host.ports = uniqueNumbers([
-      ...host.ports,
-      flow.src_port,
-      flow.dst_port,
-    ]);
+    host.ports = uniqueNumbers([...host.ports, flow.src_port, flow.dst_port]);
     host.hosts = uniqueStrings([...host.hosts, flow.host]);
     host.sni = uniqueStrings([...host.sni, flow.sni]);
     if (!host.labelCandidate) {
@@ -516,11 +587,16 @@ function aggregateHosts(
 
   const hosts = Array.from(byIP.values()).map((host) => {
     const hostNonDebugEvents = nonDebugEvents(host.events);
-    const eventOWASPSet = uniqueStrings(hostNonDebugEvents.flatMap((event) => eventOWASP(event)));
+    const eventOWASPSet = uniqueStrings(
+      hostNonDebugEvents.flatMap((event) => eventOWASP(event))
+    );
     const destinationCounts = new Map<string, number>();
     host.flows.forEach((flow) => {
       const destination = normalizeDestination(flow);
-      destinationCounts.set(destination, (destinationCounts.get(destination) || 0) + 1);
+      destinationCounts.set(
+        destination,
+        (destinationCounts.get(destination) || 0) + 1
+      );
     });
     const topDestination =
       Array.from(destinationCounts.entries()).sort((a, b) => {
@@ -536,10 +612,10 @@ function aggregateHosts(
     const inventoryOWASP = host.inventory?.risk_summary?.top_owasp_tags
       ? host.inventory.risk_summary.top_owasp_tags
       : host.inventory?.owasp_tag_counts
-        ? Object.entries(host.inventory.owasp_tag_counts)
-            .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
-            .map(([key]) => key)
-        : undefined;
+      ? Object.entries(host.inventory.owasp_tag_counts)
+          .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+          .map(([key]) => key)
+      : undefined;
 
     return {
       ...host,
@@ -564,9 +640,7 @@ function aggregateHosts(
         host.events.slice().sort((a, b) => a.ts.localeCompare(b.ts))[0]?.ts,
       lastSeen:
         host.lastSeen ||
-        host.events
-          .slice()
-          .sort((a, b) => b.ts.localeCompare(a.ts))[0]?.ts,
+        host.events.slice().sort((a, b) => b.ts.localeCompare(a.ts))[0]?.ts,
       macAddress: "-",
       events: host.events.slice().sort((a, b) => b.ts.localeCompare(a.ts)),
       flows: host.flows.slice().sort((a, b) => b.ts.localeCompare(a.ts)),
@@ -593,8 +667,7 @@ function linkClassName(active = false): string {
 function SeverityBadge({ severity }: { severity?: string }) {
   const value = (severity || "UNKNOWN").toUpperCase();
   const styles: Record<string, string> = {
-    CRITICAL:
-      "border-[#d92d20] bg-[#fff1f1] text-[#b42318]",
+    CRITICAL: "border-[#d92d20] bg-[#fff1f1] text-[#b42318]",
     HIGH: "border-[#f79009] bg-[#fff7ed] text-[#b54708]",
     MEDIUM: "border-[#f6c343] bg-[#fffbea] text-[#8a6116]",
     WARNING: "border-[#f6c343] bg-[#fffbea] text-[#8a6116]",
@@ -632,21 +705,25 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <section className="border border-border bg-card">
-      <div className="border-b border-border px-5 py-4">
-        <h2 className="text-lg font-semibold">{title}</h2>
+    <section className="rounded-[4px] border border-[#d9e0ea] bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
+      <div className="px-6 pt-5">
+        <h2 className="text-[19px] font-semibold tracking-[-0.02em] text-[#10203b]">
+          {title}
+        </h2>
         {description ? (
-          <p className="mt-1 text-sm text-muted-foreground">{description}</p>
+          <p className="mt-1 text-[13px] leading-6 text-[#64748b]">
+            {description}
+          </p>
         ) : null}
       </div>
-      <div className="px-5 py-4">{children}</div>
+      <div className="px-6 pb-5 pt-4">{children}</div>
     </section>
   );
 }
 
 function SummaryLine({ children }: { children: React.ReactNode }) {
   return (
-    <div className="border border-border bg-[#fcfcfd] px-4 py-3 text-sm text-[#334155]">
+    <div className="border border-[#d7dee8] bg-[#fbfcfe] px-4 py-3 text-sm leading-6 text-[#334155]">
       {children}
     </div>
   );
@@ -656,33 +733,238 @@ function MetricCard({
   label,
   value,
   helper,
+  accent = false,
 }: {
   label: string;
   value: string | number;
   helper?: string;
+  accent?: boolean;
 }) {
   return (
-    <div className="border border-border bg-card px-4 py-4">
-      <div className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#667085]">
+    <div className="flex min-w-0 flex-col items-center justify-center px-6 py-6 text-center">
+      <div
+        className={cn(
+          "text-[14px] font-semibold text-[#334155]",
+          accent && "text-[#f97316]"
+        )}
+      >
         {label}
       </div>
-      <div className="mt-2 font-mono text-3xl font-semibold text-[#101828]">
+      <div
+        className={cn(
+          "mt-5 font-mono text-[54px] font-semibold leading-none tracking-[-0.04em]",
+          accent ? "text-[#f97316]" : "text-[#10203b]"
+        )}
+      >
         {value}
       </div>
       {helper ? (
-        <div className="mt-1 text-xs text-[#667085]">{helper}</div>
+        <div className="mt-3 text-[14px] text-[#334155]">{helper}</div>
       ) : null}
     </div>
   );
 }
 
-function JsonDisclosure({
-  label,
-  value,
-}: {
-  label: string;
-  value: unknown;
-}) {
+const RULE_LABELS: Record<string, string> = {
+  I7_HTTP_PLAINTEXT: "平文HTTP通信",
+  I8_UNREGISTERED_DEVICE_ACTIVE: "未登録端末",
+  I8_NEW_DEVICE_OBSERVED: "新規端末",
+  I4_WEAK_UPDATE_VISIBILITY: "更新確認通信",
+  INSECURE_HTTP: "平文HTTP通信",
+  INSECURE_HTTP_TOKEN: "URL内トークン",
+};
+
+const CATEGORY_LABELS: Record<string, string> = {
+  I4: "更新機構",
+  I7: "通信の保護",
+  I8: "端末管理",
+};
+
+function displayRuleLabel(rule?: string): string {
+  const token = (rule || "").trim();
+  if (!token) return "未分類";
+  return RULE_LABELS[token] || token;
+}
+
+function displayCategoryLabel(category?: string): string {
+  const token = (category || "").trim();
+  if (!token) return "-";
+  return CATEGORY_LABELS[token] || token;
+}
+
+function categoryForRule(rule?: string): string {
+  return parseRuleCategory(rule)[0] || "-";
+}
+
+function percent(count: number, total: number): number {
+  if (total <= 0) return 0;
+  return Math.round((count / total) * 100);
+}
+
+function InlineBar({ value }: { value: number }) {
+  return (
+    <div className="h-2 w-16 rounded-full bg-[#e7ecf3]">
+      <div
+        className="h-2 rounded-full bg-[#102b52]"
+        style={{ width: `${Math.max(8, Math.min(100, value))}%` }}
+      />
+    </div>
+  );
+}
+
+function severityTextClass(severity?: string): string {
+  const value = (severity || "").toUpperCase();
+  if (value === "CRITICAL" || value === "HIGH") return "text-[#ff2f1a]";
+  if (value === "WARNING") return "text-[#f79009]";
+  if (value === "LOW") return "text-[#2563eb]";
+  return "text-[#667085]";
+}
+
+function severityDotClass(severity?: string): string {
+  const value = (severity || "").toUpperCase();
+  if (value === "CRITICAL" || value === "HIGH") return "bg-[#ff2f1a]";
+  if (value === "WARNING") return "bg-[#f79009]";
+  if (value === "LOW") return "bg-[#3b82f6]";
+  return "bg-[#98a2b3]";
+}
+
+function summaryForRule(rule?: string): string {
+  const token = (rule || "").toUpperCase();
+  switch (token) {
+    case "I7_HTTP_PLAINTEXT":
+      return "HTTP（暗号化なし）の通信を観測";
+    case "I8_UNREGISTERED_DEVICE_ACTIVE":
+      return "端末一覧に存在しない端末の通信を観測";
+    case "I4_WEAK_UPDATE_VISIBILITY":
+      return "平文HTTPによる更新確認通信を観測";
+    case "I2_INSECURE_SERVICE":
+      return "Telnet / 23番ポート通信を観測";
+    default:
+      return displayRuleLabel(rule);
+  }
+}
+
+function hostTopReason(host: HostRow): string {
+  const topEvent = host.events
+    .slice()
+    .sort(
+      (a, b) =>
+        severityRank(b.severity) - severityRank(a.severity) ||
+        b.ts.localeCompare(a.ts)
+    )[0];
+  return topEvent ? displayRuleLabel(topEvent.rule_id || topEvent.type) : "-";
+}
+
+function buildExternalDestinationRows(
+  flows: FlowRecord[],
+  events: Event[]
+): ExternalDestinationRow[] {
+  const grouped = new Map<string, ExternalDestinationRow>();
+  const sourceSets = new Map<string, Set<string>>();
+
+  flows.forEach((flow) => {
+    const destination = normalizeDestination(flow);
+    const isExternal = flow.direction === "external" || !isPrivateIPv4(destination);
+    if (!destination || destination === "-" || !isExternal) return;
+
+    const protocol = (flow.app_protocol || flow.protocol || "-").toUpperCase();
+    const port = `${flow.dst_port || "-"}`;
+    const key = `${destination}|${port}|${protocol}`;
+    const existing = grouped.get(key);
+
+    if (existing) {
+      existing.observedCount += 1;
+      if (!existing.firstSeen || flow.ts < existing.firstSeen) existing.firstSeen = flow.ts;
+      if (!existing.lastSeen || flow.ts > existing.lastSeen) existing.lastSeen = flow.ts;
+    } else {
+      grouped.set(key, {
+        key,
+        destination,
+        port,
+        protocol,
+        sourceIp: flow.src_ip || "-",
+        sourceCount: 0,
+        observedCount: 1,
+        firstSeen: flow.ts,
+        lastSeen: flow.ts,
+        relatedSeverity: undefined,
+        relatedSignal: "-",
+        relatedOwasp: "-",
+      });
+    }
+
+    const sources = sourceSets.get(key) || new Set<string>();
+    if (flow.src_ip) sources.add(flow.src_ip);
+    sourceSets.set(key, sources);
+  });
+
+  const visible = visibleEvents(events);
+  grouped.forEach((row, key) => {
+    row.sourceCount = sourceSets.get(key)?.size || 0;
+    const matching = visible
+      .filter(
+        (event) =>
+          (event.dst_ip || "-") === row.destination &&
+          `${event.dst_port || "-"}` === row.port
+      )
+      .sort(
+        (a, b) =>
+          severityRank(b.severity) - severityRank(a.severity) ||
+          b.ts.localeCompare(a.ts)
+      );
+    const topEvent = matching[0];
+    row.relatedSeverity = topEvent?.severity;
+    row.relatedSignal = topEvent
+      ? displayRuleLabel(topEvent.rule_id || topEvent.type)
+      : "-";
+    row.relatedOwasp = topEvent ? formatOWASP(eventOWASP(topEvent)) : "-";
+  });
+
+  return Array.from(grouped.values()).sort((a, b) => {
+    if (severityRank(a.relatedSeverity) !== severityRank(b.relatedSeverity)) {
+      return severityRank(b.relatedSeverity) - severityRank(a.relatedSeverity);
+    }
+    if (a.observedCount !== b.observedCount) {
+      return b.observedCount - a.observedCount;
+    }
+    return a.destination.localeCompare(b.destination);
+  });
+}
+
+function compactSeverityLabel(severity?: string): string {
+  const value = (severity || "").toUpperCase();
+  if (value === "CRITICAL") return "Critical";
+  if (value === "HIGH") return "High";
+  if (value === "MEDIUM") return "Medium";
+  if (value === "WARNING") return "Warning";
+  if (value === "LOW") return "Low";
+  if (value === "INFO") return "Info";
+  return severity || "-";
+}
+
+function displayInferredValue(value?: string): string {
+  const token = (value || "").trim();
+  if (!token) return "-";
+  if (token === "不明候補") return "不明";
+  if (token.endsWith("候補")) return token.slice(0, -2);
+  return token;
+}
+
+function reportSeverityClass(severity?: string): string {
+  const value = (severity || "").toUpperCase();
+  if (value === "CRITICAL" || value === "HIGH") {
+    return "border-[#ff6b57] text-[#ff3b1f]";
+  }
+  if (value === "WARNING" || value === "MEDIUM") {
+    return "border-[#f59e0b] text-[#d97706]";
+  }
+  if (value === "LOW") {
+    return "border-[#a8b7cf] text-[#5e7598]";
+  }
+  return "border-[#cbd5e1] text-[#64748b]";
+}
+
+function JsonDisclosure({ label, value }: { label: string; value: unknown }) {
   return (
     <details className="border border-border bg-[#fcfcfd]">
       <summary className="cursor-pointer px-3 py-2 text-sm text-[#2563eb]">
@@ -699,320 +981,380 @@ function OverviewView({
   report,
   hosts,
   onOpenHost,
+  flows,
+  onOpenEvents,
+  onOpenDevices,
+  meta,
 }: {
   report: Report | null;
   hosts: HostRow[];
   onOpenHost: (ip: string) => void;
+  flows: FlowRecord[];
+  onOpenEvents: () => void;
+  onOpenDevices: () => void;
+  meta: ViewerMeta | null;
 }) {
   const events = report?.events || [];
-  const nonDebugEvents = visibleEvents(events);
-  const debugEvents = events.filter((event) => isDebugEvent(event));
-  const riskSignals = warningOrHigherEvents(nonDebugEvents)
-    .slice()
-    .sort((a, b) => {
-      if (severityRank(a.severity) !== severityRank(b.severity)) {
-        return severityRank(b.severity) - severityRank(a.severity);
-      }
-      return b.ts.localeCompare(a.ts);
-    });
-  const warnings = nonDebugEvents.filter(
+  const visible = visibleEvents(events);
+  const warningEvents = visible.filter(
     (event) => (event.severity || "").toUpperCase() === "WARNING"
-  ).length;
-  const highCritical = nonDebugEvents.filter(
-    (event) => severityRank(event.severity) >= severityRank("HIGH")
-  ).length;
+  );
+  const highEvents = visible.filter(
+    (event) => (event.severity || "").toUpperCase() === "HIGH"
+  );
+  const criticalEvents = visible.filter(
+    (event) => (event.severity || "").toUpperCase() === "CRITICAL"
+  );
   const localHosts = hosts.filter((host) => isLocalHost(host));
   const externalHosts = hosts.filter((host) => !isLocalHost(host));
-  const visibleRules = countByKey(nonDebugEvents.map((event) => event.rule_id || event.type));
-  const visibleCategories = countByKey(nonDebugEvents.map((event) => event.category));
-  const visibleSources = countByKey(nonDebugEvents.map((event) => event.src_ip || event.device_key));
-  const sourceLabel = report?.source || "-";
-  const highCount = nonDebugEvents.length > 0 ? nonDebugEvents.filter((event) => (event.severity || "").toUpperCase() === "HIGH").length : metricValue(report?.severity, "HIGH");
-  const criticalCount = nonDebugEvents.length > 0 ? nonDebugEvents.filter((event) => (event.severity || "").toUpperCase() === "CRITICAL").length : metricValue(report?.severity, "CRITICAL");
-  const warningCount = nonDebugEvents.length > 0 ? warnings : metricValue(report?.severity, "WARNING");
-  const totalVisibleEvents = nonDebugEvents.length > 0 ? nonDebugEvents.length : report?.total_events || 0;
-  const priorityFindings = riskSignals.slice(0, 3);
-  const recommendedActions = uniqueStrings(
-    riskSignals.map((event) => event.recommendation)
-  ).slice(0, 5);
-  const overallAssessment = overallAssessmentText({
-    riskSignalCount: riskSignals.length,
-    warningCount,
-    highCriticalCount: highCritical,
-    localDeviceCount: localHosts.length,
-    externalDestinationCount: externalHosts.length,
+  const sourceHosts = uniqueStrings(flows.map((flow) => flow.src_ip));
+  const protocols = uniqueStrings(
+    flows.map((flow) => flow.app_protocol || flow.protocol).filter(Boolean)
+  );
+  const packetCount = flows.reduce(
+    (sum, flow) => sum + (flow.packet_count || 0),
+    0
+  );
+  const bytesTotal = flows.reduce(
+    (sum, flow) => sum + (flow.bytes_in || 0) + (flow.bytes_out || 0),
+    0
+  );
+  const sniCount = flows.filter(
+    (flow) => (flow.sni || "").trim() !== ""
+  ).length;
+  const hostCount = flows.filter(
+    (flow) => (flow.host || "").trim() !== ""
+  ).length;
+  const uniqueExternal = uniqueStrings(
+    flows
+      .filter((flow) => flow.direction === "external")
+      .map(
+        (flow) =>
+          flow.observed_destination || flow.host || flow.sni || flow.dst_ip
+      )
+  );
+  const totalFlowCount = uniqueStrings(
+    flows.map((flow) => flow.flow_key)
+  ).length;
+  const topHosts = localHosts
+    .slice()
+    .sort(
+      (a, b) =>
+        b.signals - a.signals ||
+        severityRank(b.risk) - severityRank(a.risk) ||
+        a.ip.localeCompare(b.ip)
+    )
+    .slice(0, 3);
+  const signalRows = topKV(
+    countByKey(visible.map((event) => event.rule_id || event.type)),
+    4
+  ).map((item) => {
+    const sample = visible.find(
+      (event) => (event.rule_id || event.type) === item.key
+    );
+    return {
+      ...item,
+      label: displayRuleLabel(item.key),
+      summary:
+        sample?.observed_fact || sample?.message || summaryForRule(item.key),
+    };
   });
+  const recentEvents = visible
+    .slice()
+    .sort((a, b) => b.ts.localeCompare(a.ts))
+    .slice(0, 5);
+  const sourceList = [
+    baseName(
+      meta?.report_path || meta?.events_path || report?.source || "events.jsonl"
+    ),
+    baseName(meta?.flows_path || "flows.jsonl"),
+    baseName(meta?.inventory_path || "device_inventory.json"),
+  ].filter(Boolean);
+  const summaryMetrics = [
+    { label: "観測端末数", value: `${sourceHosts.length}`, suffix: "台" },
+    { label: "外部通信先", value: `${uniqueExternal.length}`, suffix: "件" },
+    {
+      label: "Warning",
+      value: `${warningEvents.length}`,
+      suffix: "件",
+      accent: warningEvents.length > 0,
+    },
+    {
+      label: "High / Critical",
+      value: `${highEvents.length + criticalEvents.length}`,
+      suffix: "件",
+      accent: highEvents.length + criticalEvents.length > 0,
+    },
+    { label: "検出イベント総数", value: `${visible.length}`, suffix: "件" },
+  ];
+  const observedFacts = [
+    ["プロトコル", protocols.join(", ") || "-"],
+    ["パケット数", packetCount.toLocaleString("ja-JP")],
+    ["通信量", formatBytes(bytesTotal)],
+    ["SNI数", `${sniCount} 件`],
+    ["HTTP Host数", `${hostCount} 件`],
+    ["外部通信先", `${uniqueExternal.length} 件`],
+    ["フロー数", `${totalFlowCount.toLocaleString("ja-JP")} 件`],
+  ];
 
   return (
-    <div className="space-y-6">
-      <Section title="Overview">
-        <div className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-6">
-            <MetricCard
-              label="Total Visible Events"
-              value={totalVisibleEvents}
-              helper={`source: ${sourceLabel}`}
-            />
-            <MetricCard
-              label="Risk Signals"
-              value={riskSignals.length}
-              helper={debugEvents.length > 0 ? `${debugEvents.length} debug events hidden` : "debug events excluded"}
-            />
-            <MetricCard
-              label="Warnings"
-              value={warningCount}
-              helper="warning-level signals highlighted"
-            />
-            <MetricCard
-              label="High / Critical"
-              value={highCount + criticalCount}
-              helper={`critical ${criticalCount} / high ${highCount}`}
-            />
-            <MetricCard
-              label="Local Devices"
-              value={localHosts.length}
-              helper={`${report?.unknown_devices || 0} unknown devices`}
-            />
-            <MetricCard
-              label="External Destinations"
-              value={externalHosts.length}
-              helper={`${report?.user_notifications || 0} user notifications`}
-            />
+    <div className="space-y-7 text-[#24324b]">
+      <section className="border-b border-[#dbe3ef] pb-4">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="min-w-0">
+            <h1 className="text-[24px] font-medium tracking-[-0.02em] text-[#1f2a44]">
+              Quarant レポート概要
+            </h1>
           </div>
 
-          <div className="grid gap-4 xl:grid-cols-3">
-            <div className="border border-border bg-[#fcfcfd] px-4 py-4">
-              <div className="text-sm font-medium">Overall Assessment</div>
-              <div className="mt-2 text-sm leading-6 text-[#334155]">
-                {overallAssessment}
-              </div>
-              <div className="mt-3 text-xs text-[#667085]">
-                Mode: Passive observation / Active scanning: No / TLS decryption: No
-              </div>
-            </div>
+          <Button
+            variant="outline"
+            className="h-9 rounded-none border-[#b8c6db] bg-white px-4 text-[13px] font-semibold text-[#1f2a44] shadow-none hover:bg-[#f8fbff]"
+            onClick={() => {
+              const payload = {
+                report,
+                flows,
+                inventory: hosts.map((host) => host.inventory).filter(Boolean),
+                exported_at: new Date().toISOString(),
+              };
+              const blob = new Blob([JSON.stringify(payload, null, 2)], {
+                type: "application/json",
+              });
+              const url = URL.createObjectURL(blob);
+              const link = document.createElement("a");
+              link.href = url;
+              link.download = "quarant-report-export.json";
+              link.click();
+              URL.revokeObjectURL(url);
+            }}
+          >
+            レポートをエクスポート（JSON）
+          </Button>
+        </div>
+      </section>
 
-            <div className="border border-border bg-[#fcfcfd] px-4 py-4">
-              <div className="text-sm font-medium">Priority Findings</div>
-              <div className="mt-3 space-y-3">
-                {priorityFindings.length > 0 ? (
-                  priorityFindings.map((event, index) => (
-                    <div key={`${event.ts}-${event.rule_id || event.type}-priority-${index}`} className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <SeverityBadge severity={event.severity} />
-                        <span className="font-mono text-[11px] text-[#667085]">
-                          {event.rule_id || event.type || "-"}
-                        </span>
-                      </div>
-                      <div className="text-sm text-[#334155]">
-                        {eventSummary(event)}
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="text-sm text-muted-foreground">
-                    No priority finding in the current visible event set.
-                  </div>
-                )}
-              </div>
-            </div>
+      <section className="border-b border-[#e4eaf3] pb-5">
+        <dl className="mt-3 grid gap-y-2 text-[14px] leading-7 text-[#2e3b55] md:grid-cols-[140px_1fr]">
+          <dt className="text-[#6d7f9c]">観測期間</dt>
+          <dd className="font-mono text-[14px] text-[#22324d]">
+            {formatReportWindowLabel(
+              report?.window?.start,
+              report?.window?.end
+            )}
+          </dd>
+          <dt className="text-[#6d7f9c]">データソース</dt>
+          <dd className="font-mono text-[14px] text-[#22324d]">
+            {sourceList.join(" / ") || "-"}
+          </dd>
+        </dl>
+      </section>
 
-            <div className="border border-border bg-[#fcfcfd] px-4 py-4">
-              <div className="text-sm font-medium">Recommended Actions</div>
-              <div className="mt-3 space-y-2">
-                {recommendedActions.length > 0 ? (
-                  recommendedActions.map((action) => (
-                    <div key={action} className="text-sm leading-6 text-[#334155]">
-                      {action}
-                    </div>
-                  ))
-                ) : (
-                  <div className="text-sm text-muted-foreground">
-                    No explicit recommendation was attached to the current visible events.
-                  </div>
-                )}
+      <section className="border-b border-[#e4eaf3] pb-5">
+        <div className="grid gap-y-4 md:grid-cols-5 md:divide-x md:divide-[#e4eaf3]">
+          {summaryMetrics.map((metric) => (
+            <div key={metric.label} className="pr-4">
+              <div className="text-[13px] text-[#6d7f9c]">{metric.label}</div>
+              <div className="mt-1 flex items-end gap-0.5">
+                <span
+                  className={cn(
+                    "text-[18px] font-medium text-[#1f2a44]",
+                    metric.accent && "text-[#e56b1f]"
+                  )}
+                >
+                  {metric.value}
+                </span>
+                <span className="pb-0.5 text-[13px] text-[#6d7f9c]">
+                  {metric.suffix}
+                </span>
               </div>
             </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="border-b border-[#e4eaf3] pb-6">
+        <div className="border-b border-[#cfd9e6] pb-2 text-[18px] font-semibold text-[#1f2a44]">
+          観測された通信
+        </div>
+        <div className="mt-4 divide-y divide-[#edf2f8]">
+          {observedFacts.map(([label, value]) => (
+            <div
+              key={label}
+              className="grid grid-cols-[180px_1fr] gap-6 py-2.5 text-[14px]"
+            >
+              <div className="text-[#6d7f9c]">{label}</div>
+              <div className="font-mono text-[#22324d]">{value}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="grid gap-8 border-b border-[#e4eaf3] pb-7 xl:grid-cols-2">
+        <div>
+          <div className="border-b border-[#cfd9e6] pb-2 text-[18px] font-semibold text-[#1f2a44]">
+            要確認端末
           </div>
-
-          <div className="grid gap-4 xl:grid-cols-3">
-            <div className="border border-border">
-              <div className="border-b border-border bg-[#fafafa] px-4 py-2 text-sm font-medium">
-                Top Rules
-              </div>
-              <div className="divide-y divide-border">
-                {topKV(nonDebugEvents.length > 0 ? visibleRules : report?.rules).length > 0 ? (
-                  topKV(nonDebugEvents.length > 0 ? visibleRules : report?.rules).map((item) => (
-                    <div
-                      key={item.key}
-                      className="flex items-center justify-between px-4 py-2 text-sm"
+          <div className="mt-4 overflow-x-auto">
+            <div className="grid min-w-[580px] grid-cols-[128px_1.1fr_72px_120px_1.2fr] gap-4 border-b border-[#cfd9e6] pb-2 text-[13px] text-[#6d7f9c]">
+              <div>IPアドレス</div>
+              <div>推定カテゴリ</div>
+              <div className="text-right">件数</div>
+              <div>最高Severity</div>
+              <div>主な理由</div>
+            </div>
+            <div className="divide-y divide-[#edf2f8]">
+              {topHosts.map((host) => (
+                <button
+                  key={host.ip}
+                  onClick={() => onOpenHost(host.ip)}
+                  className="grid min-w-[580px] grid-cols-[128px_1.1fr_72px_120px_1.2fr] gap-4 py-3 text-left text-[14px] hover:bg-[#fafcff]"
+                >
+                  <div className="font-mono text-[#31415c] underline underline-offset-2">
+                    {host.ip}
+                  </div>
+                  <div>{humanizeCategoryCandidate(host.categoryCandidate)}</div>
+                  <div className="text-right font-mono">{host.signals}</div>
+                  <div>
+                    <span
+                      className={cn(
+                        "inline-flex min-w-[64px] justify-center border px-2 py-0.5 text-[12px] font-medium",
+                        reportSeverityClass(host.risk)
+                      )}
                     >
-                      <span className="font-mono text-xs text-[#334155]">{item.key}</span>
-                      <span className="font-mono text-xs text-[#667085]">{item.count}</span>
-                    </div>
-                  ))
-                ) : (
-                  <div className="px-4 py-3 text-sm text-muted-foreground">
-                    No rule summary available.
+                      {compactSeverityLabel(host.risk)}
+                    </span>
                   </div>
-                )}
-              </div>
-            </div>
-
-            <div className="border border-border">
-              <div className="border-b border-border bg-[#fafafa] px-4 py-2 text-sm font-medium">
-                Top OWASP Categories
-              </div>
-              <div className="divide-y divide-border">
-                {topKV(nonDebugEvents.length > 0 ? visibleCategories : report?.categories).length > 0 ? (
-                  topKV(nonDebugEvents.length > 0 ? visibleCategories : report?.categories).map((item) => (
-                    <div
-                      key={item.key}
-                      className="flex items-center justify-between px-4 py-2 text-sm"
-                    >
-                      <span>{item.key}</span>
-                      <span className="font-mono text-xs text-[#667085]">{item.count}</span>
-                    </div>
-                  ))
-                ) : (
-                  <div className="px-4 py-3 text-sm text-muted-foreground">
-                    No category summary available.
+                  <div className="truncate text-[#4d5f7c]">
+                    {hostTopReason(host)}
                   </div>
-                )}
-              </div>
-            </div>
-
-            <div className="border border-border">
-              <div className="border-b border-border bg-[#fafafa] px-4 py-2 text-sm font-medium">
-                Top Source IP
-              </div>
-              <div className="divide-y divide-border">
-                {topKV(nonDebugEvents.length > 0 ? visibleSources : report?.sources).length > 0 ? (
-                  topKV(nonDebugEvents.length > 0 ? visibleSources : report?.sources).map((item) => (
-                    <div
-                      key={item.key}
-                      className="flex items-center justify-between px-4 py-2 text-sm"
-                    >
-                      <span className="font-mono text-xs text-[#334155]">{item.key}</span>
-                      <span className="font-mono text-xs text-[#667085]">{item.count}</span>
-                    </div>
-                  ))
-                ) : (
-                  <div className="px-4 py-3 text-sm text-muted-foreground">
-                    No source summary available.
-                  </div>
-                )}
-              </div>
+                </button>
+              ))}
             </div>
           </div>
+          <button
+            onClick={onOpenDevices}
+            className="mt-4 text-[14px] text-[#4d5f7c] underline underline-offset-2"
+          >
+            → すべての端末を見る
+          </button>
+        </div>
 
-          <div className="space-y-2">
-            <div className="text-sm font-medium">Risk Signals</div>
-            <Table className="text-[13px]">
-              <TableHeader>
-                <TableRow className="bg-[#fafafa] hover:bg-[#fafafa]">
-                  <TableHead>Severity</TableHead>
-                  <TableHead>Rule ID</TableHead>
-                  <TableHead>OWASP Tags</TableHead>
-                  <TableHead>Confidence</TableHead>
-                  <TableHead>Observed Fact</TableHead>
-                  <TableHead>Evidence</TableHead>
-                  <TableHead>Device IP</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {riskSignals.length > 0 ? (
-                  riskSignals.map((event, index) => (
-                    <TableRow key={`${event.ts}-${event.rule_id}-${index}`}>
-                      <TableCell><SeverityBadge severity={event.severity} /></TableCell>
-                      <TableCell className="font-mono text-xs">
-                        {event.rule_id || event.type || "-"}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex flex-wrap gap-1">
-                          {eventOWASP(event).map((tag) => (
-                            <OWASPLabel key={tag} tag={tag} />
-                          ))}
-                        </div>
-                      </TableCell>
-                      <TableCell>{event.confidence || "-"}</TableCell>
-                      <TableCell className="max-w-[280px] whitespace-normal">
-                        {event.observed_fact || "-"}
-                      </TableCell>
-                      <TableCell className="max-w-[260px] whitespace-normal font-mono text-xs text-muted-foreground">
-                        {event.evidence || "-"}
-                      </TableCell>
-                      <TableCell>
-                        <button
-                          onClick={() => event.src_ip && onOpenHost(event.src_ip)}
-                          className="text-[#2563eb] hover:underline"
-                        >
-                          {event.src_ip || "-"}
-                        </button>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell colSpan={7} className="text-center text-muted-foreground">
-                      観測対象のリスクシグナルはありません。
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
+        <div>
+          <div className="border-b border-[#cfd9e6] pb-2 text-[18px] font-semibold text-[#1f2a44]">
+            主なリスクシグナル
           </div>
+          <div className="mt-4 overflow-x-auto">
+            <div className="grid min-w-[560px] grid-cols-[1.1fr_1.5fr_52px] gap-4 border-b border-[#cfd9e6] pb-2 text-[13px] text-[#6d7f9c]">
+              <div>シグナル</div>
+              <div>概要</div>
+              <div className="text-right">件数</div>
+            </div>
+            <div className="divide-y divide-[#edf2f8]">
+              {signalRows.map((item) => (
+                <div
+                  key={item.key}
+                  className="grid min-w-[560px] grid-cols-[1.1fr_1.5fr_52px] gap-4 py-3 text-[14px]"
+                >
+                  <div className="text-[#24324b]">{item.label}</div>
+                  <div className="text-[#4d5f7c]">{item.summary}</div>
+                  <div className="text-right font-mono text-[#24324b]">
+                    {item.count}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <button
+            onClick={onOpenEvents}
+            className="mt-4 text-[14px] text-[#4d5f7c] underline underline-offset-2"
+          >
+            → すべてのリスクシグナルを見る
+          </button>
+        </div>
+      </section>
 
-          <div className="space-y-2">
-            <div className="text-sm font-medium">All Events</div>
-            {nonDebugEvents.length === 0 ? (
-              <SummaryLine>
-                この `report` にはイベント配列が含まれていません。summary-only の
-                `report.json` を読み込んでいる場合、Overview の集計だけが表示されます。
-              </SummaryLine>
-            ) : null}
-            <Table className="text-[13px]">
-              <TableHeader>
-                <TableRow className="bg-[#fafafa] hover:bg-[#fafafa]">
-                  <TableHead>Time</TableHead>
-                  <TableHead>Severity</TableHead>
-                  <TableHead>Summary</TableHead>
-                  <TableHead>OWASP</TableHead>
-                  <TableHead>Source → Destination</TableHead>
-                  <TableHead>Short Evidence</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {nonDebugEvents.map((event, index) => (
-                  <TableRow key={`${event.ts}-${event.rule_id || event.type}-${index}`}>
-                    <TableCell className="font-mono text-xs">{formatTime(event.ts)}</TableCell>
-                    <TableCell><SeverityBadge severity={event.severity} /></TableCell>
-                    <TableCell className="max-w-[280px] whitespace-normal">
-                      {eventSummary(event)}
-                    </TableCell>
-                    <TableCell>{formatOWASP(eventOWASP(event))}</TableCell>
-                    <TableCell className="font-mono text-xs">
-                      {endpoint(event.src_ip, event.src_port)} {"->"}{" "}
-                      {endpoint(event.dst_ip, event.dst_port)}
-                    </TableCell>
-                    <TableCell className="max-w-[240px] whitespace-normal font-mono text-xs text-muted-foreground">
-                      {shortEvidence(event)}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+      <section className="border-b border-[#e4eaf3] pb-7">
+        <div className="flex items-center justify-between border-b border-[#cfd9e6] pb-2">
+          <div className="text-[18px] font-semibold text-[#1f2a44]">
+            最近のイベント
+          </div>
+          <div className="text-[13px] text-[#6d7f9c]">最新5件</div>
+        </div>
+        <div className="mt-4 overflow-x-auto">
+          <div className="grid min-w-[780px] grid-cols-[170px_92px_150px_170px_minmax(0,1fr)] gap-4 border-b border-[#cfd9e6] pb-2 text-[13px] text-[#6d7f9c]">
+            <div>時刻</div>
+            <div>Severity</div>
+            <div>プロトコル / ポート</div>
+            <div>ルール</div>
+            <div>内容</div>
+          </div>
+          <div className="divide-y divide-[#edf2f8]">
+            {recentEvents.map((event, index) => {
+              const flow = flows.find(
+                (item) => item.flow_key === event.flow_key
+              );
+              const protocolLabel = flow
+                ? `${(
+                    flow.app_protocol ||
+                    flow.protocol ||
+                    "-"
+                  ).toUpperCase()} / ${event.dst_port || flow.dst_port || "-"}`
+                : `- / ${event.dst_port || "-"}`;
+              return (
+                <div
+                  key={`${event.ts}-${index}`}
+                  className="grid min-w-[780px] grid-cols-[170px_92px_150px_170px_minmax(0,1fr)] gap-4 py-3 text-[14px]"
+                >
+                  <div className="font-mono text-[#24324b]">
+                    {formatCompactDateTime(event.ts)}
+                  </div>
+                  <div>
+                    <span
+                      className={cn(
+                        "inline-flex min-w-[64px] justify-center border px-2 py-0.5 text-[12px] font-medium",
+                        reportSeverityClass(event.severity)
+                      )}
+                    >
+                      {compactSeverityLabel(event.severity)}
+                    </span>
+                  </div>
+                  <div className="font-mono text-[#24324b]">
+                    {protocolLabel}
+                  </div>
+                  <div className="min-w-0 break-words font-mono text-[#5e7598]">
+                    {event.rule_id || event.type || "-"}
+                  </div>
+                  <div className="min-w-0 break-words whitespace-normal text-[#4d5f7c]">
+                    {event.observed_fact || event.message || "-"}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
-      </Section>
+        <button
+          onClick={onOpenEvents}
+          className="mt-4 text-[14px] text-[#4d5f7c] underline underline-offset-2"
+        >
+          → すべてのイベントを見る
+        </button>
+      </section>
+
     </div>
   );
 }
 
 function DevicesView({
+  report,
   hosts,
+  flows,
+  meta,
   onOpenHost,
 }: {
+  report: Report | null;
   hosts: HostRow[];
+  flows: FlowRecord[];
+  meta: ViewerMeta | null;
   onOpenHost: (ip: string) => void;
 }) {
   const [query, setQuery] = useState("");
@@ -1053,46 +1395,107 @@ function DevicesView({
   });
 
   const withSignals = hosts.filter((host) => host.signals > 0).length;
-  const unclassified = hosts.filter((host) =>
-    host.categoryCandidate.includes("未分類")
-  ).length;
   const localHosts = filteredHosts.filter((host) => isLocalHost(host));
-  const externalHosts = filteredHosts.filter((host) => !isLocalHost(host));
+  const destinationRows = buildExternalDestinationRows(flows, report?.events || []);
+  const filteredDestinations = destinationRows.filter((row) => {
+    const haystack = [
+      row.destination,
+      row.port,
+      row.protocol,
+      row.sourceIp,
+      row.relatedSignal,
+      row.relatedOwasp,
+    ]
+      .join(" ")
+      .toLowerCase();
+
+    if (riskFilter !== "all" && (row.relatedSeverity || "") !== riskFilter) {
+      return false;
+    }
+    if (owaspFilter !== "all" && row.relatedOwasp !== "-" && !row.relatedOwasp.includes(owaspFilter)) {
+      return false;
+    }
+    if (deferredQuery.trim() && !haystack.includes(deferredQuery.trim().toLowerCase())) {
+      return false;
+    }
+    return true;
+  });
+  const sourceName = baseName(meta?.inventory_path || "device_inventory.json");
 
   return (
-    <div className="space-y-6">
-      <Section
-        title="Devices"
-      >
-          <div className="grid gap-3 lg:grid-cols-[minmax(0,2fr)_repeat(2,minmax(0,1fr))]">
+    <div className="space-y-7 text-[#24324b]">
+      <section className="border-b border-[#dbe3ef] pb-4">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="min-w-0">
+            <h1 className="text-[24px] font-medium tracking-[-0.02em] text-[#1f2a44]">
+              Quarant デバイスレポート
+            </h1>
+          </div>
+
+          <Button
+            variant="outline"
+            className="h-9 rounded-none border-[#b8c6db] bg-white px-4 text-[13px] font-semibold text-[#1f2a44] shadow-none hover:bg-[#f8fbff]"
+            onClick={() => {
+              const payload = {
+                report,
+                hosts,
+                flows,
+                exported_at: new Date().toISOString(),
+              };
+              const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+              const url = URL.createObjectURL(blob);
+              const link = document.createElement("a");
+              link.href = url;
+              link.download = "quarant-device-report.json";
+              link.click();
+              URL.revokeObjectURL(url);
+            }}
+          >
+            レポートをエクスポート（JSON）
+          </Button>
+        </div>
+      </section>
+
+      <section className="border-b border-[#e4eaf3] pb-4">
+        <div className="grid gap-4 xl:grid-cols-[minmax(0,2.2fr)_220px_220px_auto]">
+          <div className="grid grid-cols-[44px_minmax(0,1fr)] items-center gap-2">
+            <div className="text-[18px] font-semibold text-[#5c7094]">検索</div>
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+              <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#93a3bb]" />
               <Input
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                placeholder="Search IP, candidate label, vendor, protocol, destination, or SNI"
-                className="pl-9"
+                placeholder="Search"
+                className="h-10 rounded-none border-[#cfd9e6] bg-white pl-10 text-[14px] placeholder:text-[#94a3b8]"
               />
             </div>
+          </div>
+
+          <div className="grid grid-cols-[84px_minmax(0,1fr)] items-center gap-2">
+            <div className="text-[18px] font-semibold text-[#5c7094]">重要度</div>
             <Select value={riskFilter} onValueChange={setRiskFilter}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Risk" />
+              <SelectTrigger className="h-10 rounded-none border-[#cfd9e6] bg-white text-[14px]">
+                <SelectValue placeholder="" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Risk</SelectItem>
+                <SelectItem value="all">すべて</SelectItem>
                 {uniqueStrings(hosts.map((host) => host.risk)).map((value) => (
                   <SelectItem key={value} value={value}>
-                    {value}
+                    {compactSeverityLabel(value)}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
+          </div>
+
+          <div className="grid grid-cols-[72px_minmax(0,1fr)] items-center gap-2">
+            <div className="text-[18px] font-semibold text-[#5c7094]">OWASP</div>
             <Select value={owaspFilter} onValueChange={setOwaspFilter}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="OWASP" />
+              <SelectTrigger className="h-10 rounded-none border-[#cfd9e6] bg-white text-[14px]">
+                <SelectValue placeholder="" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All OWASP</SelectItem>
+                <SelectItem value="all">すべて</SelectItem>
                 {owaspOptions.map((value) => (
                   <SelectItem key={value} value={value}>
                     {value}
@@ -1102,21 +1505,101 @@ function DevicesView({
             </Select>
           </div>
 
-          <SummaryLine>{filteredHosts.length} hosts shown</SummaryLine>
-
-          <div className="space-y-6">
-            <div className="space-y-2">
-              <div className="text-sm font-medium">Local Devices</div>
-              <HostTable hosts={localHosts} onOpenHost={onOpenHost} emptyLabel="条件に一致する local device はありません。" />
-            </div>
-
-            <div className="space-y-2">
-              <div className="text-sm font-medium">External Destinations</div>
-              <HostTable hosts={externalHosts} onOpenHost={onOpenHost} emptyLabel="条件に一致する external destination はありません。" />
+          <div className="flex items-center justify-end">
+            <div className="inline-flex border border-[#cfd9e6]">
+              <a href="#lan-devices" className="border-r border-[#cfd9e6] bg-[#f8fbff] px-4 py-2 text-[13px] font-semibold text-[#1f2a44]">
+                LAN内端末
+              </a>
+              <a href="#external-destinations" className="bg-white px-4 py-2 text-[13px] font-semibold text-[#1f2a44]">
+                外部通信先
+              </a>
             </div>
           </div>
+        </div>
+      </section>
 
-      </Section>
+      <section id="lan-devices" className="border-b border-[#e4eaf3] pb-7">
+        <div className="flex items-center justify-between border-b border-[#cfd9e6] pb-2">
+          <div className="text-[18px] font-semibold text-[#1f2a44]">LAN内端末一覧</div>
+          <div className="text-[13px] text-[#6d7f9c]">{localHosts.length} 件</div>
+        </div>
+        <div className="mt-4 overflow-x-auto">
+          <div className="grid min-w-[900px] grid-cols-[120px_140px_120px_84px_220px_128px_84px] gap-4 border-b border-[#cfd9e6] pb-2 text-[13px] text-[#6d7f9c]">
+            <div>IPアドレス</div>
+            <div>推定カテゴリ</div>
+            <div>最高リスク</div>
+            <div className="text-right">シグナル数</div>
+            <div>主な通信</div>
+            <div>最終観測</div>
+            <div>詳細</div>
+          </div>
+          <div className="divide-y divide-[#edf2f8]">
+            {localHosts.map((host) => (
+              <div key={host.ip} className="grid min-w-[900px] grid-cols-[120px_140px_120px_84px_220px_128px_84px] gap-4 py-3 text-[14px]">
+                <div className="font-mono text-[#24324b]">{host.ip}</div>
+                <div className="break-words text-[#4d5f7c]">{displayInferredValue(host.categoryCandidate)}</div>
+                <div>
+                  <span className={cn("inline-flex min-w-[74px] justify-center border px-2 py-0.5 text-[12px] font-medium", reportSeverityClass(host.risk))}>
+                    {compactSeverityLabel(host.risk)}
+                  </span>
+                </div>
+                <div className="text-right font-mono text-[#24324b]">{host.signals}</div>
+                <div className="truncate text-[#4d5f7c]" title={`${joinLimited(host.protocols, 2)} / ${host.topDestination}`}>
+                  {joinLimited(host.protocols, 2)} / {host.topDestination}
+                </div>
+                <div className="font-mono text-[#5e7598]">{formatCompactDateTime(host.lastSeen)}</div>
+                <button onClick={() => onOpenHost(host.ip)} className="text-left text-[#4d5f7c] underline underline-offset-2">
+                  詳細
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section id="external-destinations" className="border-b border-[#e4eaf3] pb-7">
+        <div className="flex items-center justify-between border-b border-[#cfd9e6] pb-2">
+          <div className="text-[18px] font-semibold text-[#1f2a44]">外部通信先一覧</div>
+          <div className="text-[13px] text-[#6d7f9c]">{filteredDestinations.length} 件</div>
+        </div>
+        <div className="mt-4 overflow-x-auto">
+          <div className="grid min-w-[1220px] grid-cols-[170px_64px_90px_118px_80px_120px_120px_92px_1fr] gap-4 border-b border-[#cfd9e6] pb-2 text-[13px] text-[#6d7f9c]">
+            <div>宛先</div>
+            <div>ポート</div>
+            <div>プロトコル</div>
+            <div>通信元端末</div>
+            <div className="text-right">観測回数</div>
+            <div>初回観測</div>
+            <div>最終観測</div>
+            <div>関連シグナル</div>
+            <div />
+          </div>
+          <div className="divide-y divide-[#edf2f8]">
+            {filteredDestinations.slice(0, 5).map((row) => (
+              <div key={row.key} className="grid min-w-[1220px] grid-cols-[170px_64px_90px_118px_80px_120px_120px_92px_1fr] gap-4 py-3 text-[14px]">
+                <div className="font-mono text-[#24324b]">{row.destination}</div>
+                <div className="font-mono text-[#24324b]">{row.port}</div>
+                <div className="text-[#4d5f7c]">{row.protocol}</div>
+                <div className="font-mono text-[#5e7598] underline underline-offset-2">{row.sourceIp}</div>
+                <div className="text-right font-mono text-[#24324b]">{row.observedCount}</div>
+                <div className="font-mono text-[#5e7598]">{formatCompactDateTime(row.firstSeen)}</div>
+                <div className="font-mono text-[#5e7598]">{formatCompactDateTime(row.lastSeen)}</div>
+                <div>
+                  {row.relatedSeverity ? (
+                    <span className={cn("inline-flex min-w-[74px] justify-center border px-2 py-0.5 text-[12px] font-medium", reportSeverityClass(row.relatedSeverity))}>
+                      {compactSeverityLabel(row.relatedSeverity)}
+                    </span>
+                  ) : (
+                    <span className="text-[#94a3b8]">-</span>
+                  )}
+                </div>
+                <div className="text-[#4d5f7c]">{row.relatedSignal}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
     </div>
   );
 }
@@ -1148,34 +1631,44 @@ function HostTable({
         </TableRow>
       </TableHeader>
       <TableBody>
-        {hosts.length > 0 ? hosts.map((host) => (
-          <TableRow key={host.ip}>
-            <TableCell className="font-mono text-xs">{host.ip}</TableCell>
-            <TableCell>{host.labelCandidate}</TableCell>
-            <TableCell>{host.categoryCandidate}</TableCell>
-            <TableCell>{host.vendorCandidate}</TableCell>
-            <TableCell><SeverityBadge severity={host.risk} /></TableCell>
-            <TableCell>{host.signals}</TableCell>
-            <TableCell>{joinLimited(host.owasp, 3)}</TableCell>
-            <TableCell>{joinLimited(host.protocols, 3)}</TableCell>
-            <TableCell className="max-w-[180px] truncate" title={host.topDestination}>
-              {host.topDestination}
-            </TableCell>
-            <TableCell className="font-mono text-xs">
-              {formatTime(host.lastSeen)}
-            </TableCell>
-            <TableCell>
-              <button
-                onClick={() => onOpenHost(host.ip)}
-                className="text-[#2563eb] hover:underline"
+        {hosts.length > 0 ? (
+          hosts.map((host) => (
+            <TableRow key={host.ip}>
+              <TableCell className="font-mono text-xs">{host.ip}</TableCell>
+              <TableCell>{host.labelCandidate}</TableCell>
+              <TableCell>{host.categoryCandidate}</TableCell>
+              <TableCell>{host.vendorCandidate}</TableCell>
+              <TableCell>
+                <SeverityBadge severity={host.risk} />
+              </TableCell>
+              <TableCell>{host.signals}</TableCell>
+              <TableCell>{joinLimited(host.owasp, 3)}</TableCell>
+              <TableCell>{joinLimited(host.protocols, 3)}</TableCell>
+              <TableCell
+                className="max-w-[180px] truncate"
+                title={host.topDestination}
               >
-                Host Report
-              </button>
-            </TableCell>
-          </TableRow>
-        )) : (
+                {host.topDestination}
+              </TableCell>
+              <TableCell className="font-mono text-xs">
+                {formatTime(host.lastSeen)}
+              </TableCell>
+              <TableCell>
+                <button
+                  onClick={() => onOpenHost(host.ip)}
+                  className="text-[#2563eb] hover:underline"
+                >
+                  Host Report
+                </button>
+              </TableCell>
+            </TableRow>
+          ))
+        ) : (
           <TableRow>
-            <TableCell colSpan={11} className="text-center text-muted-foreground">
+            <TableCell
+              colSpan={11}
+              className="text-center text-muted-foreground"
+            >
               {emptyLabel}
             </TableCell>
           </TableRow>
@@ -1188,326 +1681,300 @@ function HostTable({
 function HostReportView({
   host,
   onBack,
+  onOpenEvents,
 }: {
   host: HostRow;
   onBack: () => void;
+  onOpenEvents: () => void;
 }) {
   const nonDebugEvents = visibleEvents(host.events);
-  const hiddenDebugCount = host.events.length - nonDebugEvents.length;
-  const highCritical = nonDebugEvents.filter(
-    (event) => severityRank(event.severity) >= severityRank("HIGH")
-  ).length;
-  const relatedEvents = nonDebugEvents.slice().sort((a, b) => b.ts.localeCompare(a.ts));
+  const relatedEvents = nonDebugEvents
+    .slice()
+    .sort((a, b) => b.ts.localeCompare(a.ts));
   const topDestinations = uniqueStrings(
     host.flows
       .filter((flow) => flow.direction === "external")
       .map((flow) => normalizeDestination(flow))
   );
-  const inferenceReasons = deriveInferenceReasons(host);
+  const totalBytes = host.flows.reduce(
+    (sum, flow) => sum + (flow.bytes_in || 0) + (flow.bytes_out || 0),
+    0
+  );
+  const externalRows = buildExternalDestinationRows(host.flows, host.events).slice(0, 3);
+  const deviceTitle = displayInferredValue(
+    host.labelCandidate || host.categoryCandidate || "端末"
+  );
+  const topOwasp = host.owasp[0] || "-";
+  const topReason = hostTopReason(host);
+  const recentDetected = relatedEvents.slice(0, 3);
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-3">
-        <button onClick={onBack} className="text-sm text-[#2563eb] hover:underline">
-          Devices
-        </button>
-        <ChevronRight className="size-4 text-muted-foreground" />
-        <div className="text-sm text-muted-foreground">Host Report</div>
-      </div>
-
-      <Section
-        title={`Host Report: ${host.ip}`}
-        description="1台のホストについて、観測情報と候補情報を分けて表示します。"
-      >
-        <div className="space-y-4">
-          <SummaryLine>
-            {host.signals} risk signals ・ {highCritical} high/critical ・{" "}
-            {host.protocols.length} protocols ・ {host.externalDestinationCount} external destinations ・{" "}
-            {uniqueStrings(host.owasp).length} OWASP categories
-            {hiddenDebugCount > 0 ? ` ・ ${hiddenDebugCount} debug events hidden` : ""}
-          </SummaryLine>
-
-          <div className="grid gap-4 lg:grid-cols-2">
-            <div className="border border-border">
-              <div className="border-b border-border bg-[#fafafa] px-4 py-2 text-sm font-medium">
-                Device Profile
-              </div>
-              <div className="space-y-4 px-4 py-4 text-sm">
-                <div>
-                  <div className="mb-2 font-medium">Observed</div>
-                  <dl className="grid grid-cols-[150px_1fr] gap-y-2">
-                    <dt className="text-muted-foreground">IP Address</dt>
-                    <dd className="font-mono text-xs">{host.ip}</dd>
-                    <dt className="text-muted-foreground">MAC Address</dt>
-                    <dd>{host.macAddress}</dd>
-                    <dt className="text-muted-foreground">First Seen</dt>
-                    <dd className="font-mono text-xs">{formatTime(host.firstSeen)}</dd>
-                    <dt className="text-muted-foreground">Last Seen</dt>
-                    <dd className="font-mono text-xs">{formatTime(host.lastSeen)}</dd>
-                    <dt className="text-muted-foreground">Protocols</dt>
-                    <dd>{joinLimited(host.protocols, 5)}</dd>
-                    <dt className="text-muted-foreground">Ports</dt>
-                    <dd className="font-mono text-xs">
-                      {host.ports.length > 0 ? host.ports.join(", ") : "-"}
-                    </dd>
-                  </dl>
-                </div>
-
-                <div>
-                  <div className="mb-2 font-medium">Inferred / Candidate</div>
-                  <dl className="grid grid-cols-[150px_1fr] gap-y-2">
-                    <dt className="text-muted-foreground">Label Candidate</dt>
-                    <dd>{host.labelCandidate}</dd>
-                    <dt className="text-muted-foreground">Category Candidate</dt>
-                    <dd>{host.categoryCandidate}</dd>
-                    <dt className="text-muted-foreground">Vendor Candidate</dt>
-                    <dd>{host.vendorCandidate}</dd>
-                    <dt className="text-muted-foreground">Family Candidate</dt>
-                    <dd>{host.familyCandidate}</dd>
-                    <dt className="text-muted-foreground">Confidence</dt>
-                    <dd>{host.confidence}</dd>
-                  </dl>
-                </div>
-
-                <div>
-                  <div className="mb-2 font-medium">Inference Reasons</div>
-                  <ul className="space-y-1 text-sm text-[#334155]">
-                    {inferenceReasons.map((reason) => (
-                      <li key={reason}>- {reason}</li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
+    <div className="space-y-7 text-[#24324b]">
+      <section className="border-b border-[#dbe3ef] pb-4">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="min-w-0">
+            <button
+              onClick={onBack}
+              className="text-[14px] text-[#5e7598] underline underline-offset-2"
+            >
+              ← 端末一覧へ戻る
+            </button>
+            <div className="mt-4 flex items-baseline gap-1">
+              <h1 className="font-mono text-[24px] font-medium tracking-[-0.02em] text-[#1f2a44]">
+                {host.ip}
+              </h1>
+              <span className="text-[18px] text-[#5e7598]">{deviceTitle}</span>
             </div>
-
-            <div className="space-y-4">
-              <div className="border border-border">
-                <div className="border-b border-border bg-[#fafafa] px-4 py-2 text-sm font-medium">
-                  Observed Communication
-                </div>
-                <div className="px-4 py-4 text-sm">
-                  <dl className="grid grid-cols-[150px_1fr] gap-y-2">
-                    <dt className="text-muted-foreground">Protocols Observed</dt>
-                    <dd>{joinLimited(host.protocols, 6)}</dd>
-                    <dt className="text-muted-foreground">Common Ports</dt>
-                    <dd className="font-mono text-xs">
-                      {host.ports.length > 0 ? host.ports.join(", ") : "-"}
-                    </dd>
-                    <dt className="text-muted-foreground">Top Destinations</dt>
-                    <dd>{joinLimited(topDestinations, 4)}</dd>
-                    <dt className="text-muted-foreground">TLS SNI</dt>
-                    <dd>{joinLimited(host.sni, 4)}</dd>
-                    <dt className="text-muted-foreground">HTTP Hosts</dt>
-                    <dd>{joinLimited(host.hosts, 4)}</dd>
-                  </dl>
-                </div>
-              </div>
-
-              <div className="border border-border">
-                <div className="border-b border-border bg-[#fafafa] px-4 py-2 text-sm font-medium">
-                  Risk Signals
-                </div>
-                <div className="p-0">
-                  <Table className="text-[13px]">
-                    <TableHeader>
-                      <TableRow className="bg-[#fafafa] hover:bg-[#fafafa]">
-                        <TableHead>Severity</TableHead>
-                        <TableHead>Rule ID</TableHead>
-                        <TableHead>OWASP Tags</TableHead>
-                        <TableHead>Confidence</TableHead>
-                        <TableHead>Observed Fact</TableHead>
-                        <TableHead>Evidence</TableHead>
-                        <TableHead>Inference</TableHead>
-                        <TableHead>Limitation</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {relatedEvents.map((event, index) => (
-                        <TableRow key={`${event.ts}-${event.rule_id || event.type}-${index}`}>
-                          <TableCell><SeverityBadge severity={event.severity} /></TableCell>
-                          <TableCell className="font-mono text-xs">
-                            {event.rule_id || event.type || "-"}
-                          </TableCell>
-                          <TableCell>{formatOWASP(eventOWASP(event))}</TableCell>
-                          <TableCell>{event.confidence || "-"}</TableCell>
-                          <TableCell className="max-w-[220px] whitespace-normal">
-                            {event.observed_fact || "-"}
-                          </TableCell>
-                          <TableCell className="max-w-[220px] whitespace-normal font-mono text-xs text-muted-foreground">
-                            {event.evidence || "-"}
-                          </TableCell>
-                          <TableCell className="max-w-[220px] whitespace-normal">
-                            {event.inference || "-"}
-                          </TableCell>
-                          <TableCell className="max-w-[220px] whitespace-normal">
-                            {event.limitation || "-"}
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              </div>
-            </div>
+            <p className="mt-1 text-[14px] text-[#6d7f9c]">Device Detail Report</p>
           </div>
 
-          <div className="space-y-2">
-            <div className="text-sm font-medium">Related Events</div>
-            <Table className="text-[13px]">
-              <TableHeader>
-                <TableRow className="bg-[#fafafa] hover:bg-[#fafafa]">
-                  <TableHead>Time</TableHead>
-                  <TableHead>Severity</TableHead>
-                  <TableHead>Rule ID</TableHead>
-                  <TableHead>Destination</TableHead>
-                  <TableHead>Evidence</TableHead>
-                  <TableHead>Message</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {relatedEvents.map((event, index) => (
-                  <TableRow key={`${event.ts}-related-${index}`}>
-                    <TableCell className="font-mono text-xs">{formatTime(event.ts)}</TableCell>
-                    <TableCell><SeverityBadge severity={event.severity} /></TableCell>
-                    <TableCell className="font-mono text-xs">
-                      {event.rule_id || event.type || "-"}
-                    </TableCell>
-                    <TableCell className="font-mono text-xs">
-                      {endpoint(event.dst_ip, event.dst_port)}
-                    </TableCell>
-                    <TableCell className="max-w-[240px] whitespace-normal font-mono text-xs text-muted-foreground">
-                      {event.evidence || "-"}
-                    </TableCell>
-                    <TableCell className="max-w-[280px] whitespace-normal">
-                      {event.message || "-"}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+          <div className="flex items-center gap-3">
+            <span className={cn("inline-flex min-w-[74px] justify-center border px-2 py-0.5 text-[12px] font-medium", reportSeverityClass(host.risk))}>
+              {compactSeverityLabel(host.risk)}
+            </span>
+            <Button
+              variant="outline"
+              className="h-9 rounded-none border-[#b8c6db] bg-white px-4 text-[13px] font-semibold text-[#1f2a44] shadow-none hover:bg-[#f8fbff]"
+              onClick={() => {
+                const payload = {
+                  host,
+                  events: relatedEvents,
+                  external_destinations: externalRows,
+                  exported_at: new Date().toISOString(),
+                };
+                const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.href = url;
+                link.download = `${host.ip}-device-detail.json`;
+                link.click();
+                URL.revokeObjectURL(url);
+              }}
+            >
+              レポートをエクスポート（JSON）
+            </Button>
           </div>
-
-          <JsonDisclosure label="Raw JSON" value={host} />
         </div>
-      </Section>
+      </section>
+
+      <section className="border-b border-[#e4eaf3] pb-6">
+        <div className="border-b border-[#cfd9e6] pb-2 text-[18px] font-semibold text-[#1f2a44]">
+          観測情報（Observed）
+        </div>
+        <div className="mt-4 divide-y divide-[#edf2f8] text-[14px]">
+          {[
+            ["IPアドレス", host.ip],
+            ["MACアドレス", host.macAddress === "-" ? "−（観測範囲外）" : host.macAddress],
+            ["初回観測", formatReportDateTime(host.firstSeen)],
+            ["最終観測", formatReportDateTime(host.lastSeen)],
+            ["観測プロトコル", joinLimited(host.protocols, 6)],
+            ["フロー数", `${host.flows.length} 件`],
+            ["観測バイト数", formatBytes(totalBytes)],
+            ["主な通信先", topDestinations[0] || host.topDestination],
+          ].map(([label, value]) => (
+            <div key={label} className="grid grid-cols-[220px_minmax(0,1fr)] gap-4 py-2.5">
+              <div className="text-[#6d7f9c]">{label}</div>
+              <div className={cn("min-w-0 break-words text-[#2e3b55]", label.includes("IP") || label.includes("観測") ? "font-mono" : "")}>
+                {value}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="border-b border-[#e4eaf3] pb-6">
+        <div className="border-b border-[#cfd9e6] pb-2 text-[18px] font-semibold text-[#1f2a44]">
+          推定情報（Inferred）
+        </div>
+        <div className="mt-4 divide-y divide-[#edf2f8] text-[14px]">
+          {[
+            ["推定カテゴリ", displayInferredValue(host.categoryCandidate)],
+            ["推定ベンダ", displayInferredValue(host.vendorCandidate)],
+            ["推定ファミリ", displayInferredValue(host.familyCandidate)],
+            ["Confidence", host.confidence],
+            ["主なOWASPカテゴリ", topOwasp],
+            ["主な理由", topReason],
+          ].map(([label, value]) => (
+            <div key={label} className="grid grid-cols-[220px_minmax(0,1fr)] gap-4 py-2.5">
+              <div className="text-[#6d7f9c]">{label}</div>
+              <div className="min-w-0 break-words text-[#2e3b55]">{value}</div>
+            </div>
+          ))}
+        </div>
+        <div className="mt-3 text-[13px] leading-6 text-[#6d7f9c]">
+          ※ 端末カテゴリやベンダは、通信上の観測情報に基づく推定です。
+        </div>
+      </section>
+
+      <section className="border-b border-[#e4eaf3] pb-7">
+        <div className="flex items-center justify-between border-b border-[#cfd9e6] pb-2">
+          <div className="text-[18px] font-semibold text-[#1f2a44]">この端末の外部通信先</div>
+          <div className="text-[13px] text-[#6d7f9c]">{externalRows.length} 件</div>
+        </div>
+        <div className="mt-4 overflow-x-auto">
+          <div className="grid min-w-[980px] grid-cols-[170px_70px_100px_90px_120px_120px_100px_1fr] gap-4 border-b border-[#cfd9e6] pb-2 text-[13px] text-[#6d7f9c]">
+            <div>宛先</div>
+            <div>ポート</div>
+            <div>プロトコル</div>
+            <div className="text-right">観測回数</div>
+            <div>最終観測</div>
+            <div />
+            <div>関連シグナル</div>
+            <div />
+          </div>
+          <div className="divide-y divide-[#edf2f8]">
+            {externalRows.map((row) => (
+              <div key={row.key} className="grid min-w-[980px] grid-cols-[170px_70px_100px_90px_120px_120px_100px_1fr] gap-4 py-3 text-[14px]">
+                <div className="font-mono text-[#24324b]">{row.destination}</div>
+                <div className="font-mono text-[#24324b]">{row.port}</div>
+                <div className="text-[#4d5f7c]">{row.protocol}</div>
+                <div className="text-right font-mono text-[#24324b]">{row.observedCount}</div>
+                <div className="font-mono text-[#5e7598]">{formatReportDateTime(row.lastSeen)}</div>
+                <div />
+                <div>
+                  {row.relatedSeverity ? (
+                    <span className={cn("inline-flex min-w-[74px] justify-center border px-2 py-0.5 text-[12px] font-medium", reportSeverityClass(row.relatedSeverity))}>
+                      {compactSeverityLabel(row.relatedSeverity)}
+                    </span>
+                  ) : (
+                    <span className="text-[#94a3b8]">-</span>
+                  )}
+                </div>
+                <div className="text-[#4d5f7c]">{row.relatedSignal}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="border-b border-[#e4eaf3] pb-7">
+        <div className="flex items-center justify-between border-b border-[#cfd9e6] pb-2">
+          <div className="text-[18px] font-semibold text-[#1f2a44]">この端末の検出イベント</div>
+          <div className="text-[13px] text-[#6d7f9c]">{recentDetected.length} 件</div>
+        </div>
+        <div className="mt-4 overflow-x-auto">
+          <div className="grid min-w-[980px] grid-cols-[170px_92px_130px_150px_150px_minmax(0,1fr)] gap-4 border-b border-[#cfd9e6] pb-2 text-[13px] text-[#6d7f9c]">
+            <div>時刻</div>
+            <div>Severity</div>
+            <div>宛先</div>
+            <div>プロトコル / ポート</div>
+            <div>ルールID</div>
+            <div>観測された事実（要約）</div>
+          </div>
+          <div className="divide-y divide-[#edf2f8]">
+            {recentDetected.map((event, index) => {
+              const flow = host.flows.find((item) => item.flow_key === event.flow_key);
+              const protocolLabel = `${(flow?.app_protocol || flow?.protocol || "-").toUpperCase()} / ${event.dst_port || flow?.dst_port || "-"}`;
+              return (
+                <div key={`${event.ts}-${index}`} className="grid min-w-[980px] grid-cols-[170px_92px_130px_150px_150px_minmax(0,1fr)] gap-4 py-3 text-[14px]">
+                  <div className="font-mono text-[#24324b]">{formatReportDateTime(event.ts)}</div>
+                  <div>
+                    <span className={cn("inline-flex min-w-[74px] justify-center border px-2 py-0.5 text-[12px] font-medium", reportSeverityClass(event.severity))}>
+                      {compactSeverityLabel(event.severity)}
+                    </span>
+                  </div>
+                  <div className="font-mono text-[#24324b]">{event.dst_ip || "-"}</div>
+                  <div className="font-mono text-[#24324b]">{protocolLabel}</div>
+                  <div className="font-mono text-[#5e7598]">{event.rule_id || event.type || "-"}</div>
+                  <div className="min-w-0 break-words text-[#4d5f7c]">{event.observed_fact || event.message || "-"}</div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+        <button
+          onClick={onOpenEvents}
+          className="mt-4 text-[14px] text-[#4d5f7c] underline underline-offset-2"
+        >
+          → すべての検出イベントを見る
+        </button>
+      </section>
+
+      <section className="pb-4">
+        <div className="text-[18px] font-semibold text-[#1f2a44]">注意</div>
+        <div className="mt-3 text-[14px] leading-7 text-[#5e7598]">
+          ・ 端末カテゴリやベンダは、通信上の観測情報に基づく推定です。
+          <br />
+          ・ 本ページは端末内部の状態や実際の侵害を断定するものではありません。
+        </div>
+      </section>
     </div>
   );
 }
 
 function EventDetails({ event }: { event: Event }) {
-  const owasp = eventOWASP(event);
-
   return (
-    <div className="grid gap-3 border-t border-border bg-[#fcfcfd] px-4 py-4 text-sm">
-      <div className="grid gap-3 md:grid-cols-4">
-        <div>
-          <div className="text-xs text-muted-foreground">Timestamp</div>
-          <div className="font-mono text-xs">{formatTime(event.ts)}</div>
-        </div>
-        <div>
-          <div className="text-xs text-muted-foreground">Severity</div>
-          <div className="mt-1"><SeverityBadge severity={event.severity} /></div>
-        </div>
-        <div>
-          <div className="text-xs text-muted-foreground">Rule ID</div>
-          <div className="font-mono text-xs">{event.rule_id || event.type || "-"}</div>
-        </div>
-        <div>
-          <div className="text-xs text-muted-foreground">OWASP</div>
-          <div>{formatOWASP(owasp)}</div>
-        </div>
-        <div>
-          <div className="text-xs text-muted-foreground">Confidence</div>
-          <div>{event.confidence || "-"}</div>
-        </div>
+    <div className="border-t border-[#edf2f8] bg-[#fbfdff] px-7 py-4">
+      <div className="divide-y divide-[#edf2f8] text-[13px]">
+        {[
+          ["送信元", endpoint(event.src_ip, event.src_port)],
+          ["宛先", endpoint(event.dst_ip, event.dst_port)],
+          ["Observed Fact", event.observed_fact || "-"],
+          ["Evidence", event.evidence || "-"],
+          ["Inference", event.inference || "-"],
+          ["Limitation", event.limitation || "-"],
+        ].map(([label, value]) => (
+          <div
+            key={label}
+            className="grid grid-cols-[180px_minmax(0,1fr)] gap-4 py-2.5"
+          >
+            <div className="text-[#6d7f9c]">{label}</div>
+            <div
+              className={cn(
+                "min-w-0 break-words text-[#2e3b55]",
+                label === "Evidence" && "font-mono"
+              )}
+            >
+              {value}
+            </div>
+          </div>
+        ))}
       </div>
-      <div>
-        <div className="text-xs text-muted-foreground">Category</div>
-        <div>{event.category || "-"}</div>
-      </div>
-      <div>
-        <div className="text-xs text-muted-foreground">Source</div>
-        <div className="font-mono text-xs">{endpoint(event.src_ip, event.src_port)}</div>
-      </div>
-      <div>
-        <div className="text-xs text-muted-foreground">Destination</div>
-        <div className="font-mono text-xs">{endpoint(event.dst_ip, event.dst_port)}</div>
-      </div>
-      <div>
-        <div className="text-xs text-muted-foreground">Message</div>
-        <div className="whitespace-pre-wrap break-words">{event.message || "-"}</div>
-      </div>
-      <div>
-        <div className="text-xs text-muted-foreground">OWASP Tags</div>
-        <div>{formatOWASP(owasp)}</div>
-      </div>
-      <div>
-        <div className="text-xs text-muted-foreground">Observed Fact</div>
-        <div className="whitespace-pre-wrap break-words">{event.observed_fact || "-"}</div>
-      </div>
-      <div>
-        <div className="text-xs text-muted-foreground">Evidence</div>
-        <div className="whitespace-pre-wrap break-words font-mono text-xs text-[#475569]">
-          {event.evidence || "-"}
-        </div>
-      </div>
-      <div>
-        <div className="text-xs text-muted-foreground">Inference</div>
-        <div className="whitespace-pre-wrap break-words">{event.inference || "-"}</div>
-      </div>
-      <div>
-        <div className="text-xs text-muted-foreground">Limitation</div>
-        <div className="whitespace-pre-wrap break-words">{event.limitation || "-"}</div>
-      </div>
-      <div>
-        <div className="text-xs text-muted-foreground">Recommendation</div>
-        <div className="whitespace-pre-wrap break-words">{event.recommendation || "-"}</div>
-        </div>
-      <JsonDisclosure label="Raw JSON" value={event} />
     </div>
   );
 }
 
 function EventsView({
   report,
-  hosts,
+  flows,
+  meta,
 }: {
   report: Report | null;
-  hosts: HostRow[];
+  flows: FlowRecord[];
+  meta: ViewerMeta | null;
 }) {
   const [query, setQuery] = useState("");
   const [severityFilter, setSeverityFilter] = useState("all");
-  const [owaspFilter, setOwaspFilter] = useState("all");
-  const [ruleFilter, setRuleFilter] = useState("all");
-  const [deviceFilter, setDeviceFilter] = useState("all");
-  const [showDebugEvents, setShowDebugEvents] = useState(false);
+  const [protocolFilter, setProtocolFilter] = useState("all");
   const [openRows, setOpenRows] = useState<Record<string, boolean>>({});
   const deferredQuery = useDeferredValue(query);
 
   const events = report?.events || [];
-  const candidateEvents = showDebugEvents ? events : visibleEvents(events);
-  const hiddenDebugCount = events.filter((event) => isDebugEvent(event)).length;
-  const owaspOptions = uniqueStrings(candidateEvents.flatMap((event) => eventOWASP(event)));
-  const ruleOptions = uniqueStrings(candidateEvents.map((event) => event.rule_id || event.type));
-  const deviceOptions = uniqueStrings(
-    candidateEvents.flatMap((event) => [event.device_key, event.device_label, event.src_ip])
+  const candidateEvents = visibleEvents(events);
+  const eventSourceName = baseName(
+    meta?.events_path || report?.source || "events.jsonl"
+  );
+  const protocolOptions = uniqueStrings(
+    candidateEvents
+      .map((event) => {
+        const flow = flows.find((item) => item.flow_key === event.flow_key);
+        return (flow?.app_protocol || flow?.protocol || "").toUpperCase();
+      })
+      .filter(Boolean)
   );
 
   const filtered = candidateEvents.filter((event) => {
-    const tags = eventOWASP(event);
+    const flow = flows.find((item) => item.flow_key === event.flow_key);
+    const protocol = (flow?.app_protocol || flow?.protocol || "").toUpperCase();
     const haystack = [
       event.rule_id,
       event.type,
-      event.category,
       event.message,
       event.evidence,
       event.observed_fact,
-      event.inference,
-      event.device_key,
-      event.device_label,
       event.src_ip,
       event.dst_ip,
-      ...tags,
+      protocol,
     ]
       .join(" ")
       .toLowerCase();
@@ -1515,16 +1982,7 @@ function EventsView({
     if (severityFilter !== "all" && (event.severity || "") !== severityFilter) {
       return false;
     }
-    if (owaspFilter !== "all" && !tags.includes(owaspFilter)) {
-      return false;
-    }
-    if (ruleFilter !== "all" && (event.rule_id || event.type || "") !== ruleFilter) {
-      return false;
-    }
-    if (
-      deviceFilter !== "all" &&
-      ![event.device_key, event.device_label, event.src_ip].includes(deviceFilter)
-    ) {
+    if (protocolFilter !== "all" && protocol !== protocolFilter) {
       return false;
     }
     if (
@@ -1537,178 +1995,182 @@ function EventsView({
   });
 
   return (
-    <div className="space-y-6">
-      <Section
-        title="Events"
-      >
-        <div className="space-y-4">
-          <div className="grid gap-3 lg:grid-cols-[minmax(0,2fr)_repeat(4,minmax(0,1fr))]">
+    <div className="space-y-7 text-[#24324b]">
+      <section className="border-b border-[#dbe3ef] pb-4">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="min-w-0">
+            <h1 className="text-[24px] font-medium tracking-[-0.02em] text-[#1f2a44]">
+              Quarant Detection Report
+            </h1>
+            <p className="mt-1 text-[14px] text-[#6d7f9c]">
+              Detection Events from {eventSourceName}
+            </p>
+          </div>
+
+          <Button
+            variant="outline"
+            className="h-9 rounded-none border-[#b8c6db] bg-white px-4 text-[13px] font-semibold text-[#1f2a44] shadow-none hover:bg-[#f8fbff]"
+            onClick={() => {
+              const payload = {
+                report,
+                flows,
+                exported_at: new Date().toISOString(),
+              };
+              const blob = new Blob([JSON.stringify(payload, null, 2)], {
+                type: "application/json",
+              });
+              const url = URL.createObjectURL(blob);
+              const link = document.createElement("a");
+              link.href = url;
+              link.download = "quarant-detection-report.json";
+              link.click();
+              URL.revokeObjectURL(url);
+            }}
+          >
+            レポートをエクスポート（JSON）
+          </Button>
+        </div>
+      </section>
+
+      <section className="border-b border-[#e4eaf3] pb-4">
+        <div className="grid gap-4 xl:grid-cols-[minmax(0,2.2fr)_220px_220px]">
+          <div className="grid grid-cols-[44px_minmax(0,1fr)] items-center gap-2">
+            <div className="text-[18px] font-semibold text-[#5c7094]">検索</div>
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+              <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#93a3bb]" />
               <Input
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                placeholder="Search"
-                className="pl-9"
+                placeholder="ルールID / 送信元 / 宛先 / 事実"
+                className="h-10 rounded-none border-[#cfd9e6] bg-white pl-10 text-[14px] placeholder:text-[#94a3b8]"
               />
             </div>
+          </div>
+
+          <div className="grid grid-cols-[84px_minmax(0,1fr)] items-center gap-2">
+            <div className="text-[18px] font-semibold text-[#5c7094]">
+              Severity
+            </div>
             <Select value={severityFilter} onValueChange={setSeverityFilter}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Severity" />
+              <SelectTrigger className="h-10 rounded-none border-[#cfd9e6] bg-white text-[14px]">
+                <SelectValue placeholder="" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Severity</SelectItem>
-                {uniqueStrings(events.map((event) => event.severity)).map((value) => (
+                <SelectItem value="all">すべて</SelectItem>
+                {uniqueStrings(
+                  candidateEvents.map((event) => event.severity)
+                ).map((value) => (
                   <SelectItem key={value} value={value}>
-                    {value}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={owaspFilter} onValueChange={setOwaspFilter}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="OWASP" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All OWASP</SelectItem>
-                {owaspOptions.map((value) => (
-                  <SelectItem key={value} value={value}>
-                    {value}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={ruleFilter} onValueChange={setRuleFilter}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Rule ID" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Rules</SelectItem>
-                {ruleOptions.map((value) => (
-                  <SelectItem key={value} value={value}>
-                    {value}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={deviceFilter} onValueChange={setDeviceFilter}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Device / IP" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Devices</SelectItem>
-                {deviceOptions.map((value) => (
-                  <SelectItem key={value} value={value}>
-                    {value}
+                    {compactSeverityLabel(value)}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
 
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <SummaryLine>
-              {filtered.length} events shown
-              {!showDebugEvents && hiddenDebugCount > 0 ? ` ・ ${hiddenDebugCount} debug events hidden` : ""}
-            </SummaryLine>
-            <Button
-              variant={showDebugEvents ? "default" : "outline"}
-              onClick={() => setShowDebugEvents((current) => !current)}
-              className="h-9 rounded-none"
-            >
-              {showDebugEvents ? "Hide Debug Events" : "Show Debug Events"}
-            </Button>
-          </div>
-
-          <div className="border border-border">
-            <Table className="text-[13px]">
-              <TableHeader>
-                <TableRow className="bg-[#fafafa] hover:bg-[#fafafa]">
-                  <TableHead>Time</TableHead>
-                  <TableHead>Severity</TableHead>
-                  <TableHead>Human-readable Summary</TableHead>
-                  <TableHead>Source → Destination</TableHead>
-                  <TableHead>Short Evidence</TableHead>
-                  <TableHead className="w-[92px]">Details</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filtered.length > 0 ? filtered.map((event, index) => {
-                  const rowKey = `${event.ts}-${event.rule_id || event.type}-${index}`;
-                  const isOpen = Boolean(openRows[rowKey]);
-                  const summary = eventSummary(event);
-                  const evidence = event.evidence || "-";
-
-                  return (
-                    <Fragment key={rowKey}>
-                      <TableRow
-                        className="cursor-pointer"
-                        onClick={() =>
-                          setOpenRows((current) => ({
-                            ...current,
-                            [rowKey]: !current[rowKey],
-                          }))
-                        }
-                      >
-                        <TableCell className="font-mono text-xs">{formatTime(event.ts)}</TableCell>
-                        <TableCell><SeverityBadge severity={event.severity} /></TableCell>
-                        <TableCell className="max-w-[360px]">
-                          <div className="overflow-hidden text-ellipsis whitespace-normal break-words [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]">
-                            {summary}
-                          </div>
-                        </TableCell>
-                        <TableCell className="min-w-[220px] font-mono text-xs text-[#475569]">
-                          <div className="whitespace-normal break-all">
-                            {endpoint(event.src_ip, event.src_port)}
-                          </div>
-                          <div className="py-1 text-[10px] text-muted-foreground">to</div>
-                          <div className="whitespace-normal break-all">
-                            {endpoint(event.dst_ip, event.dst_port)}
-                          </div>
-                        </TableCell>
-                        <TableCell className="max-w-[360px]">
-                          <div className="overflow-hidden text-ellipsis whitespace-normal break-words font-mono text-xs text-[#475569] [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]">
-                            {evidence}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Button
-                            type="button"
-                            variant={isOpen ? "default" : "outline"}
-                            className="h-8 rounded-none px-3 text-xs"
-                            onClick={(clickEvent) => {
-                              clickEvent.stopPropagation();
-                              setOpenRows((current) => ({
-                                ...current,
-                                [rowKey]: !current[rowKey],
-                              }));
-                            }}
-                          >
-                            {isOpen ? "Hide" : "Details"}
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                      {isOpen ? (
-                        <TableRow className="hover:bg-transparent">
-                          <TableCell colSpan={6} className="p-0">
-                            <EventDetails event={event} />
-                          </TableCell>
-                        </TableRow>
-                      ) : null}
-                    </Fragment>
-                  );
-                }) : (
-                  <TableRow>
-                    <TableCell colSpan={6} className="text-center text-muted-foreground">
-                      条件に一致する event はありません。
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
+          <div className="grid grid-cols-[102px_minmax(0,1fr)] items-center gap-2">
+            <div className="text-[18px] font-semibold text-[#5c7094]">
+              プロトコル
+            </div>
+            <Select value={protocolFilter} onValueChange={setProtocolFilter}>
+              <SelectTrigger className="h-10 rounded-none border-[#cfd9e6] bg-white text-[14px]">
+                <SelectValue placeholder="" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">すべて</SelectItem>
+                {protocolOptions.map((value) => (
+                  <SelectItem key={value} value={value}>
+                    {value}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
-      </Section>
+      </section>
+
+      <section className="border-b border-[#e4eaf3] pb-7">
+        <div className="flex items-center justify-between border-b border-[#cfd9e6] pb-2">
+          <div className="text-[18px] font-semibold text-[#1f2a44]">
+            検出イベント
+          </div>
+          <div className="text-[13px] text-[#6d7f9c]">{filtered.length} 件</div>
+        </div>
+
+        <div className="mt-4 overflow-x-auto">
+          <div className="grid w-full min-w-[720px] grid-cols-[20px_104px_100px_150px_170px_minmax(0,1fr)] gap-4 border-b border-[#cfd9e6] pb-2 text-[13px] text-[#6d7f9c]">
+            <div />
+            <div>時刻</div>
+            <div>Severity</div>
+            <div>プロトコル / ポート</div>
+            <div>ルールID</div>
+            <div />
+          </div>
+
+          <div className="divide-y divide-[#edf2f8]">
+            {filtered.length > 0 ? (
+              filtered.map((event, index) => {
+                const rowKey = `${event.ts}-${
+                  event.rule_id || event.type
+                }-${index}`;
+                const isOpen = Boolean(openRows[rowKey]);
+                const flow = flows.find(
+                  (item) => item.flow_key === event.flow_key
+                );
+                const protocolLabel = `${(
+                  flow?.app_protocol ||
+                  flow?.protocol ||
+                  "-"
+                ).toUpperCase()} / ${event.dst_port || flow?.dst_port || "-"}`;
+                return (
+                  <Fragment key={rowKey}>
+                    <button
+                      type="button"
+                      className="grid w-full min-w-[720px] grid-cols-[20px_104px_100px_150px_170px_minmax(0,1fr)] gap-4 py-3 text-left text-[14px] hover:bg-[#fafcff]"
+                      onClick={() =>
+                        setOpenRows((current) => ({
+                          ...current,
+                          [rowKey]: !current[rowKey],
+                        }))
+                      }
+                    >
+                      <div className="pt-1 text-[10px] text-[#93a3bb]">
+                        {isOpen ? "▼" : "▶"}
+                      </div>
+                      <div className="font-mono text-[#24324b]">
+                        {formatCompactDateTime(event.ts)}
+                      </div>
+                      <div>
+                        <span
+                          className={cn(
+                            "inline-flex min-w-[74px] justify-center border px-2 py-0.5 text-[12px] font-medium",
+                            reportSeverityClass(event.severity)
+                          )}
+                        >
+                          {compactSeverityLabel(event.severity)}
+                        </span>
+                      </div>
+                      <div className="font-mono text-[#24324b]">
+                        {protocolLabel}
+                      </div>
+                      <div className="font-mono text-[#5e7598]">
+                        {event.rule_id || event.type || "-"}
+                      </div>
+                      <div />
+                    </button>
+                    {isOpen ? <EventDetails event={event} /> : null}
+                  </Fragment>
+                );
+              })
+            ) : (
+              <div className="py-6 text-center text-[14px] text-[#6d7f9c]">
+                条件に一致する event はありません。
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
     </div>
   );
 }
@@ -1725,6 +2187,7 @@ function QuarantReportViewerContent() {
   const [error, setError] = useState("");
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [viewerMeta, setViewerMeta] = useState<ViewerMeta | null>(null);
 
   const viewParam = searchParams.get("view");
   const activeView: ViewName =
@@ -1736,30 +2199,36 @@ function QuarantReportViewerContent() {
       setIsRefreshing(true);
       setError("");
 
-      const [reportResponse, inventoryResponse, flowsResponse] =
+      const [reportResponse, inventoryResponse, flowsResponse, metaResponse] =
         await Promise.all([
           fetch(`${API_BASE_URL}/api/report`, { cache: "no-store" }),
           fetch(`${API_BASE_URL}/api/inventory`, { cache: "no-store" }),
           fetch(`${API_BASE_URL}/api/flows`, { cache: "no-store" }),
+          fetch(`${API_BASE_URL}/api/meta`, { cache: "no-store" }),
         ]);
 
       if (!reportResponse.ok) {
         throw new Error(`report HTTP ${reportResponse.status}`);
       }
 
-      const [nextReport, nextInventory, nextFlows] = await Promise.all([
-        reportResponse.json() as Promise<Report>,
-        inventoryResponse.ok
-          ? (inventoryResponse.json() as Promise<InventoryReport>)
-          : Promise.resolve({ devices: [] }),
-        flowsResponse.ok
-          ? (flowsResponse.json() as Promise<FlowRecord[]>)
-          : Promise.resolve([]),
-      ]);
+      const [nextReport, nextInventory, nextFlows, nextMeta] =
+        await Promise.all([
+          reportResponse.json() as Promise<Report>,
+          inventoryResponse.ok
+            ? (inventoryResponse.json() as Promise<InventoryReport>)
+            : Promise.resolve({ devices: [] }),
+          flowsResponse.ok
+            ? (flowsResponse.json() as Promise<FlowRecord[]>)
+            : Promise.resolve([]),
+          metaResponse.ok
+            ? (metaResponse.json() as Promise<ViewerMeta>)
+            : Promise.resolve({}),
+        ]);
 
       setReport(nextReport);
       setInventory(nextInventory);
       setFlows(nextFlows);
+      setViewerMeta(nextMeta);
       setStatus("Connected");
       setLastUpdated(new Date());
     } catch (fetchError) {
@@ -1788,87 +2257,129 @@ function QuarantReportViewerContent() {
     router.replace(query ? `${pathname}?${query}` : pathname);
   }
 
-  const hosts = aggregateHosts(report?.events || [], inventory?.devices || [], flows);
+  const hosts = aggregateHosts(
+    report?.events || [],
+    inventory?.devices || [],
+    flows
+  );
   const selectedHost = hosts.find((host) => host.ip === activeHost);
+  const navItems: Array<{ key: ViewName; label: string }> = [
+    { key: "overview", label: "概要" },
+    { key: "devices", label: "端末一覧" },
+    { key: "events", label: "検出一覧" },
+  ];
+  const navActiveView: ViewName = selectedHost ? "devices" : activeView;
+  const observationDay = report?.window?.start
+    ? formatReportDateTime(report.window.start).slice(0, 10)
+    : "-";
 
   return (
     <div className="min-h-screen bg-white text-[#0f172a]">
-      <header className="border-b border-border bg-white">
-        <div className="mx-auto max-w-[1440px] px-7 py-5">
-          <div className="flex flex-wrap items-end justify-between gap-4">
-            <div>
-              <h1 className="text-[42px] font-semibold tracking-[-0.03em]">
-                Quarant
-              </h1>
-              <p className="mt-1 text-lg text-[#475569]">
-                IoT Passive Observation Report Viewer
-              </p>
+      <div className="flex min-h-screen">
+        <aside className="sticky top-0 flex h-screen w-[296px] shrink-0 self-start flex-col overflow-y-auto border-r border-[#d7e0ec] bg-[#fbfcff]">
+          <div className="border-b border-[#d7e0ec] px-7 pb-6 pt-9">
+            <div className="text-[20px] font-semibold tracking-[-0.02em] text-[#1d2740]">
+              Quarant
             </div>
-
-            <div className="text-right text-sm text-[#475569]">
-              <div>API: {API_BASE_URL}</div>
-              <div>Status: {status}</div>
-              <div>Report: {report?.source || "-"}</div>
-              <div>Updated: {lastUpdated ? formatTime(lastUpdated.toISOString()) : "-"}</div>
+            <div className="mt-2 text-[14px] text-[#70819d]">
+              Observation Report
             </div>
           </div>
 
-          <nav className="mt-5 flex items-center gap-2">
-            <button
-              onClick={() => setView("overview")}
-              className={linkClassName(activeView === "overview" && !selectedHost)}
-            >
-              Overview
-            </button>
-            <button
-              onClick={() => setView("devices")}
-              className={linkClassName(activeView === "devices" || Boolean(selectedHost))}
-            >
-              Devices
-            </button>
-            <button
-              onClick={() => setView("events")}
-              className={linkClassName(activeView === "events")}
-            >
-              Events
-            </button>
+          <nav className="px-4 py-5">
+            <div className="space-y-1">
+              {navItems.map((item) => {
+                const active = navActiveView === item.key;
+                return (
+                  <button
+                    key={item.key}
+                    onClick={() => setView(item.key)}
+                    className={cn(
+                      "flex w-full items-center px-4 py-4 text-left text-[15px] font-semibold text-[#61728f]",
+                      active
+                        ? "border-l-2 border-[#111827] bg-[#eef3f9] pl-[14px] text-[#111827]"
+                        : "border-l-2 border-transparent hover:bg-[#f4f7fb]"
+                    )}
+                  >
+                    {item.label}
+                  </button>
+                );
+              })}
+            </div>
+          </nav>
 
-            <div className="ml-auto">
+          <div className="mt-auto border-t border-[#d7e0ec] px-7 py-7">
+            <div className="text-[13px] text-[#70819d]">観測期間</div>
+            <div className="mt-1 font-mono text-[14px] text-[#334155]">
+              {observationDay}
+            </div>
+            <div className="mt-7 text-[13px] leading-6 text-[#8a99b2]">
+              v0.1.0 / OSS
+              <br />
+              Passive observation
+            </div>
+            <div className="mt-5 flex flex-col items-start gap-3">
+              {viewerMeta?.demo_mode ? (
+                <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#b54708]">
+                  Demo data
+                </div>
+              ) : null}
               <Button
                 variant="outline"
                 onClick={() => void loadData()}
                 disabled={isRefreshing}
-                className="h-9 rounded-none border-[#d0d5dd]"
+                className="h-8 rounded-none border-[#c8d3e3] bg-white px-3 text-[12px] text-[#334155]"
               >
-                <RefreshCw className={cn("mr-2 size-4", isRefreshing && "animate-spin")} />
+                <RefreshCw
+                  className={cn(
+                    "mr-2 size-3.5",
+                    isRefreshing && "animate-spin"
+                  )}
+                />
                 Refresh
               </Button>
             </div>
-          </nav>
-        </div>
-      </header>
-
-      <main className="mx-auto max-w-[1440px] px-7 py-8">
-        {error ? (
-          <div className="mb-6 border border-[#fda29b] bg-[#fff5f4] px-4 py-3 text-sm text-[#b42318]">
-            API 接続に失敗しました: {error}
           </div>
-        ) : null}
+        </aside>
 
-        {selectedHost ? (
-          <HostReportView host={selectedHost} onBack={() => setView("devices")} />
-        ) : activeView === "devices" ? (
-          <DevicesView hosts={hosts} onOpenHost={(ip) => setView("devices", ip)} />
-        ) : activeView === "events" ? (
-          <EventsView report={report} hosts={hosts} />
-        ) : (
-          <OverviewView
-            report={report}
-            hosts={hosts}
-            onOpenHost={(ip) => setView("devices", ip)}
-          />
-        )}
-      </main>
+        <main className="min-w-0 flex-1">
+          <div className="mx-auto max-w-[1320px] px-12 py-12">
+            {error ? (
+              <div className="mb-6 border border-[#fda29b] bg-[#fff5f4] px-4 py-3 text-sm text-[#b42318]">
+                API 接続に失敗しました: {error}
+              </div>
+            ) : null}
+
+            {selectedHost ? (
+              <HostReportView
+                host={selectedHost}
+                onBack={() => setView("devices")}
+                onOpenEvents={() => setView("events")}
+              />
+            ) : activeView === "devices" ? (
+              <DevicesView
+                report={report}
+                hosts={hosts}
+                flows={flows}
+                meta={viewerMeta}
+                onOpenHost={(ip) => setView("devices", ip)}
+              />
+            ) : activeView === "events" ? (
+              <EventsView report={report} flows={flows} meta={viewerMeta} />
+            ) : (
+              <OverviewView
+                report={report}
+                hosts={hosts}
+                flows={flows}
+                meta={viewerMeta}
+                onOpenHost={(ip) => setView("devices", ip)}
+                onOpenDevices={() => setView("devices")}
+                onOpenEvents={() => setView("events")}
+              />
+            )}
+          </div>
+        </main>
+      </div>
     </div>
   );
 }

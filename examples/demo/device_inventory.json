@@ -1,0 +1,40 @@
+{
+  "generated_at": "2026-05-03T14:25:00Z",
+  "devices": [
+    {
+      "ip": "192.168.1.144",
+      "first_seen": "2026-05-03T14:20:11Z",
+      "last_seen": "2026-05-03T14:24:31Z",
+      "observed_protocols": ["http", "tls"],
+      "observed_ports": [80, 443],
+      "observed_hosts": ["demo-device.example"],
+      "observed_sni": ["updates.vendor-demo.example"],
+      "category_candidate": "camera",
+      "category_confidence": "medium",
+      "vendor_candidate": "DemoVendor",
+      "vendor_confidence": "low",
+      "family_candidate": "Lab IoT Camera",
+      "family_confidence": "medium",
+      "risk_event_count": 5,
+      "severity_counts": {
+        "WARNING": 5
+      },
+      "owasp_tag_counts": {
+        "I4": 2,
+        "I7": 1,
+        "I8": 2
+      },
+      "last_risk_event_type": "I4_WEAK_UPDATE_VISIBILITY",
+      "last_risk_event_ts": "2026-05-03T14:24:31Z",
+      "risk_summary": {
+        "risk_event_count": 5,
+        "highest_severity": "WARNING",
+        "top_owasp_tags": ["I4", "I8", "I7"],
+        "top_severities": ["WARNING"],
+        "last_risk_event_type": "I4_WEAK_UPDATE_VISIBILITY",
+        "last_risk_event_ts": "2026-05-03T14:24:31Z",
+        "recommended_next_action": "Review asset inventory and validate transport encryption plus update integrity controls."
+      }
+    }
+  ]
+}

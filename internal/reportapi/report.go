@@ -33,6 +33,7 @@ type Event struct {
 	UserActions             []UserAction `json:"user_actions,omitempty"`
 	RecommendedAction       string       `json:"recommended_action,omitempty"`
 	DryRun                  bool         `json:"dry_run,omitempty"`
+	Debug                   bool         `json:"debug,omitempty"`
 	SuggestedFirewallAction string       `json:"suggested_firewall_action,omitempty"`
 	DeviceKey               string       `json:"device_key,omitempty"`
 	DeviceLabel             string       `json:"device_label,omitempty"`

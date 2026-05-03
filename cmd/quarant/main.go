@@ -107,6 +107,7 @@ func runReport(args []string) error {
 	fs.SetOutput(io.Discard)
 
 	openViewer := fs.Bool("open", false, "open the local report viewer in a browser")
+	demoMode := fs.Bool("demo", false, "use bundled demo data from examples/demo")
 	addr := fs.String("addr", "127.0.0.1:8080", "HTTP listen address")
 	webDist := fs.String("web-dist", filepath.Join("web", "out"), "path to exported web UI assets")
 	flowsPath := fs.String("flows-in", "", "input flows JSONL path (default: sibling flows.jsonl)")
@@ -114,6 +115,21 @@ func runReport(args []string) error {
 
 	if err := fs.Parse(normalizeFlagArgs(fs, args)); err != nil {
 		return fmt.Errorf("parse report flags: %w", err)
+	}
+	if *demoMode {
+		if fs.NArg() > 0 {
+			return fmt.Errorf("report --demo does not accept an input path")
+		}
+		demoDir := filepath.Join("examples", "demo")
+		return viewer.Serve(viewer.Options{
+			EventsPath:    filepath.Join(demoDir, "events.jsonl"),
+			FlowsPath:     defaultSibling(*flowsPath, demoDir, "flows.jsonl"),
+			InventoryPath: defaultSibling(*inventoryPath, demoDir, "device_inventory.json"),
+			Addr:          *addr,
+			OpenBrowser:   *openViewer,
+			WebDist:       *webDist,
+			DemoMode:      true,
+		})
 	}
 	if fs.NArg() != 1 {
 		return fmt.Errorf("report requires exactly one input path: events.jsonl or report.json")
