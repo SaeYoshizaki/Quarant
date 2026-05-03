@@ -36,6 +36,7 @@ type Event = {
   ts: string;
   type?: string;
   severity?: EventSeverity;
+  debug?: boolean;
   rule_id?: string;
   category?: string;
   flow_key?: string;
@@ -167,6 +168,8 @@ type ViewName = "overview" | "devices" | "events";
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL || "";
 
+const DEBUG_EVENT_TYPES = new Set(["I6_DEBUG", "DEVICE_DEBUG", "PAYLOAD_DEBUG"]);
+
 function formatTime(value?: string): string {
   if (!value) return "-";
   const date = new Date(value);
@@ -272,6 +275,61 @@ function topKV(items?: KV[], limit = 5): KV[] {
 
 function metricValue(items: KV[] | undefined, key: string): number {
   return (items || []).find((item) => item.key === key)?.count || 0;
+}
+
+function countByKey(values: Array<string | undefined | null>): KV[] {
+  const counts = new Map<string, number>();
+  values.forEach((value) => {
+    const normalized = (value || "").trim();
+    if (!normalized) return;
+    counts.set(normalized, (counts.get(normalized) || 0) + 1);
+  });
+  return Array.from(counts.entries())
+    .map(([key, count]) => ({ key, count }))
+    .sort((a, b) => b.count - a.count || a.key.localeCompare(b.key));
+}
+
+function isDebugEvent(event: Event): boolean {
+  return (
+    Boolean(event.debug) ||
+    DEBUG_EVENT_TYPES.has((event.type || "").toUpperCase()) ||
+    DEBUG_EVENT_TYPES.has((event.rule_id || "").toUpperCase())
+  );
+}
+
+function isPrivateIPv4(ip?: string): boolean {
+  const value = (ip || "").trim();
+  if (!value) return false;
+  const parts = value.split(".");
+  if (parts.length !== 4) return false;
+  const octets = parts.map((part) => Number(part));
+  if (octets.some((octet) => !Number.isInteger(octet) || octet < 0 || octet > 255)) {
+    return false;
+  }
+  if (octets[0] === 10) return true;
+  if (octets[0] === 172 && octets[1] >= 16 && octets[1] <= 31) return true;
+  if (octets[0] === 192 && octets[1] === 168) return true;
+  return false;
+}
+
+function isLocalHost(host: HostRow): boolean {
+  return isPrivateIPv4(host.ip);
+}
+
+function nonDebugEvents(events: Event[]): Event[] {
+  return events.filter((event) => !isDebugEvent(event));
+}
+
+function warningOrHigherEvents(events: Event[]): Event[] {
+  return events.filter((event) => severityRank(event.severity) >= severityRank("WARNING"));
+}
+
+function defaultVisibleEvents(events: Event[]): Event[] {
+  return warningOrHigherEvents(nonDebugEvents(events));
+}
+
+function visibleEvents(events: Event[]): Event[] {
+  return defaultVisibleEvents(events);
 }
 
 function parseRuleCategory(rule?: string): string[] {
@@ -424,7 +482,8 @@ function aggregateHosts(
   });
 
   const hosts = Array.from(byIP.values()).map((host) => {
-    const eventOWASPSet = uniqueStrings(host.events.flatMap((event) => eventOWASP(event)));
+    const hostNonDebugEvents = nonDebugEvents(host.events);
+    const eventOWASPSet = uniqueStrings(hostNonDebugEvents.flatMap((event) => eventOWASP(event)));
     const destinationCounts = new Map<string, number>();
     host.flows.forEach((flow) => {
       const destination = normalizeDestination(flow);
@@ -459,11 +518,11 @@ function aggregateHosts(
       vendorCandidate: host.vendorCandidate || "不明候補",
       familyCandidate: host.familyCandidate || "不明候補",
       confidence: host.confidence || "unknown",
-      risk: topSeverity(host.events, host.inventory),
+      risk: topSeverity(hostNonDebugEvents, host.inventory),
       signals:
         host.inventory?.risk_summary?.risk_event_count ||
         host.inventory?.risk_event_count ||
-        host.events.length,
+        hostNonDebugEvents.length,
       owasp: inventoryOWASP || eventOWASPSet,
       topDestination,
       externalDestinationCount,
@@ -613,8 +672,9 @@ function OverviewView({
   onOpenHost: (ip: string) => void;
 }) {
   const events = report?.events || [];
-  const riskSignals = events
-    .filter((event) => severityRank(event.severity) >= severityRank("LOW"))
+  const nonDebugEvents = visibleEvents(events);
+  const debugEvents = events.filter((event) => isDebugEvent(event));
+  const riskSignals = warningOrHigherEvents(nonDebugEvents)
     .slice()
     .sort((a, b) => {
       if (severityRank(a.severity) !== severityRank(b.severity)) {
@@ -622,14 +682,22 @@ function OverviewView({
       }
       return b.ts.localeCompare(a.ts);
     });
-
-  const highCritical = events.filter(
+  const warnings = nonDebugEvents.filter(
+    (event) => (event.severity || "").toUpperCase() === "WARNING"
+  ).length;
+  const highCritical = nonDebugEvents.filter(
     (event) => severityRank(event.severity) >= severityRank("HIGH")
   ).length;
+  const localHosts = hosts.filter((host) => isLocalHost(host));
+  const externalHosts = hosts.filter((host) => !isLocalHost(host));
+  const visibleRules = countByKey(nonDebugEvents.map((event) => event.rule_id || event.type));
+  const visibleCategories = countByKey(nonDebugEvents.map((event) => event.category));
+  const visibleSources = countByKey(nonDebugEvents.map((event) => event.src_ip || event.device_key));
   const sourceLabel = report?.source || "-";
-  const highCount = metricValue(report?.severity, "HIGH");
-  const criticalCount = metricValue(report?.severity, "CRITICAL");
-  const warningCount = metricValue(report?.severity, "WARNING");
+  const highCount = nonDebugEvents.length > 0 ? nonDebugEvents.filter((event) => (event.severity || "").toUpperCase() === "HIGH").length : metricValue(report?.severity, "HIGH");
+  const criticalCount = nonDebugEvents.length > 0 ? nonDebugEvents.filter((event) => (event.severity || "").toUpperCase() === "CRITICAL").length : metricValue(report?.severity, "CRITICAL");
+  const warningCount = nonDebugEvents.length > 0 ? warnings : metricValue(report?.severity, "WARNING");
+  const totalVisibleEvents = nonDebugEvents.length > 0 ? nonDebugEvents.length : report?.total_events || 0;
 
   return (
     <div className="space-y-6">
@@ -639,16 +707,27 @@ function OverviewView({
       >
         <div className="space-y-4">
           <SummaryLine>
-            {events.length}件のイベント ・ {riskSignals.length}件のリスクシグナル ・{" "}
-            {highCritical}件の High/Critical ・ {hosts.length}台のデバイス ・ 観測期間{" "}
+            {totalVisibleEvents} visible events ・ {riskSignals.length} risk signals ・{" "}
+            {warningCount} warnings ・ {localHosts.length} local devices ・ {externalHosts.length} external destinations ・ 観測期間{" "}
             {formatWindow(report?.window?.start, report?.window?.end)}
+            {debugEvents.length > 0 ? ` ・ ${debugEvents.length} debug events hidden by default` : ""}
           </SummaryLine>
 
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-6">
             <MetricCard
-              label="Total Events"
-              value={report?.total_events || 0}
+              label="Total Visible Events"
+              value={totalVisibleEvents}
               helper={`source: ${sourceLabel}`}
+            />
+            <MetricCard
+              label="Risk Signals"
+              value={riskSignals.length}
+              helper={debugEvents.length > 0 ? `${debugEvents.length} debug events hidden` : "debug events excluded"}
+            />
+            <MetricCard
+              label="Warnings"
+              value={warningCount}
+              helper="warning-level signals highlighted"
             />
             <MetricCard
               label="High / Critical"
@@ -656,19 +735,14 @@ function OverviewView({
               helper={`critical ${criticalCount} / high ${highCount}`}
             />
             <MetricCard
-              label="Warnings"
-              value={warningCount}
-              helper="medium-confidence observations included"
-            />
-            <MetricCard
-              label="Observed Devices"
-              value={hosts.length}
+              label="Local Devices"
+              value={localHosts.length}
               helper={`${report?.unknown_devices || 0} unknown devices`}
             />
             <MetricCard
-              label="User / Quarantine"
-              value={`${report?.user_notifications || 0} / ${report?.quarantine_candidates || 0}`}
-              helper="user notifications / quarantine candidates"
+              label="External Destinations"
+              value={externalHosts.length}
+              helper={`${report?.user_notifications || 0} user notifications`}
             />
           </div>
 
@@ -678,8 +752,8 @@ function OverviewView({
                 Top Rules
               </div>
               <div className="divide-y divide-border">
-                {topKV(report?.rules).length > 0 ? (
-                  topKV(report?.rules).map((item) => (
+                {topKV(nonDebugEvents.length > 0 ? visibleRules : report?.rules).length > 0 ? (
+                  topKV(nonDebugEvents.length > 0 ? visibleRules : report?.rules).map((item) => (
                     <div
                       key={item.key}
                       className="flex items-center justify-between px-4 py-2 text-sm"
@@ -701,8 +775,8 @@ function OverviewView({
                 Top OWASP Categories
               </div>
               <div className="divide-y divide-border">
-                {topKV(report?.categories).length > 0 ? (
-                  topKV(report?.categories).map((item) => (
+                {topKV(nonDebugEvents.length > 0 ? visibleCategories : report?.categories).length > 0 ? (
+                  topKV(nonDebugEvents.length > 0 ? visibleCategories : report?.categories).map((item) => (
                     <div
                       key={item.key}
                       className="flex items-center justify-between px-4 py-2 text-sm"
@@ -724,8 +798,8 @@ function OverviewView({
                 Top Source IP
               </div>
               <div className="divide-y divide-border">
-                {topKV(report?.sources).length > 0 ? (
-                  topKV(report?.sources).map((item) => (
+                {topKV(nonDebugEvents.length > 0 ? visibleSources : report?.sources).length > 0 ? (
+                  topKV(nonDebugEvents.length > 0 ? visibleSources : report?.sources).map((item) => (
                     <div
                       key={item.key}
                       className="flex items-center justify-between px-4 py-2 text-sm"
@@ -802,7 +876,7 @@ function OverviewView({
 
           <div className="space-y-2">
             <div className="text-sm font-medium">All Events</div>
-            {events.length === 0 ? (
+            {nonDebugEvents.length === 0 ? (
               <SummaryLine>
                 この `report` にはイベント配列が含まれていません。summary-only の
                 `report.json` を読み込んでいる場合、Overview の集計だけが表示されます。
@@ -822,7 +896,7 @@ function OverviewView({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {events.map((event, index) => (
+                {nonDebugEvents.map((event, index) => (
                   <TableRow key={`${event.ts}-${event.rule_id || event.type}-${index}`}>
                     <TableCell className="font-mono text-xs">{formatTime(event.ts)}</TableCell>
                     <TableCell><SeverityBadge severity={event.severity} /></TableCell>
@@ -900,24 +974,19 @@ function DevicesView({
   const unclassified = hosts.filter((host) =>
     host.categoryCandidate.includes("未分類")
   ).length;
-  const externalDestinations = uniqueStrings(
-    hosts.flatMap((host) =>
-      host.flows
-        .filter((flow) => flow.direction === "external")
-        .map((flow) => normalizeDestination(flow))
-    )
-  ).length;
+  const localHosts = filteredHosts.filter((host) => isLocalHost(host));
+  const externalHosts = filteredHosts.filter((host) => !isLocalHost(host));
 
   return (
     <div className="space-y-6">
       <Section
         title="Devices"
-        description="観測されたホストを候補情報つきで一覧表示します。"
+        description="LAN内端末と外部通信先を分けて一覧表示します。"
       >
         <div className="space-y-4">
           <SummaryLine>
             {hosts.length} hosts observed ・ {withSignals} with risk signals ・{" "}
-            {unclassified} unclassified ・ {externalDestinations} external destinations
+            {unclassified} unclassified ・ {localHosts.length} local devices shown ・ {externalHosts.length} external destinations shown
           </SummaryLine>
 
           <div className="grid gap-3 lg:grid-cols-[minmax(0,2fr)_repeat(2,minmax(0,1fr))]">
@@ -960,63 +1029,84 @@ function DevicesView({
 
           <SummaryLine>{filteredHosts.length} hosts shown</SummaryLine>
 
-          <div className="space-y-2">
-            <div className="text-sm font-medium">Observed Hosts</div>
-            <Table className="text-[13px]">
-              <TableHeader>
-                <TableRow className="bg-[#fafafa] hover:bg-[#fafafa]">
-                  <TableHead>IP Address</TableHead>
-                  <TableHead>Label / Candidate</TableHead>
-                  <TableHead>Category Candidate</TableHead>
-                  <TableHead>Vendor Candidate</TableHead>
-                  <TableHead>Risk</TableHead>
-                  <TableHead>Signals</TableHead>
-                  <TableHead>OWASP</TableHead>
-                  <TableHead>Protocols</TableHead>
-                  <TableHead>Top Destination</TableHead>
-                  <TableHead>Last Seen</TableHead>
-                  <TableHead>Detail</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredHosts.length > 0 ? filteredHosts.map((host) => (
-                  <TableRow key={host.ip}>
-                    <TableCell className="font-mono text-xs">{host.ip}</TableCell>
-                    <TableCell>{host.labelCandidate}</TableCell>
-                    <TableCell>{host.categoryCandidate}</TableCell>
-                    <TableCell>{host.vendorCandidate}</TableCell>
-                    <TableCell><SeverityBadge severity={host.risk} /></TableCell>
-                    <TableCell>{host.signals}</TableCell>
-                    <TableCell>{joinLimited(host.owasp, 3)}</TableCell>
-                    <TableCell>{joinLimited(host.protocols, 3)}</TableCell>
-                    <TableCell className="max-w-[180px] truncate" title={host.topDestination}>
-                      {host.topDestination}
-                    </TableCell>
-                    <TableCell className="font-mono text-xs">
-                      {formatTime(host.lastSeen)}
-                    </TableCell>
-                    <TableCell>
-                      <button
-                        onClick={() => onOpenHost(host.ip)}
-                        className="text-[#2563eb] hover:underline"
-                      >
-                        Host Report
-                      </button>
-                    </TableCell>
-                  </TableRow>
-                )) : (
-                  <TableRow>
-                    <TableCell colSpan={11} className="text-center text-muted-foreground">
-                      条件に一致する host はありません。
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
+          <div className="space-y-6">
+            <div className="space-y-2">
+              <div className="text-sm font-medium">Local Devices</div>
+              <HostTable hosts={localHosts} onOpenHost={onOpenHost} emptyLabel="条件に一致する local device はありません。" />
+            </div>
+
+            <div className="space-y-2">
+              <div className="text-sm font-medium">External Destinations</div>
+              <HostTable hosts={externalHosts} onOpenHost={onOpenHost} emptyLabel="条件に一致する external destination はありません。" />
+            </div>
           </div>
         </div>
       </Section>
     </div>
+  );
+}
+
+function HostTable({
+  hosts,
+  onOpenHost,
+  emptyLabel,
+}: {
+  hosts: HostRow[];
+  onOpenHost: (ip: string) => void;
+  emptyLabel: string;
+}) {
+  return (
+    <Table className="text-[13px]">
+      <TableHeader>
+        <TableRow className="bg-[#fafafa] hover:bg-[#fafafa]">
+          <TableHead>IP Address</TableHead>
+          <TableHead>Label / Candidate</TableHead>
+          <TableHead>Category Candidate</TableHead>
+          <TableHead>Vendor Candidate</TableHead>
+          <TableHead>Risk</TableHead>
+          <TableHead>Signals</TableHead>
+          <TableHead>OWASP</TableHead>
+          <TableHead>Protocols</TableHead>
+          <TableHead>Top Destination</TableHead>
+          <TableHead>Last Seen</TableHead>
+          <TableHead>Detail</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {hosts.length > 0 ? hosts.map((host) => (
+          <TableRow key={host.ip}>
+            <TableCell className="font-mono text-xs">{host.ip}</TableCell>
+            <TableCell>{host.labelCandidate}</TableCell>
+            <TableCell>{host.categoryCandidate}</TableCell>
+            <TableCell>{host.vendorCandidate}</TableCell>
+            <TableCell><SeverityBadge severity={host.risk} /></TableCell>
+            <TableCell>{host.signals}</TableCell>
+            <TableCell>{joinLimited(host.owasp, 3)}</TableCell>
+            <TableCell>{joinLimited(host.protocols, 3)}</TableCell>
+            <TableCell className="max-w-[180px] truncate" title={host.topDestination}>
+              {host.topDestination}
+            </TableCell>
+            <TableCell className="font-mono text-xs">
+              {formatTime(host.lastSeen)}
+            </TableCell>
+            <TableCell>
+              <button
+                onClick={() => onOpenHost(host.ip)}
+                className="text-[#2563eb] hover:underline"
+              >
+                Host Report
+              </button>
+            </TableCell>
+          </TableRow>
+        )) : (
+          <TableRow>
+            <TableCell colSpan={11} className="text-center text-muted-foreground">
+              {emptyLabel}
+            </TableCell>
+          </TableRow>
+        )}
+      </TableBody>
+    </Table>
   );
 }
 
@@ -1027,10 +1117,12 @@ function HostReportView({
   host: HostRow;
   onBack: () => void;
 }) {
-  const highCritical = host.events.filter(
+  const nonDebugEvents = visibleEvents(host.events);
+  const hiddenDebugCount = host.events.length - nonDebugEvents.length;
+  const highCritical = nonDebugEvents.filter(
     (event) => severityRank(event.severity) >= severityRank("HIGH")
   ).length;
-  const relatedEvents = host.events.slice().sort((a, b) => b.ts.localeCompare(a.ts));
+  const relatedEvents = nonDebugEvents.slice().sort((a, b) => b.ts.localeCompare(a.ts));
   const topDestinations = uniqueStrings(
     host.flows
       .filter((flow) => flow.direction === "external")
@@ -1057,6 +1149,7 @@ function HostReportView({
             {host.signals} risk signals ・ {highCritical} high/critical ・{" "}
             {host.protocols.length} protocols ・ {host.externalDestinationCount} external destinations ・{" "}
             {uniqueStrings(host.owasp).length} OWASP categories
+            {hiddenDebugCount > 0 ? ` ・ ${hiddenDebugCount} debug events hidden` : ""}
           </SummaryLine>
 
           <div className="grid gap-4 lg:grid-cols-2">
@@ -1284,17 +1377,20 @@ function EventsView({
   const [owaspFilter, setOwaspFilter] = useState("all");
   const [ruleFilter, setRuleFilter] = useState("all");
   const [deviceFilter, setDeviceFilter] = useState("all");
+  const [showDebugEvents, setShowDebugEvents] = useState(false);
   const [openRows, setOpenRows] = useState<Record<string, boolean>>({});
   const deferredQuery = useDeferredValue(query);
 
   const events = report?.events || [];
-  const owaspOptions = uniqueStrings(events.flatMap((event) => eventOWASP(event)));
-  const ruleOptions = uniqueStrings(events.map((event) => event.rule_id || event.type));
+  const candidateEvents = showDebugEvents ? events : visibleEvents(events);
+  const hiddenDebugCount = events.filter((event) => isDebugEvent(event)).length;
+  const owaspOptions = uniqueStrings(candidateEvents.flatMap((event) => eventOWASP(event)));
+  const ruleOptions = uniqueStrings(candidateEvents.map((event) => event.rule_id || event.type));
   const deviceOptions = uniqueStrings(
-    events.flatMap((event) => [event.device_key, event.device_label, event.src_ip])
+    candidateEvents.flatMap((event) => [event.device_key, event.device_label, event.src_ip])
   );
 
-  const filtered = events.filter((event) => {
+  const filtered = candidateEvents.filter((event) => {
     const tags = eventOWASP(event);
     const haystack = [
       event.rule_id,
@@ -1408,7 +1504,19 @@ function EventsView({
             </Select>
           </div>
 
-          <SummaryLine>{filtered.length} events shown</SummaryLine>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <SummaryLine>
+              {filtered.length} events shown
+              {!showDebugEvents && hiddenDebugCount > 0 ? ` ・ ${hiddenDebugCount} debug events hidden` : ""}
+            </SummaryLine>
+            <Button
+              variant={showDebugEvents ? "default" : "outline"}
+              onClick={() => setShowDebugEvents((current) => !current)}
+              className="h-9 rounded-none"
+            >
+              {showDebugEvents ? "Hide Debug Events" : "Show Debug Events"}
+            </Button>
+          </div>
 
           <div className="border border-border">
             <Table className="text-[13px]">
