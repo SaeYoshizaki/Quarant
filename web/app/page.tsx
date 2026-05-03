@@ -269,6 +269,39 @@ function formatOWASP(tags?: string[]): string {
   return tags.join(", ");
 }
 
+function eventSummary(event: Event): string {
+  return event.observed_fact || event.message || event.evidence || "-";
+}
+
+function shortEvidence(event: Event): string {
+  return event.evidence || event.message || event.observed_fact || "-";
+}
+
+function overallAssessmentText({
+  riskSignalCount,
+  warningCount,
+  highCriticalCount,
+  localDeviceCount,
+  externalDestinationCount,
+}: {
+  riskSignalCount: number;
+  warningCount: number;
+  highCriticalCount: number;
+  localDeviceCount: number;
+  externalDestinationCount: number;
+}): string {
+  if (highCriticalCount > 0) {
+    return `${highCriticalCount}件の high/critical signal を確認しました。優先度の高い通信上のリスクが残っており、早期確認が必要です。`;
+  }
+  if (warningCount > 0) {
+    return `${warningCount}件の warning-level signal を確認しました。断定的な脆弱性ではありませんが、通信挙動から追跡すべきリスクが見えています。`;
+  }
+  if (riskSignalCount > 0) {
+    return `${riskSignalCount}件の観測イベントがありました。重大度は高くありませんが、継続観測で変化を追う価値があります。`;
+  }
+  return `${localDeviceCount}台の local device と ${externalDestinationCount}件の external destination を観測しました。今回の範囲では明確な risk signal は確認されていません。`;
+}
+
 function topKV(items?: KV[], limit = 5): KV[] {
   return (items || []).slice(0, limit);
 }
@@ -698,21 +731,22 @@ function OverviewView({
   const criticalCount = nonDebugEvents.length > 0 ? nonDebugEvents.filter((event) => (event.severity || "").toUpperCase() === "CRITICAL").length : metricValue(report?.severity, "CRITICAL");
   const warningCount = nonDebugEvents.length > 0 ? warnings : metricValue(report?.severity, "WARNING");
   const totalVisibleEvents = nonDebugEvents.length > 0 ? nonDebugEvents.length : report?.total_events || 0;
+  const priorityFindings = riskSignals.slice(0, 3);
+  const recommendedActions = uniqueStrings(
+    riskSignals.map((event) => event.recommendation)
+  ).slice(0, 5);
+  const overallAssessment = overallAssessmentText({
+    riskSignalCount: riskSignals.length,
+    warningCount,
+    highCriticalCount: highCritical,
+    localDeviceCount: localHosts.length,
+    externalDestinationCount: externalHosts.length,
+  });
 
   return (
     <div className="space-y-6">
-      <Section
-        title="Overview"
-        description="観測入力の由来、件数、主要カテゴリを最初に把握するためのサマリです。"
-      >
+      <Section title="Overview">
         <div className="space-y-4">
-          <SummaryLine>
-            {totalVisibleEvents} visible events ・ {riskSignals.length} risk signals ・{" "}
-            {warningCount} warnings ・ {localHosts.length} local devices ・ {externalHosts.length} external destinations ・ 観測期間{" "}
-            {formatWindow(report?.window?.start, report?.window?.end)}
-            {debugEvents.length > 0 ? ` ・ ${debugEvents.length} debug events hidden by default` : ""}
-          </SummaryLine>
-
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-6">
             <MetricCard
               label="Total Visible Events"
@@ -744,6 +778,60 @@ function OverviewView({
               value={externalHosts.length}
               helper={`${report?.user_notifications || 0} user notifications`}
             />
+          </div>
+
+          <div className="grid gap-4 xl:grid-cols-3">
+            <div className="border border-border bg-[#fcfcfd] px-4 py-4">
+              <div className="text-sm font-medium">Overall Assessment</div>
+              <div className="mt-2 text-sm leading-6 text-[#334155]">
+                {overallAssessment}
+              </div>
+              <div className="mt-3 text-xs text-[#667085]">
+                Mode: Passive observation / Active scanning: No / TLS decryption: No
+              </div>
+            </div>
+
+            <div className="border border-border bg-[#fcfcfd] px-4 py-4">
+              <div className="text-sm font-medium">Priority Findings</div>
+              <div className="mt-3 space-y-3">
+                {priorityFindings.length > 0 ? (
+                  priorityFindings.map((event, index) => (
+                    <div key={`${event.ts}-${event.rule_id || event.type}-priority-${index}`} className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <SeverityBadge severity={event.severity} />
+                        <span className="font-mono text-[11px] text-[#667085]">
+                          {event.rule_id || event.type || "-"}
+                        </span>
+                      </div>
+                      <div className="text-sm text-[#334155]">
+                        {eventSummary(event)}
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-sm text-muted-foreground">
+                    No priority finding in the current visible event set.
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="border border-border bg-[#fcfcfd] px-4 py-4">
+              <div className="text-sm font-medium">Recommended Actions</div>
+              <div className="mt-3 space-y-2">
+                {recommendedActions.length > 0 ? (
+                  recommendedActions.map((action) => (
+                    <div key={action} className="text-sm leading-6 text-[#334155]">
+                      {action}
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-sm text-muted-foreground">
+                    No explicit recommendation was attached to the current visible events.
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
 
           <div className="grid gap-4 xl:grid-cols-3">
@@ -887,12 +975,10 @@ function OverviewView({
                 <TableRow className="bg-[#fafafa] hover:bg-[#fafafa]">
                   <TableHead>Time</TableHead>
                   <TableHead>Severity</TableHead>
-                  <TableHead>Rule ID</TableHead>
+                  <TableHead>Summary</TableHead>
                   <TableHead>OWASP</TableHead>
-                  <TableHead>Confidence</TableHead>
                   <TableHead>Source → Destination</TableHead>
-                  <TableHead>Evidence</TableHead>
-                  <TableHead>Message</TableHead>
+                  <TableHead>Short Evidence</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -900,20 +986,16 @@ function OverviewView({
                   <TableRow key={`${event.ts}-${event.rule_id || event.type}-${index}`}>
                     <TableCell className="font-mono text-xs">{formatTime(event.ts)}</TableCell>
                     <TableCell><SeverityBadge severity={event.severity} /></TableCell>
-                    <TableCell className="font-mono text-xs">
-                      {event.rule_id || event.type || "-"}
+                    <TableCell className="max-w-[280px] whitespace-normal">
+                      {eventSummary(event)}
                     </TableCell>
                     <TableCell>{formatOWASP(eventOWASP(event))}</TableCell>
-                    <TableCell>{event.confidence || "-"}</TableCell>
                     <TableCell className="font-mono text-xs">
                       {endpoint(event.src_ip, event.src_port)} {"->"}{" "}
                       {endpoint(event.dst_ip, event.dst_port)}
                     </TableCell>
                     <TableCell className="max-w-[240px] whitespace-normal font-mono text-xs text-muted-foreground">
-                      {event.evidence || "-"}
-                    </TableCell>
-                    <TableCell className="max-w-[280px] whitespace-normal">
-                      {event.message || "-"}
+                      {shortEvidence(event)}
                     </TableCell>
                   </TableRow>
                 ))}
@@ -981,14 +1063,7 @@ function DevicesView({
     <div className="space-y-6">
       <Section
         title="Devices"
-        description="LAN内端末と外部通信先を分けて一覧表示します。"
       >
-        <div className="space-y-4">
-          <SummaryLine>
-            {hosts.length} hosts observed ・ {withSignals} with risk signals ・{" "}
-            {unclassified} unclassified ・ {localHosts.length} local devices shown ・ {externalHosts.length} external destinations shown
-          </SummaryLine>
-
           <div className="grid gap-3 lg:grid-cols-[minmax(0,2fr)_repeat(2,minmax(0,1fr))]">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -1040,7 +1115,7 @@ function DevicesView({
               <HostTable hosts={externalHosts} onOpenHost={onOpenHost} emptyLabel="条件に一致する external destination はありません。" />
             </div>
           </div>
-        </div>
+
       </Section>
     </div>
   );
@@ -1320,9 +1395,15 @@ function HostReportView({
 }
 
 function EventDetails({ event }: { event: Event }) {
+  const owasp = eventOWASP(event);
+
   return (
     <div className="grid gap-3 border-t border-border bg-[#fcfcfd] px-4 py-4 text-sm">
       <div className="grid gap-3 md:grid-cols-4">
+        <div>
+          <div className="text-xs text-muted-foreground">Timestamp</div>
+          <div className="font-mono text-xs">{formatTime(event.ts)}</div>
+        </div>
         <div>
           <div className="text-xs text-muted-foreground">Severity</div>
           <div className="mt-1"><SeverityBadge severity={event.severity} /></div>
@@ -1333,33 +1414,55 @@ function EventDetails({ event }: { event: Event }) {
         </div>
         <div>
           <div className="text-xs text-muted-foreground">OWASP</div>
-          <div>{formatOWASP(eventOWASP(event))}</div>
+          <div>{formatOWASP(owasp)}</div>
         </div>
         <div>
-          <div className="text-xs text-muted-foreground">Device / Source</div>
-          <div className="font-mono text-xs">{event.device_key || event.src_ip || "-"}</div>
+          <div className="text-xs text-muted-foreground">Confidence</div>
+          <div>{event.confidence || "-"}</div>
         </div>
+      </div>
+      <div>
+        <div className="text-xs text-muted-foreground">Category</div>
+        <div>{event.category || "-"}</div>
+      </div>
+      <div>
+        <div className="text-xs text-muted-foreground">Source</div>
+        <div className="font-mono text-xs">{endpoint(event.src_ip, event.src_port)}</div>
+      </div>
+      <div>
+        <div className="text-xs text-muted-foreground">Destination</div>
+        <div className="font-mono text-xs">{endpoint(event.dst_ip, event.dst_port)}</div>
+      </div>
+      <div>
+        <div className="text-xs text-muted-foreground">Message</div>
+        <div className="whitespace-pre-wrap break-words">{event.message || "-"}</div>
+      </div>
+      <div>
+        <div className="text-xs text-muted-foreground">OWASP Tags</div>
+        <div>{formatOWASP(owasp)}</div>
       </div>
       <div>
         <div className="text-xs text-muted-foreground">Observed Fact</div>
-        <div>{event.observed_fact || "-"}</div>
+        <div className="whitespace-pre-wrap break-words">{event.observed_fact || "-"}</div>
       </div>
       <div>
         <div className="text-xs text-muted-foreground">Evidence</div>
-        <div className="font-mono text-xs text-[#475569]">{event.evidence || "-"}</div>
+        <div className="whitespace-pre-wrap break-words font-mono text-xs text-[#475569]">
+          {event.evidence || "-"}
+        </div>
       </div>
       <div>
         <div className="text-xs text-muted-foreground">Inference</div>
-        <div>{event.inference || "-"}</div>
+        <div className="whitespace-pre-wrap break-words">{event.inference || "-"}</div>
       </div>
       <div>
         <div className="text-xs text-muted-foreground">Limitation</div>
-        <div>{event.limitation || "-"}</div>
+        <div className="whitespace-pre-wrap break-words">{event.limitation || "-"}</div>
       </div>
       <div>
         <div className="text-xs text-muted-foreground">Recommendation</div>
-        <div>{event.recommendation || "-"}</div>
-      </div>
+        <div className="whitespace-pre-wrap break-words">{event.recommendation || "-"}</div>
+        </div>
       <JsonDisclosure label="Raw JSON" value={event} />
     </div>
   );
@@ -1437,7 +1540,6 @@ function EventsView({
     <div className="space-y-6">
       <Section
         title="Events"
-        description="全イベントを検索・フィルタし、根拠と制約を確認します。"
       >
         <div className="space-y-4">
           <div className="grid gap-3 lg:grid-cols-[minmax(0,2fr)_repeat(4,minmax(0,1fr))]">
@@ -1446,7 +1548,7 @@ function EventsView({
               <Input
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                placeholder="Search device, IP, rule, OWASP, observed fact, evidence, or inference"
+                placeholder="Search"
                 className="pl-9"
               />
             </div>
@@ -1524,20 +1626,18 @@ function EventsView({
                 <TableRow className="bg-[#fafafa] hover:bg-[#fafafa]">
                   <TableHead>Time</TableHead>
                   <TableHead>Severity</TableHead>
-                  <TableHead>Rule ID</TableHead>
-                  <TableHead>OWASP</TableHead>
-                  <TableHead>Confidence</TableHead>
-                  <TableHead>Source</TableHead>
-                  <TableHead>Destination</TableHead>
-                  <TableHead>Evidence</TableHead>
-                  <TableHead>Observed Fact</TableHead>
-                  <TableHead>Message</TableHead>
+                  <TableHead>Human-readable Summary</TableHead>
+                  <TableHead>Source → Destination</TableHead>
+                  <TableHead>Short Evidence</TableHead>
+                  <TableHead className="w-[92px]">Details</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filtered.length > 0 ? filtered.map((event, index) => {
                   const rowKey = `${event.ts}-${event.rule_id || event.type}-${index}`;
                   const isOpen = Boolean(openRows[rowKey]);
+                  const summary = eventSummary(event);
+                  const evidence = event.evidence || "-";
 
                   return (
                     <Fragment key={rowKey}>
@@ -1552,30 +1652,45 @@ function EventsView({
                       >
                         <TableCell className="font-mono text-xs">{formatTime(event.ts)}</TableCell>
                         <TableCell><SeverityBadge severity={event.severity} /></TableCell>
-                        <TableCell className="font-mono text-xs">
-                          {event.rule_id || event.type || "-"}
+                        <TableCell className="max-w-[360px]">
+                          <div className="overflow-hidden text-ellipsis whitespace-normal break-words [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]">
+                            {summary}
+                          </div>
                         </TableCell>
-                        <TableCell>{formatOWASP(eventOWASP(event))}</TableCell>
-                        <TableCell>{event.confidence || "-"}</TableCell>
-                        <TableCell className="font-mono text-xs">
-                          {endpoint(event.src_ip, event.src_port)}
+                        <TableCell className="min-w-[220px] font-mono text-xs text-[#475569]">
+                          <div className="whitespace-normal break-all">
+                            {endpoint(event.src_ip, event.src_port)}
+                          </div>
+                          <div className="py-1 text-[10px] text-muted-foreground">to</div>
+                          <div className="whitespace-normal break-all">
+                            {endpoint(event.dst_ip, event.dst_port)}
+                          </div>
                         </TableCell>
-                        <TableCell className="font-mono text-xs">
-                          {endpoint(event.dst_ip, event.dst_port)}
+                        <TableCell className="max-w-[360px]">
+                          <div className="overflow-hidden text-ellipsis whitespace-normal break-words font-mono text-xs text-[#475569] [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]">
+                            {evidence}
+                          </div>
                         </TableCell>
-                        <TableCell className="max-w-[200px] whitespace-normal font-mono text-xs text-muted-foreground">
-                          {event.evidence || "-"}
-                        </TableCell>
-                        <TableCell className="max-w-[220px] whitespace-normal">
-                          {event.observed_fact || "-"}
-                        </TableCell>
-                        <TableCell className="max-w-[220px] whitespace-normal">
-                          {event.message || "-"}
+                        <TableCell>
+                          <Button
+                            type="button"
+                            variant={isOpen ? "default" : "outline"}
+                            className="h-8 rounded-none px-3 text-xs"
+                            onClick={(clickEvent) => {
+                              clickEvent.stopPropagation();
+                              setOpenRows((current) => ({
+                                ...current,
+                                [rowKey]: !current[rowKey],
+                              }));
+                            }}
+                          >
+                            {isOpen ? "Hide" : "Details"}
+                          </Button>
                         </TableCell>
                       </TableRow>
                       {isOpen ? (
                         <TableRow className="hover:bg-transparent">
-                          <TableCell colSpan={10} className="p-0">
+                          <TableCell colSpan={6} className="p-0">
                             <EventDetails event={event} />
                           </TableCell>
                         </TableRow>
@@ -1584,7 +1699,7 @@ function EventsView({
                   );
                 }) : (
                   <TableRow>
-                    <TableCell colSpan={10} className="text-center text-muted-foreground">
+                    <TableCell colSpan={6} className="text-center text-muted-foreground">
                       条件に一致する event はありません。
                     </TableCell>
                   </TableRow>
