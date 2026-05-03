@@ -82,3 +82,43 @@ func TestLoadReportJSONLegacySummary(t *testing.T) {
 		t.Fatal("GeneratedAt should be set")
 	}
 }
+
+func TestLoadReportMissingEventsJSONLReturnsEmptyReport(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "events.jsonl")
+
+	got, err := LoadReport(path)
+	if err != nil {
+		t.Fatalf("LoadReport: %v", err)
+	}
+	if got.Source != path {
+		t.Fatalf("Source=%q, want %q", got.Source, path)
+	}
+	if got.TotalEvents != 0 {
+		t.Fatalf("TotalEvents=%d, want 0", got.TotalEvents)
+	}
+	if len(got.Events) != 0 {
+		t.Fatalf("Events=%d, want 0", len(got.Events))
+	}
+}
+
+func TestLoadReportInvalidJSONReturnsEmptyReport(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "report.json")
+	if err := os.WriteFile(path, []byte("{"), 0644); err != nil {
+		t.Fatalf("write report json: %v", err)
+	}
+
+	got, err := LoadReport(path)
+	if err != nil {
+		t.Fatalf("LoadReport: %v", err)
+	}
+	if got.Source != path {
+		t.Fatalf("Source=%q, want %q", got.Source, path)
+	}
+	if got.TotalEvents != 0 {
+		t.Fatalf("TotalEvents=%d, want 0", got.TotalEvents)
+	}
+	if len(got.Events) != 0 {
+		t.Fatalf("Events=%d, want 0", len(got.Events))
+	}
+}

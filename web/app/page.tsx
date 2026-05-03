@@ -5,6 +5,7 @@ import {
   Suspense,
   useDeferredValue,
   useEffect,
+  useEffectEvent,
   useState,
 } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -194,6 +195,7 @@ type ViewerMeta = {
 };
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "";
+const AUTO_REFRESH_INTERVAL_MS = 3000;
 
 const DEBUG_EVENT_TYPES = new Set([
   "I6_DEBUG",
@@ -2194,56 +2196,65 @@ function QuarantReportViewerContent() {
     viewParam === "devices" || viewParam === "events" ? viewParam : "overview";
   const activeHost = searchParams.get("host");
 
-  async function loadData(): Promise<void> {
-    try {
-      setIsRefreshing(true);
-      setError("");
+  const loadData = useEffectEvent(
+    async ({ background = false }: { background?: boolean } = {}): Promise<void> => {
+      try {
+        setIsRefreshing(true);
+        if (!background) {
+          setError("");
+        }
 
-      const [reportResponse, inventoryResponse, flowsResponse, metaResponse] =
-        await Promise.all([
-          fetch(`${API_BASE_URL}/api/report`, { cache: "no-store" }),
-          fetch(`${API_BASE_URL}/api/inventory`, { cache: "no-store" }),
-          fetch(`${API_BASE_URL}/api/flows`, { cache: "no-store" }),
-          fetch(`${API_BASE_URL}/api/meta`, { cache: "no-store" }),
-        ]);
+        const [reportResponse, inventoryResponse, flowsResponse, metaResponse] =
+          await Promise.all([
+            fetch(`${API_BASE_URL}/api/report`, { cache: "no-store" }),
+            fetch(`${API_BASE_URL}/api/inventory`, { cache: "no-store" }),
+            fetch(`${API_BASE_URL}/api/flows`, { cache: "no-store" }),
+            fetch(`${API_BASE_URL}/api/meta`, { cache: "no-store" }),
+          ]);
 
-      if (!reportResponse.ok) {
-        throw new Error(`report HTTP ${reportResponse.status}`);
+        if (!reportResponse.ok) {
+          throw new Error(`report HTTP ${reportResponse.status}`);
+        }
+
+        const [nextReport, nextInventory, nextFlows, nextMeta] =
+          await Promise.all([
+            reportResponse.json() as Promise<Report>,
+            inventoryResponse.ok
+              ? (inventoryResponse.json() as Promise<InventoryReport>)
+              : Promise.resolve({ devices: [] }),
+            flowsResponse.ok
+              ? (flowsResponse.json() as Promise<FlowRecord[]>)
+              : Promise.resolve([]),
+            metaResponse.ok
+              ? (metaResponse.json() as Promise<ViewerMeta>)
+              : Promise.resolve({}),
+          ]);
+
+        setReport(nextReport);
+        setInventory(nextInventory);
+        setFlows(nextFlows);
+        setViewerMeta(nextMeta);
+        setStatus("Connected");
+        setError("");
+        setLastUpdated(new Date());
+      } catch (fetchError) {
+        const message =
+          fetchError instanceof Error ? fetchError.message : "Unknown error";
+        setError(message);
+        setStatus("Error");
+      } finally {
+        setIsRefreshing(false);
       }
-
-      const [nextReport, nextInventory, nextFlows, nextMeta] =
-        await Promise.all([
-          reportResponse.json() as Promise<Report>,
-          inventoryResponse.ok
-            ? (inventoryResponse.json() as Promise<InventoryReport>)
-            : Promise.resolve({ devices: [] }),
-          flowsResponse.ok
-            ? (flowsResponse.json() as Promise<FlowRecord[]>)
-            : Promise.resolve([]),
-          metaResponse.ok
-            ? (metaResponse.json() as Promise<ViewerMeta>)
-            : Promise.resolve({}),
-        ]);
-
-      setReport(nextReport);
-      setInventory(nextInventory);
-      setFlows(nextFlows);
-      setViewerMeta(nextMeta);
-      setStatus("Connected");
-      setLastUpdated(new Date());
-    } catch (fetchError) {
-      const message =
-        fetchError instanceof Error ? fetchError.message : "Unknown error";
-      setError(message);
-      setStatus("Error");
-    } finally {
-      setIsRefreshing(false);
     }
-  }
+  );
 
   useEffect(() => {
     void loadData();
-  }, []);
+    const intervalId = window.setInterval(() => {
+      void loadData({ background: true });
+    }, AUTO_REFRESH_INTERVAL_MS);
+    return () => window.clearInterval(intervalId);
+  }, [loadData]);
 
   function setView(view: ViewName, host?: string): void {
     const params = new URLSearchParams(searchParams.toString());
@@ -2324,6 +2335,19 @@ function QuarantReportViewerContent() {
                   Demo data
                 </div>
               ) : null}
+            </div>
+          </div>
+        </aside>
+
+        <main className="min-w-0 flex-1">
+          <div className="mx-auto max-w-[1320px] px-12 py-12">
+            <div className="mb-6 flex items-center justify-end gap-4 text-[12px] text-[#70819d]">
+              <span>Auto refresh: 3s</span>
+              {lastUpdated ? (
+                <span className="font-mono text-[#5e7598]">
+                  {formatReportDateTime(lastUpdated.toISOString())}
+                </span>
+              ) : null}
               <Button
                 variant="outline"
                 onClick={() => void loadData()}
@@ -2339,11 +2363,7 @@ function QuarantReportViewerContent() {
                 Refresh
               </Button>
             </div>
-          </div>
-        </aside>
 
-        <main className="min-w-0 flex-1">
-          <div className="mx-auto max-w-[1320px] px-12 py-12">
             {error ? (
               <div className="mb-6 border border-[#fda29b] bg-[#fff5f4] px-4 py-3 text-sm text-[#b42318]">
                 API 接続に失敗しました: {error}

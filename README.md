@@ -123,6 +123,25 @@ Append instead of replacing:
 ./quarant analyze sample.pcap --out events.jsonl --report --open
 ```
 
+`--report` now starts the viewer immediately and keeps it open while `analyze` is still consuming a file or stdin stream.
+
+### Live capture with auto-refreshing report viewer
+
+```bash
+sudo ./quarant live --iface eth0 --out events.jsonl --report --open
+```
+
+Example for the containerlab demo:
+
+```bash
+sudo ./quarant live --iface eth0 \
+  --out runs/iot-demo/events.jsonl \
+  --flows-out runs/iot-demo/flows.jsonl \
+  --inventory-out runs/iot-demo/device_inventory.json \
+  --report \
+  --open
+```
+
 ## Report Viewer
 
 Quarant reuses the existing `web/` UI. It does not generate a second UI.
@@ -138,6 +157,7 @@ cd ..
 ```
 
 This creates `web/out`, which `quarant report` and `quarant-api` serve on the same localhost port as the API.
+The exported viewer polls `/api/report`, `/api/inventory`, and `/api/flows` every 3 seconds, so live captures appear automatically without WebSocket or SSE.
 
 ### Local viewer from the short CLI
 

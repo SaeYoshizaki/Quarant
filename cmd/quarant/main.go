@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 
 	"quarant/analyzer"
@@ -29,6 +30,10 @@ func main() {
 		if err := runAnalyze(args[1:]); err != nil {
 			log.Fatal(err)
 		}
+	case "live":
+		if err := runLive(args[1:]); err != nil {
+			log.Fatal(err)
+		}
 	case "report":
 		if err := runReport(args[1:]); err != nil {
 			log.Fatal(err)
@@ -43,16 +48,14 @@ func runAnalyze(args []string) error {
 	fs := flag.NewFlagSet("analyze", flag.ContinueOnError)
 	fs.SetOutput(io.Discard)
 
-	outPath := fs.String("out", "events.jsonl", "path to write events JSONL")
-	flowsOutPath := fs.String("flows-out", "", "path to write flow summaries JSONL (default: sibling flows.jsonl)")
-	inventoryOut := fs.String("inventory-out", "", "path to write device inventory snapshot JSON (default: sibling device_inventory.json, empty to disable with --inventory-out=-)")
-	inventoryInterval := fs.Duration("inventory-interval", 10*time.Second, "interval to refresh device inventory snapshot JSON")
-	debug := fs.Bool("debug", false, "enable debug payload logging")
-	appendOutput := fs.Bool("append", false, "append to existing events/flows outputs instead of replacing them")
-	reportAfter := fs.Bool("report", false, "launch the local report viewer after analysis completes")
-	openViewer := fs.Bool("open", false, "open the local report viewer in a browser")
-	addr := fs.String("addr", "127.0.0.1:8080", "HTTP listen address for the report viewer")
-	webDist := fs.String("web-dist", filepath.Join("web", "out"), "path to exported web UI assets")
+	flags := bindCaptureFlags(fs, captureFlagDefaults{
+		outPath:       "events.jsonl",
+		allowIface:    false,
+		reportHelp:    "launch the local report viewer while analysis is running",
+		appendHelp:    "append to existing events/flows outputs instead of replacing them",
+		flowsHelp:     "path to write flow summaries JSONL (default: sibling flows.jsonl)",
+		inventoryHelp: "path to write device inventory snapshot JSON (default: sibling device_inventory.json, empty to disable with --inventory-out=-)",
+	})
 
 	if err := fs.Parse(normalizeFlagArgs(fs, args)); err != nil {
 		return fmt.Errorf("parse analyze flags: %w", err)
@@ -66,40 +69,43 @@ func runAnalyze(args []string) error {
 		return fmt.Errorf("analyze accepts exactly one input path or - for stdin")
 	}
 
-	eventsDir := filepath.Dir(*outPath)
-	if eventsDir == "." {
-		eventsDir = ""
+	cfg := buildAnalysisConfig(inputPath, "", flags)
+	return runCapture(cfg, func(engine *analyzer.Engine) error {
+		if cfg.InputPath == "-" {
+			return engine.RunPCAPStream(os.Stdin)
+		}
+		return engine.RunOffline(cfg.InputPath)
+	})
+}
+
+func runLive(args []string) error {
+	fs := flag.NewFlagSet("live", flag.ContinueOnError)
+	fs.SetOutput(io.Discard)
+
+	flags := bindCaptureFlags(fs, captureFlagDefaults{
+		outPath:       "events.jsonl",
+		iface:         "eth0",
+		allowIface:    true,
+		reportHelp:    "launch the local report viewer while capture is running",
+		appendHelp:    "append to existing events/flows outputs instead of replacing them",
+		flowsHelp:     "path to write flow summaries JSONL (default: sibling flows.jsonl)",
+		inventoryHelp: "path to write device inventory snapshot JSON (default: sibling device_inventory.json, empty to disable with --inventory-out=-)",
+	})
+
+	if err := fs.Parse(normalizeFlagArgs(fs, args)); err != nil {
+		return fmt.Errorf("parse live flags: %w", err)
 	}
-	flowsPath := defaultSibling(*flowsOutPath, eventsDir, "flows.jsonl")
-	inventoryPath := defaultSibling(*inventoryOut, eventsDir, "device_inventory.json")
-	if *inventoryOut == "-" {
-		inventoryPath = ""
+	if fs.NArg() != 0 {
+		return fmt.Errorf("live does not accept positional arguments")
+	}
+	if strings.TrimSpace(*flags.iface) == "" {
+		return fmt.Errorf("live requires --iface")
 	}
 
-	cfg := analysisConfig{
-		InputPath:         inputPath,
-		EventsOut:         *outPath,
-		FlowsOut:          flowsPath,
-		InventoryOut:      inventoryPath,
-		InventoryInterval: *inventoryInterval,
-		Debug:             *debug,
-		AppendOutput:      *appendOutput,
-	}
-	if err := analyzePCAP(cfg); err != nil {
-		return err
-	}
-
-	if *reportAfter {
-		return viewer.Serve(viewer.Options{
-			EventsPath:    *outPath,
-			FlowsPath:     flowsPath,
-			InventoryPath: inventoryPath,
-			Addr:          *addr,
-			OpenBrowser:   *openViewer,
-			WebDist:       *webDist,
-		})
-	}
-	return nil
+	cfg := buildAnalysisConfig("", *flags.iface, flags)
+	return runCapture(cfg, func(engine *analyzer.Engine) error {
+		return engine.RunLive(cfg.Interface)
+	})
 }
 
 func runReport(args []string) error {
@@ -159,33 +165,161 @@ func runReport(args []string) error {
 
 type analysisConfig struct {
 	InputPath         string
+	Interface         string
 	EventsOut         string
 	FlowsOut          string
 	InventoryOut      string
 	InventoryInterval time.Duration
 	Debug             bool
 	AppendOutput      bool
+	Report            bool
+	OpenViewer        bool
+	ViewerAddr        string
+	WebDist           string
+	BlockOnViewer     bool
+}
+
+type captureRunner func(*analyzer.Engine) error
+
+type captureFlags struct {
+	outPath           *string
+	flowsOutPath      *string
+	inventoryOut      *string
+	inventoryInterval *time.Duration
+	debug             *bool
+	appendOutput      *bool
+	report            *bool
+	openViewer        *bool
+	addr              *string
+	webDist           *string
+	iface             *string
+}
+
+type captureFlagDefaults struct {
+	outPath       string
+	iface         string
+	allowIface    bool
+	appendHelp    string
+	reportHelp    string
+	flowsHelp     string
+	inventoryHelp string
+}
+
+func bindCaptureFlags(fs *flag.FlagSet, defaults captureFlagDefaults) captureFlags {
+	outDefault := defaults.outPath
+	if strings.TrimSpace(outDefault) == "" {
+		outDefault = "events.jsonl"
+	}
+	flags := captureFlags{
+		outPath:           fs.String("out", outDefault, "path to write events JSONL"),
+		flowsOutPath:      fs.String("flows-out", "", defaults.flowsHelp),
+		inventoryOut:      fs.String("inventory-out", "", defaults.inventoryHelp),
+		inventoryInterval: fs.Duration("inventory-interval", 10*time.Second, "interval to refresh device inventory snapshot JSON"),
+		debug:             fs.Bool("debug", false, "enable debug payload logging"),
+		appendOutput:      fs.Bool("append", false, defaults.appendHelp),
+		report:            fs.Bool("report", false, defaults.reportHelp),
+		openViewer:        fs.Bool("open", false, "open the local report viewer in a browser"),
+		addr:              fs.String("addr", "127.0.0.1:8080", "HTTP listen address for the report viewer"),
+		webDist:           fs.String("web-dist", filepath.Join("web", "out"), "path to exported web UI assets"),
+	}
+	if defaults.allowIface {
+		ifaceDefault := defaults.iface
+		if strings.TrimSpace(ifaceDefault) == "" {
+			ifaceDefault = "eth0"
+		}
+		flags.iface = fs.String("iface", ifaceDefault, "capture interface")
+	}
+	return flags
+}
+
+func buildAnalysisConfig(inputPath, iface string, flags captureFlags) analysisConfig {
+	eventsDir := filepath.Dir(*flags.outPath)
+	if eventsDir == "." {
+		eventsDir = ""
+	}
+	flowsPath := defaultSibling(*flags.flowsOutPath, eventsDir, "flows.jsonl")
+	inventoryPath := defaultSibling(*flags.inventoryOut, eventsDir, "device_inventory.json")
+	if *flags.inventoryOut == "-" {
+		inventoryPath = ""
+	}
+	return analysisConfig{
+		InputPath:         inputPath,
+		Interface:         iface,
+		EventsOut:         *flags.outPath,
+		FlowsOut:          flowsPath,
+		InventoryOut:      inventoryPath,
+		InventoryInterval: *flags.inventoryInterval,
+		Debug:             *flags.debug,
+		AppendOutput:      *flags.appendOutput,
+		Report:            *flags.report,
+		OpenViewer:        *flags.openViewer,
+		ViewerAddr:        *flags.addr,
+		WebDist:           *flags.webDist,
+		BlockOnViewer:     inputPath != "",
+	}
+}
+
+func runCapture(cfg analysisConfig, runner captureRunner) error {
+	if runner == nil {
+		return fmt.Errorf("capture runner is required")
+	}
+
+	runtime, err := newAnalysisRuntime(cfg)
+	if err != nil {
+		return err
+	}
+	defer runtime.close()
+
+	if cfg.Report {
+		runtime.startViewer()
+	}
+	if err := runner(runtime.engine); err != nil {
+		return err
+	}
+	if cfg.Report && cfg.BlockOnViewer {
+		return runtime.waitForViewer()
+	}
+	return nil
 }
 
 func analyzePCAP(cfg analysisConfig) error {
+	return runCapture(cfg, func(engine *analyzer.Engine) error {
+		if cfg.InputPath == "-" {
+			return engine.RunPCAPStream(os.Stdin)
+		}
+		return engine.RunOffline(cfg.InputPath)
+	})
+}
+
+type analysisRuntime struct {
+	engine          *analyzer.Engine
+	eventSink       *analyzer.JSONLSink
+	flowSink        *analyzer.JSONLSink
+	inventoryWriter *analyzer.DeviceInventoryWriter
+	viewerOnce      sync.Once
+	viewerErr       chan error
+	cfg             analysisConfig
+}
+
+func newAnalysisRuntime(cfg analysisConfig) (*analysisRuntime, error) {
 	if strings.TrimSpace(cfg.EventsOut) == "" {
-		return fmt.Errorf("events output path is required")
+		return nil, fmt.Errorf("events output path is required")
 	}
 	if strings.TrimSpace(cfg.FlowsOut) == "" {
-		return fmt.Errorf("flows output path is required")
+		return nil, fmt.Errorf("flows output path is required")
 	}
 	if !cfg.AppendOutput {
 		if err := resetOutputFile(cfg.EventsOut); err != nil {
-			return err
+			return nil, err
 		}
 		if err := resetOutputFile(cfg.FlowsOut); err != nil {
-			return err
+			return nil, err
 		}
 	}
 
 	db, err := knowledge.LoadAll()
 	if err != nil {
-		return fmt.Errorf("load knowledge db: %w", err)
+		return nil, fmt.Errorf("load knowledge db: %w", err)
 	}
 
 	log.Printf(
@@ -201,29 +335,67 @@ func analyzePCAP(cfg analysisConfig) error {
 
 	sink, err := analyzer.NewJSONSink(cfg.EventsOut)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	defer sink.Close()
 
 	flowSink, err := analyzer.NewJSONSink(cfg.FlowsOut)
 	if err != nil {
-		return err
+		_ = sink.Close()
+		return nil, err
 	}
-	defer flowSink.Close()
 
 	handler := analyzer.NewFlowHandler(sink, flowSink, cfg.Debug, db)
 	var inventoryWriter *analyzer.DeviceInventoryWriter
 	if cfg.InventoryOut != "" {
 		inventoryWriter = analyzer.NewDeviceInventoryWriter(cfg.InventoryOut, cfg.InventoryInterval, handler.DeviceInventory)
 		inventoryWriter.Start()
-		defer inventoryWriter.Stop()
 	}
 
-	engine := analyzer.NewEngine(handler)
-	if cfg.InputPath == "-" {
-		return engine.RunPCAPStream(os.Stdin)
+	return &analysisRuntime{
+		engine:          analyzer.NewEngine(handler),
+		eventSink:       sink,
+		flowSink:        flowSink,
+		inventoryWriter: inventoryWriter,
+		viewerErr:       make(chan error, 1),
+		cfg:             cfg,
+	}, nil
+}
+
+func (r *analysisRuntime) startViewer() {
+	r.viewerOnce.Do(func() {
+		go func() {
+			r.viewerErr <- viewer.Serve(viewer.Options{
+				EventsPath:    r.cfg.EventsOut,
+				FlowsPath:     r.cfg.FlowsOut,
+				InventoryPath: r.cfg.InventoryOut,
+				Addr:          r.cfg.ViewerAddr,
+				OpenBrowser:   r.cfg.OpenViewer,
+				WebDist:       r.cfg.WebDist,
+			})
+		}()
+	})
+}
+
+func (r *analysisRuntime) close() {
+	if r == nil {
+		return
 	}
-	return engine.RunOffline(cfg.InputPath)
+	if r.inventoryWriter != nil {
+		r.inventoryWriter.Stop()
+	}
+	if r.flowSink != nil {
+		_ = r.flowSink.Close()
+	}
+	if r.eventSink != nil {
+		_ = r.eventSink.Close()
+	}
+}
+
+func (r *analysisRuntime) waitForViewer() error {
+	if r == nil || !r.cfg.Report {
+		return nil
+	}
+	return <-r.viewerErr
 }
 
 func resetOutputFile(path string) error {
@@ -306,51 +478,26 @@ func runLegacyCapture(args []string) {
 		log.Fatal("use either -i <interface> or -pcap <file|->, not both")
 	}
 
-	db, err := knowledge.LoadAll()
-	if err != nil {
-		log.Fatalf("load knowledge db: %v", err)
+	cfg := analysisConfig{
+		InputPath:         *pcapPath,
+		Interface:         *iface,
+		EventsOut:         "events.jsonl",
+		FlowsOut:          "flows.jsonl",
+		InventoryOut:      *inventoryOut,
+		InventoryInterval: *inventoryInterval,
+		Debug:             *debug,
+		AppendOutput:      true,
 	}
-
-	log.Printf(
-		"knowledge db loaded: categories=%d communication_types=%d pii_types=%d policies=%d inference_categories=%d behavior_baselines=%d i5_vulnerable_components=%d",
-		len(db.DeviceCategories.Categories),
-		len(db.CommunicationTypes.CommunicationTypes),
-		len(db.PIITypes.PIITypes),
-		len(db.CategoryPolicy),
-		len(db.CategoryInference.Categories),
-		len(db.BehaviorBaselines)-1,
-		len(*db.I5Vulnerable),
-	)
-
-	sink, err := analyzer.NewJSONSink("events.jsonl")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer sink.Close()
-
-	flowSink, err := analyzer.NewJSONSink("flows.jsonl")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer flowSink.Close()
-
-	handler := analyzer.NewFlowHandler(sink, flowSink, *debug, db)
-	var inventoryWriter *analyzer.DeviceInventoryWriter
-	if *inventoryOut != "" {
-		inventoryWriter = analyzer.NewDeviceInventoryWriter(*inventoryOut, *inventoryInterval, handler.DeviceInventory)
-		inventoryWriter.Start()
-		defer inventoryWriter.Stop()
-	}
-	engine := analyzer.NewEngine(handler)
-
-	switch {
-	case *pcapPath == "-":
-		err = engine.RunPCAPStream(os.Stdin)
-	case *pcapPath != "":
-		err = engine.RunOffline(*pcapPath)
-	default:
-		err = engine.RunLive(*iface)
-	}
+	err := runCapture(cfg, func(engine *analyzer.Engine) error {
+		switch {
+		case cfg.InputPath == "-":
+			return engine.RunPCAPStream(os.Stdin)
+		case cfg.InputPath != "":
+			return engine.RunOffline(cfg.InputPath)
+		default:
+			return engine.RunLive(cfg.Interface)
+		}
+	})
 	if err != nil {
 		log.Fatal(err)
 	}

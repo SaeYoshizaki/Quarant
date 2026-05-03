@@ -46,20 +46,26 @@ type InventoryDevice struct {
 
 func LoadInventory(path string) (InventoryReport, error) {
 	if strings.TrimSpace(path) == "" {
-		return InventoryReport{}, nil
+		return InventoryReport{Devices: []InventoryDevice{}}, nil
 	}
 
 	data, err := os.ReadFile(path)
 	if err != nil {
 		if os.IsNotExist(err) {
-			return InventoryReport{}, nil
+			return InventoryReport{Devices: []InventoryDevice{}}, nil
 		}
 		return InventoryReport{}, fmt.Errorf("read %s: %w", path, err)
+	}
+	if len(strings.TrimSpace(string(data))) == 0 {
+		return InventoryReport{Devices: []InventoryDevice{}}, nil
 	}
 
 	var report InventoryReport
 	if err := json.Unmarshal(data, &report); err != nil {
-		return InventoryReport{}, fmt.Errorf("decode %s: %w", path, err)
+		return InventoryReport{Devices: []InventoryDevice{}}, nil
+	}
+	if report.Devices == nil {
+		report.Devices = []InventoryDevice{}
 	}
 	return report, nil
 }

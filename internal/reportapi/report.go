@@ -91,8 +91,14 @@ func LoadReport(path string) (Report, error) {
 }
 
 func loadEventsJSONLReport(path string) (Report, error) {
+	if strings.TrimSpace(path) == "" {
+		return emptyReport(path), nil
+	}
 	f, err := os.Open(path)
 	if err != nil {
+		if os.IsNotExist(err) {
+			return emptyReport(path), nil
+		}
 		return Report{}, fmt.Errorf("open %s: %w", path, err)
 	}
 	defer f.Close()
@@ -197,6 +203,18 @@ func loadEventsJSONLReport(path string) (Report, error) {
 	return rep, nil
 }
 
+func emptyReport(source string) Report {
+	return Report{
+		GeneratedAt: time.Now().UTC().Format(time.RFC3339),
+		Source:      source,
+		Severity:    []KV{},
+		Rules:       []KV{},
+		Categories:  []KV{},
+		Sources:     []KV{},
+		Events:      []Event{},
+	}
+}
+
 type rawReport struct {
 	GeneratedAt          string  `json:"generated_at"`
 	Source               string  `json:"source"`
@@ -215,17 +233,23 @@ type rawReport struct {
 }
 
 func loadReportJSON(path string) (Report, error) {
+	if strings.TrimSpace(path) == "" {
+		return emptyReport(path), nil
+	}
 	data, err := os.ReadFile(path)
 	if err != nil {
+		if os.IsNotExist(err) {
+			return emptyReport(path), nil
+		}
 		return Report{}, fmt.Errorf("read %s: %w", path, err)
 	}
 	if len(strings.TrimSpace(string(data))) == 0 {
-		return Report{}, nil
+		return emptyReport(path), nil
 	}
 
 	var rep rawReport
 	if err := json.Unmarshal(data, &rep); err != nil {
-		return Report{}, fmt.Errorf("decode %s: %w", path, err)
+		return emptyReport(path), nil
 	}
 
 	normalized := Report{
