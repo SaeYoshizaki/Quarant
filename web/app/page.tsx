@@ -1105,7 +1105,7 @@ function OverviewView({
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="min-w-0">
             <h1 className="text-[24px] font-medium tracking-[-0.02em] text-[#1f2a44]">
-              Quarant レポート概要
+              Quarant Report
             </h1>
           </div>
 
@@ -1430,7 +1430,7 @@ function DevicesView({
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="min-w-0">
             <h1 className="text-[24px] font-medium tracking-[-0.02em] text-[#1f2a44]">
-              Quarant デバイスレポート
+              デバイス一覧
             </h1>
           </div>
 
@@ -2002,7 +2002,7 @@ function EventsView({
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="min-w-0">
             <h1 className="text-[24px] font-medium tracking-[-0.02em] text-[#1f2a44]">
-              Quarant Detection Report
+              詳細一覧
             </h1>
             <p className="mt-1 text-[14px] text-[#6d7f9c]">
               Detection Events from {eventSourceName}
