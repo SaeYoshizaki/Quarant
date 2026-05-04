@@ -866,7 +866,8 @@ function buildExternalDestinationRows(
 
   flows.forEach((flow) => {
     const destination = normalizeDestination(flow);
-    const isExternal = flow.direction === "external" || !isPrivateIPv4(destination);
+    const isExternal =
+      flow.direction === "external" || !isPrivateIPv4(destination);
     if (!destination || destination === "-" || !isExternal) return;
 
     const protocol = (flow.app_protocol || flow.protocol || "-").toUpperCase();
@@ -876,8 +877,10 @@ function buildExternalDestinationRows(
 
     if (existing) {
       existing.observedCount += 1;
-      if (!existing.firstSeen || flow.ts < existing.firstSeen) existing.firstSeen = flow.ts;
-      if (!existing.lastSeen || flow.ts > existing.lastSeen) existing.lastSeen = flow.ts;
+      if (!existing.firstSeen || flow.ts < existing.firstSeen)
+        existing.firstSeen = flow.ts;
+      if (!existing.lastSeen || flow.ts > existing.lastSeen)
+        existing.lastSeen = flow.ts;
     } else {
       grouped.set(key, {
         key,
@@ -1105,7 +1108,7 @@ function OverviewView({
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="min-w-0">
             <h1 className="text-[24px] font-medium tracking-[-0.02em] text-[#1f2a44]">
-              Quarant Report
+              概要
             </h1>
           </div>
 
@@ -1341,7 +1344,6 @@ function OverviewView({
           → すべてのイベントを見る
         </button>
       </section>
-
     </div>
   );
 }
@@ -1398,7 +1400,10 @@ function DevicesView({
 
   const withSignals = hosts.filter((host) => host.signals > 0).length;
   const localHosts = filteredHosts.filter((host) => isLocalHost(host));
-  const destinationRows = buildExternalDestinationRows(flows, report?.events || []);
+  const destinationRows = buildExternalDestinationRows(
+    flows,
+    report?.events || []
+  );
   const filteredDestinations = destinationRows.filter((row) => {
     const haystack = [
       row.destination,
@@ -1414,10 +1419,17 @@ function DevicesView({
     if (riskFilter !== "all" && (row.relatedSeverity || "") !== riskFilter) {
       return false;
     }
-    if (owaspFilter !== "all" && row.relatedOwasp !== "-" && !row.relatedOwasp.includes(owaspFilter)) {
+    if (
+      owaspFilter !== "all" &&
+      row.relatedOwasp !== "-" &&
+      !row.relatedOwasp.includes(owaspFilter)
+    ) {
       return false;
     }
-    if (deferredQuery.trim() && !haystack.includes(deferredQuery.trim().toLowerCase())) {
+    if (
+      deferredQuery.trim() &&
+      !haystack.includes(deferredQuery.trim().toLowerCase())
+    ) {
       return false;
     }
     return true;
@@ -1430,7 +1442,7 @@ function DevicesView({
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="min-w-0">
             <h1 className="text-[24px] font-medium tracking-[-0.02em] text-[#1f2a44]">
-              デバイス一覧
+              端末一覧
             </h1>
           </div>
 
@@ -1444,7 +1456,9 @@ function DevicesView({
                 flows,
                 exported_at: new Date().toISOString(),
               };
-              const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+              const blob = new Blob([JSON.stringify(payload, null, 2)], {
+                type: "application/json",
+              });
               const url = URL.createObjectURL(blob);
               const link = document.createElement("a");
               link.href = url;
@@ -1474,7 +1488,9 @@ function DevicesView({
           </div>
 
           <div className="grid grid-cols-[84px_minmax(0,1fr)] items-center gap-2">
-            <div className="text-[18px] font-semibold text-[#5c7094]">重要度</div>
+            <div className="text-[18px] font-semibold text-[#5c7094]">
+              重要度
+            </div>
             <Select value={riskFilter} onValueChange={setRiskFilter}>
               <SelectTrigger className="h-10 rounded-none border-[#cfd9e6] bg-white text-[14px]">
                 <SelectValue placeholder="" />
@@ -1491,7 +1507,9 @@ function DevicesView({
           </div>
 
           <div className="grid grid-cols-[72px_minmax(0,1fr)] items-center gap-2">
-            <div className="text-[18px] font-semibold text-[#5c7094]">OWASP</div>
+            <div className="text-[18px] font-semibold text-[#5c7094]">
+              OWASP
+            </div>
             <Select value={owaspFilter} onValueChange={setOwaspFilter}>
               <SelectTrigger className="h-10 rounded-none border-[#cfd9e6] bg-white text-[14px]">
                 <SelectValue placeholder="" />
@@ -1509,10 +1527,16 @@ function DevicesView({
 
           <div className="flex items-center justify-end">
             <div className="inline-flex border border-[#cfd9e6]">
-              <a href="#lan-devices" className="border-r border-[#cfd9e6] bg-[#f8fbff] px-4 py-2 text-[13px] font-semibold text-[#1f2a44]">
+              <a
+                href="#lan-devices"
+                className="border-r border-[#cfd9e6] bg-[#f8fbff] px-4 py-2 text-[13px] font-semibold text-[#1f2a44]"
+              >
                 LAN内端末
               </a>
-              <a href="#external-destinations" className="bg-white px-4 py-2 text-[13px] font-semibold text-[#1f2a44]">
+              <a
+                href="#external-destinations"
+                className="bg-white px-4 py-2 text-[13px] font-semibold text-[#1f2a44]"
+              >
                 外部通信先
               </a>
             </div>
@@ -1522,8 +1546,12 @@ function DevicesView({
 
       <section id="lan-devices" className="border-b border-[#e4eaf3] pb-7">
         <div className="flex items-center justify-between border-b border-[#cfd9e6] pb-2">
-          <div className="text-[18px] font-semibold text-[#1f2a44]">LAN内端末一覧</div>
-          <div className="text-[13px] text-[#6d7f9c]">{localHosts.length} 件</div>
+          <div className="text-[18px] font-semibold text-[#1f2a44]">
+            LAN内端末一覧
+          </div>
+          <div className="text-[13px] text-[#6d7f9c]">
+            {localHosts.length} 件
+          </div>
         </div>
         <div className="mt-4 overflow-x-auto">
           <div className="grid min-w-[900px] grid-cols-[120px_140px_120px_84px_220px_128px_84px] gap-4 border-b border-[#cfd9e6] pb-2 text-[13px] text-[#6d7f9c]">
@@ -1537,20 +1565,42 @@ function DevicesView({
           </div>
           <div className="divide-y divide-[#edf2f8]">
             {localHosts.map((host) => (
-              <div key={host.ip} className="grid min-w-[900px] grid-cols-[120px_140px_120px_84px_220px_128px_84px] gap-4 py-3 text-[14px]">
+              <div
+                key={host.ip}
+                className="grid min-w-[900px] grid-cols-[120px_140px_120px_84px_220px_128px_84px] gap-4 py-3 text-[14px]"
+              >
                 <div className="font-mono text-[#24324b]">{host.ip}</div>
-                <div className="break-words text-[#4d5f7c]">{displayInferredValue(host.categoryCandidate)}</div>
+                <div className="break-words text-[#4d5f7c]">
+                  {displayInferredValue(host.categoryCandidate)}
+                </div>
                 <div>
-                  <span className={cn("inline-flex min-w-[74px] justify-center border px-2 py-0.5 text-[12px] font-medium", reportSeverityClass(host.risk))}>
+                  <span
+                    className={cn(
+                      "inline-flex min-w-[74px] justify-center border px-2 py-0.5 text-[12px] font-medium",
+                      reportSeverityClass(host.risk)
+                    )}
+                  >
                     {compactSeverityLabel(host.risk)}
                   </span>
                 </div>
-                <div className="text-right font-mono text-[#24324b]">{host.signals}</div>
-                <div className="truncate text-[#4d5f7c]" title={`${joinLimited(host.protocols, 2)} / ${host.topDestination}`}>
+                <div className="text-right font-mono text-[#24324b]">
+                  {host.signals}
+                </div>
+                <div
+                  className="truncate text-[#4d5f7c]"
+                  title={`${joinLimited(host.protocols, 2)} / ${
+                    host.topDestination
+                  }`}
+                >
                   {joinLimited(host.protocols, 2)} / {host.topDestination}
                 </div>
-                <div className="font-mono text-[#5e7598]">{formatCompactDateTime(host.lastSeen)}</div>
-                <button onClick={() => onOpenHost(host.ip)} className="text-left text-[#4d5f7c] underline underline-offset-2">
+                <div className="font-mono text-[#5e7598]">
+                  {formatCompactDateTime(host.lastSeen)}
+                </div>
+                <button
+                  onClick={() => onOpenHost(host.ip)}
+                  className="text-left text-[#4d5f7c] underline underline-offset-2"
+                >
                   詳細
                 </button>
               </div>
@@ -1559,10 +1609,17 @@ function DevicesView({
         </div>
       </section>
 
-      <section id="external-destinations" className="border-b border-[#e4eaf3] pb-7">
+      <section
+        id="external-destinations"
+        className="border-b border-[#e4eaf3] pb-7"
+      >
         <div className="flex items-center justify-between border-b border-[#cfd9e6] pb-2">
-          <div className="text-[18px] font-semibold text-[#1f2a44]">外部通信先一覧</div>
-          <div className="text-[13px] text-[#6d7f9c]">{filteredDestinations.length} 件</div>
+          <div className="text-[18px] font-semibold text-[#1f2a44]">
+            外部通信先一覧
+          </div>
+          <div className="text-[13px] text-[#6d7f9c]">
+            {filteredDestinations.length} 件
+          </div>
         </div>
         <div className="mt-4 overflow-x-auto">
           <div className="grid min-w-[1220px] grid-cols-[170px_64px_90px_118px_80px_120px_120px_92px_1fr] gap-4 border-b border-[#cfd9e6] pb-2 text-[13px] text-[#6d7f9c]">
@@ -1578,17 +1635,35 @@ function DevicesView({
           </div>
           <div className="divide-y divide-[#edf2f8]">
             {filteredDestinations.slice(0, 5).map((row) => (
-              <div key={row.key} className="grid min-w-[1220px] grid-cols-[170px_64px_90px_118px_80px_120px_120px_92px_1fr] gap-4 py-3 text-[14px]">
-                <div className="font-mono text-[#24324b]">{row.destination}</div>
+              <div
+                key={row.key}
+                className="grid min-w-[1220px] grid-cols-[170px_64px_90px_118px_80px_120px_120px_92px_1fr] gap-4 py-3 text-[14px]"
+              >
+                <div className="font-mono text-[#24324b]">
+                  {row.destination}
+                </div>
                 <div className="font-mono text-[#24324b]">{row.port}</div>
                 <div className="text-[#4d5f7c]">{row.protocol}</div>
-                <div className="font-mono text-[#5e7598] underline underline-offset-2">{row.sourceIp}</div>
-                <div className="text-right font-mono text-[#24324b]">{row.observedCount}</div>
-                <div className="font-mono text-[#5e7598]">{formatCompactDateTime(row.firstSeen)}</div>
-                <div className="font-mono text-[#5e7598]">{formatCompactDateTime(row.lastSeen)}</div>
+                <div className="font-mono text-[#5e7598] underline underline-offset-2">
+                  {row.sourceIp}
+                </div>
+                <div className="text-right font-mono text-[#24324b]">
+                  {row.observedCount}
+                </div>
+                <div className="font-mono text-[#5e7598]">
+                  {formatCompactDateTime(row.firstSeen)}
+                </div>
+                <div className="font-mono text-[#5e7598]">
+                  {formatCompactDateTime(row.lastSeen)}
+                </div>
                 <div>
                   {row.relatedSeverity ? (
-                    <span className={cn("inline-flex min-w-[74px] justify-center border px-2 py-0.5 text-[12px] font-medium", reportSeverityClass(row.relatedSeverity))}>
+                    <span
+                      className={cn(
+                        "inline-flex min-w-[74px] justify-center border px-2 py-0.5 text-[12px] font-medium",
+                        reportSeverityClass(row.relatedSeverity)
+                      )}
+                    >
                       {compactSeverityLabel(row.relatedSeverity)}
                     </span>
                   ) : (
@@ -1601,7 +1676,6 @@ function DevicesView({
           </div>
         </div>
       </section>
-
     </div>
   );
 }
@@ -1702,7 +1776,10 @@ function HostReportView({
     (sum, flow) => sum + (flow.bytes_in || 0) + (flow.bytes_out || 0),
     0
   );
-  const externalRows = buildExternalDestinationRows(host.flows, host.events).slice(0, 3);
+  const externalRows = buildExternalDestinationRows(
+    host.flows,
+    host.events
+  ).slice(0, 3);
   const deviceTitle = displayInferredValue(
     host.labelCandidate || host.categoryCandidate || "端末"
   );
@@ -1727,11 +1804,18 @@ function HostReportView({
               </h1>
               <span className="text-[18px] text-[#5e7598]">{deviceTitle}</span>
             </div>
-            <p className="mt-1 text-[14px] text-[#6d7f9c]">Device Detail Report</p>
+            <p className="mt-1 text-[14px] text-[#6d7f9c]">
+              Device Detail Report
+            </p>
           </div>
 
           <div className="flex items-center gap-3">
-            <span className={cn("inline-flex min-w-[74px] justify-center border px-2 py-0.5 text-[12px] font-medium", reportSeverityClass(host.risk))}>
+            <span
+              className={cn(
+                "inline-flex min-w-[74px] justify-center border px-2 py-0.5 text-[12px] font-medium",
+                reportSeverityClass(host.risk)
+              )}
+            >
               {compactSeverityLabel(host.risk)}
             </span>
             <Button
@@ -1744,7 +1828,9 @@ function HostReportView({
                   external_destinations: externalRows,
                   exported_at: new Date().toISOString(),
                 };
-                const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+                const blob = new Blob([JSON.stringify(payload, null, 2)], {
+                  type: "application/json",
+                });
                 const url = URL.createObjectURL(blob);
                 const link = document.createElement("a");
                 link.href = url;
@@ -1766,7 +1852,10 @@ function HostReportView({
         <div className="mt-4 divide-y divide-[#edf2f8] text-[14px]">
           {[
             ["IPアドレス", host.ip],
-            ["MACアドレス", host.macAddress === "-" ? "−（観測範囲外）" : host.macAddress],
+            [
+              "MACアドレス",
+              host.macAddress === "-" ? "−（観測範囲外）" : host.macAddress,
+            ],
             ["初回観測", formatReportDateTime(host.firstSeen)],
             ["最終観測", formatReportDateTime(host.lastSeen)],
             ["観測プロトコル", joinLimited(host.protocols, 6)],
@@ -1774,9 +1863,19 @@ function HostReportView({
             ["観測バイト数", formatBytes(totalBytes)],
             ["主な通信先", topDestinations[0] || host.topDestination],
           ].map(([label, value]) => (
-            <div key={label} className="grid grid-cols-[220px_minmax(0,1fr)] gap-4 py-2.5">
+            <div
+              key={label}
+              className="grid grid-cols-[220px_minmax(0,1fr)] gap-4 py-2.5"
+            >
               <div className="text-[#6d7f9c]">{label}</div>
-              <div className={cn("min-w-0 break-words text-[#2e3b55]", label.includes("IP") || label.includes("観測") ? "font-mono" : "")}>
+              <div
+                className={cn(
+                  "min-w-0 break-words text-[#2e3b55]",
+                  label.includes("IP") || label.includes("観測")
+                    ? "font-mono"
+                    : ""
+                )}
+              >
                 {value}
               </div>
             </div>
@@ -1797,7 +1896,10 @@ function HostReportView({
             ["主なOWASPカテゴリ", topOwasp],
             ["主な理由", topReason],
           ].map(([label, value]) => (
-            <div key={label} className="grid grid-cols-[220px_minmax(0,1fr)] gap-4 py-2.5">
+            <div
+              key={label}
+              className="grid grid-cols-[220px_minmax(0,1fr)] gap-4 py-2.5"
+            >
               <div className="text-[#6d7f9c]">{label}</div>
               <div className="min-w-0 break-words text-[#2e3b55]">{value}</div>
             </div>
@@ -1810,8 +1912,12 @@ function HostReportView({
 
       <section className="border-b border-[#e4eaf3] pb-7">
         <div className="flex items-center justify-between border-b border-[#cfd9e6] pb-2">
-          <div className="text-[18px] font-semibold text-[#1f2a44]">この端末の外部通信先</div>
-          <div className="text-[13px] text-[#6d7f9c]">{externalRows.length} 件</div>
+          <div className="text-[18px] font-semibold text-[#1f2a44]">
+            この端末の外部通信先
+          </div>
+          <div className="text-[13px] text-[#6d7f9c]">
+            {externalRows.length} 件
+          </div>
         </div>
         <div className="mt-4 overflow-x-auto">
           <div className="grid min-w-[980px] grid-cols-[170px_70px_100px_90px_120px_120px_100px_1fr] gap-4 border-b border-[#cfd9e6] pb-2 text-[13px] text-[#6d7f9c]">
@@ -1826,16 +1932,30 @@ function HostReportView({
           </div>
           <div className="divide-y divide-[#edf2f8]">
             {externalRows.map((row) => (
-              <div key={row.key} className="grid min-w-[980px] grid-cols-[170px_70px_100px_90px_120px_120px_100px_1fr] gap-4 py-3 text-[14px]">
-                <div className="font-mono text-[#24324b]">{row.destination}</div>
+              <div
+                key={row.key}
+                className="grid min-w-[980px] grid-cols-[170px_70px_100px_90px_120px_120px_100px_1fr] gap-4 py-3 text-[14px]"
+              >
+                <div className="font-mono text-[#24324b]">
+                  {row.destination}
+                </div>
                 <div className="font-mono text-[#24324b]">{row.port}</div>
                 <div className="text-[#4d5f7c]">{row.protocol}</div>
-                <div className="text-right font-mono text-[#24324b]">{row.observedCount}</div>
-                <div className="font-mono text-[#5e7598]">{formatReportDateTime(row.lastSeen)}</div>
+                <div className="text-right font-mono text-[#24324b]">
+                  {row.observedCount}
+                </div>
+                <div className="font-mono text-[#5e7598]">
+                  {formatReportDateTime(row.lastSeen)}
+                </div>
                 <div />
                 <div>
                   {row.relatedSeverity ? (
-                    <span className={cn("inline-flex min-w-[74px] justify-center border px-2 py-0.5 text-[12px] font-medium", reportSeverityClass(row.relatedSeverity))}>
+                    <span
+                      className={cn(
+                        "inline-flex min-w-[74px] justify-center border px-2 py-0.5 text-[12px] font-medium",
+                        reportSeverityClass(row.relatedSeverity)
+                      )}
+                    >
                       {compactSeverityLabel(row.relatedSeverity)}
                     </span>
                   ) : (
@@ -1851,8 +1971,12 @@ function HostReportView({
 
       <section className="border-b border-[#e4eaf3] pb-7">
         <div className="flex items-center justify-between border-b border-[#cfd9e6] pb-2">
-          <div className="text-[18px] font-semibold text-[#1f2a44]">この端末の検出イベント</div>
-          <div className="text-[13px] text-[#6d7f9c]">{recentDetected.length} 件</div>
+          <div className="text-[18px] font-semibold text-[#1f2a44]">
+            この端末の検出イベント
+          </div>
+          <div className="text-[13px] text-[#6d7f9c]">
+            {recentDetected.length} 件
+          </div>
         </div>
         <div className="mt-4 overflow-x-auto">
           <div className="grid min-w-[980px] grid-cols-[170px_92px_130px_150px_150px_minmax(0,1fr)] gap-4 border-b border-[#cfd9e6] pb-2 text-[13px] text-[#6d7f9c]">
@@ -1865,20 +1989,44 @@ function HostReportView({
           </div>
           <div className="divide-y divide-[#edf2f8]">
             {recentDetected.map((event, index) => {
-              const flow = host.flows.find((item) => item.flow_key === event.flow_key);
-              const protocolLabel = `${(flow?.app_protocol || flow?.protocol || "-").toUpperCase()} / ${event.dst_port || flow?.dst_port || "-"}`;
+              const flow = host.flows.find(
+                (item) => item.flow_key === event.flow_key
+              );
+              const protocolLabel = `${(
+                flow?.app_protocol ||
+                flow?.protocol ||
+                "-"
+              ).toUpperCase()} / ${event.dst_port || flow?.dst_port || "-"}`;
               return (
-                <div key={`${event.ts}-${index}`} className="grid min-w-[980px] grid-cols-[170px_92px_130px_150px_150px_minmax(0,1fr)] gap-4 py-3 text-[14px]">
-                  <div className="font-mono text-[#24324b]">{formatReportDateTime(event.ts)}</div>
+                <div
+                  key={`${event.ts}-${index}`}
+                  className="grid min-w-[980px] grid-cols-[170px_92px_130px_150px_150px_minmax(0,1fr)] gap-4 py-3 text-[14px]"
+                >
+                  <div className="font-mono text-[#24324b]">
+                    {formatReportDateTime(event.ts)}
+                  </div>
                   <div>
-                    <span className={cn("inline-flex min-w-[74px] justify-center border px-2 py-0.5 text-[12px] font-medium", reportSeverityClass(event.severity))}>
+                    <span
+                      className={cn(
+                        "inline-flex min-w-[74px] justify-center border px-2 py-0.5 text-[12px] font-medium",
+                        reportSeverityClass(event.severity)
+                      )}
+                    >
                       {compactSeverityLabel(event.severity)}
                     </span>
                   </div>
-                  <div className="font-mono text-[#24324b]">{event.dst_ip || "-"}</div>
-                  <div className="font-mono text-[#24324b]">{protocolLabel}</div>
-                  <div className="font-mono text-[#5e7598]">{event.rule_id || event.type || "-"}</div>
-                  <div className="min-w-0 break-words text-[#4d5f7c]">{event.observed_fact || event.message || "-"}</div>
+                  <div className="font-mono text-[#24324b]">
+                    {event.dst_ip || "-"}
+                  </div>
+                  <div className="font-mono text-[#24324b]">
+                    {protocolLabel}
+                  </div>
+                  <div className="font-mono text-[#5e7598]">
+                    {event.rule_id || event.type || "-"}
+                  </div>
+                  <div className="min-w-0 break-words text-[#4d5f7c]">
+                    {event.observed_fact || event.message || "-"}
+                  </div>
                 </div>
               );
             })}
@@ -1896,8 +2044,8 @@ function HostReportView({
         <div className="text-[18px] font-semibold text-[#1f2a44]">注意</div>
         <div className="mt-3 text-[14px] leading-7 text-[#5e7598]">
           ・ 端末カテゴリやベンダは、通信上の観測情報に基づく推定です。
-          <br />
-          ・ 本ページは端末内部の状態や実際の侵害を断定するものではありません。
+          <br />・
+          本ページは端末内部の状態や実際の侵害を断定するものではありません。
         </div>
       </section>
     </div>
@@ -2002,7 +2150,7 @@ function EventsView({
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="min-w-0">
             <h1 className="text-[24px] font-medium tracking-[-0.02em] text-[#1f2a44]">
-              詳細一覧
+              検出一覧
             </h1>
             <p className="mt-1 text-[14px] text-[#6d7f9c]">
               Detection Events from {eventSourceName}
@@ -2172,7 +2320,6 @@ function EventsView({
           </div>
         </div>
       </section>
-
     </div>
   );
 }
@@ -2197,7 +2344,9 @@ function QuarantReportViewerContent() {
   const activeHost = searchParams.get("host");
 
   const loadData = useEffectEvent(
-    async ({ background = false }: { background?: boolean } = {}): Promise<void> => {
+    async ({
+      background = false,
+    }: { background?: boolean } = {}): Promise<void> => {
       try {
         setIsRefreshing(true);
         if (!background) {
