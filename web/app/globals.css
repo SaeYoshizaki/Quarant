@@ -141,11 +141,11 @@
   }
 
   .device-event-col-time {
-    width: 140px;
+    width: 80px;
   }
 
   .device-event-col-severity {
-    width: 100px;
+    width: 90px;
   }
 
   .device-event-col-destination {

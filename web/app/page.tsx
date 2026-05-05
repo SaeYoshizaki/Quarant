@@ -245,6 +245,18 @@ function formatCompactDateTime(value?: string): string {
   return `${month}/${day} ${hours}:${minutes}`;
 }
 
+function formatTimeOnly(value?: string): string {
+  if (!value) return "-";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+  const seconds = String(date.getSeconds()).padStart(2, "0");
+
+  return `${hours}:${minutes}:${seconds}`;
+}
+
 function formatWindow(start?: string, end?: string): string {
   if (!start || !end) return "-";
   const startDate = new Date(start);
@@ -2085,8 +2097,11 @@ function HostReportView({
                     key={`${event.ts}-${index}`}
                     className="border-b border-[#edf2f8] align-top"
                   >
-                    <td className="px-0 py-3 pr-3 font-mono whitespace-nowrap text-[#24324b]">
-                      {formatReportDateTime(event.ts)}
+                    <td
+                      className="px-0 py-3 pr-3 font-mono whitespace-nowrap text-[#24324b]"
+                      title={event.ts}
+                    >
+                      {formatTimeOnly(event.ts)}
                     </td>
                     <td className="px-0 py-3 pr-3 align-top">
                       <div className="pt-0.5">
