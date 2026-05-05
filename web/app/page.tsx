@@ -2041,7 +2041,7 @@ function HostReportView({
           </div>
         </div>
         <div className="mt-4 overflow-x-auto">
-          <div className="grid min-w-[980px] grid-cols-[170px_92px_130px_150px_150px_minmax(0,1fr)] gap-4 border-b border-[#cfd9e6] pb-2 text-[13px] text-[#6d7f9c]">
+          <div className="grid min-w-[1060px] grid-cols-[148px_88px_144px_128px_188px_minmax(280px,1fr)] gap-3 border-b border-[#cfd9e6] pb-2 text-[13px] text-[#6d7f9c]">
             <div>時刻</div>
             <div>Severity</div>
             <div>宛先</div>
@@ -2062,12 +2062,12 @@ function HostReportView({
               return (
                 <div
                   key={`${event.ts}-${index}`}
-                  className="grid min-w-[980px] grid-cols-[170px_92px_130px_150px_150px_minmax(0,1fr)] gap-4 py-3 text-[14px]"
+                  className="grid min-w-[1060px] grid-cols-[148px_88px_144px_128px_188px_minmax(280px,1fr)] items-start gap-3 py-3 text-[14px]"
                 >
-                  <div className="font-mono text-[#24324b]">
+                  <div className="font-mono whitespace-nowrap text-[#24324b]">
                     {formatReportDateTime(event.ts)}
                   </div>
-                  <div>
+                  <div className="pt-0.5">
                     <span
                       className={cn(
                         "inline-flex min-w-[74px] justify-center border px-2 py-0.5 text-[12px] font-medium",
@@ -2077,16 +2077,16 @@ function HostReportView({
                       {compactSeverityLabel(event.severity)}
                     </span>
                   </div>
-                  <div className="font-mono text-[#24324b]">
+                  <div className="min-w-0 whitespace-normal break-words font-mono [overflow-wrap:anywhere] text-[#24324b]">
                     {event.dst_ip || "-"}
                   </div>
-                  <div className="font-mono text-[#24324b]">
+                  <div className="min-w-0 whitespace-normal break-words font-mono [overflow-wrap:anywhere] text-[#24324b]">
                     {protocolLabel}
                   </div>
-                  <div className="font-mono text-[#5e7598]">
+                  <div className="min-w-0 whitespace-normal break-words font-mono [overflow-wrap:anywhere] text-[#5e7598]">
                     {event.rule_id || event.type || "-"}
                   </div>
-                  <div className="min-w-0 break-words text-[#4d5f7c]">
+                  <div className="min-w-0 whitespace-normal break-words [overflow-wrap:anywhere] text-[#4d5f7c]">
                     {event.observed_fact || event.message || "-"}
                   </div>
                 </div>
@@ -2133,7 +2133,7 @@ function EventDetails({ event }: { event: Event }) {
             <div className="text-[#6d7f9c]">{label}</div>
             <div
               className={cn(
-                "min-w-0 break-words text-[#2e3b55]",
+                "min-w-0 whitespace-normal break-words [overflow-wrap:anywhere] text-[#2e3b55]",
                 label === "Evidence" && "font-mono"
               )}
             >
