@@ -402,6 +402,12 @@ function isPrivateIPv4(ip?: string): boolean {
   return false;
 }
 
+function isDeviceCandidateIP(ip?: string): boolean {
+  const value = (ip || "").trim();
+  if (!value) return false;
+  return isPrivateIPv4(value);
+}
+
 function isLocalHost(host: HostRow): boolean {
   return isPrivateIPv4(host.ip);
 }
@@ -436,6 +442,46 @@ function eventOWASP(event: Event): string[] {
     ...parseRuleCategory(event.rule_id || event.type),
   ]);
   return tags;
+}
+
+function eventIdentityKey(event: Event): string {
+  return [
+    event.ts || "",
+    event.rule_id || event.type || "",
+    event.flow_key || "",
+    event.device_key || "",
+    event.src_ip || "",
+    `${event.src_port || ""}`,
+    event.dst_ip || "",
+    `${event.dst_port || ""}`,
+  ].join("|");
+}
+
+function flowIdentityKey(flow: FlowRecord): string {
+  return [
+    flow.ts || "",
+    flow.flow_key || "",
+    flow.src_ip || "",
+    `${flow.src_port || ""}`,
+    flow.dst_ip || "",
+    `${flow.dst_port || ""}`,
+    flow.protocol || "",
+    flow.app_protocol || "",
+  ].join("|");
+}
+
+function deviceMatchesEvent(ip: string, event: Event): boolean {
+  return (
+    event.device_key === ip || event.src_ip === ip || event.dst_ip === ip
+  );
+}
+
+function deviceMatchesFlow(ip: string, flow: FlowRecord): boolean {
+  return (
+    flow.src_ip === ip ||
+    flow.dst_ip === ip ||
+    (flow.flow_key || "").includes(ip)
+  );
 }
 
 function humanizeCategoryCandidate(value?: string): string {
@@ -561,39 +607,59 @@ function aggregateHosts(
   });
 
   events.forEach((event) => {
-    const ip = event.src_ip || event.device_key;
-    if (!ip) return;
-    const host = ensureHost(ip);
-    host.events.push(event);
+    uniqueStrings([
+      event.device_key,
+      event.src_ip,
+      isDeviceCandidateIP(event.dst_ip) ? event.dst_ip : undefined,
+    ]).forEach((ip) => {
+      const host = ensureHost(ip);
+      if (!host.labelCandidate) {
+        host.labelCandidate = event.device_label || "";
+      }
+    });
   });
 
   flows.forEach((flow) => {
-    if (!flow.src_ip) return;
-    const host = ensureHost(flow.src_ip);
-    host.flows.push(flow);
-    host.protocols = uniqueStrings([
-      ...host.protocols,
-      flow.app_protocol,
-      flow.protocol,
-    ]);
-    host.ports = uniqueNumbers([...host.ports, flow.src_port, flow.dst_port]);
-    host.hosts = uniqueStrings([...host.hosts, flow.host]);
-    host.sni = uniqueStrings([...host.sni, flow.sni]);
-    if (!host.labelCandidate) {
-      host.labelCandidate = flow.device_label || flow.device_category || "";
-    }
-    if (!host.categoryCandidate) {
-      host.categoryCandidate = flow.device_category || "";
-    }
+    uniqueStrings([
+      flow.src_ip,
+      isDeviceCandidateIP(flow.dst_ip) ? flow.dst_ip : undefined,
+    ]).forEach((ip) => {
+      const host = ensureHost(ip);
+      if (!host.labelCandidate) {
+        host.labelCandidate = flow.device_label || flow.device_category || "";
+      }
+      if (!host.categoryCandidate) {
+        host.categoryCandidate = flow.device_category || "";
+      }
+    });
   });
 
   const hosts = Array.from(byIP.values()).map((host) => {
-    const hostNonDebugEvents = nonDebugEvents(host.events);
+    const eventSeen = new Set<string>();
+    const matchedEvents = events.filter((event) => {
+      if (!deviceMatchesEvent(host.ip, event)) return false;
+      const key = eventIdentityKey(event);
+      if (eventSeen.has(key)) return false;
+      eventSeen.add(key);
+      return true;
+    });
+
+    const flowSeen = new Set<string>();
+    const matchedFlows = flows.filter((flow) => {
+      if (!deviceMatchesFlow(host.ip, flow)) return false;
+      const key = flowIdentityKey(flow);
+      if (flowSeen.has(key)) return false;
+      flowSeen.add(key);
+      return true;
+    });
+
+    const hostNonDebugEvents = nonDebugEvents(matchedEvents);
+    const hostVisibleEvents = visibleEvents(matchedEvents);
     const eventOWASPSet = uniqueStrings(
       hostNonDebugEvents.flatMap((event) => eventOWASP(event))
     );
     const destinationCounts = new Map<string, number>();
-    host.flows.forEach((flow) => {
+    matchedFlows.forEach((flow) => {
       const destination = normalizeDestination(flow);
       destinationCounts.set(
         destination,
@@ -607,7 +673,7 @@ function aggregateHosts(
       })[0]?.[0] || "-";
 
     const externalDestinationCount = uniqueStrings(
-      host.flows
+      matchedFlows
         .filter((flow) => flow.direction === "external")
         .map((flow) => normalizeDestination(flow))
     ).length;
@@ -629,23 +695,20 @@ function aggregateHosts(
       vendorCandidate: host.vendorCandidate || "不明候補",
       familyCandidate: host.familyCandidate || "不明候補",
       confidence: host.confidence || "unknown",
-      risk: topSeverity(hostNonDebugEvents, host.inventory),
-      signals:
-        host.inventory?.risk_summary?.risk_event_count ||
-        host.inventory?.risk_event_count ||
-        hostNonDebugEvents.length,
+      risk: topSeverity(hostVisibleEvents, host.inventory),
+      signals: hostVisibleEvents.length,
       owasp: inventoryOWASP || eventOWASPSet,
       topDestination,
       externalDestinationCount,
       firstSeen:
         host.firstSeen ||
-        host.events.slice().sort((a, b) => a.ts.localeCompare(b.ts))[0]?.ts,
+        matchedEvents.slice().sort((a, b) => a.ts.localeCompare(b.ts))[0]?.ts,
       lastSeen:
         host.lastSeen ||
-        host.events.slice().sort((a, b) => b.ts.localeCompare(a.ts))[0]?.ts,
+        matchedEvents.slice().sort((a, b) => b.ts.localeCompare(a.ts))[0]?.ts,
       macAddress: "-",
-      events: host.events.slice().sort((a, b) => b.ts.localeCompare(a.ts)),
-      flows: host.flows.slice().sort((a, b) => b.ts.localeCompare(a.ts)),
+      events: matchedEvents.slice().sort((a, b) => b.ts.localeCompare(a.ts)),
+      flows: matchedFlows.slice().sort((a, b) => b.ts.localeCompare(a.ts)),
     };
   });
 
@@ -847,7 +910,7 @@ function summaryForRule(rule?: string): string {
 }
 
 function hostTopReason(host: HostRow): string {
-  const topEvent = host.events
+  const topEvent = visibleEvents(host.events)
     .slice()
     .sort(
       (a, b) =>
@@ -1785,7 +1848,6 @@ function HostReportView({
   );
   const topOwasp = host.owasp[0] || "-";
   const topReason = hostTopReason(host);
-  const recentDetected = relatedEvents.slice(0, 3);
 
   return (
     <div className="space-y-7 text-[#24324b]">
@@ -1975,7 +2037,7 @@ function HostReportView({
             この端末の検出イベント
           </div>
           <div className="text-[13px] text-[#6d7f9c]">
-            {recentDetected.length} 件
+            {relatedEvents.length} 件
           </div>
         </div>
         <div className="mt-4 overflow-x-auto">
@@ -1988,7 +2050,7 @@ function HostReportView({
             <div>観測された事実（要約）</div>
           </div>
           <div className="divide-y divide-[#edf2f8]">
-            {recentDetected.map((event, index) => {
+            {relatedEvents.map((event, index) => {
               const flow = host.flows.find(
                 (item) => item.flow_key === event.flow_key
               );

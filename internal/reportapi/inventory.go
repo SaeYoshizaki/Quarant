@@ -26,6 +26,8 @@ type InventoryDevice struct {
 	IP                 string                `json:"ip"`
 	FirstSeen          string                `json:"first_seen,omitempty"`
 	LastSeen           string                `json:"last_seen,omitempty"`
+	EventCount         int                   `json:"event_count,omitempty"`
+	FlowCount          int                   `json:"flow_count,omitempty"`
 	ObservedProtocols  []string              `json:"observed_protocols,omitempty"`
 	ObservedPorts      []uint16              `json:"observed_ports,omitempty"`
 	ObservedHosts      []string              `json:"observed_hosts,omitempty"`
@@ -45,6 +47,26 @@ type InventoryDevice struct {
 }
 
 func LoadInventory(path string) (InventoryReport, error) {
+	return loadInventory(path)
+}
+
+func LoadInventoryWithFallback(path, eventsPath, flowsPath string) (InventoryReport, error) {
+	base, err := loadInventory(path)
+	if err != nil {
+		return InventoryReport{}, err
+	}
+	eventsReport, err := loadEventsJSONLReport(eventsPath)
+	if err != nil {
+		return InventoryReport{}, err
+	}
+	flows, err := loadFlowRecords(flowsPath)
+	if err != nil {
+		return InventoryReport{}, err
+	}
+	return mergeInventoryWithObserved(base, derivedInventoryFromObservations(eventsReport.Events, flows)), nil
+}
+
+func loadInventory(path string) (InventoryReport, error) {
 	if strings.TrimSpace(path) == "" {
 		return InventoryReport{Devices: []InventoryDevice{}}, nil
 	}

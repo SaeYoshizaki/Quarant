@@ -62,18 +62,19 @@ type KV struct {
 }
 
 type Report struct {
-	GeneratedAt          string  `json:"generated_at"`
-	Source               string  `json:"source"`
-	TotalEvents          int     `json:"total_events"`
-	UserNotifications    int     `json:"user_notifications"`
-	QuarantineCandidates int     `json:"quarantine_candidates"`
-	UnknownDevices       int     `json:"unknown_devices"`
-	Window               Window  `json:"window"`
-	Severity             []KV    `json:"severity"`
-	Rules                []KV    `json:"rules"`
-	Categories           []KV    `json:"categories"`
-	Sources              []KV    `json:"sources"`
-	Events               []Event `json:"events"`
+	GeneratedAt          string            `json:"generated_at"`
+	Source               string            `json:"source"`
+	TotalEvents          int               `json:"total_events"`
+	UserNotifications    int               `json:"user_notifications"`
+	QuarantineCandidates int               `json:"quarantine_candidates"`
+	UnknownDevices       int               `json:"unknown_devices"`
+	Window               Window            `json:"window"`
+	Severity             []KV              `json:"severity"`
+	Rules                []KV              `json:"rules"`
+	Categories           []KV              `json:"categories"`
+	Sources              []KV              `json:"sources"`
+	Devices              []InventoryDevice `json:"devices,omitempty"`
+	Events               []Event           `json:"events"`
 }
 
 type Window struct {
@@ -211,25 +212,27 @@ func emptyReport(source string) Report {
 		Rules:       []KV{},
 		Categories:  []KV{},
 		Sources:     []KV{},
+		Devices:     []InventoryDevice{},
 		Events:      []Event{},
 	}
 }
 
 type rawReport struct {
-	GeneratedAt          string  `json:"generated_at"`
-	Source               string  `json:"source"`
-	TotalEvents          int     `json:"total_events"`
-	UserNotifications    int     `json:"user_notifications"`
-	QuarantineCandidates int     `json:"quarantine_candidates"`
-	UnknownDevices       int     `json:"unknown_devices"`
-	Window               Window  `json:"window"`
-	Severity             []KV    `json:"severity"`
-	Rules                []KV    `json:"rules"`
-	Categories           []KV    `json:"categories"`
-	Sources              []KV    `json:"sources"`
-	SrcIP                []KV    `json:"src_ip"`
-	Flows                []KV    `json:"flows"`
-	Events               []Event `json:"events"`
+	GeneratedAt          string            `json:"generated_at"`
+	Source               string            `json:"source"`
+	TotalEvents          int               `json:"total_events"`
+	UserNotifications    int               `json:"user_notifications"`
+	QuarantineCandidates int               `json:"quarantine_candidates"`
+	UnknownDevices       int               `json:"unknown_devices"`
+	Window               Window            `json:"window"`
+	Severity             []KV              `json:"severity"`
+	Rules                []KV              `json:"rules"`
+	Categories           []KV              `json:"categories"`
+	Sources              []KV              `json:"sources"`
+	SrcIP                []KV              `json:"src_ip"`
+	Flows                []KV              `json:"flows"`
+	Devices              []InventoryDevice `json:"devices"`
+	Events               []Event           `json:"events"`
 }
 
 func loadReportJSON(path string) (Report, error) {
@@ -264,6 +267,7 @@ func loadReportJSON(path string) (Report, error) {
 		Rules:                rep.Rules,
 		Categories:           rep.Categories,
 		Sources:              rep.Sources,
+		Devices:              rep.Devices,
 		Events:               rep.Events,
 	}
 	if normalized.GeneratedAt == "" {
@@ -277,6 +281,9 @@ func loadReportJSON(path string) (Report, error) {
 	}
 	if len(normalized.Sources) == 0 && len(rep.SrcIP) > 0 {
 		normalized.Sources = rep.SrcIP
+	}
+	if normalized.Devices == nil {
+		normalized.Devices = []InventoryDevice{}
 	}
 	if len(normalized.Categories) == 0 && len(normalized.Events) > 0 {
 		categoryCount := map[string]int{}

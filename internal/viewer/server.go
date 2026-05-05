@@ -69,6 +69,12 @@ func Serve(opts Options) error {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
+		inventory, err := reportapi.LoadInventoryWithFallback(opts.InventoryPath, opts.EventsPath, opts.FlowsPath)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		rep.Devices = inventory.Devices
 		writeJSON(w, rep)
 	})
 	mux.HandleFunc("/api/activity/summary", func(w http.ResponseWriter, r *http.Request) {
@@ -80,7 +86,7 @@ func Serve(opts Options) error {
 		writeJSON(w, rep)
 	})
 	mux.HandleFunc("/api/inventory", func(w http.ResponseWriter, r *http.Request) {
-		rep, err := reportapi.LoadInventory(opts.InventoryPath)
+		rep, err := reportapi.LoadInventoryWithFallback(opts.InventoryPath, opts.EventsPath, opts.FlowsPath)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
