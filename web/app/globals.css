@@ -132,3 +132,54 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer components {
+  .device-event-table {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+  }
+
+  .device-event-col-time {
+    width: 140px;
+  }
+
+  .device-event-col-severity {
+    width: 100px;
+  }
+
+  .device-event-col-destination {
+    width: 130px;
+  }
+
+  .device-event-col-protocol {
+    width: 130px;
+  }
+
+  .device-event-col-rule {
+    width: 170px;
+  }
+
+  .device-event-destination,
+  .device-event-protocol {
+    white-space: normal;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+  }
+
+  .device-event-rule {
+    max-width: 160px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .device-event-fact {
+    min-width: 280px;
+    max-width: 520px;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: normal;
+    line-height: 1.5;
+  }
+}

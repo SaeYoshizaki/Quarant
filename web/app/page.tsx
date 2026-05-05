@@ -2041,58 +2041,85 @@ function HostReportView({
           </div>
         </div>
         <div className="mt-4 overflow-x-auto">
-          <div className="grid min-w-[1060px] grid-cols-[148px_88px_144px_128px_188px_minmax(280px,1fr)] gap-3 border-b border-[#cfd9e6] pb-2 text-[13px] text-[#6d7f9c]">
-            <div>時刻</div>
-            <div>Severity</div>
-            <div>宛先</div>
-            <div>プロトコル / ポート</div>
-            <div>ルールID</div>
-            <div>観測された事実（要約）</div>
-          </div>
-          <div className="divide-y divide-[#edf2f8]">
-            {relatedEvents.map((event, index) => {
-              const flow = host.flows.find(
-                (item) => item.flow_key === event.flow_key
-              );
-              const protocolLabel = `${(
-                flow?.app_protocol ||
-                flow?.protocol ||
-                "-"
-              ).toUpperCase()} / ${event.dst_port || flow?.dst_port || "-"}`;
-              return (
-                <div
-                  key={`${event.ts}-${index}`}
-                  className="grid min-w-[1060px] grid-cols-[148px_88px_144px_128px_188px_minmax(280px,1fr)] items-start gap-3 py-3 text-[14px]"
-                >
-                  <div className="font-mono whitespace-nowrap text-[#24324b]">
-                    {formatReportDateTime(event.ts)}
-                  </div>
-                  <div className="pt-0.5">
-                    <span
-                      className={cn(
-                        "inline-flex min-w-[74px] justify-center border px-2 py-0.5 text-[12px] font-medium",
-                        reportSeverityClass(event.severity)
-                      )}
+          <table className="device-event-table min-w-[950px] text-[14px] text-[#24324b]">
+            <colgroup>
+              <col className="device-event-col-time" />
+              <col className="device-event-col-severity" />
+              <col className="device-event-col-destination" />
+              <col className="device-event-col-protocol" />
+              <col className="device-event-col-rule" />
+              <col className="device-event-col-fact" />
+            </colgroup>
+            <thead>
+              <tr className="border-b border-[#cfd9e6] text-[13px] text-[#6d7f9c]">
+                <th className="px-0 pb-2 pr-3 text-left font-normal">時刻</th>
+                <th className="px-0 pb-2 pr-3 text-left font-normal">
+                  Severity
+                </th>
+                <th className="px-0 pb-2 pr-3 text-left font-normal">宛先</th>
+                <th className="px-0 pb-2 pr-3 text-left font-normal">
+                  プロトコル / ポート
+                </th>
+                <th className="px-0 pb-2 pr-3 text-left font-normal">
+                  ルールID
+                </th>
+                <th className="px-0 pb-2 text-left font-normal">
+                  観測された事実
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {relatedEvents.map((event, index) => {
+                const flow = host.flows.find(
+                  (item) => item.flow_key === event.flow_key
+                );
+                const protocolLabel = `${(
+                  flow?.app_protocol ||
+                  flow?.protocol ||
+                  "-"
+                ).toUpperCase()} / ${event.dst_port || flow?.dst_port || "-"}`;
+                const ruleLabel = event.rule_id || event.type || "-";
+
+                return (
+                  <tr
+                    key={`${event.ts}-${index}`}
+                    className="border-b border-[#edf2f8] align-top"
+                  >
+                    <td className="px-0 py-3 pr-3 font-mono whitespace-nowrap text-[#24324b]">
+                      {formatReportDateTime(event.ts)}
+                    </td>
+                    <td className="px-0 py-3 pr-3 align-top">
+                      <div className="pt-0.5">
+                        <span
+                          className={cn(
+                            "inline-flex min-w-[74px] justify-center border px-2 py-0.5 text-[12px] font-medium",
+                            reportSeverityClass(event.severity)
+                          )}
+                        >
+                          {compactSeverityLabel(event.severity)}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="device-event-destination px-0 py-3 pr-3 font-mono text-[#24324b]">
+                      {event.dst_ip || "-"}
+                    </td>
+                    <td className="device-event-protocol px-0 py-3 pr-3 font-mono text-[#24324b]">
+                      {protocolLabel}
+                    </td>
+                    <td
+                      className="device-event-rule px-0 py-3 pr-3 font-mono text-[#5e7598]"
+                      title={ruleLabel}
                     >
-                      {compactSeverityLabel(event.severity)}
-                    </span>
-                  </div>
-                  <div className="min-w-0 whitespace-normal break-words font-mono [overflow-wrap:anywhere] text-[#24324b]">
-                    {event.dst_ip || "-"}
-                  </div>
-                  <div className="min-w-0 whitespace-normal break-words font-mono [overflow-wrap:anywhere] text-[#24324b]">
-                    {protocolLabel}
-                  </div>
-                  <div className="min-w-0 whitespace-normal break-words font-mono [overflow-wrap:anywhere] text-[#5e7598]">
-                    {event.rule_id || event.type || "-"}
-                  </div>
-                  <div className="min-w-0 whitespace-normal break-words [overflow-wrap:anywhere] text-[#4d5f7c]">
-                    {event.observed_fact || event.message || "-"}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+                      {ruleLabel}
+                    </td>
+                    <td className="device-event-fact px-0 py-3 text-[#4d5f7c]">
+                      {event.observed_fact || event.message || "-"}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
         <button
           onClick={onOpenEvents}
