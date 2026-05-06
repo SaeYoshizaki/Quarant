@@ -1,63 +1,83 @@
 # Quarant
 
-IoT network traffic analyzer for passive security monitoring.
+Quarant is a passive network observation tool for IoT devices running on Linux gateways, bridges, or routers.
 
-Quarant observes IoT device traffic on a Linux gateway / bridge / router and records network-visible risk signals related to the OWASP IoT Top 10.
+It analyzes packets from a network interface or pcap file, reconstructs TCP flows, parses protocol metadata, and records network-visible risk signals mapped to the OWASP IoT Top 10.
 
-![Quarant dashboard placeholder](docs/images/dashboard-placeholder.png)
+Quarant does not log in to devices, attack them, brute-force credentials, actively scan networks, or decrypt HTTPS traffic. It focuses only on what can be observed from network traffic — recording each event as an observed fact, possible inference, limitation, and recommended next step.
 
-## Table of Contents
+This is a personal research project, not a production security tool.
 
-- [Introduction](#introduction)
-- [Features](#features)
-- [Getting Started](#getting-started)
-- [Short CLI](#short-cli)
-- [Report Viewer](#report-viewer)
-- [Documentation](#documentation)
-- [Build Process](#build-process)
+![Quarant report viewer](docs/images/report-overview.png)
 
-## Introduction
+## Why Quarant?
 
-Quarant is a passive monitoring tool for IoT networks.
-It captures packets, reconstructs TCP flows, parses protocol metadata, and writes detected events to `events.jsonl`.
+IoT devices often behave like black boxes. Users can see the device and the app, but usually cannot see where the device connects, what protocols it uses, or how updates and cloud communication work.
 
-It focuses on what can be observed from network traffic:
+Quarant was built to make that hidden network behavior easier to inspect.
 
-- insecure services
-- plaintext communication
-- exposed credentials or tokens
-- update-like traffic
-- unexpected destinations
-- device inventory and per-device risk summary
+## What Quarant Observes
 
-Quarant is not a firmware emulator or an active vulnerability scanner.
-It does not log in to devices, exploit them, or decrypt HTTPS traffic.
+- Plaintext HTTP requests, headers, cookies, and body fragments
+- Authorization headers and token-like values in URLs or bodies
+- TLS ClientHello metadata — SNI, TLS version, cipher suites, JA3
+- MQTT, Telnet, FTP, RTSP, and CoAP traffic
+- Firmware-update-like paths and requests
+- Device communication destinations and patterns
+- Newly observed or unregistered devices
 
-## Features
+Each event is recorded with:
 
-- Capture packets from a Linux network interface
-- Read packets from a `.pcap` file
-- Read a streamed `pcap` from standard input
-- Reconstruct TCP flows for protocol-level analysis
-- Parse HTTP, TLS, MQTT, and Telnet traffic
-- Detect plaintext credentials, cookies, tokens, and API keys
-- Observe TLS metadata such as SNI, TLS version, cipher suite, and JA3
-- Detect insecure services such as Telnet, FTP, RTSP, MQTT, CoAP, and HTTP management interfaces
-- Export events as `events.jsonl`
-- Export flow summaries as `flows.jsonl`
-- Export device inventory as `device_inventory.json`
-- Show events in the existing Web report viewer
-- Map network-visible signals to OWASP IoT Top 10 categories
+| Field | Meaning |
+|---|---|
+| `observed_fact` | What was actually observed |
+| `inference` | What risk it may suggest |
+| `limitation` | What cannot be confirmed passively |
+| `recommendation` | What to check or do next |
 
-## Getting Started
+Detected events are risk signals, not confirmed vulnerabilities.
+
+## OWASP IoT Top 10 Mapping
+
+Only network-visible signals are used. Not all categories can be fully diagnosed from traffic alone.
+
+| Category | Network-visible signals |
+|---|---|
+| I1 Weak, Guessable, or Hardcoded Passwords | Credentials, tokens, and auth-like values in plaintext traffic |
+| I2 Insecure Network Services | Telnet, MQTT, FTP, RTSP, CoAP, HTTP admin interfaces |
+| I3 Insecure Ecosystem Interfaces | Plaintext API traffic, management endpoints, tokens in URLs |
+| I4 Lack of Secure Update Mechanism | Firmware-update-like traffic and weak update visibility signals |
+| I5 Use of Insecure or Outdated Components | Lightweight enrichment based on inferred device family and known issue candidates |
+| I6 Insufficient Privacy Protection | Stable identifiers, history, backup, sync, and privacy-related endpoints |
+| I7 Insecure Data Transfer and Storage | Plaintext HTTP, auth headers, cookies, tokens, MQTT/Telnet plaintext, TLS metadata risks |
+| I8 Lack of Device Management | Newly observed devices, unregistered devices, inventory mismatch signals |
+
+
+## Architecture
+
+```text
+packet capture / pcap input
+        ↓
+TCP flow reconstruction
+        ↓
+protocol parsers (HTTP / TLS / MQTT / Telnet)
+        ↓
+risk signal rules
+        ↓
+events.jsonl / flows.jsonl / device_inventory.json
+        ↓
+local report viewer
+```
+
+## Quick Start
 
 ### Requirements
 
-- Linux environment
+- Linux
 - Go 1.24 or later
 - libpcap development package
-- root privilege or packet capture capability
-- Node.js and npm when building the Web viewer
+- root or packet capture privileges
+- Node.js and npm (for the web report viewer)
 
 Ubuntu / Debian:
 
@@ -66,89 +86,18 @@ sudo apt update
 sudo apt install -y git build-essential libpcap-dev
 ```
 
-### Install
+### Build
 
 ```bash
 git clone https://github.com/SaeYoshizaki/Quarant.git
 cd Quarant
 go mod download
-```
-
-### Build
-
-```bash
 go build -o quarant ./cmd/quarant
-go build ./cmd/quarant-api
 ```
 
-## Short CLI
+### Build the Web Report Viewer
 
-### Analyze a pcap file
-
-```bash
-./quarant analyze sample.pcap --out events.jsonl
-```
-
-This also writes `flows.jsonl` by default.
-`quarant analyze` replaces existing `events.jsonl` and `flows.jsonl` unless you pass `--append`.
-
-### Analyze a streamed pcap from standard input
-
-```bash
-ssh root@192.168.1.1 "tcpdump -i br-lan -U -s 0 -w - 'host 192.168.1.144'" \
-  | ./quarant analyze - --out events.jsonl
-```
-
-Append instead of replacing:
-
-```bash
-./quarant analyze sample.pcap --out events.jsonl --append
-```
-
-### Launch the local report viewer from `events.jsonl`
-
-```bash
-./quarant report events.jsonl --open
-```
-
-### Launch the local report viewer from `report.json`
-
-```bash
-./quarant report report.json --open
-```
-
-### Analyze and then open the report viewer
-
-```bash
-./quarant analyze sample.pcap --out events.jsonl --report --open
-```
-
-`--report` now starts the viewer immediately and keeps it open while `analyze` is still consuming a file or stdin stream.
-
-### Live capture with auto-refreshing report viewer
-
-```bash
-sudo ./quarant live --iface eth0 --out events.jsonl --report --open
-```
-
-Example for the containerlab demo:
-
-```bash
-sudo ./quarant live --iface eth0 \
-  --out runs/iot-demo/events.jsonl \
-  --flows-out runs/iot-demo/flows.jsonl \
-  --inventory-out runs/iot-demo/device_inventory.json \
-  --report \
-  --open
-```
-
-## Report Viewer
-
-Quarant reuses the existing `web/` UI. It does not generate a second UI.
-
-### One-time Web build
-
-Before using `quarant report` or `quarant-api -open`, build the exported Web viewer once:
+The report viewer is a static Next.js app served by Quarant's built-in server. Build it once before using `--report` or `--open`.
 
 ```bash
 cd web
@@ -156,64 +105,50 @@ NEXT_PUBLIC_API_BASE_URL=http://127.0.0.1:8080 npm run build
 cd ..
 ```
 
-This creates `web/out`, which `quarant report` and `quarant-api` serve on the same localhost port as the API.
-The exported viewer polls `/api/report`, `/api/inventory`, and `/api/flows` every 3 seconds, so live captures appear automatically without WebSocket or SSE.
-
-### Local viewer from the short CLI
+### Analyze a pcap File
 
 ```bash
-./quarant report report.json --open
+./quarant analyze camera.pcap --out events.jsonl --report --open
 ```
 
-### Local viewer from the development CLI
+`--report` starts the built-in report server. `--open` opens the report viewer in your browser automatically.
+
+### Live Observation
 
 ```bash
-go run ./cmd/quarant-api -report-in report.json -open
+sudo ./quarant live --iface eth0 --out events.jsonl --report --open
 ```
 
-### Existing two-process development flow
+During live observation, `events.jsonl`, `flows.jsonl`, and `device_inventory.json` are updated in real time and the report viewer refreshes automatically.
 
-If you prefer the Next.js dev server during UI development, keep using the existing split flow:
+## Example Findings
 
-```bash
-go run ./cmd/quarant-api -report-in report.json -addr 127.0.0.1:8080
-cd web
-NEXT_PUBLIC_API_BASE_URL=http://127.0.0.1:8080 npm run dev
-```
+| Finding | Rule |
+|---|---|
+| Plaintext HTTP traffic | `I7_HTTP_PLAINTEXT` |
+| Token in URL | `I3_AUTH_TOKEN_IN_URL`, `I7_HTTP_TOKEN` |
+| Authorization header over HTTP | `I7_HTTP_AUTH` |
+| Secret-like value in HTTP body | `I7_HTTP_BODY_SECRET` |
+| Suspected HTTP admin interface | `I2_HTTP_ADMIN_INTERFACE_SUSPECTED` |
+| Firmware-update-like request | `I4_FIRMWARE_UPDATE_OBSERVED` |
+| Telnet traffic | `I2_TELNET_SERVICE_OBSERVED`, `I7_TELNET_PLAINTEXT` |
+| Plaintext MQTT traffic | `I2_MQTT_SERVICE_OBSERVED`, `I7_MQTT_PLAINTEXT` |
+| Weak TLS cipher offered | `I7_TLS_WEAK_CIPHER_OFFERED` |
+| Newly observed device | `I8_NEW_DEVICE_OBSERVED` |
 
-Then open:
+Example event:
 
-```text
-http://127.0.0.1:3000
-```
-
-## Legacy CLI
-
-The previous interface-driven entrypoint still works:
-
-```bash
-sudo ./quarant -i eth0
-./quarant -pcap capture.pcap
-./quarant -pcap -
-```
-
-## Documentation
-
-- [`docs/demo.md`](docs/demo.md) - Ubuntu / Linux / containerlab demo and test scenarios
-- [`docs/design.md`](docs/design.md) - architecture, design policy, OWASP IoT Top 10 mapping, and passive monitoring limitations
-- `examples/` - example `events.jsonl` and `device_inventory.json`
-
-## Build Process
-
-### Test
-
-```bash
-go test ./...
-```
-
-### Smoke test
-
-```bash
-./quarant analyze sample.pcap --out events.jsonl
-./quarant report events.jsonl
+```json
+{
+  "type": "INSECURE_HTTP_TOKEN",
+  "severity": "CRITICAL",
+  "rule_id": "I7_HTTP_TOKEN",
+  "category": "I7",
+  "owasp_tags": ["I1", "I3", "I7"],
+  "confidence": "high",
+  "observed_fact": "Sensitive token or identifier-like query parameter was observed over plaintext HTTP.",
+  "inference": "Credentials, session tokens, or stable identifiers may be exposed in transit and in URL logs.",
+  "limitation": "Passive monitoring cannot determine whether the value is still valid, whether it is hardcoded, or whether the API has additional protections.",
+  "recommendation": "Avoid putting tokens in URLs, use HTTPS, and rotate exposed credentials or tokens if necessary."
+}
 ```
