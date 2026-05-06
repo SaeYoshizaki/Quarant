@@ -11,6 +11,8 @@ ansible-inventory.yml
 .DS_Store
 .gocache/
 .obsidian/
+__pycache__/
+*.pyc
 
 events.jsonl
 build/
