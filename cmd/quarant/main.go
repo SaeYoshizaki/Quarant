@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"io"
@@ -13,6 +14,7 @@ import (
 
 	"quarant/analyzer"
 	"quarant/analyzer/knowledge"
+	"quarant/internal/reportapi"
 	"quarant/internal/viewer"
 )
 
@@ -38,10 +40,102 @@ func main() {
 		if err := runReport(args[1:]); err != nil {
 			log.Fatal(err)
 		}
+	case "compare":
+		if err := runCompare(args[1:], os.Stdout); err != nil {
+			log.Fatal(err)
+		}
+	case "openwrt":
+		if err := runOpenWrt(args[1:]); err != nil {
+			log.Fatal(err)
+		}
+	case "precision":
+		if err := runPrecision(args[1:], os.Stdout); err != nil {
+			log.Fatal(err)
+		}
+	case "mitigate":
+		if err := runMitigate(args[1:], os.Stdout); err != nil {
+			log.Fatal(err)
+		}
+	case "mitigation-eval":
+		if err := runMitigationEval(args[1:], os.Stdout); err != nil {
+			log.Fatal(err)
+		}
+	case "research-report":
+		if err := runResearchReport(args[1:], os.Stdout); err != nil {
+			log.Fatal(err)
+		}
+	case "eval":
+		if err := runEval(args[1:], os.Stdout); err != nil {
+			log.Fatal(err)
+		}
 	default:
 		// Preserve the previous interface-driven entrypoint when called without subcommands.
 		runLegacyCapture(args)
 	}
+}
+
+func runCompare(args []string, out io.Writer) error {
+	fs := flag.NewFlagSet("compare", flag.ContinueOnError)
+	fs.SetOutput(io.Discard)
+
+	beforeEvents := fs.String("before", "", "before events JSONL or report JSON path")
+	afterEvents := fs.String("after", "", "after events JSONL or report JSON path")
+	beforeFlows := fs.String("before-flows", "", "before flows JSONL path (default: sibling flows.jsonl)")
+	afterFlows := fs.String("after-flows", "", "after flows JSONL path (default: sibling flows.jsonl)")
+	beforeInventory := fs.String("before-inventory", "", "before inventory JSON path (default: sibling device_inventory.json)")
+	afterInventory := fs.String("after-inventory", "", "after inventory JSON path (default: sibling device_inventory.json)")
+	format := fs.String("format", "text", "output format: text|json")
+
+	if err := fs.Parse(normalizeFlagArgs(fs, args)); err != nil {
+		return fmt.Errorf("parse compare flags: %w", err)
+	}
+	if fs.NArg() > 0 {
+		return fmt.Errorf("compare accepts flags only; use --before and --after")
+	}
+
+	before, err := reportapi.LoadProtectionSnapshot("before", *beforeEvents, *beforeFlows, *beforeInventory)
+	if err != nil {
+		return fmt.Errorf("load before snapshot: %w", err)
+	}
+	after, err := reportapi.LoadProtectionSnapshot("after", *afterEvents, *afterFlows, *afterInventory)
+	if err != nil {
+		return fmt.Errorf("load after snapshot: %w", err)
+	}
+	comparison := reportapi.CompareProtectionSnapshots(before, after)
+
+	switch strings.ToLower(strings.TrimSpace(*format)) {
+	case "json":
+		enc := json.NewEncoder(out)
+		enc.SetIndent("", "  ")
+		return enc.Encode(comparison)
+	case "text", "":
+		printProtectionComparison(out, comparison)
+		return nil
+	default:
+		return fmt.Errorf("unknown -format: %s (use text|json)", *format)
+	}
+}
+
+func printProtectionComparison(out io.Writer, comparison reportapi.ProtectionComparison) {
+	fmt.Fprintln(out, "=== Quarant Before / After Report ===")
+	fmt.Fprintln(out)
+	fmt.Fprintln(out, comparison.Summary)
+	fmt.Fprintln(out)
+	fmt.Fprintf(out, "%-28s %10s %10s %10s %s\n", "Metric", "Before", "After", "Delta", "Result")
+	fmt.Fprintf(out, "%-28s %10s %10s %10s %s\n", "------", "------", "-----", "-----", "------")
+	for _, delta := range comparison.Deltas {
+		result := "unchanged"
+		if delta.Delta != 0 {
+			if delta.Improved {
+				result = "improved"
+			} else {
+				result = "regressed"
+			}
+		}
+		fmt.Fprintf(out, "%-28s %10d %10d %+10d %s\n", delta.Label, delta.Before, delta.After, delta.Delta, result)
+	}
+	fmt.Fprintln(out)
+	fmt.Fprintf(out, "Improved: %d  Regressed: %d  Unchanged: %d\n", comparison.ImprovedCount, comparison.RegressedCount, comparison.UnchangedCount)
 }
 
 func runAnalyze(args []string) error {
@@ -49,12 +143,13 @@ func runAnalyze(args []string) error {
 	fs.SetOutput(io.Discard)
 
 	flags := bindCaptureFlags(fs, captureFlagDefaults{
-		outPath:       "events.jsonl",
-		allowIface:    false,
-		reportHelp:    "launch the local report viewer while analysis is running",
-		appendHelp:    "append to existing events/flows outputs instead of replacing them",
-		flowsHelp:     "path to write flow summaries JSONL (default: sibling flows.jsonl)",
-		inventoryHelp: "path to write device inventory snapshot JSON (default: sibling device_inventory.json, empty to disable with --inventory-out=-)",
+		outPath:          "events.jsonl",
+		allowIface:       false,
+		reportHelp:       "launch the local report viewer while analysis is running",
+		appendHelp:       "append to existing events/flows outputs instead of replacing them",
+		flowsHelp:        "path to write flow summaries JSONL (default: sibling flows.jsonl)",
+		observationsHelp: "path to write passive observation JSONL (default: sibling observations.jsonl, empty to disable with --observations-out=-)",
+		inventoryHelp:    "path to write device inventory snapshot JSON (default: sibling device_inventory.json, empty to disable with --inventory-out=-)",
 	})
 
 	if err := fs.Parse(normalizeFlagArgs(fs, args)); err != nil {
@@ -83,13 +178,14 @@ func runLive(args []string) error {
 	fs.SetOutput(io.Discard)
 
 	flags := bindCaptureFlags(fs, captureFlagDefaults{
-		outPath:       "events.jsonl",
-		iface:         "eth0",
-		allowIface:    true,
-		reportHelp:    "launch the local report viewer while capture is running",
-		appendHelp:    "append to existing events/flows outputs instead of replacing them",
-		flowsHelp:     "path to write flow summaries JSONL (default: sibling flows.jsonl)",
-		inventoryHelp: "path to write device inventory snapshot JSON (default: sibling device_inventory.json, empty to disable with --inventory-out=-)",
+		outPath:          "events.jsonl",
+		iface:            "eth0",
+		allowIface:       true,
+		reportHelp:       "launch the local report viewer while capture is running",
+		appendHelp:       "append to existing events/flows outputs instead of replacing them",
+		flowsHelp:        "path to write flow summaries JSONL (default: sibling flows.jsonl)",
+		observationsHelp: "path to write passive observation JSONL (default: sibling observations.jsonl, empty to disable with --observations-out=-)",
+		inventoryHelp:    "path to write device inventory snapshot JSON (default: sibling device_inventory.json, empty to disable with --inventory-out=-)",
 	})
 
 	if err := fs.Parse(normalizeFlagArgs(fs, args)); err != nil {
@@ -117,6 +213,7 @@ func runReport(args []string) error {
 	addr := fs.String("addr", "127.0.0.1:8080", "HTTP listen address")
 	webDist := fs.String("web-dist", filepath.Join("web", "out"), "path to exported web UI assets")
 	flowsPath := fs.String("flows-in", "", "input flows JSONL path (default: sibling flows.jsonl)")
+	observationsPath := fs.String("observations-in", "", "input passive observations JSONL path (default: sibling observations.jsonl)")
 	inventoryPath := fs.String("inventory-in", "", "input inventory JSON path (default: sibling device_inventory.json)")
 
 	if err := fs.Parse(normalizeFlagArgs(fs, args)); err != nil {
@@ -128,13 +225,14 @@ func runReport(args []string) error {
 		}
 		demoDir := filepath.Join("examples", "demo")
 		return viewer.Serve(viewer.Options{
-			EventsPath:    filepath.Join(demoDir, "events.jsonl"),
-			FlowsPath:     defaultSibling(*flowsPath, demoDir, "flows.jsonl"),
-			InventoryPath: defaultSibling(*inventoryPath, demoDir, "device_inventory.json"),
-			Addr:          *addr,
-			OpenBrowser:   *openViewer,
-			WebDist:       *webDist,
-			DemoMode:      true,
+			EventsPath:       filepath.Join(demoDir, "events.jsonl"),
+			FlowsPath:        defaultSibling(*flowsPath, demoDir, "flows.jsonl"),
+			ObservationsPath: defaultSibling(*observationsPath, demoDir, "observations.jsonl"),
+			InventoryPath:    defaultSibling(*inventoryPath, demoDir, "device_inventory.json"),
+			Addr:             *addr,
+			OpenBrowser:      *openViewer,
+			WebDist:          *webDist,
+			DemoMode:         true,
 		})
 	}
 	if fs.NArg() != 1 {
@@ -148,11 +246,12 @@ func runReport(args []string) error {
 	}
 
 	opts := viewer.Options{
-		Addr:          *addr,
-		OpenBrowser:   *openViewer,
-		WebDist:       *webDist,
-		FlowsPath:     defaultSibling(*flowsPath, dir, "flows.jsonl"),
-		InventoryPath: defaultSibling(*inventoryPath, dir, "device_inventory.json"),
+		Addr:             *addr,
+		OpenBrowser:      *openViewer,
+		WebDist:          *webDist,
+		FlowsPath:        defaultSibling(*flowsPath, dir, "flows.jsonl"),
+		ObservationsPath: defaultSibling(*observationsPath, dir, "observations.jsonl"),
+		InventoryPath:    defaultSibling(*inventoryPath, dir, "device_inventory.json"),
 	}
 	if strings.EqualFold(filepath.Ext(inputPath), ".json") {
 		opts.ReportPath = inputPath
@@ -168,6 +267,7 @@ type analysisConfig struct {
 	Interface         string
 	EventsOut         string
 	FlowsOut          string
+	ObservationsOut   string
 	InventoryOut      string
 	InventoryInterval time.Duration
 	Debug             bool
@@ -184,6 +284,7 @@ type captureRunner func(*analyzer.Engine) error
 type captureFlags struct {
 	outPath           *string
 	flowsOutPath      *string
+	observationsOut   *string
 	inventoryOut      *string
 	inventoryInterval *time.Duration
 	debug             *bool
@@ -196,13 +297,14 @@ type captureFlags struct {
 }
 
 type captureFlagDefaults struct {
-	outPath       string
-	iface         string
-	allowIface    bool
-	appendHelp    string
-	reportHelp    string
-	flowsHelp     string
-	inventoryHelp string
+	outPath          string
+	iface            string
+	allowIface       bool
+	appendHelp       string
+	reportHelp       string
+	flowsHelp        string
+	observationsHelp string
+	inventoryHelp    string
 }
 
 func bindCaptureFlags(fs *flag.FlagSet, defaults captureFlagDefaults) captureFlags {
@@ -213,6 +315,7 @@ func bindCaptureFlags(fs *flag.FlagSet, defaults captureFlagDefaults) captureFla
 	flags := captureFlags{
 		outPath:           fs.String("out", outDefault, "path to write events JSONL"),
 		flowsOutPath:      fs.String("flows-out", "", defaults.flowsHelp),
+		observationsOut:   fs.String("observations-out", "", defaults.observationsHelp),
 		inventoryOut:      fs.String("inventory-out", "", defaults.inventoryHelp),
 		inventoryInterval: fs.Duration("inventory-interval", 10*time.Second, "interval to refresh device inventory snapshot JSON"),
 		debug:             fs.Bool("debug", false, "enable debug payload logging"),
@@ -238,7 +341,11 @@ func buildAnalysisConfig(inputPath, iface string, flags captureFlags) analysisCo
 		eventsDir = ""
 	}
 	flowsPath := defaultSibling(*flags.flowsOutPath, eventsDir, "flows.jsonl")
+	observationsPath := defaultSibling(*flags.observationsOut, eventsDir, "observations.jsonl")
 	inventoryPath := defaultSibling(*flags.inventoryOut, eventsDir, "device_inventory.json")
+	if *flags.observationsOut == "-" {
+		observationsPath = ""
+	}
 	if *flags.inventoryOut == "-" {
 		inventoryPath = ""
 	}
@@ -247,6 +354,7 @@ func buildAnalysisConfig(inputPath, iface string, flags captureFlags) analysisCo
 		Interface:         iface,
 		EventsOut:         *flags.outPath,
 		FlowsOut:          flowsPath,
+		ObservationsOut:   observationsPath,
 		InventoryOut:      inventoryPath,
 		InventoryInterval: *flags.inventoryInterval,
 		Debug:             *flags.debug,
@@ -295,6 +403,7 @@ type analysisRuntime struct {
 	engine          *analyzer.Engine
 	eventSink       *analyzer.JSONLSink
 	flowSink        *analyzer.JSONLSink
+	observationSink *analyzer.JSONLSink
 	inventoryWriter *analyzer.DeviceInventoryWriter
 	viewerOnce      sync.Once
 	viewerErr       chan error
@@ -313,6 +422,9 @@ func newAnalysisRuntime(cfg analysisConfig) (*analysisRuntime, error) {
 			return nil, err
 		}
 		if err := resetOutputFile(cfg.FlowsOut); err != nil {
+			return nil, err
+		}
+		if err := resetOutputFile(cfg.ObservationsOut); err != nil {
 			return nil, err
 		}
 	}
@@ -344,7 +456,17 @@ func newAnalysisRuntime(cfg analysisConfig) (*analysisRuntime, error) {
 		return nil, err
 	}
 
-	handler := analyzer.NewFlowHandler(sink, flowSink, cfg.Debug, db)
+	var observationSink *analyzer.JSONLSink
+	if cfg.ObservationsOut != "" {
+		observationSink, err = analyzer.NewJSONSink(cfg.ObservationsOut)
+		if err != nil {
+			_ = flowSink.Close()
+			_ = sink.Close()
+			return nil, err
+		}
+	}
+
+	handler := analyzer.NewFlowHandlerWithObservations(sink, flowSink, observationSink, cfg.Debug, db)
 	var inventoryWriter *analyzer.DeviceInventoryWriter
 	if cfg.InventoryOut != "" {
 		inventoryWriter = analyzer.NewDeviceInventoryWriter(cfg.InventoryOut, cfg.InventoryInterval, handler.DeviceInventory)
@@ -355,6 +477,7 @@ func newAnalysisRuntime(cfg analysisConfig) (*analysisRuntime, error) {
 		engine:          analyzer.NewEngine(handler),
 		eventSink:       sink,
 		flowSink:        flowSink,
+		observationSink: observationSink,
 		inventoryWriter: inventoryWriter,
 		viewerErr:       make(chan error, 1),
 		cfg:             cfg,
@@ -365,12 +488,13 @@ func (r *analysisRuntime) startViewer() {
 	r.viewerOnce.Do(func() {
 		go func() {
 			r.viewerErr <- viewer.Serve(viewer.Options{
-				EventsPath:    r.cfg.EventsOut,
-				FlowsPath:     r.cfg.FlowsOut,
-				InventoryPath: r.cfg.InventoryOut,
-				Addr:          r.cfg.ViewerAddr,
-				OpenBrowser:   r.cfg.OpenViewer,
-				WebDist:       r.cfg.WebDist,
+				EventsPath:       r.cfg.EventsOut,
+				FlowsPath:        r.cfg.FlowsOut,
+				ObservationsPath: r.cfg.ObservationsOut,
+				InventoryPath:    r.cfg.InventoryOut,
+				Addr:             r.cfg.ViewerAddr,
+				OpenBrowser:      r.cfg.OpenViewer,
+				WebDist:          r.cfg.WebDist,
 			})
 		}()
 	})
@@ -385,6 +509,9 @@ func (r *analysisRuntime) close() {
 	}
 	if r.flowSink != nil {
 		_ = r.flowSink.Close()
+	}
+	if r.observationSink != nil {
+		_ = r.observationSink.Close()
 	}
 	if r.eventSink != nil {
 		_ = r.eventSink.Close()
@@ -483,6 +610,7 @@ func runLegacyCapture(args []string) {
 		Interface:         *iface,
 		EventsOut:         "events.jsonl",
 		FlowsOut:          "flows.jsonl",
+		ObservationsOut:   "observations.jsonl",
 		InventoryOut:      *inventoryOut,
 		InventoryInterval: *inventoryInterval,
 		Debug:             *debug,

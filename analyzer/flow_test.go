@@ -2,6 +2,9 @@ package analyzer
 
 import (
 	"net"
+	"os"
+	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -125,6 +128,77 @@ func TestFlowDirectionClassification(t *testing.T) {
 			t.Fatalf("flowDirection(%q)=%q, want %q", tt.dstIP, got, tt.want)
 		}
 	}
+}
+
+func TestFlowHandlerWritesDNSObservation(t *testing.T) {
+	dir := t.TempDir()
+	observationsPath := filepath.Join(dir, "observations.jsonl")
+	observationSink, err := NewJSONSink(observationsPath)
+	if err != nil {
+		t.Fatalf("NewJSONSink: %v", err)
+	}
+	defer observationSink.Close()
+
+	h := NewFlowHandlerWithObservations(nil, nil, observationSink, false, nil)
+	h.HandlePacket(makeDNSPacket(t, "192.168.1.10", "8.8.8.8", "api.vendor.example"))
+
+	if err := observationSink.Close(); err != nil {
+		t.Fatalf("close sink: %v", err)
+	}
+	data, err := os.ReadFile(observationsPath)
+	if err != nil {
+		t.Fatalf("read observations: %v", err)
+	}
+	text := string(data)
+	if !strings.Contains(text, `"kind":"dns_query"`) {
+		t.Fatalf("expected dns_query observation, got %s", text)
+	}
+	if !strings.Contains(text, `"dns_query":"api.vendor.example"`) {
+		t.Fatalf("expected query in observation, got %s", text)
+	}
+}
+
+func makeDNSPacket(t *testing.T, srcIP, dstIP, query string) gopacket.Packet {
+	t.Helper()
+	eth := &layers.Ethernet{
+		SrcMAC:       []byte{0, 1, 2, 3, 4, 5},
+		DstMAC:       []byte{6, 7, 8, 9, 10, 11},
+		EthernetType: layers.EthernetTypeIPv4,
+	}
+	ip := &layers.IPv4{
+		Version:  4,
+		IHL:      5,
+		TTL:      64,
+		Protocol: layers.IPProtocolUDP,
+		SrcIP:    net.ParseIP(srcIP),
+		DstIP:    net.ParseIP(dstIP),
+	}
+	udp := &layers.UDP{
+		SrcPort: 43210,
+		DstPort: 53,
+	}
+	if err := udp.SetNetworkLayerForChecksum(ip); err != nil {
+		t.Fatalf("set udp checksum network layer: %v", err)
+	}
+	dns := &layers.DNS{
+		ID:     1,
+		QR:     false,
+		OpCode: layers.DNSOpCodeQuery,
+		RD:     true,
+		Questions: []layers.DNSQuestion{{
+			Name:  []byte(query),
+			Type:  layers.DNSTypeA,
+			Class: layers.DNSClassIN,
+		}},
+	}
+	buffer := gopacket.NewSerializeBuffer()
+	if err := gopacket.SerializeLayers(buffer, gopacket.SerializeOptions{
+		FixLengths:       true,
+		ComputeChecksums: true,
+	}, eth, ip, udp, dns); err != nil {
+		t.Fatalf("serialize DNS packet: %v", err)
+	}
+	return gopacket.NewPacket(buffer.Bytes(), layers.LayerTypeEthernet, gopacket.Default)
 }
 
 func TestBuildFlowRecordUsesStateMetadata(t *testing.T) {

@@ -15,22 +15,28 @@ import (
 )
 
 type FlowHandler struct {
-	eventSink *JSONLSink
-	flowSink  *JSONLSink
-	cache     *FlowCache
-	debug     bool
-	devices   *device.Store
-	knowledge *knowledge.DB
+	eventSink       *JSONLSink
+	flowSink        *JSONLSink
+	observationSink *JSONLSink
+	cache           *FlowCache
+	debug           bool
+	devices         *device.Store
+	knowledge       *knowledge.DB
 }
 
 func NewFlowHandler(eventSink, flowSink *JSONLSink, debug bool, db *knowledge.DB) *FlowHandler {
+	return NewFlowHandlerWithObservations(eventSink, flowSink, nil, debug, db)
+}
+
+func NewFlowHandlerWithObservations(eventSink, flowSink, observationSink *JSONLSink, debug bool, db *knowledge.DB) *FlowHandler {
 	return &FlowHandler{
-		eventSink: eventSink,
-		flowSink:  flowSink,
-		cache:     NewFlowCache(16*1024, 1*time.Hour),
-		debug:     debug,
-		devices:   device.NewStore(),
-		knowledge: db,
+		eventSink:       eventSink,
+		flowSink:        flowSink,
+		observationSink: observationSink,
+		cache:           NewFlowCache(16*1024, 1*time.Hour),
+		debug:           debug,
+		devices:         device.NewStore(),
+		knowledge:       db,
 	}
 }
 
@@ -582,6 +588,7 @@ func (h *FlowHandler) writeFlowRecordSnapshot(now time.Time, key string, st *Flo
 		return
 	}
 	_ = h.flowSink.WriteFlow(record)
+	h.writeFlowObservations(record)
 	st.LastFlowLogAt = now
 	st.LastFlowMetaFingerprint = metaFingerprint
 }
@@ -649,14 +656,28 @@ func classifyFlowProtocol(st *FlowState) (string, string) {
 }
 
 func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
-	tcpLayer := packet.Layer(layers.LayerTypeTCP)
 	srcIP, dstIP, ok := packetIPStrings(packet)
-	if !ok || tcpLayer == nil {
+	if !ok {
+		return
+	}
+
+	now := time.Now()
+	if udpLayer := packet.Layer(layers.LayerTypeUDP); udpLayer != nil {
+		udp := udpLayer.(*layers.UDP)
+		var dns *layers.DNS
+		if dnsLayer := packet.Layer(layers.LayerTypeDNS); dnsLayer != nil {
+			dns = dnsLayer.(*layers.DNS)
+		}
+		h.writeUDPPacketObservations(now, srcIP, dstIP, uint16(udp.SrcPort), uint16(udp.DstPort), len(udp.Payload), dns)
+		return
+	}
+
+	tcpLayer := packet.Layer(layers.LayerTypeTCP)
+	if tcpLayer == nil {
 		return
 	}
 
 	tcp := tcpLayer.(*layers.TCP)
-	now := time.Now()
 
 	srcPort := uint16(tcp.SrcPort)
 	dstPort := uint16(tcp.DstPort)

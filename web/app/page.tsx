@@ -76,6 +76,8 @@ type Report = {
   user_notifications: number;
   quarantine_candidates: number;
   unknown_devices: number;
+  protection?: ProtectionSummary;
+  observations?: ObservationSOC;
   window?: {
     start?: string;
     end?: string;
@@ -85,6 +87,187 @@ type Report = {
   categories: KV[];
   sources: KV[];
   events: Event[];
+};
+
+type ProtectionSummary = {
+  home_risk_score: number;
+  risk_level: string;
+  passive_coverage: PassiveCoverage;
+  baseline: BehaviorBaseline;
+  metrics: ProtectionMetrics;
+  top_devices: DeviceProtectionRisk[];
+  top_reasons: ProtectionReason[];
+  recommendations: string[];
+  limitations: string[];
+};
+
+type PassiveCoverage = {
+  score: number;
+  observed: CoverageItem[];
+  not_observed: CoverageItem[];
+};
+
+type CoverageItem = {
+  key: string;
+  label: string;
+};
+
+type ProtectionMetrics = {
+  device_count: number;
+  devices_with_risk: number;
+  high_risk_devices: number;
+  unknown_devices: number;
+  total_flow_count: number;
+  local_flow_count: number;
+  external_flow_count: number;
+  noise_flow_count: number;
+  multicast_broadcast_flows: number;
+  baseline_device_count: number;
+  baseline_ready_devices: number;
+  novel_destination_count: number;
+  novel_protocol_count: number;
+  novel_port_count: number;
+  category_profiled_devices: number;
+  category_deviation_count: number;
+  external_destination_count: number;
+  insecure_service_count: number;
+  plaintext_traffic_count: number;
+  critical_event_count: number;
+  high_or_critical_event_count: number;
+  quarantine_candidates: number;
+};
+
+type DeviceProtectionRisk = {
+  ip: string;
+  label?: string;
+  category?: string;
+  risk_score: number;
+  risk_level: string;
+  signal_count: number;
+  top_severity?: string;
+  external_targets: number;
+  novelty_count: number;
+  category_deviations: number;
+  reasons: string[];
+  recommendation?: string;
+};
+
+type ProtectionReason = {
+  key: string;
+  label: string;
+  count: number;
+};
+
+type BehaviorBaseline = {
+  device_count: number;
+  ready_device_count: number;
+  novel_destination_count: number;
+  novel_protocol_count: number;
+  novel_port_count: number;
+  window_policy: string;
+  devices: DeviceBehaviorProfile[];
+};
+
+type DeviceBehaviorProfile = {
+  ip: string;
+  baseline_ready: boolean;
+  first_seen?: string;
+  last_seen?: string;
+  baseline_until?: string;
+  learned_destinations?: string[];
+  learned_protocols?: string[];
+  learned_ports?: number[];
+  novel_destinations?: string[];
+  novel_protocols?: string[];
+  novel_ports?: number[];
+  category?: string;
+  expected_protocols?: string[];
+  expected_ports?: number[];
+  unexpected_protocols?: string[];
+  unexpected_ports?: number[];
+  plaintext_concern?: boolean;
+};
+
+type ObservationSOC = {
+  source: string;
+  window?: {
+    start?: string;
+    end?: string;
+  };
+  metrics: ObservationMetrics;
+  attack_like: AttackLikeActivity;
+  timeline: ObservationTimeBucket[];
+  top_lists: ObservationTopLists;
+  limitations?: string[];
+};
+
+type ObservationMetrics = {
+  total_observations: number;
+  external_count: number;
+  local_count: number;
+  dns_count: number;
+  http_count: number;
+  tls_count: number;
+  noise_count: number;
+  unique_sources: number;
+  unique_destinations: number;
+  unique_dns_queries: number;
+  unique_sni: number;
+  unique_http_hosts: number;
+  attack_like_count: number;
+  attack_like_source_count: number;
+};
+
+type AttackLikeActivity = {
+  score: number;
+  level: string;
+  total_count: number;
+  by_reason: AttackLikeReason[];
+  top_sources: ObservationTopListEntry[];
+  recent_items: AttackLikeObservation[];
+};
+
+type AttackLikeReason = {
+  key: string;
+  label: string;
+  count: number;
+};
+
+type AttackLikeObservation = {
+  ts: string;
+  source: string;
+  destination: string;
+  port?: number;
+  protocol?: string;
+  kind: string;
+  reasons: string[];
+};
+
+type ObservationTimeBucket = {
+  hour: string;
+  total_count: number;
+  external_count: number;
+  dns_count: number;
+  http_count: number;
+  tls_count: number;
+  noise_count: number;
+  attack_like_count: number;
+};
+
+type ObservationTopLists = {
+  destinations: ObservationTopListEntry[];
+  dns_queries: ObservationTopListEntry[];
+  sni: ObservationTopListEntry[];
+  http_hosts: ObservationTopListEntry[];
+  source_devices: ObservationTopListEntry[];
+};
+
+type ObservationTopListEntry = {
+  key: string;
+  count: number;
+  first_seen?: string;
+  last_seen?: string;
+  sources?: number;
 };
 
 type InventoryRiskSummary = {
@@ -122,6 +305,117 @@ type InventoryDevice = {
 type InventoryReport = {
   generated_at?: string;
   devices?: InventoryDevice[];
+};
+
+type DeviceEvidenceReport = {
+  generated_at: string;
+  window?: {
+    start?: string;
+    end?: string;
+  };
+  metrics: DeviceEvidenceMetrics;
+  devices: DeviceEvidenceProfile[];
+};
+
+type DeviceEvidenceMetrics = {
+  device_count: number;
+  devices_with_risk: number;
+  devices_with_blind_spot: number;
+  defense_candidate_count: number;
+  judged_normal?: number;
+  judged_suspicious?: number;
+  judged_risky?: number;
+  judged_unknown?: number;
+};
+
+type DeviceEvidenceProfile = {
+  ip: string;
+  label?: string;
+  category?: string;
+  category_confidence?: string;
+  vendor?: string;
+  vendor_confidence?: string;
+  family?: string;
+  family_confidence?: string;
+  first_seen?: string;
+  last_seen?: string;
+  event_count: number;
+  flow_count: number;
+  observation_count: number;
+  observed_evidence: DeviceObservedEvidence;
+  inferred_facts?: EvidenceFinding[];
+  risk_signals?: DeviceRiskSignal[];
+  passive_blind_spots?: EvidenceFinding[];
+  defense_candidates?: EvidenceFinding[];
+  judgment?: DeviceJudgment;
+};
+
+type DeviceObservedEvidence = {
+  protocols?: string[];
+  ports?: number[];
+  dns_queries?: string[];
+  tls_sni?: string[];
+  http_hosts?: string[];
+  http_requests?: string[];
+  external_destinations?: string[];
+  local_destinations?: string[];
+  discovery_protocols?: string[];
+  unknown_udp_ports?: number[];
+};
+
+type EvidenceFinding = {
+  key: string;
+  label: string;
+  detail?: string;
+  confidence?: string;
+  source?: string;
+};
+
+type DeviceRiskSignal = {
+  rule_id: string;
+  severity?: string;
+  confidence?: string;
+  count: number;
+  first_seen?: string;
+  last_seen?: string;
+  observed_fact?: string;
+  inference?: string;
+  limitation?: string;
+  recommendation?: string;
+  evidence?: string[];
+};
+
+type DeviceJudgment = {
+  state: string;
+  confidence: string;
+  evidence_readiness: string;
+  summary?: string;
+  findings?: JudgmentFinding[];
+  recommended_controls?: ControlRecommendation[];
+  deferred_decisions?: DeferredDecision[];
+};
+
+type JudgmentFinding = {
+  key: string;
+  label: string;
+  detail?: string;
+  severity?: string;
+  confidence?: string;
+};
+
+type ControlRecommendation = {
+  key: string;
+  label: string;
+  decision: string;
+  detail?: string;
+  confidence?: string;
+};
+
+type DeferredDecision = {
+  key: string;
+  label: string;
+  reason?: string;
+  blind_spot?: string;
 };
 
 type FlowRecord = {
@@ -185,12 +479,13 @@ type ExternalDestinationRow = {
   relatedOwasp: string;
 };
 
-type ViewName = "overview" | "devices" | "events";
+type ViewName = "overview" | "devices" | "events" | "evidence";
 type ViewerMeta = {
   demo_mode?: boolean;
   events_path?: string;
   report_path?: string;
   flows_path?: string;
+  observations_path?: string;
   inventory_path?: string;
 };
 
@@ -1044,6 +1339,41 @@ function reportSeverityClass(severity?: string): string {
   return "border-[#cbd5e1] text-[#64748b]";
 }
 
+function judgmentStateClass(state?: string): string {
+  const value = (state || "").toLowerCase();
+  if (value === "risky") return "border-[#ff6b57] text-[#ff3b1f]";
+  if (value === "suspicious") return "border-[#f59e0b] text-[#d97706]";
+  if (value === "normal") return "border-[#76b37d] text-[#2f7d3b]";
+  return "border-[#cbd5e1] text-[#64748b]";
+}
+
+function riskLevelLabel(level?: string): string {
+  const value = (level || "").toLowerCase();
+  if (value === "critical") return "Critical";
+  if (value === "high") return "High";
+  if (value === "medium") return "Medium";
+  if (value === "low") return "Low";
+  if (value === "observed") return "Observed";
+  return level || "-";
+}
+
+function riskLevelClass(level?: string): string {
+  const value = (level || "").toLowerCase();
+  if (value === "critical") return "border-[#ff5a47] text-[#d92d20]";
+  if (value === "high") return "border-[#fb923c] text-[#c2410c]";
+  if (value === "medium") return "border-[#facc15] text-[#a16207]";
+  if (value === "low") return "border-[#93c5fd] text-[#1d4ed8]";
+  return "border-[#cbd5e1] text-[#64748b]";
+}
+
+function riskScoreBarClass(score: number): string {
+  if (score >= 80) return "bg-[#d92d20]";
+  if (score >= 60) return "bg-[#f97316]";
+  if (score >= 35) return "bg-[#eab308]";
+  if (score > 0) return "bg-[#3b82f6]";
+  return "bg-[#94a3b8]";
+}
+
 function JsonDisclosure({ label, value }: { label: string; value: unknown }) {
   return (
     <details className="border border-border bg-[#fcfcfd]">
@@ -1148,6 +1478,11 @@ function OverviewView({
       meta?.report_path || meta?.events_path || report?.source || "events.jsonl"
     ),
     baseName(meta?.flows_path || "flows.jsonl"),
+    baseName(
+      meta?.observations_path ||
+        report?.observations?.source ||
+        "observations.jsonl"
+    ),
     baseName(meta?.inventory_path || "device_inventory.json"),
   ].filter(Boolean);
   const summaryMetrics = [
@@ -1176,6 +1511,146 @@ function OverviewView({
     ["外部通信先", `${uniqueExternal.length} 件`],
     ["フロー数", `${totalFlowCount.toLocaleString("ja-JP")} 件`],
   ];
+  const protection = report?.protection;
+  const observations = report?.observations;
+  const observationMetrics = observations
+    ? [
+        {
+          label: "総観測ログ",
+          value: observations.metrics.total_observations,
+          suffix: "件",
+        },
+        {
+          label: "外部通信",
+          value: observations.metrics.external_count,
+          suffix: "件",
+        },
+        {
+          label: "DNS",
+          value: observations.metrics.dns_count,
+          suffix: "件",
+        },
+        {
+          label: "HTTP",
+          value: observations.metrics.http_count,
+          suffix: "件",
+        },
+        {
+          label: "TLS",
+          value: observations.metrics.tls_count,
+          suffix: "件",
+        },
+        {
+          label: "ノイズ",
+          value: observations.metrics.noise_count,
+          suffix: "件",
+        },
+        {
+          label: "攻撃様シグナル",
+          value: observations.metrics.attack_like_count,
+          suffix: "件",
+          accent: observations.metrics.attack_like_count > 0,
+        },
+        {
+          label: "関与端末",
+          value: observations.metrics.attack_like_source_count,
+          suffix: "台",
+          accent: observations.metrics.attack_like_source_count > 0,
+        },
+      ]
+    : [];
+  const recentObservationTimeline = observations?.timeline.slice(-8) || [];
+  const maxTimelineCount = Math.max(
+    1,
+    ...recentObservationTimeline.map((item) => item.total_count)
+  );
+  const observationTopListSections: Array<{
+    label: string;
+    items: ObservationTopListEntry[];
+  }> = observations
+    ? [
+        {
+          label: "外部通信先",
+          items: observations.top_lists.destinations || [],
+        },
+        {
+          label: "DNS問い合わせ",
+          items: observations.top_lists.dns_queries || [],
+        },
+        {
+          label: "TLS SNI",
+          items: observations.top_lists.sni || [],
+        },
+        {
+          label: "HTTP Host",
+          items: observations.top_lists.http_hosts || [],
+        },
+      ]
+    : [];
+  const protectionMetrics = protection
+    ? [
+        {
+          label: "高リスク端末",
+          value: protection.metrics.high_risk_devices,
+          suffix: "台",
+        },
+        {
+          label: "要確認端末",
+          value: protection.metrics.devices_with_risk,
+          suffix: "台",
+        },
+        {
+          label: "未知端末",
+          value: protection.metrics.unknown_devices,
+          suffix: "台",
+        },
+        {
+          label: "外部通信先",
+          value: protection.metrics.external_destination_count,
+          suffix: "件",
+        },
+        {
+          label: "外部フロー",
+          value: protection.metrics.external_flow_count,
+          suffix: "件",
+        },
+        {
+          label: "ノイズ除外",
+          value: protection.metrics.noise_flow_count,
+          suffix: "件",
+        },
+        {
+          label: "学習済み端末",
+          value: protection.metrics.baseline_ready_devices,
+          suffix: "台",
+        },
+        {
+          label: "カテゴリ照合",
+          value: protection.metrics.category_profiled_devices,
+          suffix: "台",
+        },
+        {
+          label: "新規通信先",
+          value: protection.metrics.novel_destination_count,
+          suffix: "件",
+        },
+        {
+          label: "カテゴリ逸脱",
+          value: protection.metrics.category_deviation_count,
+          suffix: "件",
+        },
+        {
+          label: "平文通信",
+          value: protection.metrics.plaintext_traffic_count,
+          suffix: "件",
+        },
+        {
+          label: "危険サービス",
+          value: protection.metrics.insecure_service_count,
+          suffix: "件",
+        },
+      ]
+    : [];
 
   return (
     <div className="space-y-7 text-[#24324b]">
@@ -1195,6 +1670,7 @@ function OverviewView({
                 report,
                 flows,
                 inventory: hosts.map((host) => host.inventory).filter(Boolean),
+                observations: report?.observations,
                 exported_at: new Date().toISOString(),
               };
               const blob = new Blob([JSON.stringify(payload, null, 2)], {
@@ -1228,6 +1704,331 @@ function OverviewView({
           </dd>
         </dl>
       </section>
+
+      {protection ? (
+        <section className="border-b border-[#e4eaf3] pb-6">
+          <div className="grid gap-6 xl:grid-cols-[280px_minmax(0,1fr)]">
+            <div>
+              <div className="text-[13px] font-semibold text-[#6d7f9c]">
+                Home Risk Score
+              </div>
+              <div className="mt-2 flex items-end gap-3">
+                <div className="font-mono text-[64px] font-semibold leading-none tracking-[-0.03em] text-[#1f2a44]">
+                  {protection.home_risk_score}
+                </div>
+                <div className="pb-2 text-[18px] text-[#6d7f9c]">/ 100</div>
+              </div>
+              <div className="mt-4 h-2 w-full bg-[#e4eaf3]">
+                <div
+                  className={cn(
+                    "h-2",
+                    riskScoreBarClass(protection.home_risk_score)
+                  )}
+                  style={{
+                    width: `${Math.max(
+                      2,
+                      Math.min(100, protection.home_risk_score)
+                    )}%`,
+                  }}
+                />
+              </div>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <span
+                  className={cn(
+                    "inline-flex border px-2.5 py-1 text-[12px] font-semibold",
+                    riskLevelClass(protection.risk_level)
+                  )}
+                >
+                  {riskLevelLabel(protection.risk_level)}
+                </span>
+                <span className="inline-flex border border-[#cbd5e1] px-2.5 py-1 text-[12px] font-semibold text-[#475569]">
+                  Coverage {protection.passive_coverage.score}%
+                </span>
+              </div>
+            </div>
+
+            <div className="min-w-0">
+              <div className="grid gap-y-4 md:grid-cols-3 md:divide-x md:divide-[#e4eaf3]">
+                {protectionMetrics.map((metric) => (
+                  <div key={metric.label} className="pr-4">
+                    <div className="text-[13px] text-[#6d7f9c]">
+                      {metric.label}
+                    </div>
+                    <div className="mt-1 flex items-end gap-0.5">
+                      <span className="text-[20px] font-medium text-[#1f2a44]">
+                        {metric.value.toLocaleString("ja-JP")}
+                      </span>
+                      <span className="pb-0.5 text-[13px] text-[#6d7f9c]">
+                        {metric.suffix}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-6 grid gap-6 xl:grid-cols-2">
+                <div>
+                  <div className="border-b border-[#cfd9e6] pb-2 text-[15px] font-semibold text-[#1f2a44]">
+                    上位リスク端末
+                  </div>
+                  <div className="divide-y divide-[#edf2f8]">
+                    {protection.top_devices.slice(0, 3).map((device) => (
+                      <button
+                        key={device.ip}
+                        onClick={() => onOpenHost(device.ip)}
+                        className="grid w-full grid-cols-[116px_64px_minmax(0,1fr)] gap-3 py-3 text-left text-[13px] hover:bg-[#fafcff]"
+                      >
+                        <div className="font-mono text-[#31415c] underline underline-offset-2">
+                          {device.ip}
+                        </div>
+                        <div className="font-mono text-[#1f2a44]">
+                          {device.risk_score}
+                        </div>
+                        <div className="min-w-0 truncate text-[#4d5f7c]">
+                          {device.category_deviations > 0
+                            ? `Category deviation ${device.category_deviations}件`
+                            : device.novelty_count > 0
+                            ? `Baseline novelty ${device.novelty_count}件`
+                            : device.reasons[0] || device.recommendation || "-"}
+                        </div>
+                      </button>
+                    ))}
+                    {protection.top_devices.length === 0 ? (
+                      <div className="py-3 text-[13px] text-[#6d7f9c]">
+                        リスク端末はまだありません
+                      </div>
+                    ) : null}
+                  </div>
+                </div>
+
+                <div>
+                  <div className="border-b border-[#cfd9e6] pb-2 text-[15px] font-semibold text-[#1f2a44]">
+                    推奨対応
+                  </div>
+                  <div className="divide-y divide-[#edf2f8]">
+                    {protection.recommendations.slice(0, 3).map((item) => (
+                      <div
+                        key={item}
+                        className="py-3 text-[13px] leading-5 text-[#4d5f7c]"
+                      >
+                        {item}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      ) : null}
+
+      {observations ? (
+        <section className="border-b border-[#e4eaf3] pb-6">
+          <div className="grid gap-6 xl:grid-cols-[280px_minmax(0,1fr)]">
+            <div>
+              <div className="text-[13px] font-semibold text-[#6d7f9c]">
+                Home SOC Observation
+              </div>
+              <div className="mt-2 flex items-end gap-3">
+                <div className="font-mono text-[64px] font-semibold leading-none tracking-[-0.03em] text-[#1f2a44]">
+                  {observations.attack_like.score}
+                </div>
+                <div className="pb-2 text-[18px] text-[#6d7f9c]">/ 100</div>
+              </div>
+              <div className="mt-4 h-2 w-full bg-[#e4eaf3]">
+                <div
+                  className={cn(
+                    "h-2",
+                    riskScoreBarClass(observations.attack_like.score)
+                  )}
+                  style={{
+                    width: `${Math.max(
+                      2,
+                      Math.min(100, observations.attack_like.score)
+                    )}%`,
+                  }}
+                />
+              </div>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <span
+                  className={cn(
+                    "inline-flex border px-2.5 py-1 text-[12px] font-semibold",
+                    riskLevelClass(observations.attack_like.level)
+                  )}
+                >
+                  {riskLevelLabel(observations.attack_like.level)}
+                </span>
+                <span className="inline-flex border border-[#cbd5e1] px-2.5 py-1 text-[12px] font-semibold text-[#475569]">
+                  {formatWindow(
+                    observations.window?.start,
+                    observations.window?.end
+                  )}
+                </span>
+              </div>
+            </div>
+
+            <div className="min-w-0">
+              <div className="grid gap-y-4 md:grid-cols-4 md:divide-x md:divide-[#e4eaf3]">
+                {observationMetrics.map((metric) => (
+                  <div key={metric.label} className="pr-4">
+                    <div className="text-[13px] text-[#6d7f9c]">
+                      {metric.label}
+                    </div>
+                    <div className="mt-1 flex items-end gap-0.5">
+                      <span
+                        className={cn(
+                          "text-[20px] font-medium text-[#1f2a44]",
+                          metric.accent && "text-[#e56b1f]"
+                        )}
+                      >
+                        {metric.value.toLocaleString("ja-JP")}
+                      </span>
+                      <span className="pb-0.5 text-[13px] text-[#6d7f9c]">
+                        {metric.suffix}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-6 grid gap-6 xl:grid-cols-3">
+                <div>
+                  <div className="border-b border-[#cfd9e6] pb-2 text-[15px] font-semibold text-[#1f2a44]">
+                    攻撃様シグナル
+                  </div>
+                  <div className="divide-y divide-[#edf2f8]">
+                    {(observations.attack_like.by_reason || [])
+                      .slice(0, 5)
+                      .map((item) => (
+                        <div
+                          key={item.key}
+                          className="grid grid-cols-[minmax(0,1fr)_56px] gap-3 py-3 text-[13px]"
+                        >
+                          <div className="truncate text-[#4d5f7c]">
+                            {item.label}
+                          </div>
+                          <div className="text-right font-mono text-[#1f2a44]">
+                            {item.count}
+                          </div>
+                        </div>
+                      ))}
+                    {(observations.attack_like.by_reason || []).length === 0 ? (
+                      <div className="py-3 text-[13px] text-[#6d7f9c]">
+                        攻撃様シグナルはまだありません
+                      </div>
+                    ) : null}
+                  </div>
+                </div>
+
+                <div>
+                  <div className="border-b border-[#cfd9e6] pb-2 text-[15px] font-semibold text-[#1f2a44]">
+                    観測タイムライン
+                  </div>
+                  <div className="divide-y divide-[#edf2f8]">
+                    {recentObservationTimeline.map((item) => (
+                      <div
+                        key={item.hour}
+                        className="grid grid-cols-[86px_minmax(0,1fr)_52px] items-center gap-3 py-2.5 text-[13px]"
+                      >
+                        <div className="font-mono text-[#5e7598]">
+                          {formatTimeOnly(item.hour)}
+                        </div>
+                        <div className="h-2 bg-[#e7ecf3]">
+                          <div
+                            className="h-2 bg-[#102b52]"
+                            style={{
+                              width: `${Math.max(
+                                4,
+                                Math.round(
+                                  (item.total_count / maxTimelineCount) * 100
+                                )
+                              )}%`,
+                            }}
+                          />
+                        </div>
+                        <div className="text-right font-mono text-[#1f2a44]">
+                          {item.attack_like_count > 0
+                            ? `${item.attack_like_count}/${item.total_count}`
+                            : item.total_count}
+                        </div>
+                      </div>
+                    ))}
+                    {recentObservationTimeline.length === 0 ? (
+                      <div className="py-3 text-[13px] text-[#6d7f9c]">-</div>
+                    ) : null}
+                  </div>
+                </div>
+
+                <div>
+                  <div className="border-b border-[#cfd9e6] pb-2 text-[15px] font-semibold text-[#1f2a44]">
+                    最近の攻撃様ログ
+                  </div>
+                  <div className="divide-y divide-[#edf2f8]">
+                    {(observations.attack_like.recent_items || [])
+                      .slice(0, 4)
+                      .map((item, index) => (
+                        <div
+                          key={`${item.ts}-${index}`}
+                          className="py-3 text-[13px]"
+                        >
+                          <div className="flex items-center justify-between gap-3">
+                            <div className="font-mono text-[#24324b]">
+                              {item.source}
+                            </div>
+                            <div className="font-mono text-[#5e7598]">
+                              {formatCompactDateTime(item.ts)}
+                            </div>
+                          </div>
+                          <div className="mt-1 truncate text-[#4d5f7c]">
+                            {item.destination}
+                            {item.port ? `:${item.port}` : ""}
+                          </div>
+                          <div className="mt-1 truncate text-[#7a8ba6]">
+                            {(item.reasons || []).join(", ")}
+                          </div>
+                        </div>
+                      ))}
+                    {(observations.attack_like.recent_items || []).length ===
+                    0 ? (
+                      <div className="py-3 text-[13px] text-[#6d7f9c]">
+                        最近の攻撃様ログはありません
+                      </div>
+                    ) : null}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-7 grid gap-6 xl:grid-cols-4">
+            {observationTopListSections.map((section) => (
+              <div key={section.label}>
+                <div className="border-b border-[#cfd9e6] pb-2 text-[15px] font-semibold text-[#1f2a44]">
+                  {section.label}
+                </div>
+                <div className="divide-y divide-[#edf2f8]">
+                  {section.items.slice(0, 5).map((item) => (
+                    <div
+                      key={`${section.label}-${item.key}`}
+                      className="grid grid-cols-[minmax(0,1fr)_48px] gap-3 py-2.5 text-[13px]"
+                    >
+                      <div className="truncate font-mono text-[#4d5f7c]">
+                        {item.key}
+                      </div>
+                      <div className="text-right font-mono text-[#1f2a44]">
+                        {item.count}
+                      </div>
+                    </div>
+                  ))}
+                  {section.items.length === 0 ? (
+                    <div className="py-2.5 text-[13px] text-[#6d7f9c]">-</div>
+                  ) : null}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      ) : null}
 
       <section className="border-b border-[#e4eaf3] pb-5">
         <div className="grid gap-y-4 md:grid-cols-5 md:divide-x md:divide-[#e4eaf3]">
@@ -2428,6 +3229,407 @@ function EventsView({
   );
 }
 
+function EvidenceView({
+  evidence,
+  onOpenEvents,
+}: {
+  evidence: DeviceEvidenceReport | null;
+  onOpenEvents: () => void;
+}) {
+  const [query, setQuery] = useState("");
+  const deferredQuery = useDeferredValue(query);
+  const devices = evidence?.devices || [];
+  const filteredDevices = devices.filter((device) => {
+    const observed = device.observed_evidence || {};
+    const haystack = [
+      device.ip,
+      device.label,
+      device.category,
+      device.vendor,
+      device.family,
+      ...(observed.protocols || []),
+      ...(observed.dns_queries || []),
+      ...(observed.tls_sni || []),
+      ...(observed.http_hosts || []),
+      ...(observed.external_destinations || []),
+      ...(device.risk_signals || []).map((signal) => signal.rule_id),
+      ...(device.passive_blind_spots || []).map((item) => item.label),
+      ...(device.defense_candidates || []).map((item) => item.label),
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
+    return (
+      !deferredQuery.trim() ||
+      haystack.includes(deferredQuery.trim().toLowerCase())
+    );
+  });
+
+  return (
+    <div className="space-y-7 text-[#24324b]">
+      <section className="border-b border-[#dbe3ef] pb-4">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <h1 className="text-[24px] font-medium tracking-[-0.02em] text-[#1f2a44]">
+              Device Evidence
+            </h1>
+            <div className="mt-2 text-[14px] text-[#70819d]">
+              端末ごとの観測証拠、推定、見えないもの、防御候補
+            </div>
+          </div>
+          <Button
+            variant="outline"
+            className="h-9 rounded-none border-[#b8c6db] bg-white px-4 text-[13px] font-semibold text-[#1f2a44] shadow-none hover:bg-[#f8fbff]"
+            onClick={onOpenEvents}
+          >
+            検出一覧を開く
+          </Button>
+        </div>
+      </section>
+
+      <section className="grid gap-4 md:grid-cols-4">
+        {[
+          ["対象端末", evidence?.metrics?.device_count || 0],
+          ["Risky", evidence?.metrics?.judged_risky || 0],
+          ["Suspicious", evidence?.metrics?.judged_suspicious || 0],
+          ["Unknown", evidence?.metrics?.judged_unknown || 0],
+        ].map(([label, value]) => (
+          <div key={label} className="border-b border-[#cfd9e6] pb-3">
+            <div className="text-[13px] text-[#70819d]">{label}</div>
+            <div className="mt-1 font-mono text-[28px] text-[#1f2a44]">
+              {Number(value).toLocaleString("ja-JP")}
+            </div>
+          </div>
+        ))}
+      </section>
+
+      <section className="border-b border-[#e4eaf3] pb-4">
+        <div className="grid grid-cols-[44px_minmax(0,1fr)] items-center gap-2">
+          <div className="text-[18px] font-semibold text-[#5c7094]">検索</div>
+          <div className="relative">
+            <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#93a3bb]" />
+            <Input
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="IP / rule / DNS / SNI / blind spot"
+              className="h-10 rounded-none border-[#cfd9e6] bg-white pl-10 text-[14px] placeholder:text-[#94a3b8]"
+            />
+          </div>
+        </div>
+      </section>
+
+      <section className="space-y-6">
+        {filteredDevices.length > 0 ? (
+          filteredDevices.map((device) => (
+            <DeviceEvidencePanel key={device.ip} device={device} />
+          ))
+        ) : (
+          <div className="border border-[#e4eaf3] py-8 text-center text-[14px] text-[#70819d]">
+            Evidence に一致する端末はありません。
+          </div>
+        )}
+      </section>
+    </div>
+  );
+}
+
+function DeviceEvidencePanel({ device }: { device: DeviceEvidenceProfile }) {
+  const observed = device.observed_evidence || {};
+  const riskSignals = device.risk_signals || [];
+  const blindSpots = device.passive_blind_spots || [];
+  const defenseCandidates = device.defense_candidates || [];
+  const inferredFacts = device.inferred_facts || [];
+  const judgment = device.judgment;
+
+  return (
+    <article className="border-b border-[#dbe3ef] pb-6">
+      <div className="flex flex-wrap items-start justify-between gap-4 border-b border-[#cfd9e6] pb-3">
+        <div>
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="font-mono text-[18px] font-semibold text-[#1f2a44]">
+              {device.ip}
+            </div>
+            {judgment ? (
+              <span
+                className={cn(
+                  "border px-2 py-0.5 text-[11px] font-semibold uppercase",
+                  judgmentStateClass(judgment.state)
+                )}
+              >
+                {judgment.state}
+              </span>
+            ) : null}
+          </div>
+          <div className="mt-1 text-[14px] text-[#70819d]">
+            {displayInferredValue(device.family || device.vendor || device.category)}{" "}
+            / confidence{" "}
+            {device.family_confidence ||
+              device.vendor_confidence ||
+              device.category_confidence ||
+              "unknown"}
+          </div>
+        </div>
+        <div className="grid grid-cols-3 gap-5 text-right text-[13px] text-[#70819d]">
+          <div>
+            <div>Events</div>
+            <div className="font-mono text-[18px] text-[#1f2a44]">
+              {device.event_count}
+            </div>
+          </div>
+          <div>
+            <div>Flows</div>
+            <div className="font-mono text-[18px] text-[#1f2a44]">
+              {device.flow_count}
+            </div>
+          </div>
+          <div>
+            <div>Obs</div>
+            <div className="font-mono text-[18px] text-[#1f2a44]">
+              {device.observation_count}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-4 grid gap-5 xl:grid-cols-2">
+        {judgment ? <JudgmentPanel judgment={judgment} /> : null}
+        <EvidenceList
+          title="Observed Evidence"
+          items={[
+            ["Protocols", joinLimited(observed.protocols || [], 8)],
+            ["Ports", joinLimited((observed.ports || []).map(String), 12)],
+            ["DNS", joinLimited(observed.dns_queries || [], 5)],
+            ["TLS SNI", joinLimited(observed.tls_sni || [], 5)],
+            ["HTTP Host", joinLimited(observed.http_hosts || [], 5)],
+            [
+              "External",
+              joinLimited(observed.external_destinations || [], 5),
+            ],
+            [
+              "Unknown UDP",
+              joinLimited((observed.unknown_udp_ports || []).map(String), 8),
+            ],
+          ]}
+        />
+        <FindingList title="Inferred Facts" items={inferredFacts} />
+        <RiskSignalList signals={riskSignals} />
+        <FindingList title="Passive Blind Spots" items={blindSpots} />
+        <FindingList title="Defense Candidates" items={defenseCandidates} />
+      </div>
+    </article>
+  );
+}
+
+function JudgmentPanel({ judgment }: { judgment: DeviceJudgment }) {
+  return (
+    <div>
+      <div className="border-b border-[#cfd9e6] pb-2 text-[15px] font-semibold text-[#1f2a44]">
+        Judgment
+      </div>
+      <div className="space-y-3 py-2 text-[13px]">
+        <div className="flex flex-wrap items-center gap-2">
+          <span
+            className={cn(
+              "border px-2 py-0.5 text-[11px] font-semibold uppercase",
+              judgmentStateClass(judgment.state)
+            )}
+          >
+            {judgment.state}
+          </span>
+          <span className="font-mono text-[#6d7f9c]">
+            confidence {judgment.confidence || "unknown"} / evidence{" "}
+            {judgment.evidence_readiness || "unknown"}
+          </span>
+        </div>
+        <div className="text-[#5e7598]">{judgment.summary || "-"}</div>
+        <JudgmentFindingRows title="Findings" items={judgment.findings || []} />
+        <ControlRows items={judgment.recommended_controls || []} />
+        <DeferredRows items={judgment.deferred_decisions || []} />
+      </div>
+    </div>
+  );
+}
+
+function JudgmentFindingRows({
+  title,
+  items,
+}: {
+  title: string;
+  items: JudgmentFinding[];
+}) {
+  return (
+    <div>
+      <div className="text-[12px] font-semibold uppercase text-[#70819d]">
+        {title}
+      </div>
+      {items.length > 0 ? (
+        <div className="mt-1 divide-y divide-[#edf2f8]">
+          {items.map((item) => (
+            <div key={item.key} className="py-1.5">
+              <div className="font-semibold text-[#24324b]">{item.label}</div>
+              <div className="text-[#5e7598]">{item.detail || "-"}</div>
+              <div className="font-mono text-[12px] text-[#8a99b2]">
+                {item.severity || "info"} / {item.confidence || "n/a"}
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="mt-1 text-[#8a99b2]">-</div>
+      )}
+    </div>
+  );
+}
+
+function ControlRows({ items }: { items: ControlRecommendation[] }) {
+  return (
+    <div>
+      <div className="text-[12px] font-semibold uppercase text-[#70819d]">
+        Recommended Controls
+      </div>
+      {items.length > 0 ? (
+        <div className="mt-1 divide-y divide-[#edf2f8]">
+          {items.map((item) => (
+            <div key={item.key} className="py-1.5">
+              <div className="font-semibold text-[#24324b]">{item.label}</div>
+              <div className="text-[#5e7598]">{item.detail || "-"}</div>
+              <div className="font-mono text-[12px] text-[#8a99b2]">
+                {item.decision} / {item.confidence || "n/a"}
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="mt-1 text-[#8a99b2]">-</div>
+      )}
+    </div>
+  );
+}
+
+function DeferredRows({ items }: { items: DeferredDecision[] }) {
+  return (
+    <div>
+      <div className="text-[12px] font-semibold uppercase text-[#70819d]">
+        Deferred Decisions
+      </div>
+      {items.length > 0 ? (
+        <div className="mt-1 divide-y divide-[#edf2f8]">
+          {items.map((item) => (
+            <div key={item.key} className="py-1.5">
+              <div className="font-semibold text-[#24324b]">{item.label}</div>
+              <div className="text-[#5e7598]">{item.reason || "-"}</div>
+              <div className="font-mono text-[12px] text-[#8a99b2]">
+                {item.blind_spot || "passive_limit"}
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="mt-1 text-[#8a99b2]">-</div>
+      )}
+    </div>
+  );
+}
+
+function EvidenceList({
+  title,
+  items,
+}: {
+  title: string;
+  items: Array<[string, string]>;
+}) {
+  return (
+    <div>
+      <div className="border-b border-[#cfd9e6] pb-2 text-[15px] font-semibold text-[#1f2a44]">
+        {title}
+      </div>
+      <div className="divide-y divide-[#edf2f8]">
+        {items.map(([label, value]) => (
+          <div key={label} className="grid grid-cols-[112px_minmax(0,1fr)] gap-3 py-2 text-[13px]">
+            <div className="text-[#70819d]">{label}</div>
+            <div className="break-words font-mono text-[#24324b]">
+              {value || "-"}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function FindingList({
+  title,
+  items,
+}: {
+  title: string;
+  items: EvidenceFinding[];
+}) {
+  return (
+    <div>
+      <div className="border-b border-[#cfd9e6] pb-2 text-[15px] font-semibold text-[#1f2a44]">
+        {title}
+      </div>
+      <div className="divide-y divide-[#edf2f8]">
+        {items.length > 0 ? (
+          items.map((item) => (
+            <div key={`${item.key}-${item.detail}`} className="py-2 text-[13px]">
+              <div className="font-semibold text-[#24324b]">{item.label}</div>
+              <div className="mt-1 text-[#5e7598]">{item.detail || "-"}</div>
+              <div className="mt-1 font-mono text-[12px] text-[#8a99b2]">
+                {item.source || "-"} / {item.confidence || "n/a"}
+              </div>
+            </div>
+          ))
+        ) : (
+          <div className="py-3 text-[13px] text-[#8a99b2]">-</div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function RiskSignalList({ signals }: { signals: DeviceRiskSignal[] }) {
+  return (
+    <div>
+      <div className="border-b border-[#cfd9e6] pb-2 text-[15px] font-semibold text-[#1f2a44]">
+        Risk Signals
+      </div>
+      <div className="divide-y divide-[#edf2f8]">
+        {signals.length > 0 ? (
+          signals.map((signal) => (
+            <div key={signal.rule_id} className="py-2 text-[13px]">
+              <div className="flex flex-wrap items-center gap-2">
+                <span
+                  className={cn(
+                    "inline-flex min-w-[74px] justify-center border px-2 py-0.5 text-[12px] font-medium",
+                    reportSeverityClass(signal.severity)
+                  )}
+                >
+                  {compactSeverityLabel(signal.severity)}
+                </span>
+                <span className="font-mono font-semibold text-[#24324b]">
+                  {signal.rule_id}
+                </span>
+                <span className="font-mono text-[#8a99b2]">
+                  x{signal.count}
+                </span>
+              </div>
+              <div className="mt-2 text-[#5e7598]">
+                {signal.observed_fact || signal.inference || "-"}
+              </div>
+              {signal.limitation ? (
+                <div className="mt-1 text-[#8a99b2]">{signal.limitation}</div>
+              ) : null}
+            </div>
+          ))
+        ) : (
+          <div className="py-3 text-[13px] text-[#8a99b2]">-</div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function QuarantReportViewerContent() {
   const router = useRouter();
   const pathname = usePathname();
@@ -2435,6 +3637,7 @@ function QuarantReportViewerContent() {
 
   const [report, setReport] = useState<Report | null>(null);
   const [inventory, setInventory] = useState<InventoryReport | null>(null);
+  const [evidence, setEvidence] = useState<DeviceEvidenceReport | null>(null);
   const [flows, setFlows] = useState<FlowRecord[]>([]);
   const [status, setStatus] = useState("Loading...");
   const [error, setError] = useState("");
@@ -2444,7 +3647,9 @@ function QuarantReportViewerContent() {
 
   const viewParam = searchParams.get("view");
   const activeView: ViewName =
-    viewParam === "devices" || viewParam === "events" ? viewParam : "overview";
+    viewParam === "devices" || viewParam === "events" || viewParam === "evidence"
+      ? viewParam
+      : "overview";
   const activeHost = searchParams.get("host");
 
   const loadData = useEffectEvent(
@@ -2457,11 +3662,17 @@ function QuarantReportViewerContent() {
           setError("");
         }
 
-        const [reportResponse, inventoryResponse, flowsResponse, metaResponse] =
-          await Promise.all([
+        const [
+          reportResponse,
+          inventoryResponse,
+          flowsResponse,
+          evidenceResponse,
+          metaResponse,
+        ] = await Promise.all([
             fetch(`${API_BASE_URL}/api/report`, { cache: "no-store" }),
             fetch(`${API_BASE_URL}/api/inventory`, { cache: "no-store" }),
             fetch(`${API_BASE_URL}/api/flows`, { cache: "no-store" }),
+            fetch(`${API_BASE_URL}/api/evidence`, { cache: "no-store" }),
             fetch(`${API_BASE_URL}/api/meta`, { cache: "no-store" }),
           ]);
 
@@ -2469,7 +3680,7 @@ function QuarantReportViewerContent() {
           throw new Error(`report HTTP ${reportResponse.status}`);
         }
 
-        const [nextReport, nextInventory, nextFlows, nextMeta] =
+        const [nextReport, nextInventory, nextFlows, nextEvidence, nextMeta] =
           await Promise.all([
             reportResponse.json() as Promise<Report>,
             inventoryResponse.ok
@@ -2478,6 +3689,9 @@ function QuarantReportViewerContent() {
             flowsResponse.ok
               ? (flowsResponse.json() as Promise<FlowRecord[]>)
               : Promise.resolve([]),
+            evidenceResponse.ok
+              ? (evidenceResponse.json() as Promise<DeviceEvidenceReport>)
+              : Promise.resolve(null),
             metaResponse.ok
               ? (metaResponse.json() as Promise<ViewerMeta>)
               : Promise.resolve({}),
@@ -2486,6 +3700,7 @@ function QuarantReportViewerContent() {
         setReport(nextReport);
         setInventory(nextInventory);
         setFlows(nextFlows);
+        setEvidence(nextEvidence);
         setViewerMeta(nextMeta);
         setStatus("Connected");
         setError("");
@@ -2530,6 +3745,7 @@ function QuarantReportViewerContent() {
   const navItems: Array<{ key: ViewName; label: string }> = [
     { key: "overview", label: "概要" },
     { key: "devices", label: "端末一覧" },
+    { key: "evidence", label: "Evidence" },
     { key: "events", label: "検出一覧" },
   ];
   const navActiveView: ViewName = selectedHost ? "devices" : activeView;
@@ -2639,6 +3855,11 @@ function QuarantReportViewerContent() {
               />
             ) : activeView === "events" ? (
               <EventsView report={report} flows={flows} meta={viewerMeta} />
+            ) : activeView === "evidence" ? (
+              <EvidenceView
+                evidence={evidence}
+                onOpenEvents={() => setView("events")}
+              />
             ) : (
               <OverviewView
                 report={report}

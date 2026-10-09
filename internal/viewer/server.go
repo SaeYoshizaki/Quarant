@@ -18,14 +18,15 @@ import (
 )
 
 type Options struct {
-	EventsPath    string
-	ReportPath    string
-	FlowsPath     string
-	InventoryPath string
-	Addr          string
-	OpenBrowser   bool
-	WebDist       string
-	DemoMode      bool
+	EventsPath       string
+	ReportPath       string
+	FlowsPath        string
+	ObservationsPath string
+	InventoryPath    string
+	Addr             string
+	OpenBrowser      bool
+	WebDist          string
+	DemoMode         bool
 }
 
 func Serve(opts Options) error {
@@ -34,6 +35,9 @@ func Serve(opts Options) error {
 	}
 	if strings.TrimSpace(opts.FlowsPath) == "" {
 		opts.FlowsPath = "flows.jsonl"
+	}
+	if strings.TrimSpace(opts.ObservationsPath) == "" {
+		opts.ObservationsPath = "observations.jsonl"
 	}
 	if strings.TrimSpace(opts.InventoryPath) == "" {
 		opts.InventoryPath = "device_inventory.json"
@@ -52,11 +56,12 @@ func Serve(opts Options) error {
 	})
 	mux.HandleFunc("/api/meta", func(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, map[string]any{
-			"demo_mode":      opts.DemoMode,
-			"events_path":    opts.EventsPath,
-			"report_path":    opts.ReportPath,
-			"flows_path":     opts.FlowsPath,
-			"inventory_path": opts.InventoryPath,
+			"demo_mode":         opts.DemoMode,
+			"events_path":       opts.EventsPath,
+			"report_path":       opts.ReportPath,
+			"flows_path":        opts.FlowsPath,
+			"observations_path": opts.ObservationsPath,
+			"inventory_path":    opts.InventoryPath,
 		})
 	})
 	mux.HandleFunc("/api/report", func(w http.ResponseWriter, r *http.Request) {
@@ -74,7 +79,26 @@ func Serve(opts Options) error {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
+		flows, err := reportapi.LoadFlows(opts.FlowsPath)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 		rep.Devices = inventory.Devices
+		protection := reportapi.BuildProtectionSummary(
+			rep.Events,
+			flows,
+			inventory.Devices,
+			rep.UnknownDevices,
+			rep.QuarantineCandidates,
+		)
+		rep.Protection = &protection
+		observations, err := reportapi.LoadObservationSOC(opts.ObservationsPath)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		rep.Observations = &observations
 		writeJSON(w, rep)
 	})
 	mux.HandleFunc("/api/activity/summary", func(w http.ResponseWriter, r *http.Request) {
@@ -101,6 +125,30 @@ func Serve(opts Options) error {
 		}
 		writeJSON(w, rep)
 	})
+	mux.HandleFunc("/api/observations/summary", func(w http.ResponseWriter, r *http.Request) {
+		rep, err := reportapi.LoadObservationSOC(opts.ObservationsPath)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		writeJSON(w, rep)
+	})
+	mux.HandleFunc("/api/evidence", func(w http.ResponseWriter, r *http.Request) {
+		rep, err := reportapi.LoadDeviceEvidenceReport(opts.EventsPath, opts.FlowsPath, opts.ObservationsPath, opts.InventoryPath)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		writeJSON(w, rep)
+	})
+	mux.HandleFunc("/api/precision", func(w http.ResponseWriter, r *http.Request) {
+		rep, err := reportapi.LoadDetectionPrecisionReport(opts.EventsPath, opts.FlowsPath, opts.ObservationsPath, opts.InventoryPath)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		writeJSON(w, rep)
+	})
 
 	listener, err := net.Listen("tcp", opts.Addr)
 	if err != nil {
@@ -117,6 +165,7 @@ func Serve(opts Options) error {
 		log.Printf("reading report from %s", opts.ReportPath)
 	}
 	log.Printf("reading flows from %s", opts.FlowsPath)
+	log.Printf("reading observations from %s", opts.ObservationsPath)
 	log.Printf("reading inventory from %s", opts.InventoryPath)
 	if opts.DemoMode {
 		log.Printf("demo mode enabled")

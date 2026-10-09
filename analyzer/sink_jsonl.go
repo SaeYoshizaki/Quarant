@@ -27,6 +27,10 @@ func (s *JSONLSink) WriteFlow(flow FlowRecord) error {
 	return s.writeValue(flow)
 }
 
+func (s *JSONLSink) WriteObservation(observation ObservationRecord) error {
+	return s.writeValue(observation)
+}
+
 func (s *JSONLSink) writeValue(v any) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()

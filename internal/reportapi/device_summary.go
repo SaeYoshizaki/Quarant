@@ -180,6 +180,18 @@ func mergeInventoryDevice(dst *InventoryDevice, src InventoryDevice) {
 	if laterTime(src.LastSeen, dst.LastSeen) {
 		dst.LastSeen = src.LastSeen
 	}
+	if strings.TrimSpace(dst.MACAddress) == "" {
+		dst.MACAddress = src.MACAddress
+	}
+	if strings.TrimSpace(dst.Hostname) == "" {
+		dst.Hostname = src.Hostname
+	}
+	if strings.TrimSpace(dst.DHCPLeaseExpiresAt) == "" || laterTime(src.DHCPLeaseExpiresAt, dst.DHCPLeaseExpiresAt) {
+		dst.DHCPLeaseExpiresAt = src.DHCPLeaseExpiresAt
+	}
+	if strings.TrimSpace(dst.DHCPLeaseState) == "" {
+		dst.DHCPLeaseState = src.DHCPLeaseState
+	}
 	dst.EventCount = src.EventCount
 	dst.FlowCount = src.FlowCount
 	dst.ObservedProtocols = uniqueSortedStrings(append(dst.ObservedProtocols, src.ObservedProtocols...))

@@ -62,19 +62,21 @@ type KV struct {
 }
 
 type Report struct {
-	GeneratedAt          string            `json:"generated_at"`
-	Source               string            `json:"source"`
-	TotalEvents          int               `json:"total_events"`
-	UserNotifications    int               `json:"user_notifications"`
-	QuarantineCandidates int               `json:"quarantine_candidates"`
-	UnknownDevices       int               `json:"unknown_devices"`
-	Window               Window            `json:"window"`
-	Severity             []KV              `json:"severity"`
-	Rules                []KV              `json:"rules"`
-	Categories           []KV              `json:"categories"`
-	Sources              []KV              `json:"sources"`
-	Devices              []InventoryDevice `json:"devices,omitempty"`
-	Events               []Event           `json:"events"`
+	GeneratedAt          string             `json:"generated_at"`
+	Source               string             `json:"source"`
+	TotalEvents          int                `json:"total_events"`
+	UserNotifications    int                `json:"user_notifications"`
+	QuarantineCandidates int                `json:"quarantine_candidates"`
+	UnknownDevices       int                `json:"unknown_devices"`
+	Window               Window             `json:"window"`
+	Protection           *ProtectionSummary `json:"protection,omitempty"`
+	Observations         *ObservationSOC    `json:"observations,omitempty"`
+	Severity             []KV               `json:"severity"`
+	Rules                []KV               `json:"rules"`
+	Categories           []KV               `json:"categories"`
+	Sources              []KV               `json:"sources"`
+	Devices              []InventoryDevice  `json:"devices,omitempty"`
+	Events               []Event            `json:"events"`
 }
 
 type Window struct {
@@ -218,21 +220,23 @@ func emptyReport(source string) Report {
 }
 
 type rawReport struct {
-	GeneratedAt          string            `json:"generated_at"`
-	Source               string            `json:"source"`
-	TotalEvents          int               `json:"total_events"`
-	UserNotifications    int               `json:"user_notifications"`
-	QuarantineCandidates int               `json:"quarantine_candidates"`
-	UnknownDevices       int               `json:"unknown_devices"`
-	Window               Window            `json:"window"`
-	Severity             []KV              `json:"severity"`
-	Rules                []KV              `json:"rules"`
-	Categories           []KV              `json:"categories"`
-	Sources              []KV              `json:"sources"`
-	SrcIP                []KV              `json:"src_ip"`
-	Flows                []KV              `json:"flows"`
-	Devices              []InventoryDevice `json:"devices"`
-	Events               []Event           `json:"events"`
+	GeneratedAt          string             `json:"generated_at"`
+	Source               string             `json:"source"`
+	TotalEvents          int                `json:"total_events"`
+	UserNotifications    int                `json:"user_notifications"`
+	QuarantineCandidates int                `json:"quarantine_candidates"`
+	UnknownDevices       int                `json:"unknown_devices"`
+	Window               Window             `json:"window"`
+	Protection           *ProtectionSummary `json:"protection"`
+	Observations         *ObservationSOC    `json:"observations"`
+	Severity             []KV               `json:"severity"`
+	Rules                []KV               `json:"rules"`
+	Categories           []KV               `json:"categories"`
+	Sources              []KV               `json:"sources"`
+	SrcIP                []KV               `json:"src_ip"`
+	Flows                []KV               `json:"flows"`
+	Devices              []InventoryDevice  `json:"devices"`
+	Events               []Event            `json:"events"`
 }
 
 func loadReportJSON(path string) (Report, error) {
@@ -263,6 +267,8 @@ func loadReportJSON(path string) (Report, error) {
 		QuarantineCandidates: rep.QuarantineCandidates,
 		UnknownDevices:       rep.UnknownDevices,
 		Window:               rep.Window,
+		Protection:           rep.Protection,
+		Observations:         rep.Observations,
 		Severity:             rep.Severity,
 		Rules:                rep.Rules,
 		Categories:           rep.Categories,

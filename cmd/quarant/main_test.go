@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"flag"
 	"os"
 	"path/filepath"
@@ -13,6 +14,62 @@ import (
 	"github.com/google/gopacket/layers"
 	"github.com/google/gopacket/pcapgo"
 )
+
+func TestRunCompareOutputsJSON(t *testing.T) {
+	dir := t.TempDir()
+	beforeDir := filepath.Join(dir, "before")
+	afterDir := filepath.Join(dir, "after")
+	if err := os.MkdirAll(beforeDir, 0755); err != nil {
+		t.Fatalf("mkdir before: %v", err)
+	}
+	if err := os.MkdirAll(afterDir, 0755); err != nil {
+		t.Fatalf("mkdir after: %v", err)
+	}
+
+	beforeEvents := filepath.Join(beforeDir, "events.jsonl")
+	afterEvents := filepath.Join(afterDir, "events.jsonl")
+	if err := os.WriteFile(beforeEvents, []byte(`{"ts":"2026-09-23T00:00:00Z","type":"I7_HTTP_TOKEN","rule_id":"I7_HTTP_TOKEN","category":"I7","severity":"CRITICAL","confidence":"high","src_ip":"192.168.1.10","dst_ip":"8.8.8.8"}`+"\n"), 0644); err != nil {
+		t.Fatalf("write before events: %v", err)
+	}
+	if err := os.WriteFile(afterEvents, []byte(`{"ts":"2026-09-24T00:00:00Z","type":"I8_NEW_DEVICE_OBSERVED","rule_id":"I8_NEW_DEVICE_OBSERVED","category":"I8","severity":"INFO","confidence":"low","device_key":"192.168.1.10"}`+"\n"), 0644); err != nil {
+		t.Fatalf("write after events: %v", err)
+	}
+	if err := os.WriteFile(filepath.Join(beforeDir, "flows.jsonl"), []byte(`{"ts":"2026-09-23T00:00:00Z","flow_key":"tcp|before","src_ip":"192.168.1.10","dst_ip":"8.8.8.8","dst_port":80,"protocol":"tcp","app_protocol":"http","direction":"external","observed_destination":"api.before.example"}`+"\n"), 0644); err != nil {
+		t.Fatalf("write before flows: %v", err)
+	}
+	if err := os.WriteFile(filepath.Join(afterDir, "flows.jsonl"), []byte(`{"ts":"2026-09-24T00:00:00Z","flow_key":"tcp|after","src_ip":"192.168.1.10","dst_ip":"8.8.4.4","dst_port":443,"protocol":"tcp","app_protocol":"tls","direction":"external","observed_destination":"api.after.example"}`+"\n"), 0644); err != nil {
+		t.Fatalf("write after flows: %v", err)
+	}
+	if err := os.WriteFile(filepath.Join(beforeDir, "device_inventory.json"), []byte(`{"devices":[{"ip":"192.168.1.10","category_candidate":"Camera"}]}`), 0644); err != nil {
+		t.Fatalf("write before inventory: %v", err)
+	}
+	if err := os.WriteFile(filepath.Join(afterDir, "device_inventory.json"), []byte(`{"devices":[{"ip":"192.168.1.10","category_candidate":"Camera"}]}`), 0644); err != nil {
+		t.Fatalf("write after inventory: %v", err)
+	}
+
+	var out bytes.Buffer
+	err := runCompare([]string{"--before", beforeEvents, "--after", afterEvents, "--format", "json"}, &out)
+	if err != nil {
+		t.Fatalf("runCompare: %v", err)
+	}
+
+	var payload struct {
+		Summary string `json:"summary"`
+		Deltas  []struct {
+			Key   string `json:"key"`
+			Delta int    `json:"delta"`
+		} `json:"deltas"`
+	}
+	if err := json.Unmarshal(out.Bytes(), &payload); err != nil {
+		t.Fatalf("unmarshal output: %v\n%s", err, out.String())
+	}
+	if payload.Summary == "" {
+		t.Fatalf("empty summary in output: %s", out.String())
+	}
+	if len(payload.Deltas) == 0 {
+		t.Fatalf("expected deltas in output: %s", out.String())
+	}
+}
 
 func TestAnalyzePCAPWritesOutputs(t *testing.T) {
 	repoRoot := filepath.Clean(filepath.Join("..", ".."))
@@ -31,6 +88,7 @@ func TestAnalyzePCAPWritesOutputs(t *testing.T) {
 	pcapPath := filepath.Join(dir, "sample.pcap")
 	eventsPath := filepath.Join(dir, "events.jsonl")
 	flowsPath := filepath.Join(dir, "flows.jsonl")
+	observationsPath := filepath.Join(dir, "observations.jsonl")
 
 	writeTestPCAP(t, pcapPath)
 
@@ -38,6 +96,7 @@ func TestAnalyzePCAPWritesOutputs(t *testing.T) {
 		InputPath:         pcapPath,
 		EventsOut:         eventsPath,
 		FlowsOut:          flowsPath,
+		ObservationsOut:   observationsPath,
 		InventoryOut:      "",
 		InventoryInterval: time.Second,
 		Debug:             false,
@@ -54,11 +113,18 @@ func TestAnalyzePCAPWritesOutputs(t *testing.T) {
 	if err != nil {
 		t.Fatalf("read flows: %v", err)
 	}
+	observationsData, err := os.ReadFile(observationsPath)
+	if err != nil {
+		t.Fatalf("read observations: %v", err)
+	}
 	if len(eventsData) == 0 {
 		t.Fatal("expected events output to be non-empty")
 	}
 	if flowsData == nil {
 		t.Fatal("expected flows output file to be readable")
+	}
+	if len(observationsData) == 0 {
+		t.Fatal("expected observations output to be non-empty")
 	}
 }
 

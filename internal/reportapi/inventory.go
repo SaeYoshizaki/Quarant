@@ -24,6 +24,10 @@ type InventoryRiskSummary struct {
 
 type InventoryDevice struct {
 	IP                 string                `json:"ip"`
+	MACAddress         string                `json:"mac_address,omitempty"`
+	Hostname           string                `json:"hostname,omitempty"`
+	DHCPLeaseExpiresAt string                `json:"dhcp_lease_expires_at,omitempty"`
+	DHCPLeaseState     string                `json:"dhcp_lease_state,omitempty"`
 	FirstSeen          string                `json:"first_seen,omitempty"`
 	LastSeen           string                `json:"last_seen,omitempty"`
 	EventCount         int                   `json:"event_count,omitempty"`

@@ -7,17 +7,21 @@ import (
 )
 
 type RiskSummary struct {
-	RiskEventCount         int      `json:"risk_event_count,omitempty"`
-	HighestSeverity        string   `json:"highest_severity,omitempty"`
-	TopOWASPTags           []string `json:"top_owasp_tags,omitempty"`
-	TopSeverities          []string `json:"top_severities,omitempty"`
-	LastRiskEventType      string   `json:"last_risk_event_type,omitempty"`
-	LastRiskEventTS        string   `json:"last_risk_event_ts,omitempty"`
-	RecommendedNextAction  string   `json:"recommended_next_action,omitempty"`
+	RiskEventCount        int      `json:"risk_event_count,omitempty"`
+	HighestSeverity       string   `json:"highest_severity,omitempty"`
+	TopOWASPTags          []string `json:"top_owasp_tags,omitempty"`
+	TopSeverities         []string `json:"top_severities,omitempty"`
+	LastRiskEventType     string   `json:"last_risk_event_type,omitempty"`
+	LastRiskEventTS       string   `json:"last_risk_event_ts,omitempty"`
+	RecommendedNextAction string   `json:"recommended_next_action,omitempty"`
 }
 
 type InventorySnapshot struct {
 	IP                 string         `json:"ip"`
+	MACAddress         string         `json:"mac_address,omitempty"`
+	Hostname           string         `json:"hostname,omitempty"`
+	DHCPLeaseExpiresAt string         `json:"dhcp_lease_expires_at,omitempty"`
+	DHCPLeaseState     string         `json:"dhcp_lease_state,omitempty"`
 	FirstSeen          string         `json:"first_seen,omitempty"`
 	LastSeen           string         `json:"last_seen,omitempty"`
 	ObservedProtocols  []string       `json:"observed_protocols,omitempty"`
