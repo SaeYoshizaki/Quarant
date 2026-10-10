@@ -40,6 +40,7 @@ func runEvidenceAssembleCLI(args []string, out io.Writer) error {
 
 	var openwrtDirs, suricataDirs, zeekDirs, snortDirs, sourceDirs stringListFlag
 	outDir := fs.String("out", "runs/assembled", "directory to write assembled Quarant run")
+	taxonomyPolicyPath := fs.String("taxonomy-policy", "", "taxonomy policy JSON path, empty for built-in default")
 	fs.Var(&openwrtDirs, "openwrt", "OpenWrt run directory; may be repeated")
 	fs.Var(&suricataDirs, "suricata", "Suricata run directory; may be repeated")
 	fs.Var(&zeekDirs, "zeek", "Zeek run directory; may be repeated")
@@ -52,7 +53,7 @@ func runEvidenceAssembleCLI(args []string, out io.Writer) error {
 		return fmt.Errorf("evidence assemble accepts flags only")
 	}
 	sources := evidenceSourceDirs(openwrtDirs, suricataDirs, zeekDirs, snortDirs, sourceDirs)
-	result, err := assembleEvidenceRun(sources, *outDir)
+	result, err := assembleEvidenceRunWithPolicy(sources, *outDir, *taxonomyPolicyPath)
 	if err != nil {
 		return err
 	}
@@ -92,6 +93,10 @@ func evidenceSourceDirs(openwrtDirs, suricataDirs, zeekDirs, snortDirs, sourceDi
 }
 
 func assembleEvidenceRun(sources []evidenceSourceDir, outDir string) (reportapi.EvidenceManifest, error) {
+	return assembleEvidenceRunWithPolicy(sources, outDir, "")
+}
+
+func assembleEvidenceRunWithPolicy(sources []evidenceSourceDir, outDir, taxonomyPolicyPath string) (reportapi.EvidenceManifest, error) {
 	if len(sources) == 0 {
 		return reportapi.EvidenceManifest{}, fmt.Errorf("at least one source directory is required")
 	}
@@ -99,6 +104,10 @@ func assembleEvidenceRun(sources []evidenceSourceDir, outDir string) (reportapi.
 		return reportapi.EvidenceManifest{}, fmt.Errorf("--out is required")
 	}
 	if err := os.MkdirAll(outDir, 0755); err != nil {
+		return reportapi.EvidenceManifest{}, err
+	}
+	taxonomyPolicy, err := reportapi.LoadSecurityTaxonomyPolicy(taxonomyPolicyPath)
+	if err != nil {
 		return reportapi.EvidenceManifest{}, err
 	}
 	events := []analyzer.Event{}
@@ -150,7 +159,7 @@ func assembleEvidenceRun(sources []evidenceSourceDir, outDir string) (reportapi.
 	}
 	events = dedupeSlice(events, eventAssemblyKey)
 	securityEvents = dedupeSlice(securityEvents, securityEventAssemblyKey)
-	securityEvents = reportapi.NormalizeSecurityEvents(securityEvents)
+	securityEvents = reportapi.NormalizeSecurityEventsWithPolicy(securityEvents, taxonomyPolicy)
 	flows = dedupeSlice(flows, flowAssemblyKey)
 	observations = dedupeSlice(observations, observationAssemblyKey)
 	eventsPath := filepath.Join(outDir, "events.jsonl")
@@ -159,6 +168,7 @@ func assembleEvidenceRun(sources []evidenceSourceDir, outDir string) (reportapi.
 	observationsPath := filepath.Join(outDir, "observations.jsonl")
 	attackEvidencePath := filepath.Join(outDir, "attack_evidence_report.json")
 	coveragePath := filepath.Join(outDir, "source_coverage_report.json")
+	taxonomyCoveragePath := filepath.Join(outDir, "taxonomy_coverage_report.json")
 	manifestPath := filepath.Join(outDir, "evidence_manifest.json")
 	if err := writeJSONL(eventsPath, events); err != nil {
 		return reportapi.EvidenceManifest{}, err
@@ -172,7 +182,7 @@ func assembleEvidenceRun(sources []evidenceSourceDir, outDir string) (reportapi.
 	if err := writeJSONL(observationsPath, observations); err != nil {
 		return reportapi.EvidenceManifest{}, err
 	}
-	attackEvidence := reportapi.BuildAttackEvidenceReport(securityEvents)
+	attackEvidence := reportapi.BuildAttackEvidenceReportWithPolicy(securityEvents, taxonomyPolicy)
 	attackEvidence.Source.SecurityEvents = securityEventsPath
 	if err := writePrettyJSON(attackEvidencePath, attackEvidence); err != nil {
 		return reportapi.EvidenceManifest{}, err
@@ -181,13 +191,20 @@ func assembleEvidenceRun(sources []evidenceSourceDir, outDir string) (reportapi.
 	if err := writePrettyJSON(coveragePath, coverage); err != nil {
 		return reportapi.EvidenceManifest{}, err
 	}
+	taxonomyCoverage := reportapi.BuildTaxonomyCoverageReport(securityEvents, taxonomyPolicy)
+	taxonomyCoverage.Source.SecurityEvents = securityEventsPath
+	taxonomyCoverage.Source.Policy = taxonomyPolicyPath
+	if err := writePrettyJSON(taxonomyCoveragePath, taxonomyCoverage); err != nil {
+		return reportapi.EvidenceManifest{}, err
+	}
 	manifest.Outputs = reportapi.EvidenceManifestOutputs{
-		Events:               eventsPath,
-		SecurityEvents:       securityEventsPath,
-		Flows:                flowsPath,
-		Observations:         observationsPath,
-		AttackEvidenceReport: attackEvidencePath,
-		SourceCoverageReport: coveragePath,
+		Events:                 eventsPath,
+		SecurityEvents:         securityEventsPath,
+		Flows:                  flowsPath,
+		Observations:           observationsPath,
+		AttackEvidenceReport:   attackEvidencePath,
+		SourceCoverageReport:   coveragePath,
+		TaxonomyCoverageReport: taxonomyCoveragePath,
 	}
 	manifest.Metrics = reportapi.EvidenceManifestMetrics{
 		SourceCount:             len(sources),
@@ -242,7 +259,7 @@ func tagSecurityEventsSource(events []reportapi.SecurityEvent, source string) []
 		}
 		events[i].Evidence["assembled_source"] = source
 	}
-	return reportapi.NormalizeSecurityEvents(events)
+	return events
 }
 
 func dedupeSlice[T any](items []T, keyFn func(T) string) []T {

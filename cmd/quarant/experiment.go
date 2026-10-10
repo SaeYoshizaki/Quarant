@@ -13,18 +13,19 @@ import (
 )
 
 type experimentRunConfig struct {
-	BeforeOpenWrtDir  string
-	BeforeSuricataEVE string
-	BeforeZeekDir     string
-	BeforeSnortAlerts string
-	AfterOpenWrtDir   string
-	AfterSuricataEVE  string
-	AfterZeekDir      string
-	AfterSnortAlerts  string
-	OutDir            string
-	BeforeNow         time.Time
-	AfterNow          time.Time
-	PackageDir        string
+	BeforeOpenWrtDir   string
+	BeforeSuricataEVE  string
+	BeforeZeekDir      string
+	BeforeSnortAlerts  string
+	AfterOpenWrtDir    string
+	AfterSuricataEVE   string
+	AfterZeekDir       string
+	AfterSnortAlerts   string
+	OutDir             string
+	BeforeNow          time.Time
+	AfterNow           time.Time
+	PackageDir         string
+	TaxonomyPolicyPath string
 }
 
 type ExperimentRunManifest struct {
@@ -55,6 +56,7 @@ type ExperimentRunOutputs struct {
 	ResearchMarkdown   string `json:"research_report_markdown,omitempty"`
 	ResearchPackage    string `json:"research_package,omitempty"`
 	SourceCoverage     string `json:"source_coverage_report,omitempty"`
+	TaxonomyCoverage   string `json:"taxonomy_coverage_report,omitempty"`
 	QualityGate        string `json:"quality_gate_report,omitempty"`
 	GuardedResearch    string `json:"guarded_research_report,omitempty"`
 	ExperimentManifest string `json:"experiment_manifest,omitempty"`
@@ -101,6 +103,7 @@ func runExperimentRunCLI(args []string, out io.Writer) error {
 	fs.StringVar(&cfg.AfterSnortAlerts, "after-snort", "", "after Snort alert log path")
 	fs.StringVar(&cfg.OutDir, "out", "runs/experiment-001", "experiment output directory")
 	fs.StringVar(&cfg.PackageDir, "package-dir", "", "research package directory (default: out/package)")
+	fs.StringVar(&cfg.TaxonomyPolicyPath, "taxonomy-policy", "", "taxonomy policy JSON path, empty for built-in default")
 	if err := fs.Parse(normalizeFlagArgs(fs, args)); err != nil {
 		return fmt.Errorf("parse experiment run flags: %w", err)
 	}
@@ -163,13 +166,14 @@ func runExperimentRun(cfg experimentRunConfig) (ExperimentRunManifest, error) {
 		return ExperimentRunManifest{}, err
 	}
 	beforeAssembled := filepath.Join(cfg.OutDir, "before", "assembled")
-	beforeManifest, err := assembleEvidenceRun(beforeSources, beforeAssembled)
+	beforeManifest, err := assembleEvidenceRunWithPolicy(beforeSources, beforeAssembled, cfg.TaxonomyPolicyPath)
 	if err != nil {
 		return ExperimentRunManifest{}, err
 	}
 	manifest.Steps = append(manifest.Steps, ExperimentRunStep{Name: "before_assemble", Status: "complete", Output: beforeAssembled})
 	manifest.Outputs.BeforeAssembled = beforeAssembled
 	manifest.Outputs.SourceCoverage = beforeManifest.Outputs.SourceCoverageReport
+	manifest.Outputs.TaxonomyCoverage = beforeManifest.Outputs.TaxonomyCoverageReport
 	manifest.Metrics.BeforeSourceCount = beforeManifest.Metrics.SourceCount
 	manifest.Metrics.BeforeSecurityEvents = beforeManifest.Metrics.SecurityEventCount
 	manifest.Metrics.BeforeFlows = beforeManifest.Metrics.FlowCount
@@ -178,7 +182,7 @@ func runExperimentRun(cfg experimentRunConfig) (ExperimentRunManifest, error) {
 	var afterAssembled string
 	if len(afterSources) > 0 {
 		afterAssembled = filepath.Join(cfg.OutDir, "after", "assembled")
-		afterManifest, err := assembleEvidenceRun(afterSources, afterAssembled)
+		afterManifest, err := assembleEvidenceRunWithPolicy(afterSources, afterAssembled, cfg.TaxonomyPolicyPath)
 		if err != nil {
 			return ExperimentRunManifest{}, err
 		}
@@ -227,12 +231,13 @@ func runExperimentImports(window string, cfg experimentRunConfig, manifest *Expe
 	if strings.TrimSpace(openwrtDir) != "" {
 		outDir := filepath.Join(base, "openwrt")
 		_, err := runOpenWrtImport(openWrtImportConfig{
-			DHCPLeasesPath:  filepath.Join(openwrtDir, "dhcp.leases"),
-			DNSLogPath:      filepath.Join(openwrtDir, "dnsmasq.log"),
-			FirewallLogPath: filepath.Join(openwrtDir, "firewall.log"),
-			ConntrackPath:   filepath.Join(openwrtDir, "conntrack.txt"),
-			OutDir:          outDir,
-			BaseTime:        now,
+			DHCPLeasesPath:     filepath.Join(openwrtDir, "dhcp.leases"),
+			DNSLogPath:         filepath.Join(openwrtDir, "dnsmasq.log"),
+			FirewallLogPath:    filepath.Join(openwrtDir, "firewall.log"),
+			ConntrackPath:      filepath.Join(openwrtDir, "conntrack.txt"),
+			OutDir:             outDir,
+			BaseTime:           now,
+			TaxonomyPolicyPath: cfg.TaxonomyPolicyPath,
 		})
 		if err != nil {
 			return nil, fmt.Errorf("%s openwrt import: %w", window, err)
@@ -242,7 +247,7 @@ func runExperimentImports(window string, cfg experimentRunConfig, manifest *Expe
 	}
 	if strings.TrimSpace(suricataEVE) != "" {
 		outDir := filepath.Join(base, "suricata")
-		if _, err := runSuricataImport(suricataImportConfig{EVEPath: suricataEVE, OutDir: outDir}); err != nil {
+		if _, err := runSuricataImport(suricataImportConfig{EVEPath: suricataEVE, OutDir: outDir, TaxonomyPolicyPath: cfg.TaxonomyPolicyPath}); err != nil {
 			return nil, fmt.Errorf("%s suricata import: %w", window, err)
 		}
 		manifest.Steps = append(manifest.Steps, ExperimentRunStep{Name: window + "_suricata_import", Status: "complete", Output: outDir})
@@ -258,7 +263,7 @@ func runExperimentImports(window string, cfg experimentRunConfig, manifest *Expe
 	}
 	if strings.TrimSpace(snortAlerts) != "" {
 		outDir := filepath.Join(base, "snort")
-		if _, err := runSnortImport(snortImportConfig{AlertsPath: snortAlerts, OutDir: outDir}); err != nil {
+		if _, err := runSnortImport(snortImportConfig{AlertsPath: snortAlerts, OutDir: outDir, TaxonomyPolicyPath: cfg.TaxonomyPolicyPath}); err != nil {
 			return nil, fmt.Errorf("%s snort import: %w", window, err)
 		}
 		manifest.Steps = append(manifest.Steps, ExperimentRunStep{Name: window + "_snort_import", Status: "complete", Output: outDir})
@@ -386,6 +391,7 @@ func runExperimentResearchReport(cfg experimentRunConfig, manifest *ExperimentRu
 		"--precision", filepath.Join(cfg.OutDir, "precision_report.json"),
 		"--mitigation", filepath.Join(cfg.OutDir, "mitigation_plan.json"),
 		"--source-coverage", manifest.Outputs.SourceCoverage,
+		"--taxonomy-coverage", manifest.Outputs.TaxonomyCoverage,
 		"--out", reportOut,
 		"--markdown-out", markdownOut,
 		"--csv-dir", csvDir,

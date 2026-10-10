@@ -11,26 +11,28 @@ import (
 )
 
 type ResearchReport struct {
-	GeneratedAt       string                `json:"generated_at"`
-	Source            ResearchReportSources `json:"source"`
-	ExecutiveSummary  string                `json:"executive_summary"`
-	ResearchQuestion  string                `json:"research_question"`
-	Claim             string                `json:"claim"`
-	Metrics           ResearchMetrics       `json:"metrics"`
-	ExperimentStages  []ResearchStage       `json:"experiment_stages"`
-	Tables            ResearchTables        `json:"tables"`
-	SupportedClaims   []string              `json:"supported_claims"`
-	MissingEvidence   []string              `json:"missing_evidence"`
-	ThreatsToValidity []string              `json:"threats_to_validity"`
-	NextSteps         []string              `json:"next_steps"`
+	GeneratedAt       string                 `json:"generated_at"`
+	Source            ResearchReportSources  `json:"source"`
+	ExecutiveSummary  string                 `json:"executive_summary"`
+	ResearchQuestion  string                 `json:"research_question"`
+	Claim             string                 `json:"claim"`
+	Metrics           ResearchMetrics        `json:"metrics"`
+	ExperimentStages  []ResearchStage        `json:"experiment_stages"`
+	Tables            ResearchTables         `json:"tables"`
+	TaxonomyPolicy    SecurityTaxonomyPolicy `json:"taxonomy_policy,omitempty"`
+	SupportedClaims   []string               `json:"supported_claims"`
+	MissingEvidence   []string               `json:"missing_evidence"`
+	ThreatsToValidity []string               `json:"threats_to_validity"`
+	NextSteps         []string               `json:"next_steps"`
 }
 
 type ResearchReportSources struct {
-	PrecisionReport      string `json:"precision_report,omitempty"`
-	PrecisionEvalReport  string `json:"precision_eval_report,omitempty"`
-	MitigationPlan       string `json:"mitigation_plan,omitempty"`
-	MitigationEvalReport string `json:"mitigation_eval_report,omitempty"`
-	SourceCoverageReport string `json:"source_coverage_report,omitempty"`
+	PrecisionReport        string `json:"precision_report,omitempty"`
+	PrecisionEvalReport    string `json:"precision_eval_report,omitempty"`
+	MitigationPlan         string `json:"mitigation_plan,omitempty"`
+	MitigationEvalReport   string `json:"mitigation_eval_report,omitempty"`
+	SourceCoverageReport   string `json:"source_coverage_report,omitempty"`
+	TaxonomyCoverageReport string `json:"taxonomy_coverage_report,omitempty"`
 }
 
 type ResearchMetrics struct {
@@ -77,6 +79,7 @@ type ResearchTables struct {
 	MitigationOutcomes      []ResearchTableRow `json:"mitigation_outcomes,omitempty"`
 	NormalTrafficContinuity []ResearchTableRow `json:"normal_traffic_continuity,omitempty"`
 	SourceCoverage          []ResearchTableRow `json:"source_coverage,omitempty"`
+	TaxonomyCoverage        []ResearchTableRow `json:"taxonomy_coverage,omitempty"`
 }
 
 type ResearchTableRow map[string]string
@@ -86,14 +89,20 @@ func LoadResearchReport(precisionPath, precisionEvalPath, mitigationPlanPath, mi
 }
 
 func LoadResearchReportWithSourceCoverage(precisionPath, precisionEvalPath, mitigationPlanPath, mitigationEvalPath, sourceCoveragePath string) (ResearchReport, error) {
+	return LoadResearchReportWithCoverage(precisionPath, precisionEvalPath, mitigationPlanPath, mitigationEvalPath, sourceCoveragePath, "")
+}
+
+func LoadResearchReportWithCoverage(precisionPath, precisionEvalPath, mitigationPlanPath, mitigationEvalPath, sourceCoveragePath, taxonomyCoveragePath string) (ResearchReport, error) {
 	var precision DetectionPrecisionReport
 	var precisionEval PrecisionEvaluationReport
 	var mitigation MitigationPlan
 	var mitigationEval MitigationEvaluationReport
 	var sourceCoverage SourceCoverageReport
+	var taxonomyCoverage TaxonomyCoverageReport
 	hasPrecisionEval := strings.TrimSpace(precisionEvalPath) != ""
 	hasMitigationEval := strings.TrimSpace(mitigationEvalPath) != ""
 	hasSourceCoverage := strings.TrimSpace(sourceCoveragePath) != ""
+	hasTaxonomyCoverage := strings.TrimSpace(taxonomyCoveragePath) != ""
 
 	if err := readJSONFile(precisionPath, &precision); err != nil {
 		return ResearchReport{}, err
@@ -116,16 +125,25 @@ func LoadResearchReportWithSourceCoverage(precisionPath, precisionEvalPath, miti
 			return ResearchReport{}, err
 		}
 	}
+	if hasTaxonomyCoverage {
+		if err := readJSONFile(taxonomyCoveragePath, &taxonomyCoverage); err != nil {
+			return ResearchReport{}, err
+		}
+	}
 	report := BuildResearchReport(precision, optionalPrecisionEval(precisionEval, hasPrecisionEval), mitigation, optionalMitigationEval(mitigationEval, hasMitigationEval))
 	if hasSourceCoverage {
 		report = ApplySourceCoverageToResearchReport(report, sourceCoverage)
 	}
+	if hasTaxonomyCoverage {
+		report = ApplyTaxonomyCoverageToResearchReport(report, taxonomyCoverage)
+	}
 	report.Source = ResearchReportSources{
-		PrecisionReport:      precisionPath,
-		PrecisionEvalReport:  precisionEvalPath,
-		MitigationPlan:       mitigationPlanPath,
-		MitigationEvalReport: mitigationEvalPath,
-		SourceCoverageReport: sourceCoveragePath,
+		PrecisionReport:        precisionPath,
+		PrecisionEvalReport:    precisionEvalPath,
+		MitigationPlan:         mitigationPlanPath,
+		MitigationEvalReport:   mitigationEvalPath,
+		SourceCoverageReport:   sourceCoveragePath,
+		TaxonomyCoverageReport: taxonomyCoveragePath,
 	}
 	return report, nil
 }
@@ -171,6 +189,34 @@ func ApplySourceCoverageToResearchReport(report ResearchReport, coverage SourceC
 	}
 	report.SupportedClaims = uniqueSortedStrings(report.SupportedClaims)
 	report.ThreatsToValidity = uniqueSortedStrings(append(report.ThreatsToValidity, coverage.Limitations...))
+	report.ExecutiveSummary = researchExecutiveSummary(report.Metrics)
+	return report
+}
+
+func ApplyTaxonomyCoverageToResearchReport(report ResearchReport, coverage TaxonomyCoverageReport) ResearchReport {
+	report.Tables.TaxonomyCoverage = researchTaxonomyCoverageRows(coverage)
+	report.TaxonomyPolicy = coverage.Policy
+	report.ExperimentStages = append(report.ExperimentStages, ResearchStage{
+		Name:   "taxonomy_coverage",
+		Status: stageStatus(coverage.Metrics.ClassificationCoverage >= 0.8, "ready", "needs_review"),
+		Evidence: []string{
+			fmt.Sprintf("classification coverage %.3f", coverage.Metrics.ClassificationCoverage),
+			fmt.Sprintf("%d taxonomy term(s) observed", coverage.Metrics.TaxonomyCount),
+			fmt.Sprintf("%d normalized technique(s) observed", coverage.Metrics.NormalizedTechniqueCount),
+			fmt.Sprintf("%d IDS fallback-only event(s)", coverage.Metrics.IDSFallbackOnlyCount),
+		},
+		Gaps: coverage.Limitations,
+	})
+	if coverage.Metrics.ClassificationCoverage > 0 {
+		report.SupportedClaims = append(report.SupportedClaims, "security evidence is grouped by an explicit Quarant taxonomy policy")
+	}
+	if coverage.Metrics.IDSFallbackOnlyCount > 0 {
+		report.MissingEvidence = append(report.MissingEvidence, "some IDS alerts only mapped to generic ids_alert taxonomy")
+	}
+	report.SupportedClaims = uniqueSortedStrings(report.SupportedClaims)
+	report.MissingEvidence = uniqueSortedStrings(report.MissingEvidence)
+	report.ThreatsToValidity = uniqueSortedStrings(append(report.ThreatsToValidity, coverage.Limitations...))
+	report.NextSteps = uniqueSortedStrings(append(report.NextSteps, coverage.Recommendations...))
 	report.ExecutiveSummary = researchExecutiveSummary(report.Metrics)
 	return report
 }
@@ -411,6 +457,27 @@ func researchSourceCoverageRows(coverage SourceCoverageReport) []ResearchTableRo
 	return rows
 }
 
+func researchTaxonomyCoverageRows(coverage TaxonomyCoverageReport) []ResearchTableRow {
+	rows := []ResearchTableRow{
+		{"metric": "security_events", "value": fmt.Sprintf("%d", coverage.Metrics.SecurityEventCount)},
+		{"metric": "classification_coverage", "value": fmt.Sprintf("%.3f", coverage.Metrics.ClassificationCoverage)},
+		{"metric": "taxonomy_count", "value": fmt.Sprintf("%d", coverage.Metrics.TaxonomyCount)},
+		{"metric": "normalized_technique_count", "value": fmt.Sprintf("%d", coverage.Metrics.NormalizedTechniqueCount)},
+		{"metric": "ids_fallback_only_count", "value": fmt.Sprintf("%d", coverage.Metrics.IDSFallbackOnlyCount)},
+		{"metric": "single_taxonomy_dominance", "value": coverage.Metrics.SingleTaxonomyDominanceTaxonomy},
+		{"metric": "single_taxonomy_dominance_rate", "value": fmt.Sprintf("%.3f", coverage.Metrics.SingleTaxonomyDominanceRate)},
+	}
+	for _, item := range coverage.ByTaxonomy {
+		rows = append(rows, ResearchTableRow{
+			"taxonomy":     item.Taxonomy,
+			"event_count":  fmt.Sprintf("%d", item.EventCount),
+			"source_count": fmt.Sprintf("%d", item.SourceCount),
+			"engine_count": fmt.Sprintf("%d", item.EngineCount),
+		})
+	}
+	return rows
+}
+
 func buildResearchSupportedClaims(precision DetectionPrecisionReport, precisionEval *PrecisionEvaluationReport, mitigation MitigationPlan, mitigationEval *MitigationEvaluationReport) []string {
 	claims := []string{}
 	claims = append(claims, precision.PaperSummary.ResearchClaimsSupported...)
@@ -527,6 +594,7 @@ func ResearchReportMarkdown(report ResearchReport) string {
 	writeMarkdownTable(&b, "Mitigation Outcomes", report.Tables.MitigationOutcomes)
 	writeMarkdownTable(&b, "Normal Traffic Continuity", report.Tables.NormalTrafficContinuity)
 	writeMarkdownTable(&b, "Source Coverage", report.Tables.SourceCoverage)
+	writeMarkdownTable(&b, "Taxonomy Coverage", report.Tables.TaxonomyCoverage)
 	writeMarkdownList(&b, "Supported Claims", report.SupportedClaims)
 	writeMarkdownList(&b, "Missing Evidence", report.MissingEvidence)
 	writeMarkdownList(&b, "Threats To Validity", report.ThreatsToValidity)
@@ -578,6 +646,9 @@ func ResearchReportCSVs(report ResearchReport) map[string]string {
 	}
 	if csv := researchRowsCSV(report.Tables.SourceCoverage); csv != "" {
 		out["source_coverage.csv"] = csv
+	}
+	if csv := researchRowsCSV(report.Tables.TaxonomyCoverage); csv != "" {
+		out["taxonomy_coverage.csv"] = csv
 	}
 	if csv := researchRowsCSV(researchStageRows(report.ExperimentStages)); csv != "" {
 		out["experiment_stages.csv"] = csv

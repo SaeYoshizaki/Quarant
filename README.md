@@ -233,6 +233,26 @@ Suricata alert は precision / mitigation / before-after eval の `--security-ev
 
 この正規化は説明可能性のための grouping layer であり、侵害を直接証明するものではありません。`attack_evidence_report.json` には `taxonomy_policy` と `taxonomy_counts` が入り、precision incident の detail にも taxonomy が残ります。
 
+default policy は JSON として出力でき、研究 artifact や再現 package に含められます。
+
+```bash
+go run ./cmd/quarant taxonomy policy \
+  --out taxonomy_policy.json
+```
+
+各 importer / assemble / experiment では、必要に応じて `--taxonomy-policy taxonomy_policy.json` を指定できます。指定しない場合は built-in default policy を使います。
+
+taxonomy coverage report は、`security_events.jsonl` から source 別・engine 別・taxonomy 別・normalized technique 別に分類の広がりを集計します。
+
+```bash
+go run ./cmd/quarant taxonomy coverage \
+  --security-events runs/experiment-001/before/assembled/security_events.jsonl \
+  --policy taxonomy_policy.json \
+  --out taxonomy_coverage_report.json
+```
+
+`taxonomy_coverage_report.json` は classification coverage、generic `ids_alert` fallback-only rate、single taxonomy dominance を含みます。quality gate と research report に接続できます。
+
 ### Zeek import
 
 Zeek `conn.log` / `dns.log` / `http.log` / `ssl.log` または `tls.log` を passive observation と flow に変換します。
@@ -287,6 +307,7 @@ runs/experiment-001/flows.jsonl
 runs/experiment-001/observations.jsonl
 runs/experiment-001/attack_evidence_report.json
 runs/experiment-001/source_coverage_report.json
+runs/experiment-001/taxonomy_coverage_report.json
 runs/experiment-001/evidence_manifest.json
 ```
 
@@ -306,6 +327,7 @@ go run ./cmd/quarant experiment run \
   --after-suricata examples/integrated/after/suricata/raw/eve.json \
   --after-zeek examples/integrated/after/zeek/raw \
   --after-snort examples/integrated/after/snort/raw/alert.fast \
+  --taxonomy-policy taxonomy_policy.json \
   --before-now 2026-09-26T12:30:00Z \
   --after-now 2026-09-26T13:30:00Z \
   --out runs/experiment-001
@@ -319,6 +341,7 @@ go run ./cmd/quarant experiment run \
 - mitigation plan / gateway backend / dry-run rollback artifacts
 - before/after mitigation evaluation
 - source coverage 付き research report
+- taxonomy coverage 付き research report
 - quality gate / guarded research report
 - reproducibility package
 - `experiment_manifest.json`
@@ -330,6 +353,7 @@ go run ./cmd/quarant experiment run \
 ```bash
 go run ./cmd/quarant quality-gate \
   --experiment runs/experiment-001 \
+  --taxonomy-coverage runs/experiment-001/before/assembled/taxonomy_coverage_report.json \
   --out runs/experiment-001/quality_gate_report.json \
   --research-out runs/experiment-001/guarded_research_report.json
 ```
@@ -343,6 +367,7 @@ go run ./cmd/quarant quality-gate \
 - IDS alert count を gateway mitigation 効果として扱いすぎていないか。
 - normal flow preservation が低くないか。
 - source coverage が single-source only になっていないか。
+- taxonomy coverage が低すぎないか、IDS alert が generic `ids_alert` のまま粗く残っていないか。
 
 `guarded_research_report.json` には、弱めるべき claim と threats to validity / next steps が反映されます。
 
@@ -443,6 +468,7 @@ go run ./cmd/quarant research-report \
   --mitigation mitigation_plan.json \
   --mitigation-eval mitigation_eval_report.json \
   --source-coverage source_coverage_report.json \
+  --taxonomy-coverage taxonomy_coverage_report.json \
   --out research_report.json
 ```
 
@@ -475,6 +501,7 @@ research report には、以下の注意を含めています。
 - evidence assemble CLI
 - source coverage report
 - research package source coverage table
+- taxonomy coverage report / taxonomy policy / research package taxonomy table
 - accepted/exposed service attempt と IDS alert overlap の before/after evaluation
 
 今後の想定:

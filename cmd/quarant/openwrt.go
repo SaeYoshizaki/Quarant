@@ -30,6 +30,7 @@ type openWrtImportConfig struct {
 	OutDir                string
 	SecurityEventsOutPath string
 	AttackEvidenceOutPath string
+	TaxonomyPolicyPath    string
 	BaseTime              time.Time
 }
 
@@ -320,6 +321,7 @@ func runOpenWrtImportCLI(args []string, out io.Writer) error {
 	fs.StringVar(&cfg.OutDir, "out-dir", "openwrt-run", "directory to write Quarant JSON outputs")
 	fs.StringVar(&cfg.SecurityEventsOutPath, "security-events-out", "", "security events JSONL output path (default: out-dir/security_events.jsonl)")
 	fs.StringVar(&cfg.AttackEvidenceOutPath, "attack-evidence-out", "", "attack evidence report JSON output path (default: out-dir/attack_evidence_report.json)")
+	fs.StringVar(&cfg.TaxonomyPolicyPath, "taxonomy-policy", "", "taxonomy policy JSON path, empty for built-in default")
 	nowValue := fs.String("now", "", "base time for logs without a year, RFC3339")
 
 	if err := fs.Parse(normalizeFlagArgs(fs, args)); err != nil {
@@ -530,14 +532,18 @@ func runOpenWrtImport(cfg openWrtImportConfig) (openWrtImportResult, error) {
 	flowsPath := filepath.Join(cfg.OutDir, "flows.jsonl")
 	observationsPath := filepath.Join(cfg.OutDir, "observations.jsonl")
 	inventoryPath := filepath.Join(cfg.OutDir, "device_inventory.json")
-	importer.securityEvents = reportapi.NormalizeSecurityEvents(importer.securityEvents)
+	taxonomyPolicy, err := reportapi.LoadSecurityTaxonomyPolicy(cfg.TaxonomyPolicyPath)
+	if err != nil {
+		return openWrtImportResult{}, err
+	}
+	importer.securityEvents = reportapi.NormalizeSecurityEventsWithPolicy(importer.securityEvents, taxonomyPolicy)
 	if err := writeOpenWrtJSONL(eventsPath, importer.events); err != nil {
 		return openWrtImportResult{}, err
 	}
 	if err := writeOpenWrtJSONL(securityEventsPath, importer.securityEvents); err != nil {
 		return openWrtImportResult{}, err
 	}
-	attackEvidence := reportapi.BuildAttackEvidenceReport(importer.securityEvents)
+	attackEvidence := reportapi.BuildAttackEvidenceReportWithPolicy(importer.securityEvents, taxonomyPolicy)
 	attackEvidence.Source.SecurityEvents = securityEventsPath
 	if err := writePrettyJSON(attackEvidencePath, attackEvidence); err != nil {
 		return openWrtImportResult{}, err

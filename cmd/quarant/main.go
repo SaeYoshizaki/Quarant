@@ -68,6 +68,10 @@ func main() {
 		if err := runSnort(args[1:], os.Stdout); err != nil {
 			log.Fatal(err)
 		}
+	case "taxonomy":
+		if err := runTaxonomy(args[1:], os.Stdout); err != nil {
+			log.Fatal(err)
+		}
 	case "precision":
 		if err := runPrecision(args[1:], os.Stdout); err != nil {
 			log.Fatal(err)

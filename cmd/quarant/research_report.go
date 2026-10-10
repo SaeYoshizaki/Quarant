@@ -21,6 +21,7 @@ func runResearchReport(args []string, out io.Writer) error {
 	mitigationPath := fs.String("mitigation", "mitigation_plan.json", "mitigation plan JSON path")
 	mitigationEvalPath := fs.String("mitigation-eval", "", "mitigation evaluation report JSON path")
 	sourceCoveragePath := fs.String("source-coverage", "", "source coverage report JSON path")
+	taxonomyCoveragePath := fs.String("taxonomy-coverage", "", "taxonomy coverage report JSON path")
 	reportOut := fs.String("out", "research_report.json", "research report JSON output path, or - for stdout")
 	markdownOut := fs.String("markdown-out", "research_report.md", "research report Markdown output path, empty to disable")
 	csvDir := fs.String("csv-dir", "", "directory to write paper table CSV files, empty to disable")
@@ -38,7 +39,7 @@ func runResearchReport(args []string, out io.Writer) error {
 		return fmt.Errorf("research-report accepts flags only")
 	}
 
-	report, err := reportapi.LoadResearchReportWithSourceCoverage(*precisionPath, *precisionEvalPath, *mitigationPath, *mitigationEvalPath, *sourceCoveragePath)
+	report, err := reportapi.LoadResearchReportWithCoverage(*precisionPath, *precisionEvalPath, *mitigationPath, *mitigationEvalPath, *sourceCoveragePath, *taxonomyCoveragePath)
 	if err != nil {
 		return err
 	}
@@ -200,6 +201,15 @@ func writeResearchPackage(dir string, report reportapi.ResearchReport) (int, []r
 	if err := write("device_list.csv", "csv", "device-level experiment summary", reportapi.ResearchDeviceListCSV(report)); err != nil {
 		return count, artifacts, err
 	}
+	taxonomyPolicy := report.TaxonomyPolicy
+	if taxonomyPolicy.Version == "" && len(taxonomyPolicy.Taxonomies) == 0 {
+		taxonomyPolicy = reportapi.SecurityTaxonomyDecisionPolicy()
+	}
+	if err := writePrettyJSON(filepath.Join(dir, "taxonomy_policy.json"), taxonomyPolicy); err != nil {
+		return count, artifacts, err
+	}
+	artifacts = append(artifacts, researchArtifact("taxonomy_policy", filepath.Join(dir, "taxonomy_policy.json"), "json", "taxonomy normalization policy"))
+	count++
 	tablesDir := filepath.Join(dir, "tables")
 	tableCount, err := writeResearchCSVs(tablesDir, report)
 	if err != nil {

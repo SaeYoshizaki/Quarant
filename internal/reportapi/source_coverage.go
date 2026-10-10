@@ -26,12 +26,13 @@ type EvidenceManifestSource struct {
 }
 
 type EvidenceManifestOutputs struct {
-	Events               string `json:"events,omitempty"`
-	SecurityEvents       string `json:"security_events,omitempty"`
-	Flows                string `json:"flows,omitempty"`
-	Observations         string `json:"observations,omitempty"`
-	AttackEvidenceReport string `json:"attack_evidence_report,omitempty"`
-	SourceCoverageReport string `json:"source_coverage_report,omitempty"`
+	Events                 string `json:"events,omitempty"`
+	SecurityEvents         string `json:"security_events,omitempty"`
+	Flows                  string `json:"flows,omitempty"`
+	Observations           string `json:"observations,omitempty"`
+	AttackEvidenceReport   string `json:"attack_evidence_report,omitempty"`
+	SourceCoverageReport   string `json:"source_coverage_report,omitempty"`
+	TaxonomyCoverageReport string `json:"taxonomy_coverage_report,omitempty"`
 }
 
 type EvidenceManifestMetrics struct {

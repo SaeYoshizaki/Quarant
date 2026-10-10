@@ -131,10 +131,12 @@ type SecurityTaxonomyPolicy struct {
 }
 
 type SecurityTaxonomyTerm struct {
-	Key         string   `json:"key"`
-	Label       string   `json:"label"`
-	Description string   `json:"description"`
-	Sources     []string `json:"sources,omitempty"`
+	Key                 string   `json:"key"`
+	Label               string   `json:"label"`
+	Description         string   `json:"description"`
+	Sources             []string `json:"sources,omitempty"`
+	MatchAny            []string `json:"match_any,omitempty"`
+	NormalizedTechnique string   `json:"normalized_technique,omitempty"`
 }
 
 func NormalizeSecurityEvent(event SecurityEvent) SecurityEvent {
@@ -145,19 +147,31 @@ func NormalizeSecurityEvents(events []SecurityEvent) []SecurityEvent {
 	return normalizedSecurityEvents(events)
 }
 
+func NormalizeSecurityEventWithPolicy(event SecurityEvent, policy SecurityTaxonomyPolicy) SecurityEvent {
+	return normalizeSecurityEventWithPolicy(event, policy)
+}
+
+func NormalizeSecurityEventsWithPolicy(events []SecurityEvent, policy SecurityTaxonomyPolicy) []SecurityEvent {
+	out := make([]SecurityEvent, 0, len(events))
+	for _, event := range events {
+		out = append(out, normalizeSecurityEventWithPolicy(event, policy))
+	}
+	return out
+}
+
 func SecurityTaxonomyDecisionPolicy() SecurityTaxonomyPolicy {
 	return SecurityTaxonomyPolicy{
 		Version: "quarant-security-taxonomy-v1",
 		Taxonomies: []SecurityTaxonomyTerm{
 			{Key: "reconnaissance", Label: "Reconnaissance", Description: "Scanning, probing, or sweep activity before exploitation.", Sources: []string{"openwrt", "suricata", "snort"}},
-			{Key: "port_scan", Label: "Port scan", Description: "One source probing several ports on one target.", Sources: []string{"psad", "openwrt"}},
-			{Key: "host_sweep", Label: "Host sweep", Description: "One source probing the same or related service across multiple local targets.", Sources: []string{"psad", "openwrt"}},
-			{Key: "sensitive_service_probe", Label: "Sensitive service probe", Description: "Inbound probe aimed at management, IoT, or remote-access services.", Sources: []string{"openwrt", "suricata", "snort"}},
-			{Key: "suspicious_tcp_flags", Label: "Suspicious TCP flags", Description: "FIN, NULL, XMAS, or similar scan-like TCP flag patterns.", Sources: []string{"psad", "openwrt"}},
-			{Key: "exploit_attempt", Label: "Exploit attempt", Description: "IDS evidence categorized as attempted-admin, attempted-user, web application attack, or exploitation.", Sources: []string{"suricata", "snort"}},
-			{Key: "malware_or_c2", Label: "Malware or C2", Description: "IDS evidence categorized as malware, trojan, botnet, or command-and-control.", Sources: []string{"suricata", "snort"}},
-			{Key: "dos", Label: "Denial of service", Description: "IDS evidence categorized as denial-of-service activity.", Sources: []string{"suricata", "snort"}},
-			{Key: "policy_violation", Label: "Policy violation", Description: "IDS evidence categorized as policy, protocol anomaly, or potentially unwanted behavior.", Sources: []string{"suricata", "snort"}},
+			{Key: "port_scan", Label: "Port scan", Description: "One source probing several ports on one target.", Sources: []string{"psad", "openwrt"}, MatchAny: []string{"tcp_syn_probe", "port_probe", "port_scan", "scan", "probe"}, NormalizedTechnique: "port_scan"},
+			{Key: "host_sweep", Label: "Host sweep", Description: "One source probing the same or related service across multiple local targets.", Sources: []string{"psad", "openwrt"}, MatchAny: []string{"sweep"}, NormalizedTechnique: "host_sweep"},
+			{Key: "sensitive_service_probe", Label: "Sensitive service probe", Description: "Inbound probe aimed at management, IoT, or remote-access services.", Sources: []string{"openwrt", "suricata", "snort"}, MatchAny: []string{"telnet", "rtsp", "mqtt", "ssh", "webcam", "camera"}},
+			{Key: "suspicious_tcp_flags", Label: "Suspicious TCP flags", Description: "FIN, NULL, XMAS, or similar scan-like TCP flag patterns.", Sources: []string{"psad", "openwrt"}, MatchAny: []string{"xmas", "fin_scan", "null_scan", "fin scan"}, NormalizedTechnique: "suspicious_tcp_flags"},
+			{Key: "exploit_attempt", Label: "Exploit attempt", Description: "IDS evidence categorized as attempted-admin, attempted-user, web application attack, or exploitation.", Sources: []string{"suricata", "snort"}, MatchAny: []string{"attempted-admin", "attempted user", "attempted-user", "web application attack", "exploit", "shellcode", "sql injection", "command injection"}, NormalizedTechnique: "exploit_attempt"},
+			{Key: "malware_or_c2", Label: "Malware or C2", Description: "IDS evidence categorized as malware, trojan, botnet, or command-and-control.", Sources: []string{"suricata", "snort"}, MatchAny: []string{"trojan", "malware", "botnet", "command and control", "c2", "cnc"}, NormalizedTechnique: "malware_or_c2"},
+			{Key: "dos", Label: "Denial of service", Description: "IDS evidence categorized as denial-of-service activity.", Sources: []string{"suricata", "snort"}, MatchAny: []string{"denial of service", "denial-of-service", "dos", "ddos"}, NormalizedTechnique: "dos"},
+			{Key: "policy_violation", Label: "Policy violation", Description: "IDS evidence categorized as policy, protocol anomaly, or potentially unwanted behavior.", Sources: []string{"suricata", "snort"}, MatchAny: []string{"policy", "protocol-command-decode", "pua", "bad-unknown"}, NormalizedTechnique: "policy_violation"},
 			{Key: "ids_alert", Label: "IDS alert", Description: "Rule-engine alert retained when a more specific normalized class is unavailable.", Sources: []string{"suricata", "snort"}},
 		},
 		Notes: []string{
@@ -211,7 +225,12 @@ func LoadAttackEvidenceReport(securityEventsPath string) (AttackEvidenceReport, 
 }
 
 func BuildAttackEvidenceReport(events []SecurityEvent) AttackEvidenceReport {
-	events = normalizedSecurityEvents(events)
+	return BuildAttackEvidenceReportWithPolicy(events, SecurityTaxonomyDecisionPolicy())
+}
+
+func BuildAttackEvidenceReportWithPolicy(events []SecurityEvent, policy SecurityTaxonomyPolicy) AttackEvidenceReport {
+	policy = normalizeSecurityTaxonomyPolicy(policy)
+	events = NormalizeSecurityEventsWithPolicy(events, policy)
 	report := AttackEvidenceReport{
 		GeneratedAt: time.Now().UTC().Format(time.RFC3339),
 		DecisionPolicy: AttackEvidencePolicy{
@@ -229,7 +248,7 @@ func BuildAttackEvidenceReport(events []SecurityEvent) AttackEvidenceReport {
 				"Observed evidence is separated into blocked, accepted, and exposed-service attempts so before/after metrics are not interpreted as internet attack-volume reduction.",
 			},
 		},
-		TaxonomyPolicy: SecurityTaxonomyDecisionPolicy(),
+		TaxonomyPolicy: policy,
 		Recommendations: []string{
 			"Prioritize findings that repeat, fan out across ports, or target sensitive IoT services.",
 			"Correlate attack evidence with device behavior before applying disruptive mitigation.",
@@ -339,6 +358,11 @@ func normalizedSecurityEvents(events []SecurityEvent) []SecurityEvent {
 }
 
 func normalizeSecurityEvent(event SecurityEvent) SecurityEvent {
+	return normalizeSecurityEventWithPolicy(event, SecurityTaxonomyDecisionPolicy())
+}
+
+func normalizeSecurityEventWithPolicy(event SecurityEvent, policy SecurityTaxonomyPolicy) SecurityEvent {
+	policy = normalizeSecurityTaxonomyPolicy(policy)
 	event.Source = strings.TrimSpace(event.Source)
 	event.SourceFormat = strings.TrimSpace(event.SourceFormat)
 	event.Sensor = strings.TrimSpace(event.Sensor)
@@ -378,7 +402,7 @@ func normalizeSecurityEvent(event SecurityEvent) SecurityEvent {
 	if event.AttackTechnique == "" && isInboundSecurityEvent(event) {
 		event.AttackTechnique = "inbound_block"
 	}
-	event.Taxonomy, event.NormalizedTechnique = normalizeSecurityTaxonomy(event)
+	event.Taxonomy, event.NormalizedTechnique = normalizeSecurityTaxonomy(event, policy)
 	if event.DeviceIP == "" && isLocalDeviceIP(event.DstIP) {
 		event.DeviceIP = event.DstIP
 	}
@@ -392,6 +416,25 @@ func normalizeSecurityEvent(event SecurityEvent) SecurityEvent {
 		event.EventID = securityEventID(event)
 	}
 	return event
+}
+
+func normalizeSecurityTaxonomyPolicy(policy SecurityTaxonomyPolicy) SecurityTaxonomyPolicy {
+	if strings.TrimSpace(policy.Version) == "" && len(policy.Taxonomies) == 0 {
+		return SecurityTaxonomyDecisionPolicy()
+	}
+	if strings.TrimSpace(policy.Version) == "" {
+		policy.Version = "custom-security-taxonomy"
+	}
+	for i := range policy.Taxonomies {
+		policy.Taxonomies[i].Key = strings.ToLower(strings.TrimSpace(policy.Taxonomies[i].Key))
+		policy.Taxonomies[i].Key = strings.ReplaceAll(policy.Taxonomies[i].Key, " ", "_")
+		policy.Taxonomies[i].Key = strings.ReplaceAll(policy.Taxonomies[i].Key, "-", "_")
+		policy.Taxonomies[i].NormalizedTechnique = strings.ToLower(strings.TrimSpace(policy.Taxonomies[i].NormalizedTechnique))
+		for j := range policy.Taxonomies[i].MatchAny {
+			policy.Taxonomies[i].MatchAny[j] = strings.ToLower(strings.TrimSpace(policy.Taxonomies[i].MatchAny[j]))
+		}
+	}
+	return policy
 }
 
 func securityEventID(event SecurityEvent) string {
@@ -424,7 +467,7 @@ func verdictFromAction(action string) string {
 	}
 }
 
-func normalizeSecurityTaxonomy(event SecurityEvent) ([]string, string) {
+func normalizeSecurityTaxonomy(event SecurityEvent, policy SecurityTaxonomyPolicy) ([]string, string) {
 	terms := map[string]bool{}
 	for _, taxonomy := range event.Taxonomy {
 		addSecurityTaxonomy(terms, taxonomy)
@@ -444,39 +487,16 @@ func normalizeSecurityTaxonomy(event SecurityEvent) ([]string, string) {
 		addSecurityTaxonomy(terms, "attack_like")
 		addSecurityTaxonomy(terms, "reconnaissance")
 	}
-	switch {
-	case strings.Contains(technique, "xmas") || strings.Contains(technique, "fin_scan") || strings.Contains(technique, "null_scan") || strings.Contains(text, "xmas") || strings.Contains(text, " null ") || strings.Contains(text, " fin scan"):
-		addSecurityTaxonomy(terms, "suspicious_tcp_flags")
-		technique = "suspicious_tcp_flags"
-	case strings.Contains(technique, "syn") || strings.Contains(technique, "port_probe") || strings.Contains(technique, "port_scan") || strings.Contains(text, "scan") || strings.Contains(text, "probe"):
-		addSecurityTaxonomy(terms, "port_scan")
-		if technique == "" || technique == "inbound_block" || technique == "tcp_probe" || strings.Contains(text, "scan") {
-			technique = "port_scan"
-		}
-	}
-	if strings.Contains(text, "sweep") {
-		addSecurityTaxonomy(terms, "host_sweep")
-		technique = "host_sweep"
-	}
 	if isSensitiveSecurityEvent(event) || strings.Contains(text, "telnet") || strings.Contains(text, "rtsp") || strings.Contains(text, "mqtt") || strings.Contains(text, "ssh") || strings.Contains(text, "webcam") || strings.Contains(text, "camera") {
 		addSecurityTaxonomy(terms, "sensitive_service_probe")
 	}
-	switch {
-	case containsAnySecurityTaxonomyText(text, "attempted-admin", "attempted user", "attempted-user", "web application attack", "exploit", "shellcode", "sql injection", "command injection"):
-		addSecurityTaxonomy(terms, "exploit_attempt")
-		if technique == "" || technique == "port_scan" || technique == "inbound_block" {
-			technique = "exploit_attempt"
+	for _, term := range policy.Taxonomies {
+		if !securityTaxonomyTermMatches(text, technique, term) {
+			continue
 		}
-	case containsAnySecurityTaxonomyText(text, "trojan", "malware", "botnet", "command and control", "c2", "cnc"):
-		addSecurityTaxonomy(terms, "malware_or_c2")
-		technique = "malware_or_c2"
-	case containsAnySecurityTaxonomyText(text, "denial of service", "denial-of-service", "dos", "ddos"):
-		addSecurityTaxonomy(terms, "dos")
-		technique = "dos"
-	case containsAnySecurityTaxonomyText(text, "policy", "protocol-command-decode", "pua", "bad-unknown"):
-		addSecurityTaxonomy(terms, "policy_violation")
-		if technique == "" || technique == "inbound_block" {
-			technique = "policy_violation"
+		addSecurityTaxonomy(terms, term.Key)
+		if term.NormalizedTechnique != "" && shouldReplaceNormalizedSecurityTechnique(technique, text, term.NormalizedTechnique) {
+			technique = term.NormalizedTechnique
 		}
 	}
 	if isIDSSecurityEvent(event) {
@@ -492,6 +512,37 @@ func normalizeSecurityTaxonomy(event SecurityEvent) ([]string, string) {
 	return sortedStringSet(terms), technique
 }
 
+func securityTaxonomyTermMatches(text, technique string, term SecurityTaxonomyTerm) bool {
+	if term.Key == "" || len(term.MatchAny) == 0 {
+		return false
+	}
+	for _, value := range term.MatchAny {
+		value = strings.ToLower(strings.TrimSpace(value))
+		if value == "" {
+			continue
+		}
+		if strings.Contains(text, value) || strings.Contains(technique, value) {
+			return true
+		}
+	}
+	return false
+}
+
+func shouldReplaceNormalizedSecurityTechnique(current, text, candidate string) bool {
+	switch candidate {
+	case "suspicious_tcp_flags", "host_sweep", "exploit_attempt", "malware_or_c2", "dos", "policy_violation":
+		return true
+	}
+	switch strings.TrimSpace(current) {
+	case "", "inbound_block", "tcp_probe":
+		return true
+	case "port_scan":
+		return candidate != "sensitive_service_probe"
+	default:
+		return strings.Contains(text, candidate)
+	}
+}
+
 func addSecurityTaxonomy(values map[string]bool, value string) {
 	value = strings.ToLower(strings.TrimSpace(value))
 	value = strings.ReplaceAll(value, " ", "_")
@@ -500,15 +551,6 @@ func addSecurityTaxonomy(values map[string]bool, value string) {
 		return
 	}
 	values[value] = true
-}
-
-func containsAnySecurityTaxonomyText(text string, needles ...string) bool {
-	for _, needle := range needles {
-		if strings.Contains(text, needle) {
-			return true
-		}
-	}
-	return false
 }
 
 func isInboundSecurityEvent(event SecurityEvent) bool {

@@ -21,6 +21,7 @@ func runQualityGate(args []string, out io.Writer) error {
 	attackEvalPath := fs.String("attack-eval", "", "attack evidence evaluation report JSON path")
 	mitigationEvalPath := fs.String("mitigation-eval", "", "mitigation evaluation report JSON path")
 	sourceCoveragePath := fs.String("source-coverage", "", "source coverage report JSON path")
+	taxonomyCoveragePath := fs.String("taxonomy-coverage", "", "taxonomy coverage report JSON path")
 	researchPath := fs.String("research", "", "research report JSON path")
 	reportOut := fs.String("out", "", "quality gate report JSON output path")
 	researchOut := fs.String("research-out", "", "guarded research report JSON output path, empty to disable")
@@ -37,6 +38,7 @@ func runQualityGate(args []string, out io.Writer) error {
 		*attackEvalPath,
 		*mitigationEvalPath,
 		*sourceCoveragePath,
+		*taxonomyCoveragePath,
 		*researchPath,
 	)
 	if strings.TrimSpace(*reportOut) == "" {
@@ -74,13 +76,14 @@ func runQualityGate(args []string, out io.Writer) error {
 	return nil
 }
 
-func qualityGateSourcesFromFlags(experimentDir, precisionEvalPath, attackEvalPath, mitigationEvalPath, sourceCoveragePath, researchPath string) reportapi.QualityGateSources {
+func qualityGateSourcesFromFlags(experimentDir, precisionEvalPath, attackEvalPath, mitigationEvalPath, sourceCoveragePath, taxonomyCoveragePath, researchPath string) reportapi.QualityGateSources {
 	if strings.TrimSpace(experimentDir) == "" {
 		return reportapi.QualityGateSources{
 			PrecisionEvalReport:      precisionEvalPath,
 			AttackEvidenceEvalReport: attackEvalPath,
 			MitigationEvalReport:     mitigationEvalPath,
 			SourceCoverageReport:     sourceCoveragePath,
+			TaxonomyCoverageReport:   taxonomyCoveragePath,
 			ResearchReport:           researchPath,
 		}
 	}
@@ -89,6 +92,7 @@ func qualityGateSourcesFromFlags(experimentDir, precisionEvalPath, attackEvalPat
 		AttackEvidenceEvalReport: firstExistingPath(attackEvalPath, filepath.Join(experimentDir, "before", "assembled", "attack_evidence_eval_report.json"), filepath.Join(experimentDir, "attack_evidence_eval_report.json")),
 		MitigationEvalReport:     firstExistingPath(mitigationEvalPath, filepath.Join(experimentDir, "mitigation_eval_report.json")),
 		SourceCoverageReport:     firstExistingPath(sourceCoveragePath, filepath.Join(experimentDir, "before", "assembled", "source_coverage_report.json"), filepath.Join(experimentDir, "source_coverage_report.json")),
+		TaxonomyCoverageReport:   firstExistingPath(taxonomyCoveragePath, filepath.Join(experimentDir, "before", "assembled", "taxonomy_coverage_report.json"), filepath.Join(experimentDir, "taxonomy_coverage_report.json")),
 		ResearchReport:           firstExistingPath(researchPath, filepath.Join(experimentDir, "research_report.json")),
 	}
 }

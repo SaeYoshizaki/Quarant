@@ -166,6 +166,7 @@ func ResearchPackageREADME(report ResearchReport) string {
 	b.WriteString("- `run_manifest.json`: generated artifact inventory\n")
 	b.WriteString("- `research_report.json` and `research_report.md`: integrated research report\n")
 	b.WriteString("- `tables/`: CSV tables for paper analysis\n")
+	b.WriteString("- `taxonomy_policy.json`: taxonomy normalization policy used as the default Quarant grouping layer\n")
 	b.WriteString("- `latex/`: LaTeX table snippets\n")
 	b.WriteString("- `figures/`: SVG figures generated from report metrics\n")
 	b.WriteString("- `device_list.csv`: device-level summary\n\n")

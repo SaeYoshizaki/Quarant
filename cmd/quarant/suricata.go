@@ -24,6 +24,7 @@ type suricataImportConfig struct {
 	OutDir                string
 	SecurityEventsOutPath string
 	AttackEvidenceOutPath string
+	TaxonomyPolicyPath    string
 }
 
 type suricataImportResult struct {
@@ -93,6 +94,7 @@ func runSuricataImportCLI(args []string, out io.Writer) error {
 	fs.StringVar(&cfg.OutDir, "out-dir", "suricata-run", "directory to write Quarant JSON outputs")
 	fs.StringVar(&cfg.SecurityEventsOutPath, "security-events-out", "", "security events JSONL output path (default: out-dir/security_events.jsonl)")
 	fs.StringVar(&cfg.AttackEvidenceOutPath, "attack-evidence-out", "", "attack evidence report JSON output path (default: out-dir/attack_evidence_report.json)")
+	fs.StringVar(&cfg.TaxonomyPolicyPath, "taxonomy-policy", "", "taxonomy policy JSON path, empty for built-in default")
 	if err := fs.Parse(normalizeFlagArgs(fs, args)); err != nil {
 		return fmt.Errorf("parse suricata import flags: %w", err)
 	}
@@ -141,7 +143,11 @@ func runSuricataImport(cfg suricataImportConfig) (suricataImportResult, error) {
 		}
 		observations = append(observations, observationsFromSuricataEVE(record)...)
 	}
-	securityEvents = reportapi.NormalizeSecurityEvents(securityEvents)
+	taxonomyPolicy, err := reportapi.LoadSecurityTaxonomyPolicy(cfg.TaxonomyPolicyPath)
+	if err != nil {
+		return suricataImportResult{}, err
+	}
+	securityEvents = reportapi.NormalizeSecurityEventsWithPolicy(securityEvents, taxonomyPolicy)
 	securityEventsPath := defaultSibling(cfg.SecurityEventsOutPath, cfg.OutDir, "security_events.jsonl")
 	attackEvidencePath := defaultSibling(cfg.AttackEvidenceOutPath, cfg.OutDir, "attack_evidence_report.json")
 	flowsPath := filepath.Join(cfg.OutDir, "flows.jsonl")
@@ -149,7 +155,7 @@ func runSuricataImport(cfg suricataImportConfig) (suricataImportResult, error) {
 	if err := writeJSONL(securityEventsPath, securityEvents); err != nil {
 		return suricataImportResult{}, err
 	}
-	attackEvidence := reportapi.BuildAttackEvidenceReport(securityEvents)
+	attackEvidence := reportapi.BuildAttackEvidenceReportWithPolicy(securityEvents, taxonomyPolicy)
 	attackEvidence.Source.SecurityEvents = securityEventsPath
 	if err := writePrettyJSON(attackEvidencePath, attackEvidence); err != nil {
 		return suricataImportResult{}, err

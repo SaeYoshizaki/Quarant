@@ -25,6 +25,7 @@ type QualityGateSources struct {
 	AttackEvidenceEvalReport string `json:"attack_evidence_eval_report,omitempty"`
 	MitigationEvalReport     string `json:"mitigation_eval_report,omitempty"`
 	SourceCoverageReport     string `json:"source_coverage_report,omitempty"`
+	TaxonomyCoverageReport   string `json:"taxonomy_coverage_report,omitempty"`
 	ResearchReport           string `json:"research_report,omitempty"`
 }
 
@@ -37,6 +38,9 @@ type QualityGateMetrics struct {
 	NormalFlowPreservationRate     float64 `json:"normal_flow_preservation_rate,omitempty"`
 	SourceCount                    int     `json:"source_count,omitempty"`
 	MultiSourceServiceCount        int     `json:"multi_source_service_count,omitempty"`
+	TaxonomyClassificationCoverage float64 `json:"taxonomy_classification_coverage,omitempty"`
+	IDSFallbackOnlyRate            float64 `json:"ids_fallback_only_rate,omitempty"`
+	TaxonomyCount                  int     `json:"taxonomy_count,omitempty"`
 }
 
 type QualityGateCheck struct {
@@ -58,6 +62,7 @@ type QualityGateInputs struct {
 	AttackEvidenceEval *AttackEvidenceEvaluationReport
 	MitigationEval     *MitigationEvaluationReport
 	SourceCoverage     *SourceCoverageReport
+	TaxonomyCoverage   *TaxonomyCoverageReport
 	ResearchReport     *ResearchReport
 	Source             QualityGateSources
 }
@@ -96,6 +101,14 @@ func LoadQualityGateReport(sources QualityGateSources) (QualityGateReport, error
 			inputs.SourceCoverage = &report
 		}
 	}
+	if strings.TrimSpace(sources.TaxonomyCoverageReport) != "" {
+		var report TaxonomyCoverageReport
+		if ok, err := readOptionalJSONFile(sources.TaxonomyCoverageReport, &report); err != nil {
+			return QualityGateReport{}, err
+		} else if ok {
+			inputs.TaxonomyCoverage = &report
+		}
+	}
 	if strings.TrimSpace(sources.ResearchReport) != "" {
 		var report ResearchReport
 		if ok, err := readOptionalJSONFile(sources.ResearchReport, &report); err != nil {
@@ -129,12 +142,18 @@ func BuildQualityGateReport(inputs QualityGateInputs) QualityGateReport {
 		report.Metrics.SourceCount = inputs.SourceCoverage.Metrics.SourceCount
 		report.Metrics.MultiSourceServiceCount = inputs.SourceCoverage.Metrics.MultiSourceServiceCount
 	}
+	if inputs.TaxonomyCoverage != nil {
+		report.Metrics.TaxonomyClassificationCoverage = inputs.TaxonomyCoverage.Metrics.ClassificationCoverage
+		report.Metrics.IDSFallbackOnlyRate = inputs.TaxonomyCoverage.Metrics.IDSFallbackOnlyRate
+		report.Metrics.TaxonomyCount = inputs.TaxonomyCoverage.Metrics.TaxonomyCount
+	}
 	report.Checks = append(report.Checks, qualityPrecisionCoverageCheck(inputs.PrecisionEval))
 	report.Checks = append(report.Checks, qualityAttackEvidenceCoverageCheck(inputs.AttackEvidenceEval))
 	report.Checks = append(report.Checks, qualityMitigationEvidenceCheck(inputs.MitigationEval))
 	report.Checks = append(report.Checks, qualityIDSGuardrailCheck(inputs.MitigationEval))
 	report.Checks = append(report.Checks, qualityNormalTrafficCheck(inputs.MitigationEval))
 	report.Checks = append(report.Checks, qualitySourceCoverageCheck(inputs.SourceCoverage))
+	report.Checks = append(report.Checks, qualityTaxonomyCoverageCheck(inputs.TaxonomyCoverage))
 	report.ClaimAdjustments = qualityClaimAdjustments(report.Checks)
 	report.RecommendedNextSteps = qualityNextSteps(report.Checks)
 	report.OverallStatus = qualityOverallStatus(report.Checks)
@@ -246,6 +265,22 @@ func qualitySourceCoverageCheck(report *SourceCoverageReport) QualityGateCheck {
 		return qualityCheck("source_coverage", "warn", "medium", "no multi-source service overlap was observed", "Avoid claiming cross-sensor corroboration for this run.")
 	}
 	return qualityCheck("source_coverage", "pass", "low", fmt.Sprintf("%d multi-source service tuple(s) observed", report.Metrics.MultiSourceServiceCount), "")
+}
+
+func qualityTaxonomyCoverageCheck(report *TaxonomyCoverageReport) QualityGateCheck {
+	if report == nil {
+		return qualityCheck("taxonomy_coverage", "warn", "medium", "taxonomy coverage report was not provided", "Treat normalized attack categories as unmeasured unless taxonomy coverage is reported.")
+	}
+	if report.Metrics.ClassificationCoverage < 0.8 {
+		return qualityCheck("taxonomy_coverage", "warn", "medium", fmt.Sprintf("taxonomy classification coverage is %.3f", report.Metrics.ClassificationCoverage), "Review unclassified security events before making taxonomy-level claims.")
+	}
+	if report.Metrics.IDSFallbackOnlyRate > 0.2 {
+		return qualityCheck("taxonomy_coverage", "warn", "medium", fmt.Sprintf("generic IDS fallback-only rate is %.3f", report.Metrics.IDSFallbackOnlyRate), "Avoid over-interpreting IDS alerts that only map to generic ids_alert taxonomy.")
+	}
+	if report.Metrics.SingleTaxonomyDominanceRate > 0.9 && report.Metrics.TaxonomyCount > 1 {
+		return qualityCheck("taxonomy_coverage", "warn", "low", fmt.Sprintf("taxonomy %s dominates %.3f of events", report.Metrics.SingleTaxonomyDominanceTaxonomy, report.Metrics.SingleTaxonomyDominanceRate), "Describe taxonomy distribution skew when presenting evidence coverage.")
+	}
+	return qualityCheck("taxonomy_coverage", "pass", "low", fmt.Sprintf("taxonomy coverage is %.3f across %d term(s)", report.Metrics.ClassificationCoverage, report.Metrics.TaxonomyCount), "")
 }
 
 func qualityCheck(key, status, severity, summary, guardrail string) QualityGateCheck {
