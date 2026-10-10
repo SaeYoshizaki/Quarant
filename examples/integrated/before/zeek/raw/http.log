@@ -1,0 +1,2 @@
+#fields	ts	uid	id.orig_h	id.orig_p	id.resp_h	id.resp_p	method	host	uri
+1790409607.000000	H1	192.168.8.42	50001	198.51.100.11	80	GET	camera-cloud.example	/ping

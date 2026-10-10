@@ -1,0 +1,2 @@
+#fields	ts	uid	id.orig_h	id.orig_p	id.resp_h	id.resp_p	query
+1790413205.000000	D2	192.168.8.42	53000	8.8.8.8	53	camera-cloud.example

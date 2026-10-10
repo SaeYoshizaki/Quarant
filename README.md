@@ -193,7 +193,7 @@ go run ./cmd/quarant openwrt collect \
   --out-dir runs/openwrt-001
 ```
 
-## Suricata / Zeek 連携
+## Suricata / Zeek / Snort 連携
 
 ### Suricata EVE import
 
@@ -237,6 +237,43 @@ runs/zeek-001/observations.jsonl
 ```
 
 Zeek は IDS alert ではなく NSM 証拠として扱います。device behavior、DNS、HTTP host、TLS SNI、external/local connection の補強証拠として precision incident に接続します。
+
+### Snort import
+
+Snort fast alert log または JSONL alert を `security_events.jsonl` に変換します。`sid` / `msg` / `classtype` / `priority` は IDS metadata として保持します。
+
+```bash
+go run ./cmd/quarant snort import \
+  --alerts raw/alert.fast \
+  --out-dir runs/snort-001
+```
+
+## Evidence assemble
+
+OpenWrt / Suricata / Zeek / Snort など複数 sensor の run directory を統合し、Quarant の標準入力セットを作ります。
+
+```bash
+go run ./cmd/quarant evidence assemble \
+  --openwrt runs/openwrt-001 \
+  --suricata runs/suricata-001 \
+  --zeek runs/zeek-001 \
+  --snort runs/snort-001 \
+  --out runs/experiment-001
+```
+
+出力:
+
+```text
+runs/experiment-001/events.jsonl
+runs/experiment-001/security_events.jsonl
+runs/experiment-001/flows.jsonl
+runs/experiment-001/observations.jsonl
+runs/experiment-001/attack_evidence_report.json
+runs/experiment-001/source_coverage_report.json
+runs/experiment-001/evidence_manifest.json
+```
+
+`source_coverage_report.json` は OpenWrt only / Suricata only / Zeek only / overlap を、device/protocol/port tuple 単位で集計します。研究 report には `--source-coverage` で接続できます。
 
 ## Precision incident
 
@@ -334,6 +371,7 @@ go run ./cmd/quarant research-report \
   --precision-eval precision_eval_report.json \
   --mitigation mitigation_plan.json \
   --mitigation-eval mitigation_eval_report.json \
+  --source-coverage source_coverage_report.json \
   --out research_report.json
 ```
 
@@ -362,14 +400,17 @@ research report には、以下の注意を含めています。
 
 - Suricata EVE JSON importer
 - Zeek connection/DNS/HTTP/TLS log importer
+- Snort alert importer
+- evidence assemble CLI
+- source coverage report
+- research package source coverage table
 - accepted/exposed service attempt と IDS alert overlap の before/after evaluation
 
 今後の想定:
 
-- Snort alert metadata importer
-- Snort の `sid` / `msg` / `classtype` / `priority` 風 metadata の security event への対応
+- より多様な Snort unified2 / alert_json variants の importer
 
-Suricata alert は Quarant native `security_events.jsonl` に変換する adapter、Zeek は `flows.jsonl` / `observations.jsonl` に変換する passive visibility adapter として扱います。
+Suricata / Snort alert は Quarant native `security_events.jsonl` に変換する adapter、Zeek は `flows.jsonl` / `observations.jsonl` に変換する passive visibility adapter として扱います。
 
 ## テスト
 
@@ -387,6 +428,9 @@ go test ./...
 - attack evidence label/eval が meaningful evidence、internet background noise、benign admin、unlabeled を分けて集計すること。
 - Suricata EVE importer が alert metadata を `security_events.jsonl` に保持し、flow / dns / http / tls を passive evidence に変換すること。
 - Zeek importer が conn / dns / http / ssl/tls log を flow / observation に変換すること。
+- Snort importer が fast alert / JSONL alert を security event に変換すること。
+- evidence assemble が複数 source を merge / dedup し、attack evidence report と source coverage report を生成すること。
+- research package が source coverage table を出力すること。
 - before/after eval が IDS alert count と exposed service attempt overlap を分けて集計すること。
 - security events が precision incident の attack evidence signal に接続されること。
 - mitigation / gateway backend / apply report / before-after eval / research report の既存テストが通ること。

@@ -48,12 +48,20 @@ func main() {
 		if err := runOpenWrt(args[1:]); err != nil {
 			log.Fatal(err)
 		}
+	case "evidence":
+		if err := runEvidence(args[1:], os.Stdout); err != nil {
+			log.Fatal(err)
+		}
 	case "suricata":
 		if err := runSuricata(args[1:], os.Stdout); err != nil {
 			log.Fatal(err)
 		}
 	case "zeek":
 		if err := runZeek(args[1:], os.Stdout); err != nil {
+			log.Fatal(err)
+		}
+	case "snort":
+		if err := runSnort(args[1:], os.Stdout); err != nil {
 			log.Fatal(err)
 		}
 	case "precision":

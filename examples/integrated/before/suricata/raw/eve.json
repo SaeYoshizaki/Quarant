@@ -1,0 +1,3 @@
+{"timestamp":"2026-09-26T12:00:03.000000+0000","event_type":"alert","src_ip":"203.0.113.9","src_port":45124,"dest_ip":"192.168.8.42","dest_port":80,"proto":"TCP","flow_id":1002,"alert":{"action":"allowed","signature_id":2100002,"signature":"ET SCAN HTTP Probe","category":"Attempted Recon","severity":2}}
+{"timestamp":"2026-09-26T12:00:05.000000+0000","event_type":"dns","src_ip":"192.168.8.42","src_port":53000,"dest_ip":"8.8.8.8","dest_port":53,"proto":"UDP","app_proto":"dns","flow_id":2001,"dns":{"rrname":"camera-cloud.example"}}
+{"timestamp":"2026-09-26T12:00:06.000000+0000","event_type":"tls","src_ip":"192.168.8.42","src_port":50000,"dest_ip":"198.51.100.10","dest_port":443,"proto":"TCP","app_proto":"tls","flow_id":2002,"tls":{"sni":"camera-cloud.example"}}

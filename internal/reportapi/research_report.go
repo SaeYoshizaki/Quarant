@@ -30,6 +30,7 @@ type ResearchReportSources struct {
 	PrecisionEvalReport  string `json:"precision_eval_report,omitempty"`
 	MitigationPlan       string `json:"mitigation_plan,omitempty"`
 	MitigationEvalReport string `json:"mitigation_eval_report,omitempty"`
+	SourceCoverageReport string `json:"source_coverage_report,omitempty"`
 }
 
 type ResearchMetrics struct {
@@ -75,17 +76,24 @@ type ResearchTables struct {
 	MitigationSummary       []ResearchTableRow `json:"mitigation_summary,omitempty"`
 	MitigationOutcomes      []ResearchTableRow `json:"mitigation_outcomes,omitempty"`
 	NormalTrafficContinuity []ResearchTableRow `json:"normal_traffic_continuity,omitempty"`
+	SourceCoverage          []ResearchTableRow `json:"source_coverage,omitempty"`
 }
 
 type ResearchTableRow map[string]string
 
 func LoadResearchReport(precisionPath, precisionEvalPath, mitigationPlanPath, mitigationEvalPath string) (ResearchReport, error) {
+	return LoadResearchReportWithSourceCoverage(precisionPath, precisionEvalPath, mitigationPlanPath, mitigationEvalPath, "")
+}
+
+func LoadResearchReportWithSourceCoverage(precisionPath, precisionEvalPath, mitigationPlanPath, mitigationEvalPath, sourceCoveragePath string) (ResearchReport, error) {
 	var precision DetectionPrecisionReport
 	var precisionEval PrecisionEvaluationReport
 	var mitigation MitigationPlan
 	var mitigationEval MitigationEvaluationReport
+	var sourceCoverage SourceCoverageReport
 	hasPrecisionEval := strings.TrimSpace(precisionEvalPath) != ""
 	hasMitigationEval := strings.TrimSpace(mitigationEvalPath) != ""
+	hasSourceCoverage := strings.TrimSpace(sourceCoveragePath) != ""
 
 	if err := readJSONFile(precisionPath, &precision); err != nil {
 		return ResearchReport{}, err
@@ -103,12 +111,21 @@ func LoadResearchReport(precisionPath, precisionEvalPath, mitigationPlanPath, mi
 			return ResearchReport{}, err
 		}
 	}
+	if hasSourceCoverage {
+		if err := readJSONFile(sourceCoveragePath, &sourceCoverage); err != nil {
+			return ResearchReport{}, err
+		}
+	}
 	report := BuildResearchReport(precision, optionalPrecisionEval(precisionEval, hasPrecisionEval), mitigation, optionalMitigationEval(mitigationEval, hasMitigationEval))
+	if hasSourceCoverage {
+		report = ApplySourceCoverageToResearchReport(report, sourceCoverage)
+	}
 	report.Source = ResearchReportSources{
 		PrecisionReport:      precisionPath,
 		PrecisionEvalReport:  precisionEvalPath,
 		MitigationPlan:       mitigationPlanPath,
 		MitigationEvalReport: mitigationEvalPath,
+		SourceCoverageReport: sourceCoveragePath,
 	}
 	return report, nil
 }
@@ -132,6 +149,28 @@ func BuildResearchReport(precision DetectionPrecisionReport, precisionEval *Prec
 	report.SupportedClaims = buildResearchSupportedClaims(precision, precisionEval, mitigation, mitigationEval)
 	report.MissingEvidence = buildResearchMissingEvidence(precision, precisionEval, mitigation, mitigationEval)
 	report.NextSteps = buildResearchNextSteps(report)
+	report.ExecutiveSummary = researchExecutiveSummary(report.Metrics)
+	return report
+}
+
+func ApplySourceCoverageToResearchReport(report ResearchReport, coverage SourceCoverageReport) ResearchReport {
+	report.Tables.SourceCoverage = researchSourceCoverageRows(coverage)
+	report.ExperimentStages = append(report.ExperimentStages, ResearchStage{
+		Name:   "source_coverage",
+		Status: stageStatus(coverage.Metrics.SourceCount > 0, "ready", "missing"),
+		Evidence: []string{
+			fmt.Sprintf("%d source(s) assembled", coverage.Metrics.SourceCount),
+			fmt.Sprintf("%d multi-source service tuple(s)", coverage.Metrics.MultiSourceServiceCount),
+			fmt.Sprintf("%d OpenWrt/Suricata overlap tuple(s)", coverage.Metrics.OpenWrtSuricataOverlap),
+			fmt.Sprintf("%d Suricata/Zeek overlap tuple(s)", coverage.Metrics.SuricataZeekOverlap),
+		},
+		Gaps: coverage.Limitations,
+	})
+	for _, claim := range coverage.ClaimSupport {
+		report.SupportedClaims = append(report.SupportedClaims, fmt.Sprintf("%s: %s", claim.Claim, claim.Evidence))
+	}
+	report.SupportedClaims = uniqueSortedStrings(report.SupportedClaims)
+	report.ThreatsToValidity = uniqueSortedStrings(append(report.ThreatsToValidity, coverage.Limitations...))
 	report.ExecutiveSummary = researchExecutiveSummary(report.Metrics)
 	return report
 }
@@ -345,6 +384,33 @@ func researchContinuityRows(mitigationEval *MitigationEvaluationReport) []Resear
 	return rows
 }
 
+func researchSourceCoverageRows(coverage SourceCoverageReport) []ResearchTableRow {
+	rows := []ResearchTableRow{
+		{"metric": "source_count", "value": fmt.Sprintf("%d", coverage.Metrics.SourceCount)},
+		{"metric": "security_event_count", "value": fmt.Sprintf("%d", coverage.Metrics.SecurityEventCount)},
+		{"metric": "flow_count", "value": fmt.Sprintf("%d", coverage.Metrics.FlowCount)},
+		{"metric": "observation_count", "value": fmt.Sprintf("%d", coverage.Metrics.ObservationCount)},
+		{"metric": "openwrt_only_services", "value": fmt.Sprintf("%d", coverage.Metrics.OpenWrtOnlyServiceCount)},
+		{"metric": "suricata_only_services", "value": fmt.Sprintf("%d", coverage.Metrics.SuricataOnlyServiceCount)},
+		{"metric": "zeek_only_services", "value": fmt.Sprintf("%d", coverage.Metrics.ZeekOnlyServiceCount)},
+		{"metric": "multi_source_services", "value": fmt.Sprintf("%d", coverage.Metrics.MultiSourceServiceCount)},
+		{"metric": "openwrt_suricata_overlap", "value": fmt.Sprintf("%d", coverage.Metrics.OpenWrtSuricataOverlap)},
+		{"metric": "openwrt_zeek_overlap", "value": fmt.Sprintf("%d", coverage.Metrics.OpenWrtZeekOverlap)},
+		{"metric": "suricata_zeek_overlap", "value": fmt.Sprintf("%d", coverage.Metrics.SuricataZeekOverlap)},
+		{"metric": "all_source_overlap", "value": fmt.Sprintf("%d", coverage.Metrics.AllSourceOverlap)},
+	}
+	for _, item := range coverage.BySource {
+		rows = append(rows, ResearchTableRow{
+			"source":          item.Source,
+			"security_events": fmt.Sprintf("%d", item.Security),
+			"flows":           fmt.Sprintf("%d", item.Flows),
+			"observations":    fmt.Sprintf("%d", item.Observations),
+			"services":        fmt.Sprintf("%d", item.Services),
+		})
+	}
+	return rows
+}
+
 func buildResearchSupportedClaims(precision DetectionPrecisionReport, precisionEval *PrecisionEvaluationReport, mitigation MitigationPlan, mitigationEval *MitigationEvaluationReport) []string {
 	claims := []string{}
 	claims = append(claims, precision.PaperSummary.ResearchClaimsSupported...)
@@ -460,6 +526,7 @@ func ResearchReportMarkdown(report ResearchReport) string {
 	writeMarkdownTable(&b, "Mitigation Summary", report.Tables.MitigationSummary)
 	writeMarkdownTable(&b, "Mitigation Outcomes", report.Tables.MitigationOutcomes)
 	writeMarkdownTable(&b, "Normal Traffic Continuity", report.Tables.NormalTrafficContinuity)
+	writeMarkdownTable(&b, "Source Coverage", report.Tables.SourceCoverage)
 	writeMarkdownList(&b, "Supported Claims", report.SupportedClaims)
 	writeMarkdownList(&b, "Missing Evidence", report.MissingEvidence)
 	writeMarkdownList(&b, "Threats To Validity", report.ThreatsToValidity)
@@ -508,6 +575,9 @@ func ResearchReportCSVs(report ResearchReport) map[string]string {
 	}
 	if csv := researchRowsCSV(report.Tables.NormalTrafficContinuity); csv != "" {
 		out["normal_traffic_continuity.csv"] = csv
+	}
+	if csv := researchRowsCSV(report.Tables.SourceCoverage); csv != "" {
+		out["source_coverage.csv"] = csv
 	}
 	if csv := researchRowsCSV(researchStageRows(report.ExperimentStages)); csv != "" {
 		out["experiment_stages.csv"] = csv

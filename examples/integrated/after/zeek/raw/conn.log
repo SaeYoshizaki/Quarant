@@ -1,0 +1,3 @@
+#separator \x09
+#fields	ts	uid	id.orig_h	id.orig_p	id.resp_h	id.resp_p	proto	service	orig_bytes	resp_bytes	orig_pkts	resp_pkts
+1790413206.000000	C2	192.168.8.42	50000	198.51.100.10	443	tcp	ssl	120	500	2	3

@@ -114,6 +114,35 @@ func TestBuildResearchReportSummarizesExperiment(t *testing.T) {
 	}
 }
 
+func TestApplySourceCoverageToResearchReportAddsTableAndClaims(t *testing.T) {
+	report := BuildResearchReport(DetectionPrecisionReport{}, nil, MitigationPlan{}, nil)
+	coverage := SourceCoverageReport{
+		Metrics: SourceCoverageMetrics{
+			SourceCount:             2,
+			MultiSourceServiceCount: 1,
+			OpenWrtSuricataOverlap:  1,
+		},
+		BySource: []SourceCoverageSource{
+			{Source: "openwrt", Security: 1, Services: 1},
+			{Source: "suricata", Security: 1, Services: 1},
+		},
+		ClaimSupport: []SourceCoverageClaim{
+			{Claim: "router-boundary exposure has IDS corroboration", Sources: []string{"openwrt", "suricata"}, Evidence: "same service tuple"},
+		},
+		Limitations: []string{"coverage limitation"},
+	}
+	got := ApplySourceCoverageToResearchReport(report, coverage)
+	if len(got.Tables.SourceCoverage) == 0 {
+		t.Fatalf("SourceCoverage table empty")
+	}
+	if !researchStringSliceContains(got.ThreatsToValidity, "coverage limitation") {
+		t.Fatalf("ThreatsToValidity=%+v, want coverage limitation", got.ThreatsToValidity)
+	}
+	if !strings.Contains(strings.Join(got.SupportedClaims, "\n"), "same service tuple") {
+		t.Fatalf("SupportedClaims=%+v, want source coverage claim", got.SupportedClaims)
+	}
+}
+
 func TestResearchReportMarkdownIncludesTables(t *testing.T) {
 	report := ResearchReport{
 		ExecutiveSummary: "summary.",

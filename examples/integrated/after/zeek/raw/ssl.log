@@ -1,0 +1,2 @@
+#fields	ts	uid	id.orig_h	id.orig_p	id.resp_h	id.resp_p	server_name
+1790413206.000000	S2	192.168.8.42	50000	198.51.100.10	443	camera-cloud.example

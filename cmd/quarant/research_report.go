@@ -20,6 +20,7 @@ func runResearchReport(args []string, out io.Writer) error {
 	precisionEvalPath := fs.String("precision-eval", "", "precision evaluation report JSON path")
 	mitigationPath := fs.String("mitigation", "mitigation_plan.json", "mitigation plan JSON path")
 	mitigationEvalPath := fs.String("mitigation-eval", "", "mitigation evaluation report JSON path")
+	sourceCoveragePath := fs.String("source-coverage", "", "source coverage report JSON path")
 	reportOut := fs.String("out", "research_report.json", "research report JSON output path, or - for stdout")
 	markdownOut := fs.String("markdown-out", "research_report.md", "research report Markdown output path, empty to disable")
 	csvDir := fs.String("csv-dir", "", "directory to write paper table CSV files, empty to disable")
@@ -37,7 +38,7 @@ func runResearchReport(args []string, out io.Writer) error {
 		return fmt.Errorf("research-report accepts flags only")
 	}
 
-	report, err := reportapi.LoadResearchReport(*precisionPath, *precisionEvalPath, *mitigationPath, *mitigationEvalPath)
+	report, err := reportapi.LoadResearchReportWithSourceCoverage(*precisionPath, *precisionEvalPath, *mitigationPath, *mitigationEvalPath, *sourceCoveragePath)
 	if err != nil {
 		return err
 	}
