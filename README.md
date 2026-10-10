@@ -346,6 +346,45 @@ go run ./cmd/quarant experiment run \
 - reproducibility package
 - `experiment_manifest.json`
 
+## Experiment batch
+
+複数 dataset / 複数 before-after window を一括実行し、研究評価用の横比較 summary を生成します。各 run は `experiment run` と同じ pipeline を使います。
+
+```bash
+go run ./cmd/quarant experiment batch \
+  --config examples/integrated/experiments.yaml \
+  --out runs/batch-001
+```
+
+config は小さな YAML subset または JSON で書けます。
+
+```yaml
+version: experiment-batch-v1
+taxonomy_policy: taxonomy_policy.json
+runs:
+  - id: integrated-demo
+    before_openwrt: examples/integrated/before/openwrt/raw
+    before_suricata: examples/integrated/before/suricata/raw/eve.json
+    before_zeek: examples/integrated/before/zeek/raw
+    before_snort: examples/integrated/before/snort/raw/alert.fast
+    after_openwrt: examples/integrated/after/openwrt/raw
+    after_suricata: examples/integrated/after/suricata/raw/eve.json
+    after_zeek: examples/integrated/after/zeek/raw
+    after_snort: examples/integrated/after/snort/raw/alert.fast
+    before_now: 2026-09-26T12:30:00Z
+    after_now: 2026-09-26T13:30:00Z
+```
+
+出力:
+
+```text
+runs/batch-001/<run-id>/...
+runs/batch-001/batch_summary_report.json
+runs/batch-001/batch_summary.csv
+```
+
+`batch_summary_report.json` / `batch_summary.csv` は run ごとに incident count、mitigation action count、accepted/exposed reduction、IDS exposed overlap reduction、source coverage、taxonomy coverage、quality gate status をまとめます。
+
 ## Quality gate
 
 研究 claim を言いすぎないための guardrail report を生成します。
@@ -502,6 +541,7 @@ research report には、以下の注意を含めています。
 - source coverage report
 - research package source coverage table
 - taxonomy coverage report / taxonomy policy / research package taxonomy table
+- experiment batch runner / batch summary report / batch summary CSV
 - accepted/exposed service attempt と IDS alert overlap の before/after evaluation
 
 今後の想定:
@@ -529,6 +569,7 @@ go test ./...
 - Snort importer が fast alert / JSONL alert を security event に変換すること。
 - evidence assemble が複数 source を merge / dedup し、attack evidence report と source coverage report を生成すること。
 - experiment run が integrated demo を raw evidence から research package まで一括生成すること。
+- experiment batch が複数 run の summary JSON / CSV を生成すること。
 - quality gate が claim guardrails と guarded research report を生成すること。
 - research package が source coverage table を出力すること。
 - before/after eval が IDS alert count と exposed service attempt overlap を分けて集計すること。

@@ -1,0 +1,13 @@
+version: experiment-batch-v1
+runs:
+  - id: integrated-demo
+    before_openwrt: examples/integrated/before/openwrt/raw
+    before_suricata: examples/integrated/before/suricata/raw/eve.json
+    before_zeek: examples/integrated/before/zeek/raw
+    before_snort: examples/integrated/before/snort/raw/alert.fast
+    after_openwrt: examples/integrated/after/openwrt/raw
+    after_suricata: examples/integrated/after/suricata/raw/eve.json
+    after_zeek: examples/integrated/after/zeek/raw
+    after_snort: examples/integrated/after/snort/raw/alert.fast
+    before_now: 2026-09-26T12:30:00Z
+    after_now: 2026-09-26T13:30:00Z

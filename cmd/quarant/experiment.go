@@ -82,8 +82,10 @@ func runExperiment(args []string, out io.Writer) error {
 	switch args[0] {
 	case "run":
 		return runExperimentRunCLI(args[1:], out)
+	case "batch":
+		return runExperimentBatchCLI(args[1:], out)
 	default:
-		return fmt.Errorf("unknown experiment subcommand %q; use run", args[0])
+		return fmt.Errorf("unknown experiment subcommand %q; use run or batch", args[0])
 	}
 }
 
