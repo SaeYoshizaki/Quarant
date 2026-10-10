@@ -2,6 +2,38 @@
 
 この demo は OpenWrt boundary evidence、Suricata IDS alert、Zeek passive NSM、Snort alert を同じ Quarant run にまとめ、precision / mitigation / before-after evaluation / research package まで流すための最小例です。
 
+## ワンコマンド実行
+
+repo root から実行します。
+
+```bash
+go run ./cmd/quarant experiment run \
+  --before-openwrt examples/integrated/before/openwrt/raw \
+  --before-suricata examples/integrated/before/suricata/raw/eve.json \
+  --before-zeek examples/integrated/before/zeek/raw \
+  --before-snort examples/integrated/before/snort/raw/alert.fast \
+  --after-openwrt examples/integrated/after/openwrt/raw \
+  --after-suricata examples/integrated/after/suricata/raw/eve.json \
+  --after-zeek examples/integrated/after/zeek/raw \
+  --after-snort examples/integrated/after/snort/raw/alert.fast \
+  --before-now 2026-09-26T12:30:00Z \
+  --after-now 2026-09-26T13:30:00Z \
+  --out runs/integrated
+```
+
+主な出力:
+
+- `runs/integrated/before/assembled`
+- `runs/integrated/after/assembled`
+- `runs/integrated/precision_report.json`
+- `runs/integrated/mitigation_plan.json`
+- `runs/integrated/mitigation_eval_report.json`
+- `runs/integrated/research_report.json`
+- `runs/integrated/package`
+- `runs/integrated/experiment_manifest.json`
+
+以下は同じ処理を段階ごとに実行する場合の例です。
+
 ## 1. Import
 
 ```bash

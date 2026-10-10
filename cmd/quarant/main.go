@@ -52,6 +52,10 @@ func main() {
 		if err := runEvidence(args[1:], os.Stdout); err != nil {
 			log.Fatal(err)
 		}
+	case "experiment":
+		if err := runExperiment(args[1:], os.Stdout); err != nil {
+			log.Fatal(err)
+		}
 	case "suricata":
 		if err := runSuricata(args[1:], os.Stdout); err != nil {
 			log.Fatal(err)

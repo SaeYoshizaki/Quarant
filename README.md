@@ -275,6 +275,36 @@ runs/experiment-001/evidence_manifest.json
 
 `source_coverage_report.json` は OpenWrt only / Suricata only / Zeek only / overlap を、device/protocol/port tuple 単位で集計します。研究 report には `--source-coverage` で接続できます。
 
+## Experiment run
+
+raw evidence から paper package までを一括生成します。
+
+```bash
+go run ./cmd/quarant experiment run \
+  --before-openwrt examples/integrated/before/openwrt/raw \
+  --before-suricata examples/integrated/before/suricata/raw/eve.json \
+  --before-zeek examples/integrated/before/zeek/raw \
+  --before-snort examples/integrated/before/snort/raw/alert.fast \
+  --after-openwrt examples/integrated/after/openwrt/raw \
+  --after-suricata examples/integrated/after/suricata/raw/eve.json \
+  --after-zeek examples/integrated/after/zeek/raw \
+  --after-snort examples/integrated/after/snort/raw/alert.fast \
+  --before-now 2026-09-26T12:30:00Z \
+  --after-now 2026-09-26T13:30:00Z \
+  --out runs/experiment-001
+```
+
+実行内容:
+
+- before / after の OpenWrt、Suricata、Zeek、Snort import
+- before / after の evidence assemble
+- before window の precision incident
+- mitigation plan / gateway backend / dry-run rollback artifacts
+- before/after mitigation evaluation
+- source coverage 付き research report
+- reproducibility package
+- `experiment_manifest.json`
+
 ## Precision incident
 
 precision report は、passive event、flow、observation、inventory、security event を統合して incident を生成します。
@@ -430,6 +460,7 @@ go test ./...
 - Zeek importer が conn / dns / http / ssl/tls log を flow / observation に変換すること。
 - Snort importer が fast alert / JSONL alert を security event に変換すること。
 - evidence assemble が複数 source を merge / dedup し、attack evidence report と source coverage report を生成すること。
+- experiment run が integrated demo を raw evidence から research package まで一括生成すること。
 - research package が source coverage table を出力すること。
 - before/after eval が IDS alert count と exposed service attempt overlap を分けて集計すること。
 - security events が precision incident の attack evidence signal に接続されること。
