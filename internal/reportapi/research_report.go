@@ -45,6 +45,7 @@ type ResearchMetrics struct {
 	EstimatedBlockedFlows          int     `json:"estimated_blocked_flows"`
 	NormalTrafficImpactMeasurable  bool    `json:"normal_traffic_impact_measurable"`
 	TargetedSignalReductionRate    float64 `json:"targeted_signal_reduction_rate,omitempty"`
+	AttackEvidenceReductionRate    float64 `json:"attack_evidence_reduction_rate,omitempty"`
 	ImprovedMitigationActionCount  int     `json:"improved_mitigation_action_count,omitempty"`
 	ResidualMitigationActionCount  int     `json:"residual_mitigation_action_count,omitempty"`
 	RegressedMitigationActionCount int     `json:"regressed_mitigation_action_count,omitempty"`
@@ -177,6 +178,7 @@ func buildResearchMetrics(precision DetectionPrecisionReport, precisionEval *Pre
 	}
 	if mitigationEval != nil {
 		metrics.TargetedSignalReductionRate = mitigationEval.Metrics.TargetedSignalReductionRate
+		metrics.AttackEvidenceReductionRate = mitigationEval.Metrics.AttackEvidenceReductionRate
 		metrics.ImprovedMitigationActionCount = mitigationEval.Metrics.ImprovedActionCount
 		metrics.ResidualMitigationActionCount = mitigationEval.Metrics.ResidualActionCount
 		metrics.RegressedMitigationActionCount = mitigationEval.Metrics.RegressedActionCount
@@ -239,6 +241,7 @@ func buildResearchStages(precision DetectionPrecisionReport, precisionEval *Prec
 			Evidence: []string{
 				fmt.Sprintf("overall outcome %s", mitigationEval.OverallOutcome),
 				fmt.Sprintf("targeted signal reduction %.3f", mitigationEval.Metrics.TargetedSignalReductionRate),
+				fmt.Sprintf("attack evidence reduction %.3f", mitigationEval.Metrics.AttackEvidenceReductionRate),
 				fmt.Sprintf("normal-flow preservation %.3f", mitigationEval.PaperMetrics.NormalFlowPreservationRate),
 				fmt.Sprintf("false mitigation rate %.3f", mitigationEval.PaperMetrics.FalseMitigationRate),
 				fmt.Sprintf("critical-flow continuity risk %s", mitigationEval.Metrics.CriticalFlowContinuityRisk),
@@ -390,6 +393,9 @@ func researchExecutiveSummary(metrics ResearchMetrics) string {
 	if metrics.OverallOutcome != "" {
 		parts = append(parts, fmt.Sprintf("post-mitigation outcome was %s with targeted signal reduction %.3f", metrics.OverallOutcome, metrics.TargetedSignalReductionRate))
 	}
+	if metrics.AttackEvidenceReductionRate > 0 {
+		parts = append(parts, fmt.Sprintf("attack evidence reduction was %.3f", metrics.AttackEvidenceReductionRate))
+	}
 	if metrics.CriticalFlowContinuityRisk != "" {
 		parts = append(parts, fmt.Sprintf("critical-flow continuity risk was %s", metrics.CriticalFlowContinuityRisk))
 	}
@@ -420,6 +426,7 @@ func ResearchReportMarkdown(report ResearchReport) string {
 		{"metric": "mitigation_actions", "value": fmt.Sprintf("%d", report.Metrics.MitigationActionCount)},
 		{"metric": "estimated_blocked_flows", "value": fmt.Sprintf("%d", report.Metrics.EstimatedBlockedFlows)},
 		{"metric": "targeted_signal_reduction_rate", "value": fmt.Sprintf("%.3f", report.Metrics.TargetedSignalReductionRate)},
+		{"metric": "attack_evidence_reduction_rate", "value": fmt.Sprintf("%.3f", report.Metrics.AttackEvidenceReductionRate)},
 		{"metric": "normal_flow_preservation_rate", "value": fmt.Sprintf("%.3f", report.Metrics.NormalFlowPreservationRate)},
 		{"metric": "false_mitigation_rate", "value": fmt.Sprintf("%.3f", report.Metrics.FalseMitigationRate)},
 		{"metric": "rollback_required_count", "value": fmt.Sprintf("%d", report.Metrics.RollbackRequiredCount)},
@@ -461,6 +468,7 @@ func ResearchReportCSVs(report ResearchReport) map[string]string {
 		{"metric": "incident_reduction_rate", "value": fmt.Sprintf("%.3f", report.Metrics.IncidentReductionRate)},
 		{"metric": "high_risk_incident_reduction_rate", "value": fmt.Sprintf("%.3f", report.Metrics.HighRiskIncidentReductionRate)},
 		{"metric": "targeted_signal_reduction_rate", "value": fmt.Sprintf("%.3f", report.Metrics.TargetedSignalReductionRate)},
+		{"metric": "attack_evidence_reduction_rate", "value": fmt.Sprintf("%.3f", report.Metrics.AttackEvidenceReductionRate)},
 		{"metric": "normal_flow_preservation_rate", "value": fmt.Sprintf("%.3f", report.Metrics.NormalFlowPreservationRate)},
 		{"metric": "critical_flow_preservation_rate", "value": fmt.Sprintf("%.3f", report.Metrics.CriticalFlowPreservationRate)},
 		{"metric": "false_mitigation_rate", "value": fmt.Sprintf("%.3f", report.Metrics.FalseMitigationRate)},

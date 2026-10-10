@@ -18,10 +18,12 @@ func runMitigationEval(args []string, out io.Writer) error {
 	planPath := fs.String("plan", "mitigation_plan.json", "mitigation plan JSON path")
 	applyReportPath := fs.String("apply-report", "", "optional mitigation apply report JSON path")
 	beforeEvents := fs.String("before-events", "", "before mitigation events JSONL path")
+	beforeSecurityEvents := fs.String("before-security-events", "", "before mitigation security events JSONL path (default: sibling security_events.jsonl)")
 	beforeFlows := fs.String("before-flows", "", "before mitigation flows JSONL path (default: sibling flows.jsonl)")
 	beforeObservations := fs.String("before-observations", "", "before mitigation observations JSONL path (default: sibling observations.jsonl)")
 	beforeInventory := fs.String("before-inventory", "", "before mitigation inventory JSON path (default: sibling device_inventory.json)")
 	afterEvents := fs.String("after-events", "", "after mitigation events JSONL path")
+	afterSecurityEvents := fs.String("after-security-events", "", "after mitigation security events JSONL path (default: sibling security_events.jsonl)")
 	afterFlows := fs.String("after-flows", "", "after mitigation flows JSONL path (default: sibling flows.jsonl)")
 	afterObservations := fs.String("after-observations", "", "after mitigation observations JSONL path (default: sibling observations.jsonl)")
 	afterInventory := fs.String("after-inventory", "", "after mitigation inventory JSON path (default: sibling device_inventory.json)")
@@ -48,14 +50,16 @@ func runMitigationEval(args []string, out io.Writer) error {
 	if afterDir == "." {
 		afterDir = ""
 	}
-	report, err := reportapi.LoadMitigationEvaluationReportWithApply(
+	report, err := reportapi.LoadMitigationEvaluationReportWithApplyAndSecurityEvents(
 		*planPath,
 		*applyReportPath,
 		*beforeEvents,
+		defaultSibling(*beforeSecurityEvents, beforeDir, "security_events.jsonl"),
 		defaultSibling(*beforeFlows, beforeDir, "flows.jsonl"),
 		defaultSibling(*beforeObservations, beforeDir, "observations.jsonl"),
 		defaultSibling(*beforeInventory, beforeDir, "device_inventory.json"),
 		*afterEvents,
+		defaultSibling(*afterSecurityEvents, afterDir, "security_events.jsonl"),
 		defaultSibling(*afterFlows, afterDir, "flows.jsonl"),
 		defaultSibling(*afterObservations, afterDir, "observations.jsonl"),
 		defaultSibling(*afterInventory, afterDir, "device_inventory.json"),
@@ -73,13 +77,14 @@ func runMitigationEval(args []string, out io.Writer) error {
 			return err
 		}
 	}
-	fmt.Fprintf(out, "Mitigation evaluation complete: outcome=%s actions=%d improved=%d residual=%d regressed=%d targeted_reduction=%.3f normal_preservation=%.3f rollback_required=%d report=%s\n",
+	fmt.Fprintf(out, "Mitigation evaluation complete: outcome=%s actions=%d improved=%d residual=%d regressed=%d targeted_reduction=%.3f attack_evidence_reduction=%.3f normal_preservation=%.3f rollback_required=%d report=%s\n",
 		report.OverallOutcome,
 		report.Metrics.ActionCount,
 		report.Metrics.ImprovedActionCount,
 		report.Metrics.ResidualActionCount,
 		report.Metrics.RegressedActionCount,
 		report.Metrics.TargetedSignalReductionRate,
+		report.Metrics.AttackEvidenceReductionRate,
 		report.Metrics.NormalFlowPreservationRate,
 		report.Metrics.RollbackRequiredCount,
 		*reportOut,

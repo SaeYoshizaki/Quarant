@@ -24,16 +24,18 @@ type MitigationEvaluationReport struct {
 }
 
 type MitigationEvaluationSources struct {
-	Plan               string `json:"plan,omitempty"`
-	ApplyReport        string `json:"apply_report,omitempty"`
-	BeforeEvents       string `json:"before_events,omitempty"`
-	BeforeFlows        string `json:"before_flows,omitempty"`
-	BeforeObservations string `json:"before_observations,omitempty"`
-	BeforeInventory    string `json:"before_inventory,omitempty"`
-	AfterEvents        string `json:"after_events,omitempty"`
-	AfterFlows         string `json:"after_flows,omitempty"`
-	AfterObservations  string `json:"after_observations,omitempty"`
-	AfterInventory     string `json:"after_inventory,omitempty"`
+	Plan                 string `json:"plan,omitempty"`
+	ApplyReport          string `json:"apply_report,omitempty"`
+	BeforeEvents         string `json:"before_events,omitempty"`
+	BeforeSecurityEvents string `json:"before_security_events,omitempty"`
+	BeforeFlows          string `json:"before_flows,omitempty"`
+	BeforeObservations   string `json:"before_observations,omitempty"`
+	BeforeInventory      string `json:"before_inventory,omitempty"`
+	AfterEvents          string `json:"after_events,omitempty"`
+	AfterSecurityEvents  string `json:"after_security_events,omitempty"`
+	AfterFlows           string `json:"after_flows,omitempty"`
+	AfterObservations    string `json:"after_observations,omitempty"`
+	AfterInventory       string `json:"after_inventory,omitempty"`
 }
 
 type MitigationEvaluationMetrics struct {
@@ -53,6 +55,10 @@ type MitigationEvaluationMetrics struct {
 	BeforeTargetedSignalCount    int     `json:"before_targeted_signal_count"`
 	AfterTargetedSignalCount     int     `json:"after_targeted_signal_count"`
 	TargetedSignalReductionRate  float64 `json:"targeted_signal_reduction_rate,omitempty"`
+	BeforeAttackEvidenceCount    int     `json:"before_attack_evidence_count"`
+	AfterAttackEvidenceCount     int     `json:"after_attack_evidence_count"`
+	AttackEvidenceDelta          int     `json:"attack_evidence_delta"`
+	AttackEvidenceReductionRate  float64 `json:"attack_evidence_reduction_rate,omitempty"`
 	BeforeCriticalFlowCount      int     `json:"before_critical_flow_count"`
 	AfterCriticalFlowCount       int     `json:"after_critical_flow_count"`
 	CriticalFlowDelta            int     `json:"critical_flow_delta"`
@@ -71,6 +77,7 @@ type MitigationEvaluationPaperMetrics struct {
 	IncidentReductionRate         float64 `json:"incident_reduction_rate,omitempty"`
 	HighRiskIncidentReductionRate float64 `json:"high_risk_incident_reduction_rate,omitempty"`
 	TargetedSignalReductionRate   float64 `json:"targeted_signal_reduction_rate,omitempty"`
+	AttackEvidenceReductionRate   float64 `json:"attack_evidence_reduction_rate,omitempty"`
 	NormalFlowPreservationRate    float64 `json:"normal_flow_preservation_rate,omitempty"`
 	CriticalFlowPreservationRate  float64 `json:"critical_flow_preservation_rate,omitempty"`
 	FalseMitigationRate           float64 `json:"false_mitigation_rate,omitempty"`
@@ -148,6 +155,10 @@ func LoadMitigationEvaluationReport(planPath, beforeEventsPath, beforeFlowsPath,
 }
 
 func LoadMitigationEvaluationReportWithApply(planPath, applyReportPath, beforeEventsPath, beforeFlowsPath, beforeObservationsPath, beforeInventoryPath, afterEventsPath, afterFlowsPath, afterObservationsPath, afterInventoryPath string) (MitigationEvaluationReport, error) {
+	return LoadMitigationEvaluationReportWithApplyAndSecurityEvents(planPath, applyReportPath, beforeEventsPath, "", beforeFlowsPath, beforeObservationsPath, beforeInventoryPath, afterEventsPath, "", afterFlowsPath, afterObservationsPath, afterInventoryPath)
+}
+
+func LoadMitigationEvaluationReportWithApplyAndSecurityEvents(planPath, applyReportPath, beforeEventsPath, beforeSecurityEventsPath, beforeFlowsPath, beforeObservationsPath, beforeInventoryPath, afterEventsPath, afterSecurityEventsPath, afterFlowsPath, afterObservationsPath, afterInventoryPath string) (MitigationEvaluationReport, error) {
 	plan, err := LoadMitigationPlanJSON(planPath)
 	if err != nil {
 		return MitigationEvaluationReport{}, err
@@ -160,13 +171,21 @@ func LoadMitigationEvaluationReportWithApply(planPath, applyReportPath, beforeEv
 		}
 		applyReport = &loaded
 	}
-	before, err := LoadDetectionPrecisionReport(beforeEventsPath, beforeFlowsPath, beforeObservationsPath, beforeInventoryPath)
+	before, err := LoadDetectionPrecisionReportWithSecurityEvents(beforeEventsPath, beforeSecurityEventsPath, beforeFlowsPath, beforeObservationsPath, beforeInventoryPath)
 	if err != nil {
 		return MitigationEvaluationReport{}, fmt.Errorf("load before precision report: %w", err)
 	}
-	after, err := LoadDetectionPrecisionReport(afterEventsPath, afterFlowsPath, afterObservationsPath, afterInventoryPath)
+	after, err := LoadDetectionPrecisionReportWithSecurityEvents(afterEventsPath, afterSecurityEventsPath, afterFlowsPath, afterObservationsPath, afterInventoryPath)
 	if err != nil {
 		return MitigationEvaluationReport{}, fmt.Errorf("load after precision report: %w", err)
+	}
+	beforeSecurityEvents, err := LoadSecurityEvents(beforeSecurityEventsPath)
+	if err != nil {
+		return MitigationEvaluationReport{}, fmt.Errorf("load before security events: %w", err)
+	}
+	afterSecurityEvents, err := LoadSecurityEvents(afterSecurityEventsPath)
+	if err != nil {
+		return MitigationEvaluationReport{}, fmt.Errorf("load after security events: %w", err)
 	}
 	beforeFlows, err := LoadFlows(beforeFlowsPath)
 	if err != nil {
@@ -176,18 +195,20 @@ func LoadMitigationEvaluationReportWithApply(planPath, applyReportPath, beforeEv
 	if err != nil {
 		return MitigationEvaluationReport{}, fmt.Errorf("load after flows: %w", err)
 	}
-	report := BuildMitigationEvaluationReportWithApply(plan, applyReport, before, after, beforeFlows, afterFlows)
+	report := BuildMitigationEvaluationReportWithApplyAndSecurityEvents(plan, applyReport, before, after, beforeFlows, afterFlows, beforeSecurityEvents, afterSecurityEvents)
 	report.Source = MitigationEvaluationSources{
-		Plan:               planPath,
-		ApplyReport:        applyReportPath,
-		BeforeEvents:       beforeEventsPath,
-		BeforeFlows:        beforeFlowsPath,
-		BeforeObservations: beforeObservationsPath,
-		BeforeInventory:    beforeInventoryPath,
-		AfterEvents:        afterEventsPath,
-		AfterFlows:         afterFlowsPath,
-		AfterObservations:  afterObservationsPath,
-		AfterInventory:     afterInventoryPath,
+		Plan:                 planPath,
+		ApplyReport:          applyReportPath,
+		BeforeEvents:         beforeEventsPath,
+		BeforeSecurityEvents: beforeSecurityEventsPath,
+		BeforeFlows:          beforeFlowsPath,
+		BeforeObservations:   beforeObservationsPath,
+		BeforeInventory:      beforeInventoryPath,
+		AfterEvents:          afterEventsPath,
+		AfterSecurityEvents:  afterSecurityEventsPath,
+		AfterFlows:           afterFlowsPath,
+		AfterObservations:    afterObservationsPath,
+		AfterInventory:       afterInventoryPath,
 	}
 	return report, nil
 }
@@ -227,6 +248,10 @@ func BuildMitigationEvaluationReport(plan MitigationPlan, before, after Detectio
 }
 
 func BuildMitigationEvaluationReportWithApply(plan MitigationPlan, applyReport *MitigationApplyReport, before, after DetectionPrecisionReport, beforeFlows, afterFlows []FlowRecord) MitigationEvaluationReport {
+	return BuildMitigationEvaluationReportWithApplyAndSecurityEvents(plan, applyReport, before, after, beforeFlows, afterFlows, nil, nil)
+}
+
+func BuildMitigationEvaluationReportWithApplyAndSecurityEvents(plan MitigationPlan, applyReport *MitigationApplyReport, before, after DetectionPrecisionReport, beforeFlows, afterFlows []FlowRecord, beforeSecurityEvents, afterSecurityEvents []SecurityEvent) MitigationEvaluationReport {
 	report := MitigationEvaluationReport{
 		GeneratedAt: time.Now().UTC().Format(time.RFC3339),
 		Limitations: []string{
@@ -278,6 +303,10 @@ func BuildMitigationEvaluationReportWithApply(plan MitigationPlan, applyReport *
 	report.Metrics.CriticalFlowDelta = report.Metrics.AfterCriticalFlowCount - report.Metrics.BeforeCriticalFlowCount
 	report.Metrics.CriticalFlowContinuityRisk = mitigationContinuityRisk(report.Metrics)
 	report.Metrics.TargetedSignalReductionRate = targetedSignalReductionRate(report.Metrics.BeforeTargetedSignalCount, report.Metrics.AfterTargetedSignalCount)
+	report.Metrics.BeforeAttackEvidenceCount = len(beforeSecurityEvents)
+	report.Metrics.AfterAttackEvidenceCount = len(afterSecurityEvents)
+	report.Metrics.AttackEvidenceDelta = report.Metrics.AfterAttackEvidenceCount - report.Metrics.BeforeAttackEvidenceCount
+	report.Metrics.AttackEvidenceReductionRate = reductionRate(report.Metrics.BeforeAttackEvidenceCount, report.Metrics.AfterAttackEvidenceCount)
 	report.Metrics.BeforeNormalFlowCount = totalFlowCountMap(beforeNormal)
 	report.Metrics.AfterNormalFlowCount = totalFlowCountMap(afterNormal)
 	report.Metrics.NormalFlowDelta = report.Metrics.AfterNormalFlowCount - report.Metrics.BeforeNormalFlowCount
@@ -661,6 +690,7 @@ func buildMitigationEvaluationPaperMetrics(report MitigationEvaluationReport, be
 		IncidentReductionRate:         reductionRate(report.Metrics.BeforeIncidentCount, report.Metrics.AfterIncidentCount),
 		HighRiskIncidentReductionRate: reductionRate(beforeHigh, afterHigh),
 		TargetedSignalReductionRate:   report.Metrics.TargetedSignalReductionRate,
+		AttackEvidenceReductionRate:   report.Metrics.AttackEvidenceReductionRate,
 		NormalFlowPreservationRate:    report.Metrics.NormalFlowPreservationRate,
 		CriticalFlowPreservationRate:  preservationRate(report.Metrics.BeforeCriticalFlowCount, report.Metrics.AfterCriticalFlowCount),
 		FalseMitigationRate:           ratio(report.Metrics.FalseMitigationCount, report.Metrics.EvaluableActionCount),
@@ -722,6 +752,9 @@ func buildMitigationEvalPaperSummary(report MitigationEvaluationReport) Mitigati
 	if report.Metrics.AfterTargetedSignalCount > 0 {
 		missing = append(missing, "some targeted signals remained after mitigation")
 	}
+	if report.Metrics.BeforeAttackEvidenceCount == 0 && report.Metrics.AfterAttackEvidenceCount == 0 {
+		missing = append(missing, "router-boundary attack evidence was not provided for the compared windows")
+	}
 	if report.ApplySummary == nil {
 		missing = append(missing, "apply report was not provided; evaluation cannot distinguish dry-run from generated apply execution artifacts")
 	}
@@ -732,6 +765,7 @@ func buildMitigationEvalPaperSummary(report MitigationEvaluationReport) Mitigati
 			"risk reduction is measured with before/after targeted signal counts and device risk score deltas",
 			"normal-operation preservation is approximated with DNS/DHCP/NTP and discovery-flow continuity",
 			"normal-flow preservation and false mitigation rate are exported as paper metrics",
+			"router-boundary attack evidence reduction is exported separately from incident reduction",
 			"rollback-required count is derived from regressed or continuity-risk outcomes after explicit apply",
 			"residual and regressed outcomes are separated from resolved outcomes",
 		},
@@ -743,6 +777,8 @@ func buildMitigationEvalPaperSummary(report MitigationEvaluationReport) Mitigati
 			"before_targeted_signals",
 			"after_targeted_signals",
 			"targeted_signal_delta",
+			"attack_evidence_delta",
+			"attack_evidence_reduction_rate",
 			"device_risk_score_delta",
 			"critical_flow_delta",
 			"normal_flow_preservation_rate",

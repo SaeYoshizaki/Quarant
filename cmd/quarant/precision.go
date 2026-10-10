@@ -17,6 +17,7 @@ func runPrecision(args []string, out io.Writer) error {
 	fs.SetOutput(io.Discard)
 
 	eventsPath := fs.String("events", "events.jsonl", "events JSONL path")
+	securityEventsPath := fs.String("security-events", "", "security events JSONL path (default: sibling security_events.jsonl when present)")
 	flowsPath := fs.String("flows", "", "flows JSONL path (default: sibling flows.jsonl)")
 	observationsPath := fs.String("observations", "", "observations JSONL path (default: sibling observations.jsonl)")
 	inventoryPath := fs.String("inventory", "", "device inventory JSON path (default: sibling device_inventory.json)")
@@ -34,8 +35,9 @@ func runPrecision(args []string, out io.Writer) error {
 	if dir == "." {
 		dir = ""
 	}
-	report, err := reportapi.LoadDetectionPrecisionReport(
+	report, err := reportapi.LoadDetectionPrecisionReportWithSecurityEvents(
 		*eventsPath,
+		defaultSibling(*securityEventsPath, dir, "security_events.jsonl"),
 		defaultSibling(*flowsPath, dir, "flows.jsonl"),
 		defaultSibling(*observationsPath, dir, "observations.jsonl"),
 		defaultSibling(*inventoryPath, dir, "device_inventory.json"),

@@ -215,7 +215,11 @@ type MitigationConflict struct {
 }
 
 func LoadMitigationPlan(eventsPath, flowsPath, observationsPath, inventoryPath string) (MitigationPlan, error) {
-	precision, err := LoadDetectionPrecisionReport(eventsPath, flowsPath, observationsPath, inventoryPath)
+	return LoadMitigationPlanWithSecurityEvents(eventsPath, "", flowsPath, observationsPath, inventoryPath)
+}
+
+func LoadMitigationPlanWithSecurityEvents(eventsPath, securityEventsPath, flowsPath, observationsPath, inventoryPath string) (MitigationPlan, error) {
+	precision, err := LoadDetectionPrecisionReportWithSecurityEvents(eventsPath, securityEventsPath, flowsPath, observationsPath, inventoryPath)
 	if err != nil {
 		return MitigationPlan{}, err
 	}
@@ -306,7 +310,7 @@ func mitigationActionsForIncident(incident PrecisionIncident) []MitigationAction
 	if hasSignalContaining(incident, "mqtt") && !hasSignalContaining(incident, "mqtts") {
 		actions = append(actions, newServiceBlockMitigation(incident, 78, "Block plaintext MQTT", "Plaintext MQTT was observed. Blocking TCP/1883 reduces unauthenticated or unencrypted broker exposure when the device does not require it.", "tcp", 1883, "wan", "medium", []string{"tcp/1883"}, "plaintext MQTT broker exposure", "MQTT plaintext has a known port and can be narrowed to TCP/1883.", "Device isolation is stronger and should wait until MQTT is confirmed unnecessary."))
 	}
-	if hasAnyMitigationSignal(incident, "attack_like_inbound_blocks") {
+	if hasAnyMitigationSignal(incident, "attack_like_inbound_blocks", "attack_evidence_inbound_scan") {
 		actions = append(actions, MitigationAction{
 			ID:                   mitigationActionID(incident, "restrict_inbound"),
 			IncidentID:           incident.ID,
@@ -314,10 +318,10 @@ func mitigationActionsForIncident(incident PrecisionIncident) []MitigationAction
 			DeviceLabel:          incident.DeviceLabel,
 			Kind:                 "restrict_inbound",
 			Status:               "review_required",
-			Priority:             72,
+			Priority:             attackEvidenceMitigationPriority(incident),
 			Confidence:           incident.Confidence,
 			Title:                "Keep inbound access denied and increase logging",
-			Rationale:            "Repeated inbound blocks were correlated. The safest rule-based response is to keep inbound access denied and preserve logs for before-after evaluation.",
+			Rationale:            "Repeated inbound blocks or router-boundary attack evidence were correlated. The safest rule-based response is to keep inbound access denied and preserve logs for before-after evaluation.",
 			RiskReductionTarget:  mitigationRiskTarget(incident, "inbound probing or scanning exposure", "preserve default-deny inbound posture and increase review visibility"),
 			WhyThisAction:        "The evidence is inbound block correlation, so preserving and validating deny rules is safer than changing outbound behavior.",
 			WhyNotStrongerAction: "No successful inbound session was observed; isolating the device would add disruption without stronger evidence.",
@@ -344,6 +348,13 @@ func mitigationActionsForIncident(incident PrecisionIncident) []MitigationAction
 		actions = append(actions, isolateDeviceMitigation(incident))
 	}
 	return actions
+}
+
+func attackEvidenceMitigationPriority(incident PrecisionIncident) int {
+	if hasAnyMitigationSignal(incident, "attack_evidence_inbound_scan") {
+		return 82
+	}
+	return 72
 }
 
 func isolateDeviceMitigation(incident PrecisionIncident) MitigationAction {
