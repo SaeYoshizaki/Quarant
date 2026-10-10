@@ -30,6 +30,18 @@ OpenWrt firewall log / nft-style logread output
   -> research report の metrics / limitations
 ```
 
+## 再現 demo
+
+OpenWrt 境界証拠の再現用 fixture と実行手順は `examples/openwrt/` にあります。
+
+```text
+examples/openwrt/before/raw/
+examples/openwrt/after/raw/
+examples/openwrt/README.md
+```
+
+この demo は、before window に ACCEPT された inbound service attempt を含め、after window では同じ probe が DROP される形にしています。これにより、単なる observed scan volume ではなく、accepted / exposed service attempt の before/after reduction を確認できます。
+
 ## 主要な出力ファイル
 
 ### `events.jsonl`

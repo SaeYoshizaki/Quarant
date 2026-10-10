@@ -1,0 +1,3 @@
+Sep 26 13:00:00 router dnsmasq[1234]: query[A] api.camera-demo.example from 192.168.50.42
+Sep 26 13:00:01 router dnsmasq[1234]: query[A] ntp.vendor-demo.example from 192.168.50.42
+Sep 26 13:00:02 router dnsmasq[1234]: query[A] api.plug-demo.example from 192.168.50.99
