@@ -36,6 +36,8 @@ func TestRunExperimentRunCLIExecutesIntegratedPipeline(t *testing.T) {
 		filepath.Join(outDir, "mitigation_plan.json"),
 		filepath.Join(outDir, "mitigation_eval_report.json"),
 		filepath.Join(outDir, "research_report.json"),
+		filepath.Join(outDir, "quality_gate_report.json"),
+		filepath.Join(outDir, "guarded_research_report.json"),
 		filepath.Join(outDir, "package", "run_manifest.json"),
 		filepath.Join(outDir, "experiment_manifest.json"),
 	} {

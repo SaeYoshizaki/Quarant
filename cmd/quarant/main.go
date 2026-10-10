@@ -88,6 +88,10 @@ func main() {
 		if err := runResearchReport(args[1:], os.Stdout); err != nil {
 			log.Fatal(err)
 		}
+	case "quality-gate":
+		if err := runQualityGate(args[1:], os.Stdout); err != nil {
+			log.Fatal(err)
+		}
 	case "eval":
 		if err := runEval(args[1:], os.Stdout); err != nil {
 			log.Fatal(err)

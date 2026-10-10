@@ -302,8 +302,32 @@ go run ./cmd/quarant experiment run \
 - mitigation plan / gateway backend / dry-run rollback artifacts
 - before/after mitigation evaluation
 - source coverage 付き research report
+- quality gate / guarded research report
 - reproducibility package
 - `experiment_manifest.json`
+
+## Quality gate
+
+研究 claim を言いすぎないための guardrail report を生成します。
+
+```bash
+go run ./cmd/quarant quality-gate \
+  --experiment runs/experiment-001 \
+  --out runs/experiment-001/quality_gate_report.json \
+  --research-out runs/experiment-001/guarded_research_report.json
+```
+
+主な check:
+
+- precision label coverage が十分か。
+- attack evidence label coverage が十分か。
+- `attack_evidence_reduction_rate` だけで mitigation 効果を主張していないか。
+- accepted / exposed service attempt や targeted signal が減っているか。
+- IDS alert count を gateway mitigation 効果として扱いすぎていないか。
+- normal flow preservation が低くないか。
+- source coverage が single-source only になっていないか。
+
+`guarded_research_report.json` には、弱めるべき claim と threats to validity / next steps が反映されます。
 
 ## Precision incident
 
@@ -461,6 +485,7 @@ go test ./...
 - Snort importer が fast alert / JSONL alert を security event に変換すること。
 - evidence assemble が複数 source を merge / dedup し、attack evidence report と source coverage report を生成すること。
 - experiment run が integrated demo を raw evidence から research package まで一括生成すること。
+- quality gate が claim guardrails と guarded research report を生成すること。
 - research package が source coverage table を出力すること。
 - before/after eval が IDS alert count と exposed service attempt overlap を分けて集計すること。
 - security events が precision incident の attack evidence signal に接続されること。

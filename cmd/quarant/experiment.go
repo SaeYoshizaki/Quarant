@@ -55,6 +55,8 @@ type ExperimentRunOutputs struct {
 	ResearchMarkdown   string `json:"research_report_markdown,omitempty"`
 	ResearchPackage    string `json:"research_package,omitempty"`
 	SourceCoverage     string `json:"source_coverage_report,omitempty"`
+	QualityGate        string `json:"quality_gate_report,omitempty"`
+	GuardedResearch    string `json:"guarded_research_report,omitempty"`
 	ExperimentManifest string `json:"experiment_manifest,omitempty"`
 }
 
@@ -202,6 +204,9 @@ func runExperimentRun(cfg experimentRunConfig) (ExperimentRunManifest, error) {
 		}
 	}
 	if err := runExperimentResearchReport(cfg, &manifest); err != nil {
+		return ExperimentRunManifest{}, err
+	}
+	if err := runExperimentQualityGate(cfg, &manifest); err != nil {
 		return ExperimentRunManifest{}, err
 	}
 	manifest.Outputs.ExperimentManifest = filepath.Join(cfg.OutDir, "experiment_manifest.json")
@@ -397,6 +402,24 @@ func runExperimentResearchReport(cfg experimentRunConfig, manifest *ExperimentRu
 	manifest.Outputs.ResearchMarkdown = markdownOut
 	manifest.Outputs.ResearchPackage = cfg.PackageDir
 	manifest.Steps = append(manifest.Steps, ExperimentRunStep{Name: "research_report", Status: "complete", Output: reportOut})
+	return nil
+}
+
+func runExperimentQualityGate(cfg experimentRunConfig, manifest *ExperimentRunManifest) error {
+	reportOut := filepath.Join(cfg.OutDir, "quality_gate_report.json")
+	researchOut := filepath.Join(cfg.OutDir, "guarded_research_report.json")
+	var sink strings.Builder
+	args := []string{
+		"--experiment", cfg.OutDir,
+		"--out", reportOut,
+		"--research-out", researchOut,
+	}
+	if err := runQualityGate(args, &sink); err != nil {
+		return err
+	}
+	manifest.Outputs.QualityGate = reportOut
+	manifest.Outputs.GuardedResearch = researchOut
+	manifest.Steps = append(manifest.Steps, ExperimentRunStep{Name: "quality_gate", Status: "complete", Output: reportOut})
 	return nil
 }
 

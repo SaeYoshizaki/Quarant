@@ -29,6 +29,8 @@ go run ./cmd/quarant experiment run \
 - `runs/integrated/mitigation_plan.json`
 - `runs/integrated/mitigation_eval_report.json`
 - `runs/integrated/research_report.json`
+- `runs/integrated/quality_gate_report.json`
+- `runs/integrated/guarded_research_report.json`
 - `runs/integrated/package`
 - `runs/integrated/experiment_manifest.json`
 
