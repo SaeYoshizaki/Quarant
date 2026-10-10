@@ -19,22 +19,27 @@ import (
 
 	"quarant/analyzer"
 	"quarant/analyzer/device"
+	"quarant/internal/reportapi"
 )
 
 type openWrtImportConfig struct {
-	DHCPLeasesPath  string
-	DNSLogPath      string
-	FirewallLogPath string
-	ConntrackPath   string
-	OutDir          string
-	BaseTime        time.Time
+	DHCPLeasesPath        string
+	DNSLogPath            string
+	FirewallLogPath       string
+	ConntrackPath         string
+	OutDir                string
+	SecurityEventsOutPath string
+	AttackEvidenceOutPath string
+	BaseTime              time.Time
 }
 
 type openWrtImportResult struct {
-	EventCount       int
-	FlowCount        int
-	ObservationCount int
-	DeviceCount      int
+	EventCount         int
+	SecurityEventCount int
+	AttackFindingCount int
+	FlowCount          int
+	ObservationCount   int
+	DeviceCount        int
 }
 
 type openWrtCollectConfig struct {
@@ -313,6 +318,8 @@ func runOpenWrtImportCLI(args []string, out io.Writer) error {
 	fs.StringVar(&cfg.FirewallLogPath, "firewall-log", "", "OpenWrt firewall/kernel log path")
 	fs.StringVar(&cfg.ConntrackPath, "conntrack", "", "conntrack dump path")
 	fs.StringVar(&cfg.OutDir, "out-dir", "openwrt-run", "directory to write Quarant JSON outputs")
+	fs.StringVar(&cfg.SecurityEventsOutPath, "security-events-out", "", "security events JSONL output path (default: out-dir/security_events.jsonl)")
+	fs.StringVar(&cfg.AttackEvidenceOutPath, "attack-evidence-out", "", "attack evidence report JSON output path (default: out-dir/attack_evidence_report.json)")
 	nowValue := fs.String("now", "", "base time for logs without a year, RFC3339")
 
 	if err := fs.Parse(normalizeFlagArgs(fs, args)); err != nil {
@@ -336,11 +343,13 @@ func runOpenWrtImportCLI(args []string, out io.Writer) error {
 	if err != nil {
 		return err
 	}
-	fmt.Fprintf(out, "OpenWrt import complete: devices=%d flows=%d observations=%d events=%d out=%s\n",
+	fmt.Fprintf(out, "OpenWrt import complete: devices=%d flows=%d observations=%d events=%d security_events=%d attack_findings=%d out=%s\n",
 		result.DeviceCount,
 		result.FlowCount,
 		result.ObservationCount,
 		result.EventCount,
+		result.SecurityEventCount,
+		result.AttackFindingCount,
 		cfg.OutDir,
 	)
 	return nil
@@ -516,10 +525,20 @@ func runOpenWrtImport(cfg openWrtImportConfig) (openWrtImportResult, error) {
 	}
 
 	eventsPath := filepath.Join(cfg.OutDir, "events.jsonl")
+	securityEventsPath := defaultSibling(cfg.SecurityEventsOutPath, cfg.OutDir, "security_events.jsonl")
+	attackEvidencePath := defaultSibling(cfg.AttackEvidenceOutPath, cfg.OutDir, "attack_evidence_report.json")
 	flowsPath := filepath.Join(cfg.OutDir, "flows.jsonl")
 	observationsPath := filepath.Join(cfg.OutDir, "observations.jsonl")
 	inventoryPath := filepath.Join(cfg.OutDir, "device_inventory.json")
 	if err := writeOpenWrtJSONL(eventsPath, importer.events); err != nil {
+		return openWrtImportResult{}, err
+	}
+	if err := writeOpenWrtJSONL(securityEventsPath, importer.securityEvents); err != nil {
+		return openWrtImportResult{}, err
+	}
+	attackEvidence := reportapi.BuildAttackEvidenceReport(importer.securityEvents)
+	attackEvidence.Source.SecurityEvents = securityEventsPath
+	if err := writePrettyJSON(attackEvidencePath, attackEvidence); err != nil {
 		return openWrtImportResult{}, err
 	}
 	if err := writeOpenWrtJSONL(flowsPath, importer.flows); err != nil {
@@ -533,19 +552,22 @@ func runOpenWrtImport(cfg openWrtImportConfig) (openWrtImportResult, error) {
 	}
 
 	return openWrtImportResult{
-		EventCount:       len(importer.events),
-		FlowCount:        len(importer.flows),
-		ObservationCount: len(importer.observations),
-		DeviceCount:      len(importer.devices),
+		EventCount:         len(importer.events),
+		SecurityEventCount: len(importer.securityEvents),
+		AttackFindingCount: len(attackEvidence.Findings),
+		FlowCount:          len(importer.flows),
+		ObservationCount:   len(importer.observations),
+		DeviceCount:        len(importer.devices),
 	}, nil
 }
 
 type openWrtImporter struct {
-	baseTime     time.Time
-	devices      map[string]*openWrtDevice
-	events       []analyzer.Event
-	flows        []analyzer.FlowRecord
-	observations []analyzer.ObservationRecord
+	baseTime       time.Time
+	devices        map[string]*openWrtDevice
+	events         []analyzer.Event
+	securityEvents []reportapi.SecurityEvent
+	flows          []analyzer.FlowRecord
+	observations   []analyzer.ObservationRecord
 }
 
 func (i *openWrtImporter) readDHCPLeases(path string) error {
@@ -597,6 +619,9 @@ func (i *openWrtImporter) readFirewallLog(path string) error {
 			return nil
 		}
 		i.addFlowFromFirewall(record)
+		if securityEvent, ok := securityEventFromOpenWrtFirewallRecord(record); ok {
+			i.securityEvents = append(i.securityEvents, securityEvent)
+		}
 		if strings.EqualFold(record.Action, "DROP") || strings.EqualFold(record.Action, "REJECT") {
 			i.events = append(i.events, analyzer.Event{
 				Timestamp:      record.Timestamp,
@@ -829,6 +854,7 @@ type openWrtFirewallRecord struct {
 	DstIP     string
 	DstPort   uint16
 	Protocol  string
+	TCPFlags  []string
 	Raw       string
 }
 
@@ -851,6 +877,7 @@ func parseOpenWrtFirewallLine(line string, base time.Time) (openWrtFirewallRecor
 		DstIP:     dstIP,
 		DstPort:   parseOpenWrtPort(openWrtKV(line, "DPT")),
 		Protocol:  protocol,
+		TCPFlags:  openWrtTCPFlags(line),
 		Raw:       strings.TrimSpace(line),
 	}, true
 }
@@ -921,6 +948,140 @@ func openWrtFirewallAction(line string) string {
 	default:
 		return "LOG"
 	}
+}
+
+func securityEventFromOpenWrtFirewallRecord(record openWrtFirewallRecord) (reportapi.SecurityEvent, bool) {
+	if strings.TrimSpace(record.SrcIP) == "" || strings.TrimSpace(record.DstIP) == "" {
+		return reportapi.SecurityEvent{}, false
+	}
+	direction := openWrtDirection(record.SrcIP, record.DstIP)
+	deviceIP := ""
+	if isPrivateIPString(record.DstIP) {
+		deviceIP = record.DstIP
+	} else if isPrivateIPString(record.SrcIP) {
+		deviceIP = record.SrcIP
+	}
+	technique := openWrtAttackTechnique(record, direction)
+	category := ""
+	if strings.Contains(direction, "inbound") {
+		category = "inbound_probe"
+	}
+	verdict := openWrtSecurityVerdict(record.Action)
+	severity := "INFO"
+	confidence := "medium"
+	if strings.EqualFold(verdict, "accepted") && strings.Contains(direction, "inbound") {
+		severity = "WARNING"
+	}
+	if isSensitiveIoTPort(record.DstPort) && strings.Contains(direction, "inbound") {
+		severity = "WARNING"
+	}
+	return reportapi.SecurityEvent{
+		Timestamp:       record.Timestamp,
+		Source:          "openwrt_firewall",
+		SourceFormat:    "nft_log",
+		Sensor:          "openwrt",
+		EventType:       "firewall_" + strings.ToLower(firstNonEmptyString(verdict, "log")),
+		AttackCategory:  category,
+		AttackTechnique: technique,
+		Severity:        severity,
+		Confidence:      confidence,
+		Action:          record.Action,
+		Verdict:         verdict,
+		Direction:       direction,
+		SrcIP:           record.SrcIP,
+		SrcPort:         record.SrcPort,
+		DstIP:           record.DstIP,
+		DstPort:         record.DstPort,
+		Protocol:        record.Protocol,
+		TCPFlags:        record.TCPFlags,
+		DeviceIP:        deviceIP,
+		AssetRole:       openWrtAssetRole(deviceIP),
+		AggregationKey:  openWrtSecurityAggregationKey(record, direction, deviceIP),
+		Raw:             record.Raw,
+		Evidence: map[string]string{
+			"parser": "openwrt_firewall_v1",
+			"action": record.Action,
+		},
+	}, true
+}
+
+func openWrtSecurityVerdict(action string) string {
+	switch strings.ToUpper(strings.TrimSpace(action)) {
+	case "DROP":
+		return "dropped"
+	case "REJECT":
+		return "rejected"
+	case "ACCEPT":
+		return "accepted"
+	default:
+		return "logged"
+	}
+}
+
+func openWrtAttackTechnique(record openWrtFirewallRecord, direction string) string {
+	if !strings.Contains(direction, "inbound") {
+		return ""
+	}
+	if strings.EqualFold(record.Protocol, "tcp") {
+		flags := map[string]bool{}
+		for _, flag := range record.TCPFlags {
+			flags[strings.ToUpper(flag)] = true
+		}
+		switch {
+		case flags["FIN"] && flags["PSH"] && flags["URG"]:
+			return "tcp_xmas_scan"
+		case flags["FIN"] && !flags["SYN"] && !flags["ACK"]:
+			return "tcp_fin_scan"
+		case flags["SYN"] && !flags["ACK"]:
+			return "tcp_syn_probe"
+		case len(flags) == 0:
+			return "tcp_probe"
+		}
+	}
+	if record.DstPort != 0 {
+		return "inbound_port_probe"
+	}
+	return "inbound_probe"
+}
+
+func openWrtAssetRole(deviceIP string) string {
+	if strings.TrimSpace(deviceIP) == "" {
+		return ""
+	}
+	return "iot_device"
+}
+
+func openWrtSecurityAggregationKey(record openWrtFirewallRecord, direction, deviceIP string) string {
+	return strings.Join([]string{
+		direction,
+		record.SrcIP,
+		firstNonEmptyString(deviceIP, record.DstIP),
+		record.Protocol,
+		fmt.Sprintf("%d", record.DstPort),
+	}, "|")
+}
+
+func isSensitiveIoTPort(port uint16) bool {
+	switch port {
+	case 21, 22, 23, 80, 81, 443, 554, 1883, 2323, 5000, 8000, 8080, 8443, 8883:
+		return true
+	default:
+		return false
+	}
+}
+
+func openWrtTCPFlags(line string) []string {
+	upperFields := map[string]bool{}
+	for _, field := range strings.Fields(strings.ToUpper(line)) {
+		upperFields[strings.Trim(field, "[],:")] = true
+	}
+	flags := []string{}
+	for _, flag := range []string{"SYN", "ACK", "FIN", "RST", "PSH", "URG", "ECE", "CWR"} {
+		if upperFields[flag] {
+			flags = append(flags, flag)
+		}
+	}
+	return flags
 }
 
 func parseOpenWrtPort(value string) uint16 {

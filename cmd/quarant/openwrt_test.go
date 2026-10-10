@@ -22,7 +22,7 @@ func TestRunOpenWrtImportWritesQuarantOutputs(t *testing.T) {
 
 	writeTestFile(t, dhcpPath, "1790409600 aa:bb:cc:dd:ee:ff 192.168.8.42 camera-01 01:aa:bb:cc:dd:ee:ff\n")
 	writeTestFile(t, dnsPath, "Sep 26 12:00:01 router dnsmasq[1234]: query[A] api.camera.example from 192.168.8.42\n")
-	writeTestFile(t, firewallPath, "Sep 26 12:00:02 router kern.warn kernel: [123.45] DROP IN=wan OUT=br-lan SRC=203.0.113.9 DST=192.168.8.42 PROTO=TCP SPT=45123 DPT=23\n")
+	writeTestFile(t, firewallPath, "Sep 26 12:00:02 router kern.warn kernel: [123.45] DROP IN=wan OUT=br-lan SRC=203.0.113.9 DST=192.168.8.42 PROTO=TCP SPT=45123 DPT=23 SYN\n")
 	writeTestFile(t, conntrackPath, "tcp 6 431999 ESTABLISHED src=192.168.8.42 dst=198.51.100.10 sport=50000 dport=443 src=198.51.100.10 dst=203.0.113.5 sport=443 dport=50000 [ASSURED]\n")
 
 	result, err := runOpenWrtImport(openWrtImportConfig{
@@ -48,10 +48,24 @@ func TestRunOpenWrtImportWritesQuarantOutputs(t *testing.T) {
 	if result.EventCount != 1 {
 		t.Fatalf("EventCount=%d, want 1", result.EventCount)
 	}
+	if result.SecurityEventCount != 1 {
+		t.Fatalf("SecurityEventCount=%d, want 1", result.SecurityEventCount)
+	}
 
 	events := readJSONLLines[analyzer.Event](t, filepath.Join(outDir, "events.jsonl"))
 	if len(events) != 1 || events[0].RuleID != "OPENWRT_FIREWALL_BLOCK" {
 		t.Fatalf("events=%+v, want firewall block event", events)
+	}
+	securityEvents := readJSONLLines[map[string]any](t, filepath.Join(outDir, "security_events.jsonl"))
+	if len(securityEvents) != 1 || securityEvents[0]["source"] != "openwrt_firewall" || securityEvents[0]["attack_technique"] != "tcp_syn_probe" {
+		t.Fatalf("securityEvents=%+v, want OpenWrt tcp_syn_probe security event", securityEvents)
+	}
+	attackEvidenceData, err := os.ReadFile(filepath.Join(outDir, "attack_evidence_report.json"))
+	if err != nil {
+		t.Fatalf("read attack evidence: %v", err)
+	}
+	if !strings.Contains(string(attackEvidenceData), `"security_event_count": 1`) {
+		t.Fatalf("attack evidence=%s, want security event count", attackEvidenceData)
 	}
 	flows := readJSONLLines[analyzer.FlowRecord](t, filepath.Join(outDir, "flows.jsonl"))
 	if !flowWithAppProtocolExists(flows, "tls") || !flowWithAppProtocolExists(flows, "telnet") {
@@ -166,7 +180,7 @@ case "$cmd" in
     printf '%s\n' 'Sep 26 12:00:01 router dnsmasq[1234]: query[A] api.camera.example from 192.168.8.42'
     ;;
   *"SRC="*)
-    printf '%s\n' 'Sep 26 12:00:02 router kern.warn kernel: [123.45] DROP IN=wan OUT=br-lan SRC=203.0.113.9 DST=192.168.8.42 PROTO=TCP SPT=45123 DPT=23'
+    printf '%s\n' 'Sep 26 12:00:02 router kern.warn kernel: [123.45] DROP IN=wan OUT=br-lan SRC=203.0.113.9 DST=192.168.8.42 PROTO=TCP SPT=45123 DPT=23 SYN'
     ;;
   *"conntrack"*)
     printf '%s\n' 'tcp 6 431999 ESTABLISHED src=192.168.8.42 dst=198.51.100.10 sport=50000 dport=443 src=198.51.100.10 dst=203.0.113.5 sport=443 dport=50000 [ASSURED]'
