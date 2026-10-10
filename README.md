@@ -109,6 +109,44 @@ router boundary や IDS/NSM 由来の security evidence を表す Quarant native
 
 重要: `attack_evidence_reduction_rate` は「インターネット上の攻撃数が減った」ことを意味しません。外部 scan volume は gateway mitigation で制御できないため、Quarant では observed / blocked / accepted / exposed service attempt を分けて評価します。
 
+### `attack_evidence_eval_report.json`
+
+`attack_evidence_report.json` の finding に人手ラベルを付け、router-boundary detector の説明可能性を評価する report です。Suricata / Zeek / Snort importer を追加したあとも、同じラベル体系で importer 間の evidence quality を比較できます。
+
+まず label template を作ります。
+
+```bash
+go run ./cmd/quarant attack-eval \
+  --attack-evidence runs/openwrt-001/attack_evidence_report.json \
+  --labels runs/openwrt-001/attack_evidence_labels.jsonl \
+  --init-labels
+```
+
+`attack_evidence_labels.jsonl` の `label` をレビューしてから評価します。
+
+```bash
+go run ./cmd/quarant attack-eval \
+  --attack-evidence runs/openwrt-001/attack_evidence_report.json \
+  --labels runs/openwrt-001/attack_evidence_labels.jsonl \
+  --out runs/openwrt-001/attack_evidence_eval_report.json
+```
+
+label は以下を想定しています。
+
+- `true_attack`: 保護対象への実攻撃・明確な悪性 probe。
+- `scanner_lab_generated`: 実験用 scanner や controlled test traffic。
+- `internet_background_noise`: インターネット由来の scan noise。攻撃 traffic ではあり得るが、対象 deployment への targeted attack とは分ける。
+- `benign_admin`: 管理者や正常運用由来。
+- `unknown` / `unlabeled`: 判定保留。
+
+主な metrics:
+
+- `meaningful_evidence_count` / `meaningful_evidence_rate`: `true_attack` と `scanner_lab_generated` の合計。
+- `noise_or_benign_count` / `noise_or_benign_rate`: `internet_background_noise` と `benign_admin` の合計。
+- `label_coverage`: finding のうちレビュー済み label が付いた割合。
+
+注意: `meaningful_evidence_rate` は detector の evidence quality を見るための指標で、gateway mitigation が外部 scan volume を減らしたことは意味しません。
+
 ## OpenWrt 連携
 
 ### setup plan
@@ -296,6 +334,7 @@ go test ./...
 - OpenWrt import が `events.jsonl` / `flows.jsonl` / `observations.jsonl` / `device_inventory.json` / `security_events.jsonl` / `attack_evidence_report.json` を生成すること。
 - OpenWrt firewall parser が DROP / REJECT / ACCEPT、TCP / UDP、SPT / DPT、TCP flags あり/なしを扱えること。
 - attack evidence report が port scan candidate を検出すること。
+- attack evidence label/eval が meaningful evidence、internet background noise、benign admin、unlabeled を分けて集計すること。
 - security events が precision incident の attack evidence signal に接続されること。
 - mitigation / gateway backend / apply report / before-after eval / research report の既存テストが通ること。
 

@@ -60,6 +60,10 @@ func main() {
 		if err := runMitigationEval(args[1:], os.Stdout); err != nil {
 			log.Fatal(err)
 		}
+	case "attack-eval":
+		if err := runAttackEval(args[1:], os.Stdout); err != nil {
+			log.Fatal(err)
+		}
 	case "research-report":
 		if err := runResearchReport(args[1:], os.Stdout); err != nil {
 			log.Fatal(err)

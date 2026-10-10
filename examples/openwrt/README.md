@@ -39,6 +39,24 @@ go run ./cmd/quarant precision \
   --incidents-out runs/openwrt-demo/incidents.jsonl
 ```
 
+必要に応じて、attack evidence finding に人手ラベルを付けて detector evidence quality を評価します。
+
+```bash
+go run ./cmd/quarant attack-eval \
+  --attack-evidence runs/openwrt-demo/before/attack_evidence_report.json \
+  --labels runs/openwrt-demo/before/attack_evidence_labels.jsonl \
+  --init-labels
+```
+
+`attack_evidence_labels.jsonl` の `label` を `true_attack`、`scanner_lab_generated`、`internet_background_noise`、`benign_admin`、`unknown` のいずれかにレビューしてから実行します。
+
+```bash
+go run ./cmd/quarant attack-eval \
+  --attack-evidence runs/openwrt-demo/before/attack_evidence_report.json \
+  --labels runs/openwrt-demo/before/attack_evidence_labels.jsonl \
+  --out runs/openwrt-demo/before/attack_evidence_eval_report.json
+```
+
 ```bash
 go run ./cmd/quarant mitigate \
   --events runs/openwrt-demo/before/events.jsonl \
