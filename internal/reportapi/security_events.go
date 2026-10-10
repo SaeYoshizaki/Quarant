@@ -55,17 +55,22 @@ type AttackEvidenceSources struct {
 }
 
 type AttackEvidenceMetrics struct {
-	SecurityEventCount      int  `json:"security_event_count"`
-	BlockedCount            int  `json:"blocked_count"`
-	AllowedCount            int  `json:"allowed_count"`
-	ScanCandidateCount      int  `json:"scan_candidate_count"`
-	SweepCandidateCount     int  `json:"sweep_candidate_count"`
-	TargetedDeviceCount     int  `json:"targeted_device_count"`
-	UniqueAttackSourceCount int  `json:"unique_attack_source_count"`
-	UniqueTargetPortCount   int  `json:"unique_target_port_count"`
-	ActionCounts            []KV `json:"action_counts,omitempty"`
-	VerdictCounts           []KV `json:"verdict_counts,omitempty"`
-	TechniqueCounts         []KV `json:"technique_counts,omitempty"`
+	SecurityEventCount         int  `json:"security_event_count"`
+	ObservedCount              int  `json:"observed_count"`
+	BlockedCount               int  `json:"blocked_count"`
+	AllowedCount               int  `json:"allowed_count"`
+	AcceptedCount              int  `json:"accepted_count"`
+	ExposedServiceAttemptCount int  `json:"exposed_service_attempt_count"`
+	ScanCandidateCount         int  `json:"scan_candidate_count"`
+	SweepCandidateCount        int  `json:"sweep_candidate_count"`
+	SensitiveServiceProbeCount int  `json:"sensitive_service_probe_count"`
+	SuspiciousTCPFlagCount     int  `json:"suspicious_tcp_flag_count"`
+	TargetedDeviceCount        int  `json:"targeted_device_count"`
+	UniqueAttackSourceCount    int  `json:"unique_attack_source_count"`
+	UniqueTargetPortCount      int  `json:"unique_target_port_count"`
+	ActionCounts               []KV `json:"action_counts,omitempty"`
+	VerdictCounts              []KV `json:"verdict_counts,omitempty"`
+	TechniqueCounts            []KV `json:"technique_counts,omitempty"`
 }
 
 type AttackEvidencePolicy struct {
@@ -156,13 +161,16 @@ func BuildAttackEvidenceReport(events []SecurityEvent) AttackEvidenceReport {
 		DecisionPolicy: AttackEvidencePolicy{
 			Version: "attack-evidence-v1",
 			Thresholds: []PrecisionThreshold{
-				{Name: "port_scan", Condition: "same source targets one device on >=3 ports or produces >=5 blocked events", Description: "psad-style inbound scan candidate."},
-				{Name: "sweep", Condition: "same source targets >=3 local devices", Description: "psad-style horizontal sweep candidate."},
+				{Name: "port_scan", Condition: "same source targets one device on >=3 ports or produces >=5 observed events", Description: "psad-style inbound scan candidate."},
+				{Name: "host_sweep", Condition: "same source targets >=3 local devices", Description: "psad-style horizontal sweep candidate."},
+				{Name: "sensitive_service_probe", Condition: "inbound evidence targets a sensitive IoT or management service port", Description: "Probe targeted at services such as Telnet, HTTP admin, RTSP, MQTT, or SSH."},
+				{Name: "suspicious_tcp_flags", Condition: "TCP flag pattern resembles FIN, XMAS, or other suspicious scan probes", Description: "TCP flag evidence is preserved separately from ordinary SYN probes."},
 				{Name: "single_block", Condition: "one blocked packet", Description: "retained as evidence but not promoted by itself."},
 			},
 			Notes: []string{
 				"Firewall evidence is boundary evidence; it does not prove compromise.",
 				"Repeated or fan-out activity is promoted before single denied packets.",
+				"Observed evidence is separated into blocked, accepted, and exposed-service attempts so before/after metrics are not interpreted as internet attack-volume reduction.",
 			},
 		},
 		Recommendations: []string{
@@ -185,6 +193,7 @@ func BuildAttackEvidenceReport(events []SecurityEvent) AttackEvidenceReport {
 
 	for _, event := range events {
 		report.Metrics.SecurityEventCount++
+		report.Metrics.ObservedCount++
 		addCount(actionCounts, event.Action)
 		addCount(verdictCounts, event.Verdict)
 		addCount(techniqueCounts, event.AttackTechnique)
@@ -198,6 +207,16 @@ func BuildAttackEvidenceReport(events []SecurityEvent) AttackEvidenceReport {
 			report.Metrics.BlockedCount++
 		case "allowed", "accepted":
 			report.Metrics.AllowedCount++
+			report.Metrics.AcceptedCount++
+		}
+		if isExposedServiceAttempt(event) {
+			report.Metrics.ExposedServiceAttemptCount++
+		}
+		if isSensitiveSecurityEvent(event) {
+			report.Metrics.SensitiveServiceProbeCount++
+		}
+		if hasSuspiciousTCPFlags(event) {
+			report.Metrics.SuspiciousTCPFlagCount++
 		}
 		if !isInboundSecurityEvent(event) {
 			continue
@@ -233,7 +252,7 @@ func BuildAttackEvidenceReport(events []SecurityEvent) AttackEvidenceReport {
 	report.Findings = findings
 	for _, finding := range findings {
 		switch finding.Kind {
-		case "port_scan", "repeated_inbound_probe":
+		case "port_scan", "repeated_inbound_probe", "sensitive_service_probe", "suspicious_tcp_flags":
 			report.Metrics.ScanCandidateCount++
 		case "sweep":
 			report.Metrics.SweepCandidateCount++
@@ -341,6 +360,55 @@ func isInboundSecurityEvent(event SecurityEvent) bool {
 	return !isLocalDeviceIP(event.SrcIP) && isLocalDeviceIP(firstNonEmpty(event.DeviceIP, event.DstIP))
 }
 
+func isExposedServiceAttempt(event SecurityEvent) bool {
+	if !isInboundSecurityEvent(event) {
+		return false
+	}
+	switch strings.ToLower(strings.TrimSpace(event.Verdict)) {
+	case "accepted", "allowed":
+		return true
+	default:
+		return false
+	}
+}
+
+func isSensitiveSecurityEvent(event SecurityEvent) bool {
+	return isInboundSecurityEvent(event) && isSensitiveEvidencePort(event.DstPort)
+}
+
+func isSensitiveEvidencePort(port uint16) bool {
+	switch port {
+	case 21, 22, 23, 80, 81, 443, 554, 1883, 2323, 5000, 8000, 8080, 8443, 8883:
+		return true
+	default:
+		return false
+	}
+}
+
+func containsSensitivePort(ports map[uint16]bool) bool {
+	for port := range ports {
+		if isSensitiveEvidencePort(port) {
+			return true
+		}
+	}
+	return false
+}
+
+func hasSuspiciousTCPFlags(event SecurityEvent) bool {
+	if !strings.EqualFold(event.Protocol, "tcp") {
+		return false
+	}
+	technique := strings.ToLower(strings.TrimSpace(event.AttackTechnique))
+	if technique == "tcp_fin_scan" || technique == "tcp_xmas_scan" || technique == "tcp_null_scan" || technique == "suspicious_tcp_flags" {
+		return true
+	}
+	flags := map[string]bool{}
+	for _, flag := range event.TCPFlags {
+		flags[strings.ToUpper(strings.TrimSpace(flag))] = true
+	}
+	return (flags["FIN"] && !flags["ACK"] && !flags["SYN"]) || (flags["FIN"] && flags["PSH"] && flags["URG"])
+}
+
 func attackEvidenceKey(srcIP, targetIP, protocol string) string {
 	return strings.Join([]string{strings.TrimSpace(srcIP), strings.TrimSpace(targetIP), strings.ToLower(strings.TrimSpace(protocol))}, "|")
 }
@@ -395,6 +463,11 @@ func attackFindingFromPair(acc *attackEvidenceAccumulator) (AttackEvidenceFindin
 	kind := "repeated_inbound_probe"
 	if portCount >= 3 {
 		kind = "port_scan"
+	}
+	if acc.technique["suspicious_tcp_flags"] || acc.technique["tcp_fin_scan"] || acc.technique["tcp_xmas_scan"] {
+		kind = "suspicious_tcp_flags"
+	} else if kind == "repeated_inbound_probe" && containsSensitivePort(acc.ports) {
+		kind = "sensitive_service_probe"
 	}
 	return attackFinding(acc, kind, acc.targetIP), true
 }

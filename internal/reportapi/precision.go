@@ -233,22 +233,28 @@ type precisionSuppressionCounter struct {
 }
 
 type precisionDeviceContext struct {
-	ip                       string
-	label                    string
-	category                 string
-	baseline                 *DeviceBehaviorProfile
-	externalFlowCount        int
-	dnsOnlyCount             int
-	unknownUDPPorts          map[uint16]bool
-	inboundBlockCount        int
-	inboundBlockSources      map[string]bool
-	inboundBlockPorts        map[uint16]bool
-	attackEvidenceCount      int
-	attackEvidenceSources    map[string]bool
-	attackEvidencePorts      map[uint16]bool
-	attackEvidenceTechniques map[string]bool
-	first                    time.Time
-	last                     time.Time
+	ip                            string
+	label                         string
+	category                      string
+	baseline                      *DeviceBehaviorProfile
+	externalFlowCount             int
+	dnsOnlyCount                  int
+	unknownUDPPorts               map[uint16]bool
+	inboundBlockCount             int
+	inboundBlockSources           map[string]bool
+	inboundBlockPorts             map[uint16]bool
+	attackEvidenceCount           int
+	attackEvidenceBlocked         int
+	attackEvidenceAccepted        int
+	attackEvidenceExposed         int
+	attackEvidenceSources         map[string]bool
+	attackEvidencePorts           map[uint16]bool
+	attackEvidenceTechniques      map[string]bool
+	attackEvidenceSweepSources    map[string]bool
+	attackEvidenceSensitivePorts  map[uint16]bool
+	attackEvidenceSuspiciousFlags int
+	first                         time.Time
+	last                          time.Time
 }
 
 func LoadDetectionPrecisionReport(eventsPath, flowsPath, observationsPath, inventoryPath string) (DetectionPrecisionReport, error) {
@@ -378,6 +384,7 @@ func BuildDetectionPrecisionReportWithSecurityEvents(events []Event, securityEve
 		}
 	}
 
+	sweepSources := securityEventSweepSources(securityEvents)
 	for _, event := range securityEvents {
 		if !isInboundSecurityEvent(event) {
 			continue
@@ -391,10 +398,28 @@ func BuildDetectionPrecisionReportWithSecurityEvents(events []Event, securityEve
 			continue
 		}
 		ctx.attackEvidenceCount++
+		switch strings.ToLower(event.Verdict) {
+		case "dropped", "rejected", "blocked":
+			ctx.attackEvidenceBlocked++
+		case "accepted", "allowed":
+			ctx.attackEvidenceAccepted++
+		}
+		if isExposedServiceAttempt(event) {
+			ctx.attackEvidenceExposed++
+		}
 		addStringBool(ctx.attackEvidenceSources, event.SrcIP)
 		addStringBool(ctx.attackEvidenceTechniques, event.AttackTechnique)
 		if event.DstPort != 0 {
 			ctx.attackEvidencePorts[event.DstPort] = true
+			if isSensitiveEvidencePort(event.DstPort) {
+				ctx.attackEvidenceSensitivePorts[event.DstPort] = true
+			}
+		}
+		if hasSuspiciousTCPFlags(event) {
+			ctx.attackEvidenceSuspiciousFlags++
+		}
+		if sweepSources[event.SrcIP] {
+			addStringBool(ctx.attackEvidenceSweepSources, event.SrcIP)
 		}
 		observePrecisionBounds(ctx, event.Timestamp)
 	}
@@ -453,12 +478,60 @@ func BuildDetectionPrecisionReportWithSecurityEvents(events []Event, securityEve
 		if ctx.attackEvidenceCount >= 5 || len(ctx.attackEvidencePorts) >= 3 {
 			builder := builderFor(ip)
 			if builder != nil {
+				key := "attack_evidence_inbound_scan"
+				label := "Router-boundary inbound scan evidence"
+				if len(ctx.attackEvidencePorts) >= 3 {
+					key = "attack_evidence_port_scan"
+					label = "Router-boundary port scan evidence"
+				}
 				addPrecisionSignal(builder, PrecisionSignal{
-					Key:        "attack_evidence_inbound_scan",
+					Key:        key,
 					Layer:      "correlation",
-					Label:      "Router-boundary attack evidence",
-					Detail:     fmt.Sprintf("%d security event(s) from %d source(s) across %d port(s); techniques=%s.", ctx.attackEvidenceCount, len(ctx.attackEvidenceSources), len(ctx.attackEvidencePorts), strings.Join(sortedStringSet(ctx.attackEvidenceTechniques), ",")),
-					Weight:     minInt(36, 16+ctx.attackEvidenceCount+len(ctx.attackEvidencePorts)*4),
+					Label:      label,
+					Detail:     attackEvidencePrecisionDetail(ctx),
+					Weight:     attackEvidencePrecisionWeight(ctx, 18),
+					Confidence: "medium",
+					Source:     "security_events",
+				}, ctx.last)
+			}
+		}
+		if len(ctx.attackEvidenceSweepSources) > 0 {
+			builder := builderFor(ip)
+			if builder != nil {
+				addPrecisionSignal(builder, PrecisionSignal{
+					Key:        "attack_evidence_host_sweep",
+					Layer:      "correlation",
+					Label:      "Router-boundary host sweep evidence",
+					Detail:     attackEvidencePrecisionDetail(ctx),
+					Weight:     attackEvidencePrecisionWeight(ctx, 20),
+					Confidence: "medium",
+					Source:     "security_events",
+				}, ctx.last)
+			}
+		}
+		if len(ctx.attackEvidenceSensitivePorts) > 0 {
+			builder := builderFor(ip)
+			if builder != nil {
+				addPrecisionSignal(builder, PrecisionSignal{
+					Key:        "attack_evidence_sensitive_service_probe",
+					Layer:      "correlation",
+					Label:      "Sensitive service probe at router boundary",
+					Detail:     attackEvidencePrecisionDetail(ctx),
+					Weight:     attackEvidencePrecisionWeight(ctx, 22),
+					Confidence: "medium",
+					Source:     "security_events",
+				}, ctx.last)
+			}
+		}
+		if ctx.attackEvidenceSuspiciousFlags > 0 {
+			builder := builderFor(ip)
+			if builder != nil {
+				addPrecisionSignal(builder, PrecisionSignal{
+					Key:        "attack_evidence_suspicious_tcp_flags",
+					Layer:      "correlation",
+					Label:      "Suspicious TCP flags at router boundary",
+					Detail:     attackEvidencePrecisionDetail(ctx),
+					Weight:     attackEvidencePrecisionWeight(ctx, 24),
 					Confidence: "medium",
 					Source:     "security_events",
 				}, ctx.last)
@@ -503,13 +576,15 @@ func buildPrecisionDeviceContexts(flows []FlowRecord, observations []Observation
 			return ctx
 		}
 		ctx = &precisionDeviceContext{
-			ip:                       ip,
-			unknownUDPPorts:          map[uint16]bool{},
-			inboundBlockSources:      map[string]bool{},
-			inboundBlockPorts:        map[uint16]bool{},
-			attackEvidenceSources:    map[string]bool{},
-			attackEvidencePorts:      map[uint16]bool{},
-			attackEvidenceTechniques: map[string]bool{},
+			ip:                           ip,
+			unknownUDPPorts:              map[uint16]bool{},
+			inboundBlockSources:          map[string]bool{},
+			inboundBlockPorts:            map[uint16]bool{},
+			attackEvidenceSources:        map[string]bool{},
+			attackEvidencePorts:          map[uint16]bool{},
+			attackEvidenceTechniques:     map[string]bool{},
+			attackEvidenceSweepSources:   map[string]bool{},
+			attackEvidenceSensitivePorts: map[uint16]bool{},
 		}
 		out[ip] = ctx
 		return ctx
@@ -576,13 +651,15 @@ func ensurePrecisionContext(contexts map[string]*precisionDeviceContext, ip stri
 	ctx := contexts[ip]
 	if ctx == nil {
 		ctx = &precisionDeviceContext{
-			ip:                       ip,
-			unknownUDPPorts:          map[uint16]bool{},
-			inboundBlockSources:      map[string]bool{},
-			inboundBlockPorts:        map[uint16]bool{},
-			attackEvidenceSources:    map[string]bool{},
-			attackEvidencePorts:      map[uint16]bool{},
-			attackEvidenceTechniques: map[string]bool{},
+			ip:                           ip,
+			unknownUDPPorts:              map[uint16]bool{},
+			inboundBlockSources:          map[string]bool{},
+			inboundBlockPorts:            map[uint16]bool{},
+			attackEvidenceSources:        map[string]bool{},
+			attackEvidencePorts:          map[uint16]bool{},
+			attackEvidenceTechniques:     map[string]bool{},
+			attackEvidenceSweepSources:   map[string]bool{},
+			attackEvidenceSensitivePorts: map[uint16]bool{},
 		}
 		contexts[ip] = ctx
 	}
@@ -906,7 +983,7 @@ func buildPrecisionMetrics(report DetectionPrecisionReport, contexts map[string]
 			metrics.MediumConfidenceCount++
 		}
 		for _, signal := range incident.Signals {
-			if signal.Key == "attack_like_inbound_blocks" || signal.Key == "attack_evidence_inbound_scan" {
+			if signal.Key == "attack_like_inbound_blocks" || strings.HasPrefix(signal.Key, "attack_evidence_") {
 				metrics.AttackLikeIncidentCount++
 				break
 			}
@@ -1181,7 +1258,7 @@ func precisionLayer(signal PrecisionSignal) string {
 	switch {
 	case strings.HasPrefix(signal.Key, "event_"):
 		return "observation"
-	case strings.HasPrefix(signal.Key, "correlation_"), signal.Key == "attack_like_inbound_blocks", signal.Key == "attack_evidence_inbound_scan":
+	case strings.HasPrefix(signal.Key, "correlation_"), signal.Key == "attack_like_inbound_blocks", strings.HasPrefix(signal.Key, "attack_evidence_"):
 		return "correlation"
 	default:
 		return "context"
@@ -1266,7 +1343,7 @@ func precisionTitle(score int, signals []PrecisionSignal) string {
 	case "baseline_novelty":
 		return "Device behavior changed from baseline"
 	}
-	if hasPrecisionSignal(signals, "attack_like_inbound_blocks") || hasPrecisionSignal(signals, "attack_evidence_inbound_scan") {
+	if hasPrecisionSignal(signals, "attack_like_inbound_blocks") || hasPrecisionSignalPrefix(signals, "attack_evidence_") {
 		return "Attack-like inbound activity"
 	}
 	if hasPrecisionSignal(signals, "category_deviation") {
@@ -1298,7 +1375,7 @@ func precisionAction(score int, signals []PrecisionSignal) string {
 		return "Investigate immediately and consider temporary IoT isolation while preserving logs."
 	case score >= precisionMediumSeverityThreshold:
 		return "Review device owner, firmware state, credentials, and recent destinations before applying blocks."
-	case hasPrecisionSignal(signals, "attack_like_inbound_blocks") || hasPrecisionSignal(signals, "attack_evidence_inbound_scan"):
+	case hasPrecisionSignal(signals, "attack_like_inbound_blocks") || hasPrecisionSignalPrefix(signals, "attack_evidence_"):
 		return "Keep firewall logging enabled and confirm whether the traffic is internet background scan noise or targeted."
 	default:
 		return "Continue observation until the signal repeats or combines with another independent indicator."
@@ -1372,6 +1449,15 @@ func hasPrecisionSignal(signals []PrecisionSignal, key string) bool {
 	return false
 }
 
+func hasPrecisionSignalPrefix(signals []PrecisionSignal, prefix string) bool {
+	for _, signal := range signals {
+		if strings.HasPrefix(signal.Key, prefix) {
+			return true
+		}
+	}
+	return false
+}
+
 func precisionIncidentID(ip string, signals []PrecisionSignal) string {
 	parts := []string{strings.TrimSpace(ip), primaryPrecisionTaxonomy(signals)}
 	parts = append(parts, precisionTaxonomies(signals)...)
@@ -1406,7 +1492,7 @@ func precisionDecisionPolicy() PrecisionDecisionPolicy {
 			{Key: "baseline_novelty", Layer: "context", Description: "Destination, protocol, or port differs from learned baseline."},
 			{Key: "category_deviation", Layer: "context", Description: "Behavior differs from expected device category profile."},
 			{Key: "unknown_udp", Layer: "context", Description: "UDP traffic without decoded application context after noise filtering."},
-			{Key: "attack_like", Layer: "correlation", Description: "Repeated inbound blocks, router-boundary evidence, or other activity consistent with scanning or probing."},
+			{Key: "attack_like", Layer: "correlation", Description: "Repeated inbound blocks, router-boundary port scans, host sweeps, sensitive-service probes, suspicious TCP flags, or other activity consistent with scanning or probing."},
 			{Key: "correlation", Layer: "correlation", Description: "Multiple weaker signals reinforce each other."},
 		},
 		SuppressionPolicy: []PrecisionSuppressionPolicy{
@@ -1529,7 +1615,7 @@ func precisionTaxonomy(signal PrecisionSignal) string {
 		return "category_deviation"
 	case key == "unknown_udp":
 		return "unknown_udp"
-	case key == "attack_like_inbound_blocks" || key == "attack_evidence_inbound_scan":
+	case key == "attack_like_inbound_blocks" || strings.HasPrefix(key, "attack_evidence_"):
 		return "attack_like"
 	case strings.HasPrefix(key, "correlation_"):
 		return "correlation"
@@ -1602,6 +1688,65 @@ func observePrecisionBounds(ctx *precisionDeviceContext, ts time.Time) {
 	if ts.After(ctx.last) {
 		ctx.last = ts
 	}
+}
+
+func securityEventSweepSources(events []SecurityEvent) map[string]bool {
+	targetsBySource := map[string]map[string]bool{}
+	for _, event := range events {
+		if !isInboundSecurityEvent(event) {
+			continue
+		}
+		src := strings.TrimSpace(event.SrcIP)
+		target := firstLocalIP(event.DeviceIP, event.DstIP)
+		if src == "" || target == "" {
+			continue
+		}
+		if targetsBySource[src] == nil {
+			targetsBySource[src] = map[string]bool{}
+		}
+		targetsBySource[src][target] = true
+	}
+	out := map[string]bool{}
+	for src, targets := range targetsBySource {
+		if len(targets) >= 3 {
+			out[src] = true
+		}
+	}
+	return out
+}
+
+func attackEvidencePrecisionDetail(ctx *precisionDeviceContext) string {
+	if ctx == nil {
+		return ""
+	}
+	return fmt.Sprintf(
+		"observed=%d blocked=%d accepted=%d exposed_service_attempts=%d sources=%d ports=%d sensitive_ports=%s techniques=%s.",
+		ctx.attackEvidenceCount,
+		ctx.attackEvidenceBlocked,
+		ctx.attackEvidenceAccepted,
+		ctx.attackEvidenceExposed,
+		len(ctx.attackEvidenceSources),
+		len(ctx.attackEvidencePorts),
+		joinPorts(sortedPortSet(ctx.attackEvidenceSensitivePorts)),
+		strings.Join(sortedStringSet(ctx.attackEvidenceTechniques), ","),
+	)
+}
+
+func attackEvidencePrecisionWeight(ctx *precisionDeviceContext, base int) int {
+	if ctx == nil {
+		return base
+	}
+	weight := base + minInt(ctx.attackEvidenceCount, 8) + len(ctx.attackEvidencePorts)*2
+	if ctx.attackEvidenceAccepted > 0 || ctx.attackEvidenceExposed > 0 {
+		weight += 12
+	}
+	if len(ctx.attackEvidenceSensitivePorts) > 0 {
+		weight += 6
+	}
+	if ctx.attackEvidenceSuspiciousFlags > 0 {
+		weight += 8
+	}
+	return minInt(46, weight)
 }
 
 func firstLocalIP(values ...string) string {

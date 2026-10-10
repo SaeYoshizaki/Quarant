@@ -33,31 +33,33 @@ type ResearchReportSources struct {
 }
 
 type ResearchMetrics struct {
-	IncidentCount                  int     `json:"incident_count"`
-	RiskyIncidentCount             int     `json:"risky_incident_count"`
-	SuppressedSignalCount          int     `json:"suppressed_signal_count"`
-	LabelCoverage                  float64 `json:"label_coverage,omitempty"`
-	Precision                      float64 `json:"precision,omitempty"`
-	FalsePositiveRate              float64 `json:"false_positive_rate,omitempty"`
-	MitigationActionCount          int     `json:"mitigation_action_count"`
-	AutoEligibleActionCount        int     `json:"auto_eligible_action_count"`
-	ReviewRequiredActionCount      int     `json:"review_required_action_count"`
-	EstimatedBlockedFlows          int     `json:"estimated_blocked_flows"`
-	NormalTrafficImpactMeasurable  bool    `json:"normal_traffic_impact_measurable"`
-	TargetedSignalReductionRate    float64 `json:"targeted_signal_reduction_rate,omitempty"`
-	AttackEvidenceReductionRate    float64 `json:"attack_evidence_reduction_rate,omitempty"`
-	ImprovedMitigationActionCount  int     `json:"improved_mitigation_action_count,omitempty"`
-	ResidualMitigationActionCount  int     `json:"residual_mitigation_action_count,omitempty"`
-	RegressedMitigationActionCount int     `json:"regressed_mitigation_action_count,omitempty"`
-	CriticalFlowContinuityRisk     string  `json:"critical_flow_continuity_risk,omitempty"`
-	IncidentReductionRate          float64 `json:"incident_reduction_rate,omitempty"`
-	HighRiskIncidentReductionRate  float64 `json:"high_risk_incident_reduction_rate,omitempty"`
-	NormalFlowPreservationRate     float64 `json:"normal_flow_preservation_rate,omitempty"`
-	CriticalFlowPreservationRate   float64 `json:"critical_flow_preservation_rate,omitempty"`
-	FalseMitigationRate            float64 `json:"false_mitigation_rate,omitempty"`
-	RollbackRequiredCount          int     `json:"rollback_required_count,omitempty"`
-	ResidualRiskScore              int     `json:"residual_risk_score,omitempty"`
-	OverallOutcome                 string  `json:"overall_outcome,omitempty"`
+	IncidentCount                       int     `json:"incident_count"`
+	RiskyIncidentCount                  int     `json:"risky_incident_count"`
+	SuppressedSignalCount               int     `json:"suppressed_signal_count"`
+	LabelCoverage                       float64 `json:"label_coverage,omitempty"`
+	Precision                           float64 `json:"precision,omitempty"`
+	FalsePositiveRate                   float64 `json:"false_positive_rate,omitempty"`
+	MitigationActionCount               int     `json:"mitigation_action_count"`
+	AutoEligibleActionCount             int     `json:"auto_eligible_action_count"`
+	ReviewRequiredActionCount           int     `json:"review_required_action_count"`
+	EstimatedBlockedFlows               int     `json:"estimated_blocked_flows"`
+	NormalTrafficImpactMeasurable       bool    `json:"normal_traffic_impact_measurable"`
+	TargetedSignalReductionRate         float64 `json:"targeted_signal_reduction_rate,omitempty"`
+	AttackEvidenceReductionRate         float64 `json:"attack_evidence_reduction_rate,omitempty"`
+	AcceptedAttackEvidenceReductionRate float64 `json:"accepted_attack_evidence_reduction_rate,omitempty"`
+	ExposedServiceAttemptReductionRate  float64 `json:"exposed_service_attempt_reduction_rate,omitempty"`
+	ImprovedMitigationActionCount       int     `json:"improved_mitigation_action_count,omitempty"`
+	ResidualMitigationActionCount       int     `json:"residual_mitigation_action_count,omitempty"`
+	RegressedMitigationActionCount      int     `json:"regressed_mitigation_action_count,omitempty"`
+	CriticalFlowContinuityRisk          string  `json:"critical_flow_continuity_risk,omitempty"`
+	IncidentReductionRate               float64 `json:"incident_reduction_rate,omitempty"`
+	HighRiskIncidentReductionRate       float64 `json:"high_risk_incident_reduction_rate,omitempty"`
+	NormalFlowPreservationRate          float64 `json:"normal_flow_preservation_rate,omitempty"`
+	CriticalFlowPreservationRate        float64 `json:"critical_flow_preservation_rate,omitempty"`
+	FalseMitigationRate                 float64 `json:"false_mitigation_rate,omitempty"`
+	RollbackRequiredCount               int     `json:"rollback_required_count,omitempty"`
+	ResidualRiskScore                   int     `json:"residual_risk_score,omitempty"`
+	OverallOutcome                      string  `json:"overall_outcome,omitempty"`
 }
 
 type ResearchStage struct {
@@ -120,6 +122,7 @@ func BuildResearchReport(precision DetectionPrecisionReport, precisionEval *Prec
 			"Before/after windows must be comparable; device usage changes can bias mitigation effectiveness.",
 			"Encrypted traffic and unseen local dependencies may hide residual risk or normal-traffic breakage.",
 			"Rule-based decisions depend on the completeness of the signal taxonomy and suppression policy.",
+			"Internet scan volume is not controlled by gateway mitigation; router-boundary evidence reduction must be interpreted separately from accepted or exposed-service attempts.",
 		},
 	}
 	report.Metrics = buildResearchMetrics(precision, precisionEval, mitigation, mitigationEval)
@@ -179,6 +182,8 @@ func buildResearchMetrics(precision DetectionPrecisionReport, precisionEval *Pre
 	if mitigationEval != nil {
 		metrics.TargetedSignalReductionRate = mitigationEval.Metrics.TargetedSignalReductionRate
 		metrics.AttackEvidenceReductionRate = mitigationEval.Metrics.AttackEvidenceReductionRate
+		metrics.AcceptedAttackEvidenceReductionRate = mitigationEval.Metrics.AcceptedAttackEvidenceReductionRate
+		metrics.ExposedServiceAttemptReductionRate = mitigationEval.Metrics.ExposedServiceAttemptReductionRate
 		metrics.ImprovedMitigationActionCount = mitigationEval.Metrics.ImprovedActionCount
 		metrics.ResidualMitigationActionCount = mitigationEval.Metrics.ResidualActionCount
 		metrics.RegressedMitigationActionCount = mitigationEval.Metrics.RegressedActionCount
@@ -242,6 +247,8 @@ func buildResearchStages(precision DetectionPrecisionReport, precisionEval *Prec
 				fmt.Sprintf("overall outcome %s", mitigationEval.OverallOutcome),
 				fmt.Sprintf("targeted signal reduction %.3f", mitigationEval.Metrics.TargetedSignalReductionRate),
 				fmt.Sprintf("attack evidence reduction %.3f", mitigationEval.Metrics.AttackEvidenceReductionRate),
+				fmt.Sprintf("accepted boundary evidence reduction %.3f", mitigationEval.Metrics.AcceptedAttackEvidenceReductionRate),
+				fmt.Sprintf("exposed-service attempt reduction %.3f", mitigationEval.Metrics.ExposedServiceAttemptReductionRate),
 				fmt.Sprintf("normal-flow preservation %.3f", mitigationEval.PaperMetrics.NormalFlowPreservationRate),
 				fmt.Sprintf("false mitigation rate %.3f", mitigationEval.PaperMetrics.FalseMitigationRate),
 				fmt.Sprintf("critical-flow continuity risk %s", mitigationEval.Metrics.CriticalFlowContinuityRisk),
@@ -396,6 +403,9 @@ func researchExecutiveSummary(metrics ResearchMetrics) string {
 	if metrics.AttackEvidenceReductionRate > 0 {
 		parts = append(parts, fmt.Sprintf("attack evidence reduction was %.3f", metrics.AttackEvidenceReductionRate))
 	}
+	if metrics.AcceptedAttackEvidenceReductionRate > 0 || metrics.ExposedServiceAttemptReductionRate > 0 {
+		parts = append(parts, fmt.Sprintf("accepted/exposed boundary evidence reduction was %.3f/%.3f", metrics.AcceptedAttackEvidenceReductionRate, metrics.ExposedServiceAttemptReductionRate))
+	}
 	if metrics.CriticalFlowContinuityRisk != "" {
 		parts = append(parts, fmt.Sprintf("critical-flow continuity risk was %s", metrics.CriticalFlowContinuityRisk))
 	}
@@ -427,6 +437,8 @@ func ResearchReportMarkdown(report ResearchReport) string {
 		{"metric": "estimated_blocked_flows", "value": fmt.Sprintf("%d", report.Metrics.EstimatedBlockedFlows)},
 		{"metric": "targeted_signal_reduction_rate", "value": fmt.Sprintf("%.3f", report.Metrics.TargetedSignalReductionRate)},
 		{"metric": "attack_evidence_reduction_rate", "value": fmt.Sprintf("%.3f", report.Metrics.AttackEvidenceReductionRate)},
+		{"metric": "accepted_attack_evidence_reduction_rate", "value": fmt.Sprintf("%.3f", report.Metrics.AcceptedAttackEvidenceReductionRate)},
+		{"metric": "exposed_service_attempt_reduction_rate", "value": fmt.Sprintf("%.3f", report.Metrics.ExposedServiceAttemptReductionRate)},
 		{"metric": "normal_flow_preservation_rate", "value": fmt.Sprintf("%.3f", report.Metrics.NormalFlowPreservationRate)},
 		{"metric": "false_mitigation_rate", "value": fmt.Sprintf("%.3f", report.Metrics.FalseMitigationRate)},
 		{"metric": "rollback_required_count", "value": fmt.Sprintf("%d", report.Metrics.RollbackRequiredCount)},
@@ -469,6 +481,8 @@ func ResearchReportCSVs(report ResearchReport) map[string]string {
 		{"metric": "high_risk_incident_reduction_rate", "value": fmt.Sprintf("%.3f", report.Metrics.HighRiskIncidentReductionRate)},
 		{"metric": "targeted_signal_reduction_rate", "value": fmt.Sprintf("%.3f", report.Metrics.TargetedSignalReductionRate)},
 		{"metric": "attack_evidence_reduction_rate", "value": fmt.Sprintf("%.3f", report.Metrics.AttackEvidenceReductionRate)},
+		{"metric": "accepted_attack_evidence_reduction_rate", "value": fmt.Sprintf("%.3f", report.Metrics.AcceptedAttackEvidenceReductionRate)},
+		{"metric": "exposed_service_attempt_reduction_rate", "value": fmt.Sprintf("%.3f", report.Metrics.ExposedServiceAttemptReductionRate)},
 		{"metric": "normal_flow_preservation_rate", "value": fmt.Sprintf("%.3f", report.Metrics.NormalFlowPreservationRate)},
 		{"metric": "critical_flow_preservation_rate", "value": fmt.Sprintf("%.3f", report.Metrics.CriticalFlowPreservationRate)},
 		{"metric": "false_mitigation_rate", "value": fmt.Sprintf("%.3f", report.Metrics.FalseMitigationRate)},

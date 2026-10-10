@@ -77,7 +77,7 @@ func runMitigationEval(args []string, out io.Writer) error {
 			return err
 		}
 	}
-	fmt.Fprintf(out, "Mitigation evaluation complete: outcome=%s actions=%d improved=%d residual=%d regressed=%d targeted_reduction=%.3f attack_evidence_reduction=%.3f normal_preservation=%.3f rollback_required=%d report=%s\n",
+	fmt.Fprintf(out, "Mitigation evaluation complete: outcome=%s actions=%d improved=%d residual=%d regressed=%d targeted_reduction=%.3f observed_boundary_evidence_reduction=%.3f accepted_boundary_evidence_reduction=%.3f exposed_service_attempt_reduction=%.3f normal_preservation=%.3f rollback_required=%d report=%s\n",
 		report.OverallOutcome,
 		report.Metrics.ActionCount,
 		report.Metrics.ImprovedActionCount,
@@ -85,6 +85,8 @@ func runMitigationEval(args []string, out io.Writer) error {
 		report.Metrics.RegressedActionCount,
 		report.Metrics.TargetedSignalReductionRate,
 		report.Metrics.AttackEvidenceReductionRate,
+		report.Metrics.AcceptedAttackEvidenceReductionRate,
+		report.Metrics.ExposedServiceAttemptReductionRate,
 		report.Metrics.NormalFlowPreservationRate,
 		report.Metrics.RollbackRequiredCount,
 		*reportOut,

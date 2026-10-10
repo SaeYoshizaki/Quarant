@@ -39,56 +39,69 @@ type MitigationEvaluationSources struct {
 }
 
 type MitigationEvaluationMetrics struct {
-	ActionCount                  int     `json:"action_count"`
-	EvaluableActionCount         int     `json:"evaluable_action_count"`
-	ImprovedActionCount          int     `json:"improved_action_count"`
-	ResolvedActionCount          int     `json:"resolved_action_count"`
-	ResidualActionCount          int     `json:"residual_action_count"`
-	RegressedActionCount         int     `json:"regressed_action_count"`
-	MonitorOnlyActionCount       int     `json:"monitor_only_action_count"`
-	BeforeIncidentCount          int     `json:"before_incident_count"`
-	AfterIncidentCount           int     `json:"after_incident_count"`
-	IncidentDelta                int     `json:"incident_delta"`
-	BeforeRiskScore              int     `json:"before_risk_score"`
-	AfterRiskScore               int     `json:"after_risk_score"`
-	RiskScoreDelta               int     `json:"risk_score_delta"`
-	BeforeTargetedSignalCount    int     `json:"before_targeted_signal_count"`
-	AfterTargetedSignalCount     int     `json:"after_targeted_signal_count"`
-	TargetedSignalReductionRate  float64 `json:"targeted_signal_reduction_rate,omitempty"`
-	BeforeAttackEvidenceCount    int     `json:"before_attack_evidence_count"`
-	AfterAttackEvidenceCount     int     `json:"after_attack_evidence_count"`
-	AttackEvidenceDelta          int     `json:"attack_evidence_delta"`
-	AttackEvidenceReductionRate  float64 `json:"attack_evidence_reduction_rate,omitempty"`
-	BeforeCriticalFlowCount      int     `json:"before_critical_flow_count"`
-	AfterCriticalFlowCount       int     `json:"after_critical_flow_count"`
-	CriticalFlowDelta            int     `json:"critical_flow_delta"`
-	CriticalFlowContinuityRisk   string  `json:"critical_flow_continuity_risk"`
-	EstimatedBlockedFlowsPlanned int     `json:"estimated_blocked_flows_planned"`
-	RollbackRequiredCount        int     `json:"rollback_required_count"`
-	FalseMitigationCount         int     `json:"false_mitigation_count"`
-	ResidualRiskScore            int     `json:"residual_risk_score"`
-	BeforeNormalFlowCount        int     `json:"before_normal_flow_count"`
-	AfterNormalFlowCount         int     `json:"after_normal_flow_count"`
-	NormalFlowDelta              int     `json:"normal_flow_delta"`
-	NormalFlowPreservationRate   float64 `json:"normal_flow_preservation_rate,omitempty"`
+	ActionCount                         int     `json:"action_count"`
+	EvaluableActionCount                int     `json:"evaluable_action_count"`
+	ImprovedActionCount                 int     `json:"improved_action_count"`
+	ResolvedActionCount                 int     `json:"resolved_action_count"`
+	ResidualActionCount                 int     `json:"residual_action_count"`
+	RegressedActionCount                int     `json:"regressed_action_count"`
+	MonitorOnlyActionCount              int     `json:"monitor_only_action_count"`
+	BeforeIncidentCount                 int     `json:"before_incident_count"`
+	AfterIncidentCount                  int     `json:"after_incident_count"`
+	IncidentDelta                       int     `json:"incident_delta"`
+	BeforeRiskScore                     int     `json:"before_risk_score"`
+	AfterRiskScore                      int     `json:"after_risk_score"`
+	RiskScoreDelta                      int     `json:"risk_score_delta"`
+	BeforeTargetedSignalCount           int     `json:"before_targeted_signal_count"`
+	AfterTargetedSignalCount            int     `json:"after_targeted_signal_count"`
+	TargetedSignalReductionRate         float64 `json:"targeted_signal_reduction_rate,omitempty"`
+	BeforeAttackEvidenceCount           int     `json:"before_attack_evidence_count"`
+	AfterAttackEvidenceCount            int     `json:"after_attack_evidence_count"`
+	AttackEvidenceDelta                 int     `json:"attack_evidence_delta"`
+	AttackEvidenceReductionRate         float64 `json:"attack_evidence_reduction_rate,omitempty"`
+	BeforeBlockedAttackEvidenceCount    int     `json:"before_blocked_attack_evidence_count"`
+	AfterBlockedAttackEvidenceCount     int     `json:"after_blocked_attack_evidence_count"`
+	BlockedAttackEvidenceDelta          int     `json:"blocked_attack_evidence_delta"`
+	BeforeAcceptedAttackEvidenceCount   int     `json:"before_accepted_attack_evidence_count"`
+	AfterAcceptedAttackEvidenceCount    int     `json:"after_accepted_attack_evidence_count"`
+	AcceptedAttackEvidenceDelta         int     `json:"accepted_attack_evidence_delta"`
+	AcceptedAttackEvidenceReductionRate float64 `json:"accepted_attack_evidence_reduction_rate,omitempty"`
+	BeforeExposedServiceAttemptCount    int     `json:"before_exposed_service_attempt_count"`
+	AfterExposedServiceAttemptCount     int     `json:"after_exposed_service_attempt_count"`
+	ExposedServiceAttemptDelta          int     `json:"exposed_service_attempt_delta"`
+	ExposedServiceAttemptReductionRate  float64 `json:"exposed_service_attempt_reduction_rate,omitempty"`
+	BeforeCriticalFlowCount             int     `json:"before_critical_flow_count"`
+	AfterCriticalFlowCount              int     `json:"after_critical_flow_count"`
+	CriticalFlowDelta                   int     `json:"critical_flow_delta"`
+	CriticalFlowContinuityRisk          string  `json:"critical_flow_continuity_risk"`
+	EstimatedBlockedFlowsPlanned        int     `json:"estimated_blocked_flows_planned"`
+	RollbackRequiredCount               int     `json:"rollback_required_count"`
+	FalseMitigationCount                int     `json:"false_mitigation_count"`
+	ResidualRiskScore                   int     `json:"residual_risk_score"`
+	BeforeNormalFlowCount               int     `json:"before_normal_flow_count"`
+	AfterNormalFlowCount                int     `json:"after_normal_flow_count"`
+	NormalFlowDelta                     int     `json:"normal_flow_delta"`
+	NormalFlowPreservationRate          float64 `json:"normal_flow_preservation_rate,omitempty"`
 }
 
 type MitigationEvaluationPaperMetrics struct {
-	IncidentReductionRate         float64 `json:"incident_reduction_rate,omitempty"`
-	HighRiskIncidentReductionRate float64 `json:"high_risk_incident_reduction_rate,omitempty"`
-	TargetedSignalReductionRate   float64 `json:"targeted_signal_reduction_rate,omitempty"`
-	AttackEvidenceReductionRate   float64 `json:"attack_evidence_reduction_rate,omitempty"`
-	NormalFlowPreservationRate    float64 `json:"normal_flow_preservation_rate,omitempty"`
-	CriticalFlowPreservationRate  float64 `json:"critical_flow_preservation_rate,omitempty"`
-	FalseMitigationRate           float64 `json:"false_mitigation_rate,omitempty"`
-	RollbackRequiredCount         int     `json:"rollback_required_count"`
-	ResidualRiskScore             int     `json:"residual_risk_score"`
-	BeforeHighRiskIncidentCount   int     `json:"before_high_risk_incident_count"`
-	AfterHighRiskIncidentCount    int     `json:"after_high_risk_incident_count"`
-	EstimatedBlockedFlowsPlanned  int     `json:"estimated_blocked_flows_planned"`
-	ObservedNormalFlowDelta       int     `json:"observed_normal_flow_delta"`
-	ApplyWasExplicit              bool    `json:"apply_was_explicit"`
-	ApplyWasBlocked               bool    `json:"apply_was_blocked"`
+	IncidentReductionRate               float64 `json:"incident_reduction_rate,omitempty"`
+	HighRiskIncidentReductionRate       float64 `json:"high_risk_incident_reduction_rate,omitempty"`
+	TargetedSignalReductionRate         float64 `json:"targeted_signal_reduction_rate,omitempty"`
+	AttackEvidenceReductionRate         float64 `json:"attack_evidence_reduction_rate,omitempty"`
+	AcceptedAttackEvidenceReductionRate float64 `json:"accepted_attack_evidence_reduction_rate,omitempty"`
+	ExposedServiceAttemptReductionRate  float64 `json:"exposed_service_attempt_reduction_rate,omitempty"`
+	NormalFlowPreservationRate          float64 `json:"normal_flow_preservation_rate,omitempty"`
+	CriticalFlowPreservationRate        float64 `json:"critical_flow_preservation_rate,omitempty"`
+	FalseMitigationRate                 float64 `json:"false_mitigation_rate,omitempty"`
+	RollbackRequiredCount               int     `json:"rollback_required_count"`
+	ResidualRiskScore                   int     `json:"residual_risk_score"`
+	BeforeHighRiskIncidentCount         int     `json:"before_high_risk_incident_count"`
+	AfterHighRiskIncidentCount          int     `json:"after_high_risk_incident_count"`
+	EstimatedBlockedFlowsPlanned        int     `json:"estimated_blocked_flows_planned"`
+	ObservedNormalFlowDelta             int     `json:"observed_normal_flow_delta"`
+	ApplyWasExplicit                    bool    `json:"apply_was_explicit"`
+	ApplyWasBlocked                     bool    `json:"apply_was_blocked"`
 }
 
 type MitigationEvaluationApplySummary struct {
@@ -258,6 +271,7 @@ func BuildMitigationEvaluationReportWithApplyAndSecurityEvents(plan MitigationPl
 			"This evaluates passive observations before and after mitigation; it cannot prove device firmware was patched.",
 			"Outcome quality depends on comparable before/after observation windows.",
 			"Residual encrypted behavior may remain invisible when only metadata is available.",
+			"Internet scan volume is not controlled by gateway mitigation; observed boundary-evidence reduction must be interpreted separately from accepted or exposed-service reduction.",
 		},
 	}
 	beforeByDevice := incidentStatsByDevice(before.Incidents)
@@ -307,6 +321,19 @@ func BuildMitigationEvaluationReportWithApplyAndSecurityEvents(plan MitigationPl
 	report.Metrics.AfterAttackEvidenceCount = len(afterSecurityEvents)
 	report.Metrics.AttackEvidenceDelta = report.Metrics.AfterAttackEvidenceCount - report.Metrics.BeforeAttackEvidenceCount
 	report.Metrics.AttackEvidenceReductionRate = reductionRate(report.Metrics.BeforeAttackEvidenceCount, report.Metrics.AfterAttackEvidenceCount)
+	beforeBoundary := securityEvidenceCounts(beforeSecurityEvents)
+	afterBoundary := securityEvidenceCounts(afterSecurityEvents)
+	report.Metrics.BeforeBlockedAttackEvidenceCount = beforeBoundary.blocked
+	report.Metrics.AfterBlockedAttackEvidenceCount = afterBoundary.blocked
+	report.Metrics.BlockedAttackEvidenceDelta = afterBoundary.blocked - beforeBoundary.blocked
+	report.Metrics.BeforeAcceptedAttackEvidenceCount = beforeBoundary.accepted
+	report.Metrics.AfterAcceptedAttackEvidenceCount = afterBoundary.accepted
+	report.Metrics.AcceptedAttackEvidenceDelta = afterBoundary.accepted - beforeBoundary.accepted
+	report.Metrics.AcceptedAttackEvidenceReductionRate = reductionRate(beforeBoundary.accepted, afterBoundary.accepted)
+	report.Metrics.BeforeExposedServiceAttemptCount = beforeBoundary.exposed
+	report.Metrics.AfterExposedServiceAttemptCount = afterBoundary.exposed
+	report.Metrics.ExposedServiceAttemptDelta = afterBoundary.exposed - beforeBoundary.exposed
+	report.Metrics.ExposedServiceAttemptReductionRate = reductionRate(beforeBoundary.exposed, afterBoundary.exposed)
 	report.Metrics.BeforeNormalFlowCount = totalFlowCountMap(beforeNormal)
 	report.Metrics.AfterNormalFlowCount = totalFlowCountMap(afterNormal)
 	report.Metrics.NormalFlowDelta = report.Metrics.AfterNormalFlowCount - report.Metrics.BeforeNormalFlowCount
@@ -534,6 +561,31 @@ func normalFlowCountsByDevice(plan MitigationPlan, flows []FlowRecord) map[strin
 	return out
 }
 
+type securityEvidenceCounter struct {
+	blocked  int
+	accepted int
+	exposed  int
+}
+
+func securityEvidenceCounts(events []SecurityEvent) securityEvidenceCounter {
+	var counts securityEvidenceCounter
+	for _, event := range events {
+		if !isInboundSecurityEvent(event) {
+			continue
+		}
+		switch strings.ToLower(strings.TrimSpace(event.Verdict)) {
+		case "dropped", "rejected", "blocked":
+			counts.blocked++
+		case "accepted", "allowed":
+			counts.accepted++
+		}
+		if isExposedServiceAttempt(event) {
+			counts.exposed++
+		}
+	}
+	return counts
+}
+
 func mitigationFlowTargetsAnyAction(plan MitigationPlan, flow FlowRecord) bool {
 	for _, action := range plan.Actions {
 		if strings.TrimSpace(action.DeviceIP) != "" && flow.SrcIP != action.DeviceIP && flow.DstIP != action.DeviceIP {
@@ -687,19 +739,21 @@ func buildMitigationEvaluationPaperMetrics(report MitigationEvaluationReport, be
 	beforeHigh := highRiskIncidentCount(beforeIncidents)
 	afterHigh := highRiskIncidentCount(afterIncidents)
 	metrics := MitigationEvaluationPaperMetrics{
-		IncidentReductionRate:         reductionRate(report.Metrics.BeforeIncidentCount, report.Metrics.AfterIncidentCount),
-		HighRiskIncidentReductionRate: reductionRate(beforeHigh, afterHigh),
-		TargetedSignalReductionRate:   report.Metrics.TargetedSignalReductionRate,
-		AttackEvidenceReductionRate:   report.Metrics.AttackEvidenceReductionRate,
-		NormalFlowPreservationRate:    report.Metrics.NormalFlowPreservationRate,
-		CriticalFlowPreservationRate:  preservationRate(report.Metrics.BeforeCriticalFlowCount, report.Metrics.AfterCriticalFlowCount),
-		FalseMitigationRate:           ratio(report.Metrics.FalseMitigationCount, report.Metrics.EvaluableActionCount),
-		RollbackRequiredCount:         report.Metrics.RollbackRequiredCount,
-		ResidualRiskScore:             report.Metrics.ResidualRiskScore,
-		BeforeHighRiskIncidentCount:   beforeHigh,
-		AfterHighRiskIncidentCount:    afterHigh,
-		EstimatedBlockedFlowsPlanned:  report.Metrics.EstimatedBlockedFlowsPlanned,
-		ObservedNormalFlowDelta:       report.Metrics.NormalFlowDelta,
+		IncidentReductionRate:               reductionRate(report.Metrics.BeforeIncidentCount, report.Metrics.AfterIncidentCount),
+		HighRiskIncidentReductionRate:       reductionRate(beforeHigh, afterHigh),
+		TargetedSignalReductionRate:         report.Metrics.TargetedSignalReductionRate,
+		AttackEvidenceReductionRate:         report.Metrics.AttackEvidenceReductionRate,
+		AcceptedAttackEvidenceReductionRate: report.Metrics.AcceptedAttackEvidenceReductionRate,
+		ExposedServiceAttemptReductionRate:  report.Metrics.ExposedServiceAttemptReductionRate,
+		NormalFlowPreservationRate:          report.Metrics.NormalFlowPreservationRate,
+		CriticalFlowPreservationRate:        preservationRate(report.Metrics.BeforeCriticalFlowCount, report.Metrics.AfterCriticalFlowCount),
+		FalseMitigationRate:                 ratio(report.Metrics.FalseMitigationCount, report.Metrics.EvaluableActionCount),
+		RollbackRequiredCount:               report.Metrics.RollbackRequiredCount,
+		ResidualRiskScore:                   report.Metrics.ResidualRiskScore,
+		BeforeHighRiskIncidentCount:         beforeHigh,
+		AfterHighRiskIncidentCount:          afterHigh,
+		EstimatedBlockedFlowsPlanned:        report.Metrics.EstimatedBlockedFlowsPlanned,
+		ObservedNormalFlowDelta:             report.Metrics.NormalFlowDelta,
 	}
 	if applyReport != nil {
 		metrics.ApplyWasExplicit = applyReport.ExplicitApply
@@ -765,7 +819,7 @@ func buildMitigationEvalPaperSummary(report MitigationEvaluationReport) Mitigati
 			"risk reduction is measured with before/after targeted signal counts and device risk score deltas",
 			"normal-operation preservation is approximated with DNS/DHCP/NTP and discovery-flow continuity",
 			"normal-flow preservation and false mitigation rate are exported as paper metrics",
-			"router-boundary attack evidence reduction is exported separately from incident reduction",
+			"router-boundary attack evidence is separated into observed, blocked, accepted, and exposed-service attempts",
 			"rollback-required count is derived from regressed or continuity-risk outcomes after explicit apply",
 			"residual and regressed outcomes are separated from resolved outcomes",
 		},
@@ -779,6 +833,10 @@ func buildMitigationEvalPaperSummary(report MitigationEvaluationReport) Mitigati
 			"targeted_signal_delta",
 			"attack_evidence_delta",
 			"attack_evidence_reduction_rate",
+			"accepted_attack_evidence_delta",
+			"accepted_attack_evidence_reduction_rate",
+			"exposed_service_attempt_delta",
+			"exposed_service_attempt_reduction_rate",
 			"device_risk_score_delta",
 			"critical_flow_delta",
 			"normal_flow_preservation_rate",

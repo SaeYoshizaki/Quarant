@@ -215,6 +215,94 @@ esac
 	}
 }
 
+func TestParseOpenWrtFirewallLineVariants(t *testing.T) {
+	base := time.Date(2026, 9, 26, 12, 30, 0, 0, time.UTC)
+	cases := []struct {
+		name      string
+		line      string
+		action    string
+		protocol  string
+		srcPort   uint16
+		dstPort   uint16
+		flags     []string
+		verdict   string
+		technique string
+	}{
+		{
+			name:      "drop tcp with ports and syn",
+			line:      "Sep 26 12:00:02 router kern.warn kernel: DROP IN=wan OUT=br-lan SRC=203.0.113.9 DST=192.168.8.42 PROTO=TCP SPT=45123 DPT=23 SYN",
+			action:    "DROP",
+			protocol:  "tcp",
+			srcPort:   45123,
+			dstPort:   23,
+			flags:     []string{"SYN"},
+			verdict:   "dropped",
+			technique: "tcp_syn_probe",
+		},
+		{
+			name:      "reject udp with ports",
+			line:      "Sep 26 12:00:03 router kern.warn kernel: REJECT IN=wan OUT=br-lan SRC=203.0.113.10 DST=192.168.8.42 PROTO=UDP SPT=5353 DPT=1900",
+			action:    "REJECT",
+			protocol:  "udp",
+			srcPort:   5353,
+			dstPort:   1900,
+			verdict:   "rejected",
+			technique: "inbound_port_probe",
+		},
+		{
+			name:      "accept tcp fin scan",
+			line:      "Sep 26 12:00:04 router kern.warn kernel: ACCEPT IN=wan OUT=br-lan SRC=203.0.113.11 DST=192.168.8.42 PROTO=TCP SPT=44444 DPT=80 FIN",
+			action:    "ACCEPT",
+			protocol:  "tcp",
+			srcPort:   44444,
+			dstPort:   80,
+			flags:     []string{"FIN"},
+			verdict:   "accepted",
+			technique: "tcp_fin_scan",
+		},
+		{
+			name:      "drop tcp without ports or flags",
+			line:      "Sep 26 12:00:05 router kern.warn kernel: DROP IN=wan OUT=br-lan SRC=203.0.113.12 DST=192.168.8.42 PROTO=TCP",
+			action:    "DROP",
+			protocol:  "tcp",
+			verdict:   "dropped",
+			technique: "tcp_probe",
+		},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			record, ok := parseOpenWrtFirewallLine(tc.line, base)
+			if !ok {
+				t.Fatalf("parseOpenWrtFirewallLine returned false")
+			}
+			if record.Action != tc.action || record.Protocol != tc.protocol || record.SrcPort != tc.srcPort || record.DstPort != tc.dstPort {
+				t.Fatalf("record=%+v, want action=%s protocol=%s srcPort=%d dstPort=%d", record, tc.action, tc.protocol, tc.srcPort, tc.dstPort)
+			}
+			for _, flag := range tc.flags {
+				if !stringSliceContains(record.TCPFlags, flag) {
+					t.Fatalf("flags=%+v, want %s", record.TCPFlags, flag)
+				}
+			}
+			event, ok := securityEventFromOpenWrtFirewallRecord(record)
+			if !ok {
+				t.Fatalf("securityEventFromOpenWrtFirewallRecord returned false")
+			}
+			if event.Verdict != tc.verdict || event.AttackTechnique != tc.technique {
+				t.Fatalf("event=%+v, want verdict=%s technique=%s", event, tc.verdict, tc.technique)
+			}
+		})
+	}
+}
+
+func stringSliceContains(values []string, want string) bool {
+	for _, value := range values {
+		if value == want {
+			return true
+		}
+	}
+	return false
+}
+
 func writeTestFile(t *testing.T, path, content string) {
 	t.Helper()
 	if err := os.WriteFile(path, []byte(content), 0644); err != nil {

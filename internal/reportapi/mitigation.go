@@ -310,27 +310,50 @@ func mitigationActionsForIncident(incident PrecisionIncident) []MitigationAction
 	if hasSignalContaining(incident, "mqtt") && !hasSignalContaining(incident, "mqtts") {
 		actions = append(actions, newServiceBlockMitigation(incident, 78, "Block plaintext MQTT", "Plaintext MQTT was observed. Blocking TCP/1883 reduces unauthenticated or unencrypted broker exposure when the device does not require it.", "tcp", 1883, "wan", "medium", []string{"tcp/1883"}, "plaintext MQTT broker exposure", "MQTT plaintext has a known port and can be narrowed to TCP/1883.", "Device isolation is stronger and should wait until MQTT is confirmed unnecessary."))
 	}
-	if hasAnyMitigationSignal(incident, "attack_like_inbound_blocks", "attack_evidence_inbound_scan") {
-		actions = append(actions, MitigationAction{
-			ID:                   mitigationActionID(incident, "restrict_inbound"),
-			IncidentID:           incident.ID,
-			DeviceIP:             incident.DeviceIP,
-			DeviceLabel:          incident.DeviceLabel,
-			Kind:                 "restrict_inbound",
-			Status:               "review_required",
-			Priority:             attackEvidenceMitigationPriority(incident),
-			Confidence:           incident.Confidence,
-			Title:                "Keep inbound access denied and increase logging",
-			Rationale:            "Repeated inbound blocks or router-boundary attack evidence were correlated. The safest rule-based response is to keep inbound access denied and preserve logs for before-after evaluation.",
-			RiskReductionTarget:  mitigationRiskTarget(incident, "inbound probing or scanning exposure", "preserve default-deny inbound posture and increase review visibility"),
-			WhyThisAction:        "The evidence is inbound block correlation, so preserving and validating deny rules is safer than changing outbound behavior.",
-			WhyNotStrongerAction: "No successful inbound session was observed; isolating the device would add disruption without stronger evidence.",
-			AutoApply:            mitigationAutoApply(false, "review_required", "Inbound policy changes can lock out legitimate local administration and should be reviewed.", "existing inbound deny policy confirmed", "target device identity stable"),
-			Impact:               mitigationImpact("low", []string{"inbound traffic to device"}, "The action preserves a deny posture and does not block additional outbound dependencies."),
-			Preconditions:        []string{"Gateway firewall can identify the IoT device IP.", "Existing inbound deny policy is active."},
-			Validation:           defaultMitigationValidation(),
-			RollbackRequired:     false,
-		})
+	if hasAttackEvidenceMitigationSignal(incident) {
+		if attackEvidenceReachedExposedService(incident) {
+			actions = append(actions, MitigationAction{
+				ID:                   mitigationActionID(incident, "restrict_inbound"),
+				IncidentID:           incident.ID,
+				DeviceIP:             incident.DeviceIP,
+				DeviceLabel:          incident.DeviceLabel,
+				Kind:                 "restrict_inbound",
+				Status:               "review_required",
+				Priority:             attackEvidenceMitigationPriority(incident),
+				Confidence:           incident.Confidence,
+				Title:                "Review inbound exposure and tighten gateway policy",
+				Rationale:            "Router-boundary evidence included accepted or exposed-service attempts. The response should verify that no WAN path reaches the IoT service and preserve logs for before-after evaluation.",
+				RiskReductionTarget:  mitigationRiskTarget(incident, "accepted or exposed inbound probing", "remove unintended inbound exposure while preserving default-deny evidence"),
+				WhyThisAction:        "Accepted or exposed-service evidence is stronger than background blocked scans and justifies reviewed inbound policy tightening.",
+				WhyNotStrongerAction: "No device compromise was proven; isolating the device would add disruption without stronger evidence.",
+				AutoApply:            mitigationAutoApply(false, "review_required", "Inbound policy changes can lock out legitimate remote administration and should be reviewed.", "exposed inbound path reviewed", "target device identity stable"),
+				Impact:               mitigationImpact("low", []string{"inbound traffic to device"}, "The action targets inbound exposure and does not block additional outbound dependencies."),
+				Preconditions:        []string{"Gateway firewall can identify the IoT device IP.", "Accepted inbound path or exposed service is reviewed."},
+				Validation:           defaultMitigationValidation(),
+				RollbackRequired:     false,
+			})
+		} else {
+			actions = append(actions, MitigationAction{
+				ID:                  mitigationActionID(incident, "confirm_inbound_posture"),
+				IncidentID:          incident.ID,
+				DeviceIP:            incident.DeviceIP,
+				DeviceLabel:         incident.DeviceLabel,
+				Kind:                "monitor_only",
+				Status:              "monitor_only",
+				Priority:            28,
+				Confidence:          incident.Confidence,
+				Title:               "Confirm default-deny inbound posture",
+				Rationale:           "Router-boundary evidence was already blocked or rejected. This is useful posture evidence, but it should not be treated as proof that mitigation reduced internet scan volume.",
+				RiskReductionTarget: mitigationRiskTarget(incident, "blocked inbound probing evidence", "preserve default-deny posture and continue measuring boundary evidence"),
+				WhyThisAction:       "DROP/REJECT evidence confirms the gateway denied the attempt, so monitoring and posture confirmation are safer than adding disruptive rules.",
+				AutoApply:           mitigationAutoApply(true, "safe_auto", "Posture confirmation does not change gateway behavior."),
+				Impact:              mitigationImpact("low", nil, "Monitoring does not block traffic."),
+				Validation: []MitigationValidation{
+					{Metric: "blocked_boundary_evidence", Expected: "blocked or rejected inbound attempts remain blocked"},
+					{Metric: "accepted_boundary_evidence", Expected: "no accepted inbound attempts appear"},
+				},
+			})
+		}
 	}
 	if incident.State == "observe" || incident.PrimaryTaxonomy == "baseline_novelty" {
 		actions = append(actions, monitorOnlyMitigation(incident))
@@ -350,11 +373,42 @@ func mitigationActionsForIncident(incident PrecisionIncident) []MitigationAction
 	return actions
 }
 
+func hasAttackEvidenceMitigationSignal(incident PrecisionIncident) bool {
+	if hasAnyMitigationSignal(incident, "attack_like_inbound_blocks") {
+		return true
+	}
+	for _, signal := range incident.Signals {
+		if strings.HasPrefix(signal.Key, "attack_evidence_") {
+			return true
+		}
+	}
+	return false
+}
+
+func attackEvidenceReachedExposedService(incident PrecisionIncident) bool {
+	for _, signal := range incident.Signals {
+		if !strings.HasPrefix(signal.Key, "attack_evidence_") {
+			continue
+		}
+		detail := strings.ToLower(signal.Detail)
+		if strings.Contains(detail, "accepted=0") && strings.Contains(detail, "exposed_service_attempts=0") {
+			continue
+		}
+		if strings.Contains(detail, "accepted=") || strings.Contains(detail, "exposed_service_attempts=") {
+			return true
+		}
+	}
+	return false
+}
+
 func attackEvidenceMitigationPriority(incident PrecisionIncident) int {
-	if hasAnyMitigationSignal(incident, "attack_evidence_inbound_scan") {
+	if attackEvidenceReachedExposedService(incident) {
 		return 82
 	}
-	return 72
+	if hasAnyMitigationSignal(incident, "attack_evidence_sensitive_service_probe", "attack_evidence_suspicious_tcp_flags") {
+		return 58
+	}
+	return 48
 }
 
 func isolateDeviceMitigation(incident PrecisionIncident) MitigationAction {

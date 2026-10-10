@@ -14,7 +14,7 @@ func TestBuildAttackEvidenceReportDetectsPortScan(t *testing.T) {
 	}
 
 	report := BuildAttackEvidenceReport(events)
-	if report.Metrics.SecurityEventCount != 3 || report.Metrics.ScanCandidateCount != 1 {
+	if report.Metrics.SecurityEventCount != 3 || report.Metrics.ObservedCount != 3 || report.Metrics.BlockedCount != 3 || report.Metrics.ScanCandidateCount != 1 || report.Metrics.SensitiveServiceProbeCount != 3 {
 		t.Fatalf("metrics=%+v, want one scan candidate from three security events", report.Metrics)
 	}
 	if len(report.Findings) != 1 || report.Findings[0].Kind != "port_scan" {
@@ -34,7 +34,7 @@ func TestPrecisionReportUsesSecurityEventsAsAttackEvidence(t *testing.T) {
 	if report.Metrics.IncidentCount != 1 || report.Metrics.AttackLikeIncidentCount != 1 {
 		t.Fatalf("metrics=%+v incidents=%+v, want attack-like incident", report.Metrics, report.Incidents)
 	}
-	if !hasPrecisionSignal(report.Incidents[0].Signals, "attack_evidence_inbound_scan") {
-		t.Fatalf("signals=%+v, want attack_evidence_inbound_scan", report.Incidents[0].Signals)
+	if !hasPrecisionSignal(report.Incidents[0].Signals, "attack_evidence_port_scan") || !hasPrecisionSignal(report.Incidents[0].Signals, "attack_evidence_sensitive_service_probe") {
+		t.Fatalf("signals=%+v, want port scan and sensitive service probe evidence", report.Incidents[0].Signals)
 	}
 }
