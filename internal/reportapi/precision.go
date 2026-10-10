@@ -39,10 +39,11 @@ type DetectionPrecisionReport struct {
 }
 
 type PrecisionSources struct {
-	Events       string `json:"events,omitempty"`
-	Flows        string `json:"flows,omitempty"`
-	Observations string `json:"observations,omitempty"`
-	Inventory    string `json:"inventory,omitempty"`
+	Events         string `json:"events,omitempty"`
+	SecurityEvents string `json:"security_events,omitempty"`
+	Flows          string `json:"flows,omitempty"`
+	Observations   string `json:"observations,omitempty"`
+	Inventory      string `json:"inventory,omitempty"`
 }
 
 type PrecisionMetrics struct {
@@ -232,22 +233,34 @@ type precisionSuppressionCounter struct {
 }
 
 type precisionDeviceContext struct {
-	ip                  string
-	label               string
-	category            string
-	baseline            *DeviceBehaviorProfile
-	externalFlowCount   int
-	dnsOnlyCount        int
-	unknownUDPPorts     map[uint16]bool
-	inboundBlockCount   int
-	inboundBlockSources map[string]bool
-	inboundBlockPorts   map[uint16]bool
-	first               time.Time
-	last                time.Time
+	ip                       string
+	label                    string
+	category                 string
+	baseline                 *DeviceBehaviorProfile
+	externalFlowCount        int
+	dnsOnlyCount             int
+	unknownUDPPorts          map[uint16]bool
+	inboundBlockCount        int
+	inboundBlockSources      map[string]bool
+	inboundBlockPorts        map[uint16]bool
+	attackEvidenceCount      int
+	attackEvidenceSources    map[string]bool
+	attackEvidencePorts      map[uint16]bool
+	attackEvidenceTechniques map[string]bool
+	first                    time.Time
+	last                     time.Time
 }
 
 func LoadDetectionPrecisionReport(eventsPath, flowsPath, observationsPath, inventoryPath string) (DetectionPrecisionReport, error) {
+	return LoadDetectionPrecisionReportWithSecurityEvents(eventsPath, "", flowsPath, observationsPath, inventoryPath)
+}
+
+func LoadDetectionPrecisionReportWithSecurityEvents(eventsPath, securityEventsPath, flowsPath, observationsPath, inventoryPath string) (DetectionPrecisionReport, error) {
 	report, err := LoadReport(eventsPath)
+	if err != nil {
+		return DetectionPrecisionReport{}, err
+	}
+	securityEvents, err := LoadSecurityEvents(securityEventsPath)
 	if err != nil {
 		return DetectionPrecisionReport{}, err
 	}
@@ -263,17 +276,22 @@ func LoadDetectionPrecisionReport(eventsPath, flowsPath, observationsPath, inven
 	if err != nil {
 		return DetectionPrecisionReport{}, err
 	}
-	out := BuildDetectionPrecisionReport(report.Events, flows, observations, inventory.Devices)
+	out := BuildDetectionPrecisionReportWithSecurityEvents(report.Events, securityEvents, flows, observations, inventory.Devices)
 	out.Source = PrecisionSources{
-		Events:       eventsPath,
-		Flows:        flowsPath,
-		Observations: observationsPath,
-		Inventory:    inventoryPath,
+		Events:         eventsPath,
+		SecurityEvents: securityEventsPath,
+		Flows:          flowsPath,
+		Observations:   observationsPath,
+		Inventory:      inventoryPath,
 	}
 	return out, nil
 }
 
 func BuildDetectionPrecisionReport(events []Event, flows []FlowRecord, observations []ObservationRecord, devices []InventoryDevice) DetectionPrecisionReport {
+	return BuildDetectionPrecisionReportWithSecurityEvents(events, nil, flows, observations, devices)
+}
+
+func BuildDetectionPrecisionReportWithSecurityEvents(events []Event, securityEvents []SecurityEvent, flows []FlowRecord, observations []ObservationRecord, devices []InventoryDevice) DetectionPrecisionReport {
 	baseline := buildBehaviorBaseline(flows, devices)
 	contexts := buildPrecisionDeviceContexts(flows, observations, devices, baseline)
 	builders := map[string]*precisionIncidentBuilder{}
@@ -360,6 +378,27 @@ func BuildDetectionPrecisionReport(events []Event, flows []FlowRecord, observati
 		}
 	}
 
+	for _, event := range securityEvents {
+		if !isInboundSecurityEvent(event) {
+			continue
+		}
+		dst := firstLocalIP(event.DeviceIP, event.DstIP)
+		if dst == "" {
+			continue
+		}
+		ctx := ensurePrecisionContext(contexts, dst)
+		if ctx == nil {
+			continue
+		}
+		ctx.attackEvidenceCount++
+		addStringBool(ctx.attackEvidenceSources, event.SrcIP)
+		addStringBool(ctx.attackEvidenceTechniques, event.AttackTechnique)
+		if event.DstPort != 0 {
+			ctx.attackEvidencePorts[event.DstPort] = true
+		}
+		observePrecisionBounds(ctx, event.Timestamp)
+	}
+
 	for ip, ctx := range contexts {
 		if ctx == nil {
 			continue
@@ -411,6 +450,20 @@ func BuildDetectionPrecisionReport(events []Event, flows []FlowRecord, observati
 				}, ctx.last)
 			}
 		}
+		if ctx.attackEvidenceCount >= 5 || len(ctx.attackEvidencePorts) >= 3 {
+			builder := builderFor(ip)
+			if builder != nil {
+				addPrecisionSignal(builder, PrecisionSignal{
+					Key:        "attack_evidence_inbound_scan",
+					Layer:      "correlation",
+					Label:      "Router-boundary attack evidence",
+					Detail:     fmt.Sprintf("%d security event(s) from %d source(s) across %d port(s); techniques=%s.", ctx.attackEvidenceCount, len(ctx.attackEvidenceSources), len(ctx.attackEvidencePorts), strings.Join(sortedStringSet(ctx.attackEvidenceTechniques), ",")),
+					Weight:     minInt(36, 16+ctx.attackEvidenceCount+len(ctx.attackEvidencePorts)*4),
+					Confidence: "medium",
+					Source:     "security_events",
+				}, ctx.last)
+			}
+		}
 	}
 
 	incidents := suppressWeakPrecisionIncidents(finalizePrecisionIncidents(builders), suppress)
@@ -450,10 +503,13 @@ func buildPrecisionDeviceContexts(flows []FlowRecord, observations []Observation
 			return ctx
 		}
 		ctx = &precisionDeviceContext{
-			ip:                  ip,
-			unknownUDPPorts:     map[uint16]bool{},
-			inboundBlockSources: map[string]bool{},
-			inboundBlockPorts:   map[uint16]bool{},
+			ip:                       ip,
+			unknownUDPPorts:          map[uint16]bool{},
+			inboundBlockSources:      map[string]bool{},
+			inboundBlockPorts:        map[uint16]bool{},
+			attackEvidenceSources:    map[string]bool{},
+			attackEvidencePorts:      map[uint16]bool{},
+			attackEvidenceTechniques: map[string]bool{},
 		}
 		out[ip] = ctx
 		return ctx
@@ -520,10 +576,13 @@ func ensurePrecisionContext(contexts map[string]*precisionDeviceContext, ip stri
 	ctx := contexts[ip]
 	if ctx == nil {
 		ctx = &precisionDeviceContext{
-			ip:                  ip,
-			unknownUDPPorts:     map[uint16]bool{},
-			inboundBlockSources: map[string]bool{},
-			inboundBlockPorts:   map[uint16]bool{},
+			ip:                       ip,
+			unknownUDPPorts:          map[uint16]bool{},
+			inboundBlockSources:      map[string]bool{},
+			inboundBlockPorts:        map[uint16]bool{},
+			attackEvidenceSources:    map[string]bool{},
+			attackEvidencePorts:      map[uint16]bool{},
+			attackEvidenceTechniques: map[string]bool{},
 		}
 		contexts[ip] = ctx
 	}
@@ -847,7 +906,7 @@ func buildPrecisionMetrics(report DetectionPrecisionReport, contexts map[string]
 			metrics.MediumConfidenceCount++
 		}
 		for _, signal := range incident.Signals {
-			if signal.Key == "attack_like_inbound_blocks" {
+			if signal.Key == "attack_like_inbound_blocks" || signal.Key == "attack_evidence_inbound_scan" {
 				metrics.AttackLikeIncidentCount++
 				break
 			}
@@ -1122,7 +1181,7 @@ func precisionLayer(signal PrecisionSignal) string {
 	switch {
 	case strings.HasPrefix(signal.Key, "event_"):
 		return "observation"
-	case strings.HasPrefix(signal.Key, "correlation_"), signal.Key == "attack_like_inbound_blocks":
+	case strings.HasPrefix(signal.Key, "correlation_"), signal.Key == "attack_like_inbound_blocks", signal.Key == "attack_evidence_inbound_scan":
 		return "correlation"
 	default:
 		return "context"
@@ -1207,7 +1266,7 @@ func precisionTitle(score int, signals []PrecisionSignal) string {
 	case "baseline_novelty":
 		return "Device behavior changed from baseline"
 	}
-	if hasPrecisionSignal(signals, "attack_like_inbound_blocks") {
+	if hasPrecisionSignal(signals, "attack_like_inbound_blocks") || hasPrecisionSignal(signals, "attack_evidence_inbound_scan") {
 		return "Attack-like inbound activity"
 	}
 	if hasPrecisionSignal(signals, "category_deviation") {
@@ -1239,7 +1298,7 @@ func precisionAction(score int, signals []PrecisionSignal) string {
 		return "Investigate immediately and consider temporary IoT isolation while preserving logs."
 	case score >= precisionMediumSeverityThreshold:
 		return "Review device owner, firmware state, credentials, and recent destinations before applying blocks."
-	case hasPrecisionSignal(signals, "attack_like_inbound_blocks"):
+	case hasPrecisionSignal(signals, "attack_like_inbound_blocks") || hasPrecisionSignal(signals, "attack_evidence_inbound_scan"):
 		return "Keep firewall logging enabled and confirm whether the traffic is internet background scan noise or targeted."
 	default:
 		return "Continue observation until the signal repeats or combines with another independent indicator."
@@ -1347,7 +1406,7 @@ func precisionDecisionPolicy() PrecisionDecisionPolicy {
 			{Key: "baseline_novelty", Layer: "context", Description: "Destination, protocol, or port differs from learned baseline."},
 			{Key: "category_deviation", Layer: "context", Description: "Behavior differs from expected device category profile."},
 			{Key: "unknown_udp", Layer: "context", Description: "UDP traffic without decoded application context after noise filtering."},
-			{Key: "attack_like", Layer: "correlation", Description: "Repeated inbound blocks or other activity consistent with scanning or probing."},
+			{Key: "attack_like", Layer: "correlation", Description: "Repeated inbound blocks, router-boundary evidence, or other activity consistent with scanning or probing."},
 			{Key: "correlation", Layer: "correlation", Description: "Multiple weaker signals reinforce each other."},
 		},
 		SuppressionPolicy: []PrecisionSuppressionPolicy{
@@ -1470,7 +1529,7 @@ func precisionTaxonomy(signal PrecisionSignal) string {
 		return "category_deviation"
 	case key == "unknown_udp":
 		return "unknown_udp"
-	case key == "attack_like_inbound_blocks":
+	case key == "attack_like_inbound_blocks" || key == "attack_evidence_inbound_scan":
 		return "attack_like"
 	case strings.HasPrefix(key, "correlation_"):
 		return "correlation"
