@@ -188,3 +188,30 @@ func TestBuildMitigationEvaluationReportConnectsApplyReportAndPaperMetrics(t *te
 		t.Fatalf("PaperMetrics=%+v, want normal-flow loss and non-blocked apply", report.PaperMetrics)
 	}
 }
+
+func TestMitigationEvaluationCountsIDSExposedOverlap(t *testing.T) {
+	beforeSecurityEvents := []SecurityEvent{
+		{Source: "openwrt_firewall", EventType: "firewall_accepted", Verdict: "accepted", Direction: "inbound", SrcIP: "203.0.113.9", DstIP: "192.168.50.20", DeviceIP: "192.168.50.20", DstPort: 80, Protocol: "tcp"},
+		{Source: "suricata", Engine: "suricata", EventType: "ids_alert", Direction: "inbound", SrcIP: "203.0.113.9", DstIP: "192.168.50.20", DeviceIP: "192.168.50.20", DstPort: 80, Protocol: "tcp", Signature: "ET WEB Probe"},
+	}
+	afterSecurityEvents := []SecurityEvent{
+		{Source: "openwrt_firewall", EventType: "firewall_dropped", Verdict: "dropped", Direction: "inbound", SrcIP: "203.0.113.9", DstIP: "192.168.50.20", DeviceIP: "192.168.50.20", DstPort: 80, Protocol: "tcp"},
+		{Source: "suricata", Engine: "suricata", EventType: "ids_alert", Direction: "inbound", SrcIP: "203.0.113.9", DstIP: "192.168.50.20", DeviceIP: "192.168.50.20", DstPort: 80, Protocol: "tcp", Signature: "ET WEB Probe"},
+	}
+	report := BuildMitigationEvaluationReportWithApplyAndSecurityEvents(
+		MitigationPlan{},
+		nil,
+		DetectionPrecisionReport{},
+		DetectionPrecisionReport{},
+		nil,
+		nil,
+		beforeSecurityEvents,
+		afterSecurityEvents,
+	)
+	if report.Metrics.BeforeIDSAlertCount != 1 || report.Metrics.AfterIDSAlertCount != 1 {
+		t.Fatalf("metrics=%+v, want IDS alert counts", report.Metrics)
+	}
+	if report.Metrics.BeforeIDSExposedOverlapCount != 1 || report.Metrics.AfterIDSExposedOverlapCount != 0 || report.Metrics.IDSExposedOverlapReductionRate != 1 {
+		t.Fatalf("metrics=%+v, want IDS/exposed overlap reduction", report.Metrics)
+	}
+}

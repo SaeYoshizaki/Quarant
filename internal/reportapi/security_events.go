@@ -23,6 +23,14 @@ type SecurityEvent struct {
 	AttackTechnique string            `json:"attack_technique,omitempty"`
 	Severity        string            `json:"severity"`
 	Confidence      string            `json:"confidence"`
+	SID             string            `json:"sid,omitempty"`
+	Signature       string            `json:"signature,omitempty"`
+	ClassType       string            `json:"classtype,omitempty"`
+	Priority        int               `json:"priority,omitempty"`
+	Engine          string            `json:"engine,omitempty"`
+	RuleSource      string            `json:"rule_source,omitempty"`
+	FlowID          string            `json:"flow_id,omitempty"`
+	AlertAction     string            `json:"alert_action,omitempty"`
 	Action          string            `json:"action,omitempty"`
 	Verdict         string            `json:"verdict,omitempty"`
 	Direction       string            `json:"direction,omitempty"`
@@ -285,6 +293,13 @@ func normalizeSecurityEvent(event SecurityEvent) SecurityEvent {
 	event.AttackTechnique = strings.TrimSpace(event.AttackTechnique)
 	event.Severity = strings.ToUpper(strings.TrimSpace(event.Severity))
 	event.Confidence = strings.ToLower(strings.TrimSpace(event.Confidence))
+	event.SID = strings.TrimSpace(event.SID)
+	event.Signature = strings.TrimSpace(event.Signature)
+	event.ClassType = strings.TrimSpace(event.ClassType)
+	event.Engine = strings.TrimSpace(event.Engine)
+	event.RuleSource = strings.TrimSpace(event.RuleSource)
+	event.FlowID = strings.TrimSpace(event.FlowID)
+	event.AlertAction = strings.TrimSpace(event.AlertAction)
 	event.Action = strings.ToUpper(strings.TrimSpace(event.Action))
 	event.Verdict = strings.ToLower(strings.TrimSpace(event.Verdict))
 	event.Direction = strings.ToLower(strings.TrimSpace(event.Direction))

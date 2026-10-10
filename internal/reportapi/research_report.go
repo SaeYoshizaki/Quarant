@@ -48,6 +48,7 @@ type ResearchMetrics struct {
 	AttackEvidenceReductionRate         float64 `json:"attack_evidence_reduction_rate,omitempty"`
 	AcceptedAttackEvidenceReductionRate float64 `json:"accepted_attack_evidence_reduction_rate,omitempty"`
 	ExposedServiceAttemptReductionRate  float64 `json:"exposed_service_attempt_reduction_rate,omitempty"`
+	IDSExposedOverlapReductionRate      float64 `json:"ids_exposed_overlap_reduction_rate,omitempty"`
 	ImprovedMitigationActionCount       int     `json:"improved_mitigation_action_count,omitempty"`
 	ResidualMitigationActionCount       int     `json:"residual_mitigation_action_count,omitempty"`
 	RegressedMitigationActionCount      int     `json:"regressed_mitigation_action_count,omitempty"`
@@ -184,6 +185,7 @@ func buildResearchMetrics(precision DetectionPrecisionReport, precisionEval *Pre
 		metrics.AttackEvidenceReductionRate = mitigationEval.Metrics.AttackEvidenceReductionRate
 		metrics.AcceptedAttackEvidenceReductionRate = mitigationEval.Metrics.AcceptedAttackEvidenceReductionRate
 		metrics.ExposedServiceAttemptReductionRate = mitigationEval.Metrics.ExposedServiceAttemptReductionRate
+		metrics.IDSExposedOverlapReductionRate = mitigationEval.Metrics.IDSExposedOverlapReductionRate
 		metrics.ImprovedMitigationActionCount = mitigationEval.Metrics.ImprovedActionCount
 		metrics.ResidualMitigationActionCount = mitigationEval.Metrics.ResidualActionCount
 		metrics.RegressedMitigationActionCount = mitigationEval.Metrics.RegressedActionCount
@@ -439,6 +441,7 @@ func ResearchReportMarkdown(report ResearchReport) string {
 		{"metric": "attack_evidence_reduction_rate", "value": fmt.Sprintf("%.3f", report.Metrics.AttackEvidenceReductionRate)},
 		{"metric": "accepted_attack_evidence_reduction_rate", "value": fmt.Sprintf("%.3f", report.Metrics.AcceptedAttackEvidenceReductionRate)},
 		{"metric": "exposed_service_attempt_reduction_rate", "value": fmt.Sprintf("%.3f", report.Metrics.ExposedServiceAttemptReductionRate)},
+		{"metric": "ids_exposed_overlap_reduction_rate", "value": fmt.Sprintf("%.3f", report.Metrics.IDSExposedOverlapReductionRate)},
 		{"metric": "normal_flow_preservation_rate", "value": fmt.Sprintf("%.3f", report.Metrics.NormalFlowPreservationRate)},
 		{"metric": "false_mitigation_rate", "value": fmt.Sprintf("%.3f", report.Metrics.FalseMitigationRate)},
 		{"metric": "rollback_required_count", "value": fmt.Sprintf("%d", report.Metrics.RollbackRequiredCount)},
@@ -483,6 +486,7 @@ func ResearchReportCSVs(report ResearchReport) map[string]string {
 		{"metric": "attack_evidence_reduction_rate", "value": fmt.Sprintf("%.3f", report.Metrics.AttackEvidenceReductionRate)},
 		{"metric": "accepted_attack_evidence_reduction_rate", "value": fmt.Sprintf("%.3f", report.Metrics.AcceptedAttackEvidenceReductionRate)},
 		{"metric": "exposed_service_attempt_reduction_rate", "value": fmt.Sprintf("%.3f", report.Metrics.ExposedServiceAttemptReductionRate)},
+		{"metric": "ids_exposed_overlap_reduction_rate", "value": fmt.Sprintf("%.3f", report.Metrics.IDSExposedOverlapReductionRate)},
 		{"metric": "normal_flow_preservation_rate", "value": fmt.Sprintf("%.3f", report.Metrics.NormalFlowPreservationRate)},
 		{"metric": "critical_flow_preservation_rate", "value": fmt.Sprintf("%.3f", report.Metrics.CriticalFlowPreservationRate)},
 		{"metric": "false_mitigation_rate", "value": fmt.Sprintf("%.3f", report.Metrics.FalseMitigationRate)},

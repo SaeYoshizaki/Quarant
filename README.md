@@ -62,7 +62,7 @@ SOC/precision 用の passive observation です。DNS query、HTTP host/request�
 
 ### `security_events.jsonl`
 
-router boundary や IDS/NSM 由来の security evidence を表す Quarant native JSONL です。現在は OpenWrt firewall log から生成できます。
+router boundary や IDS/NSM 由来の security evidence を表す Quarant native JSONL です。現在は OpenWrt firewall log と Suricata EVE alert から生成できます。
 
 主な field:
 
@@ -193,6 +193,51 @@ go run ./cmd/quarant openwrt collect \
   --out-dir runs/openwrt-001
 ```
 
+## Suricata / Zeek 連携
+
+### Suricata EVE import
+
+Suricata `eve.json` を Quarant 形式に変換します。`event_type=alert` は `security_events.jsonl` に変換し、`alert.signature_id` / `signature` / `category` / `severity` / `action` / `flow_id` は IDS metadata として保持します。`flow` / `dns` / `http` / `tls` は passive visibility 用に `flows.jsonl` と `observations.jsonl` に変換します。
+
+```bash
+go run ./cmd/quarant suricata import \
+  --eve raw/eve.json \
+  --out-dir runs/suricata-001
+```
+
+出力:
+
+```text
+runs/suricata-001/security_events.jsonl
+runs/suricata-001/attack_evidence_report.json
+runs/suricata-001/flows.jsonl
+runs/suricata-001/observations.jsonl
+```
+
+Suricata alert は precision / mitigation / before-after eval の `--security-events` としてそのまま接続できます。OpenWrt firewall evidence と同じ `security_events.jsonl` に連結すれば、accepted/exposed service attempt と IDS alert の重なりも評価できます。
+
+### Zeek import
+
+Zeek `conn.log` / `dns.log` / `http.log` / `ssl.log` または `tls.log` を passive observation と flow に変換します。
+
+```bash
+go run ./cmd/quarant zeek import \
+  --conn raw/conn.log \
+  --dns raw/dns.log \
+  --http raw/http.log \
+  --ssl raw/ssl.log \
+  --out-dir runs/zeek-001
+```
+
+出力:
+
+```text
+runs/zeek-001/flows.jsonl
+runs/zeek-001/observations.jsonl
+```
+
+Zeek は IDS alert ではなく NSM 証拠として扱います。device behavior、DNS、HTTP host、TLS SNI、external/local connection の補強証拠として precision incident に接続します。
+
 ## Precision incident
 
 precision report は、passive event、flow、observation、inventory、security event を統合して incident を生成します。
@@ -271,10 +316,13 @@ Boundary evidence metrics は、誤解を避けるため以下に分けていま
 - `before_blocked_attack_evidence_count` / `after_blocked_attack_evidence_count`
 - `before_accepted_attack_evidence_count` / `after_accepted_attack_evidence_count`
 - `before_exposed_service_attempt_count` / `after_exposed_service_attempt_count`
+- `before_ids_alert_count` / `after_ids_alert_count`
+- `before_ids_exposed_overlap_count` / `after_ids_exposed_overlap_count`
 - `accepted_attack_evidence_reduction_rate`
 - `exposed_service_attempt_reduction_rate`
+- `ids_exposed_overlap_reduction_rate`
 
-注意: observed boundary evidence が減っても、外部から来る scan volume が mitigation によって減ったとは主張しません。研究上は、accepted/exposed service attempt が減ったか、blocked evidence が blocked のまま維持されたか、normal traffic が保たれたかを分けて見ます。
+注意: observed boundary evidence や IDS alert count が減っても、外部から来る scan volume が mitigation によって減ったとは主張しません。研究上は、accepted/exposed service attempt が減ったか、IDS alert が exposed service attempt と重ならなくなったか、blocked evidence が blocked のまま維持されたか、normal traffic が保たれたかを分けて見ます。
 
 ## Research report
 
@@ -310,16 +358,18 @@ research report には、以下の注意を含めています。
 
 ### Zeek / Suricata / Snort について
 
-現時点では importer は未実装です。
-
-今後の想定:
+実装済み:
 
 - Suricata EVE JSON importer
 - Zeek connection/DNS/HTTP/TLS log importer
-- Snort alert metadata importer
-- `sid` / `msg` / `classtype` / `priority` 風 metadata の security event への対応
+- accepted/exposed service attempt と IDS alert overlap の before/after evaluation
 
-これらは Quarant native `security_events.jsonl` に変換する adapter として追加する想定です。
+今後の想定:
+
+- Snort alert metadata importer
+- Snort の `sid` / `msg` / `classtype` / `priority` 風 metadata の security event への対応
+
+Suricata alert は Quarant native `security_events.jsonl` に変換する adapter、Zeek は `flows.jsonl` / `observations.jsonl` に変換する passive visibility adapter として扱います。
 
 ## テスト
 
@@ -335,6 +385,9 @@ go test ./...
 - OpenWrt firewall parser が DROP / REJECT / ACCEPT、TCP / UDP、SPT / DPT、TCP flags あり/なしを扱えること。
 - attack evidence report が port scan candidate を検出すること。
 - attack evidence label/eval が meaningful evidence、internet background noise、benign admin、unlabeled を分けて集計すること。
+- Suricata EVE importer が alert metadata を `security_events.jsonl` に保持し、flow / dns / http / tls を passive evidence に変換すること。
+- Zeek importer が conn / dns / http / ssl/tls log を flow / observation に変換すること。
+- before/after eval が IDS alert count と exposed service attempt overlap を分けて集計すること。
 - security events が precision incident の attack evidence signal に接続されること。
 - mitigation / gateway backend / apply report / before-after eval / research report の既存テストが通ること。
 

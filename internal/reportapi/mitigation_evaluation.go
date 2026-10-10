@@ -70,6 +70,13 @@ type MitigationEvaluationMetrics struct {
 	AfterExposedServiceAttemptCount     int     `json:"after_exposed_service_attempt_count"`
 	ExposedServiceAttemptDelta          int     `json:"exposed_service_attempt_delta"`
 	ExposedServiceAttemptReductionRate  float64 `json:"exposed_service_attempt_reduction_rate,omitempty"`
+	BeforeIDSAlertCount                 int     `json:"before_ids_alert_count"`
+	AfterIDSAlertCount                  int     `json:"after_ids_alert_count"`
+	IDSAlertDelta                       int     `json:"ids_alert_delta"`
+	BeforeIDSExposedOverlapCount        int     `json:"before_ids_exposed_overlap_count"`
+	AfterIDSExposedOverlapCount         int     `json:"after_ids_exposed_overlap_count"`
+	IDSExposedOverlapDelta              int     `json:"ids_exposed_overlap_delta"`
+	IDSExposedOverlapReductionRate      float64 `json:"ids_exposed_overlap_reduction_rate,omitempty"`
 	BeforeCriticalFlowCount             int     `json:"before_critical_flow_count"`
 	AfterCriticalFlowCount              int     `json:"after_critical_flow_count"`
 	CriticalFlowDelta                   int     `json:"critical_flow_delta"`
@@ -91,6 +98,7 @@ type MitigationEvaluationPaperMetrics struct {
 	AttackEvidenceReductionRate         float64 `json:"attack_evidence_reduction_rate,omitempty"`
 	AcceptedAttackEvidenceReductionRate float64 `json:"accepted_attack_evidence_reduction_rate,omitempty"`
 	ExposedServiceAttemptReductionRate  float64 `json:"exposed_service_attempt_reduction_rate,omitempty"`
+	IDSExposedOverlapReductionRate      float64 `json:"ids_exposed_overlap_reduction_rate,omitempty"`
 	NormalFlowPreservationRate          float64 `json:"normal_flow_preservation_rate,omitempty"`
 	CriticalFlowPreservationRate        float64 `json:"critical_flow_preservation_rate,omitempty"`
 	FalseMitigationRate                 float64 `json:"false_mitigation_rate,omitempty"`
@@ -334,6 +342,15 @@ func BuildMitigationEvaluationReportWithApplyAndSecurityEvents(plan MitigationPl
 	report.Metrics.AfterExposedServiceAttemptCount = afterBoundary.exposed
 	report.Metrics.ExposedServiceAttemptDelta = afterBoundary.exposed - beforeBoundary.exposed
 	report.Metrics.ExposedServiceAttemptReductionRate = reductionRate(beforeBoundary.exposed, afterBoundary.exposed)
+	beforeIDS := idsSecurityEvidenceCounts(beforeSecurityEvents)
+	afterIDS := idsSecurityEvidenceCounts(afterSecurityEvents)
+	report.Metrics.BeforeIDSAlertCount = beforeIDS.alerts
+	report.Metrics.AfterIDSAlertCount = afterIDS.alerts
+	report.Metrics.IDSAlertDelta = afterIDS.alerts - beforeIDS.alerts
+	report.Metrics.BeforeIDSExposedOverlapCount = beforeIDS.exposedOverlap
+	report.Metrics.AfterIDSExposedOverlapCount = afterIDS.exposedOverlap
+	report.Metrics.IDSExposedOverlapDelta = afterIDS.exposedOverlap - beforeIDS.exposedOverlap
+	report.Metrics.IDSExposedOverlapReductionRate = reductionRate(beforeIDS.exposedOverlap, afterIDS.exposedOverlap)
 	report.Metrics.BeforeNormalFlowCount = totalFlowCountMap(beforeNormal)
 	report.Metrics.AfterNormalFlowCount = totalFlowCountMap(afterNormal)
 	report.Metrics.NormalFlowDelta = report.Metrics.AfterNormalFlowCount - report.Metrics.BeforeNormalFlowCount
@@ -567,6 +584,11 @@ type securityEvidenceCounter struct {
 	exposed  int
 }
 
+type idsSecurityEvidenceCounter struct {
+	alerts         int
+	exposedOverlap int
+}
+
 func securityEvidenceCounts(events []SecurityEvent) securityEvidenceCounter {
 	var counts securityEvidenceCounter
 	for _, event := range events {
@@ -584,6 +606,44 @@ func securityEvidenceCounts(events []SecurityEvent) securityEvidenceCounter {
 		}
 	}
 	return counts
+}
+
+func idsSecurityEvidenceCounts(events []SecurityEvent) idsSecurityEvidenceCounter {
+	exposedKeys := map[string]bool{}
+	for _, event := range events {
+		if isExposedServiceAttempt(event) {
+			exposedKeys[securityEvidenceServiceKey(event)] = true
+		}
+	}
+	var counts idsSecurityEvidenceCounter
+	overlapKeys := map[string]bool{}
+	for _, event := range events {
+		if !isIDSSecurityEvent(event) {
+			continue
+		}
+		counts.alerts++
+		key := securityEvidenceServiceKey(event)
+		if exposedKeys[key] && !overlapKeys[key] {
+			overlapKeys[key] = true
+			counts.exposedOverlap++
+		}
+	}
+	return counts
+}
+
+func isIDSSecurityEvent(event SecurityEvent) bool {
+	source := strings.ToLower(strings.TrimSpace(event.Source))
+	engine := strings.ToLower(strings.TrimSpace(event.Engine))
+	eventType := strings.ToLower(strings.TrimSpace(event.EventType))
+	return source == "suricata" || source == "snort" || engine == "suricata" || engine == "snort" || strings.Contains(eventType, "ids_alert")
+}
+
+func securityEvidenceServiceKey(event SecurityEvent) string {
+	return strings.Join([]string{
+		strings.TrimSpace(firstNonEmpty(event.DeviceIP, event.DstIP)),
+		strings.ToLower(strings.TrimSpace(event.Protocol)),
+		fmt.Sprintf("%d", event.DstPort),
+	}, "|")
 }
 
 func mitigationFlowTargetsAnyAction(plan MitigationPlan, flow FlowRecord) bool {
@@ -745,6 +805,7 @@ func buildMitigationEvaluationPaperMetrics(report MitigationEvaluationReport, be
 		AttackEvidenceReductionRate:         report.Metrics.AttackEvidenceReductionRate,
 		AcceptedAttackEvidenceReductionRate: report.Metrics.AcceptedAttackEvidenceReductionRate,
 		ExposedServiceAttemptReductionRate:  report.Metrics.ExposedServiceAttemptReductionRate,
+		IDSExposedOverlapReductionRate:      report.Metrics.IDSExposedOverlapReductionRate,
 		NormalFlowPreservationRate:          report.Metrics.NormalFlowPreservationRate,
 		CriticalFlowPreservationRate:        preservationRate(report.Metrics.BeforeCriticalFlowCount, report.Metrics.AfterCriticalFlowCount),
 		FalseMitigationRate:                 ratio(report.Metrics.FalseMitigationCount, report.Metrics.EvaluableActionCount),
