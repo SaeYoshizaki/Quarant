@@ -141,6 +141,7 @@ func runSuricataImport(cfg suricataImportConfig) (suricataImportResult, error) {
 		}
 		observations = append(observations, observationsFromSuricataEVE(record)...)
 	}
+	securityEvents = reportapi.NormalizeSecurityEvents(securityEvents)
 	securityEventsPath := defaultSibling(cfg.SecurityEventsOutPath, cfg.OutDir, "security_events.jsonl")
 	attackEvidencePath := defaultSibling(cfg.AttackEvidenceOutPath, cfg.OutDir, "attack_evidence_report.json")
 	flowsPath := filepath.Join(cfg.OutDir, "flows.jsonl")

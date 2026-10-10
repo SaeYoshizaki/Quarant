@@ -13,38 +13,40 @@ import (
 )
 
 type SecurityEvent struct {
-	Timestamp       time.Time         `json:"ts"`
-	EventID         string            `json:"event_id,omitempty"`
-	Source          string            `json:"source,omitempty"`
-	SourceFormat    string            `json:"source_format,omitempty"`
-	Sensor          string            `json:"sensor,omitempty"`
-	EventType       string            `json:"event_type"`
-	AttackCategory  string            `json:"attack_category,omitempty"`
-	AttackTechnique string            `json:"attack_technique,omitempty"`
-	Severity        string            `json:"severity"`
-	Confidence      string            `json:"confidence"`
-	SID             string            `json:"sid,omitempty"`
-	Signature       string            `json:"signature,omitempty"`
-	ClassType       string            `json:"classtype,omitempty"`
-	Priority        int               `json:"priority,omitempty"`
-	Engine          string            `json:"engine,omitempty"`
-	RuleSource      string            `json:"rule_source,omitempty"`
-	FlowID          string            `json:"flow_id,omitempty"`
-	AlertAction     string            `json:"alert_action,omitempty"`
-	Action          string            `json:"action,omitempty"`
-	Verdict         string            `json:"verdict,omitempty"`
-	Direction       string            `json:"direction,omitempty"`
-	SrcIP           string            `json:"src_ip,omitempty"`
-	SrcPort         uint16            `json:"src_port,omitempty"`
-	DstIP           string            `json:"dst_ip,omitempty"`
-	DstPort         uint16            `json:"dst_port,omitempty"`
-	Protocol        string            `json:"protocol,omitempty"`
-	TCPFlags        []string          `json:"tcp_flags,omitempty"`
-	DeviceIP        string            `json:"device_ip,omitempty"`
-	AssetRole       string            `json:"asset_role,omitempty"`
-	AggregationKey  string            `json:"aggregation_key,omitempty"`
-	Raw             string            `json:"raw,omitempty"`
-	Evidence        map[string]string `json:"evidence,omitempty"`
+	Timestamp           time.Time         `json:"ts"`
+	EventID             string            `json:"event_id,omitempty"`
+	Source              string            `json:"source,omitempty"`
+	SourceFormat        string            `json:"source_format,omitempty"`
+	Sensor              string            `json:"sensor,omitempty"`
+	EventType           string            `json:"event_type"`
+	AttackCategory      string            `json:"attack_category,omitempty"`
+	AttackTechnique     string            `json:"attack_technique,omitempty"`
+	Taxonomy            []string          `json:"taxonomy,omitempty"`
+	NormalizedTechnique string            `json:"normalized_technique,omitempty"`
+	Severity            string            `json:"severity"`
+	Confidence          string            `json:"confidence"`
+	SID                 string            `json:"sid,omitempty"`
+	Signature           string            `json:"signature,omitempty"`
+	ClassType           string            `json:"classtype,omitempty"`
+	Priority            int               `json:"priority,omitempty"`
+	Engine              string            `json:"engine,omitempty"`
+	RuleSource          string            `json:"rule_source,omitempty"`
+	FlowID              string            `json:"flow_id,omitempty"`
+	AlertAction         string            `json:"alert_action,omitempty"`
+	Action              string            `json:"action,omitempty"`
+	Verdict             string            `json:"verdict,omitempty"`
+	Direction           string            `json:"direction,omitempty"`
+	SrcIP               string            `json:"src_ip,omitempty"`
+	SrcPort             uint16            `json:"src_port,omitempty"`
+	DstIP               string            `json:"dst_ip,omitempty"`
+	DstPort             uint16            `json:"dst_port,omitempty"`
+	Protocol            string            `json:"protocol,omitempty"`
+	TCPFlags            []string          `json:"tcp_flags,omitempty"`
+	DeviceIP            string            `json:"device_ip,omitempty"`
+	AssetRole           string            `json:"asset_role,omitempty"`
+	AggregationKey      string            `json:"aggregation_key,omitempty"`
+	Raw                 string            `json:"raw,omitempty"`
+	Evidence            map[string]string `json:"evidence,omitempty"`
 }
 
 type AttackEvidenceReport struct {
@@ -53,6 +55,7 @@ type AttackEvidenceReport struct {
 	Window          Window                  `json:"window"`
 	Metrics         AttackEvidenceMetrics   `json:"metrics"`
 	DecisionPolicy  AttackEvidencePolicy    `json:"decision_policy"`
+	TaxonomyPolicy  SecurityTaxonomyPolicy  `json:"taxonomy_policy"`
 	Findings        []AttackEvidenceFinding `json:"findings"`
 	Recommendations []string                `json:"recommendations"`
 	Limitations     []string                `json:"limitations"`
@@ -79,6 +82,7 @@ type AttackEvidenceMetrics struct {
 	ActionCounts               []KV `json:"action_counts,omitempty"`
 	VerdictCounts              []KV `json:"verdict_counts,omitempty"`
 	TechniqueCounts            []KV `json:"technique_counts,omitempty"`
+	TaxonomyCounts             []KV `json:"taxonomy_counts,omitempty"`
 }
 
 type AttackEvidencePolicy struct {
@@ -117,6 +121,50 @@ type attackEvidenceAccumulator struct {
 	last      time.Time
 	evidence  map[string]bool
 	technique map[string]bool
+	taxonomy  map[string]bool
+}
+
+type SecurityTaxonomyPolicy struct {
+	Version    string                 `json:"version"`
+	Taxonomies []SecurityTaxonomyTerm `json:"taxonomies"`
+	Notes      []string               `json:"notes"`
+}
+
+type SecurityTaxonomyTerm struct {
+	Key         string   `json:"key"`
+	Label       string   `json:"label"`
+	Description string   `json:"description"`
+	Sources     []string `json:"sources,omitempty"`
+}
+
+func NormalizeSecurityEvent(event SecurityEvent) SecurityEvent {
+	return normalizeSecurityEvent(event)
+}
+
+func NormalizeSecurityEvents(events []SecurityEvent) []SecurityEvent {
+	return normalizedSecurityEvents(events)
+}
+
+func SecurityTaxonomyDecisionPolicy() SecurityTaxonomyPolicy {
+	return SecurityTaxonomyPolicy{
+		Version: "quarant-security-taxonomy-v1",
+		Taxonomies: []SecurityTaxonomyTerm{
+			{Key: "reconnaissance", Label: "Reconnaissance", Description: "Scanning, probing, or sweep activity before exploitation.", Sources: []string{"openwrt", "suricata", "snort"}},
+			{Key: "port_scan", Label: "Port scan", Description: "One source probing several ports on one target.", Sources: []string{"psad", "openwrt"}},
+			{Key: "host_sweep", Label: "Host sweep", Description: "One source probing the same or related service across multiple local targets.", Sources: []string{"psad", "openwrt"}},
+			{Key: "sensitive_service_probe", Label: "Sensitive service probe", Description: "Inbound probe aimed at management, IoT, or remote-access services.", Sources: []string{"openwrt", "suricata", "snort"}},
+			{Key: "suspicious_tcp_flags", Label: "Suspicious TCP flags", Description: "FIN, NULL, XMAS, or similar scan-like TCP flag patterns.", Sources: []string{"psad", "openwrt"}},
+			{Key: "exploit_attempt", Label: "Exploit attempt", Description: "IDS evidence categorized as attempted-admin, attempted-user, web application attack, or exploitation.", Sources: []string{"suricata", "snort"}},
+			{Key: "malware_or_c2", Label: "Malware or C2", Description: "IDS evidence categorized as malware, trojan, botnet, or command-and-control.", Sources: []string{"suricata", "snort"}},
+			{Key: "dos", Label: "Denial of service", Description: "IDS evidence categorized as denial-of-service activity.", Sources: []string{"suricata", "snort"}},
+			{Key: "policy_violation", Label: "Policy violation", Description: "IDS evidence categorized as policy, protocol anomaly, or potentially unwanted behavior.", Sources: []string{"suricata", "snort"}},
+			{Key: "ids_alert", Label: "IDS alert", Description: "Rule-engine alert retained when a more specific normalized class is unavailable.", Sources: []string{"suricata", "snort"}},
+		},
+		Notes: []string{
+			"Original attack_category, attack_technique, classtype, signature, and sid fields are preserved for auditability.",
+			"Normalized taxonomy is used as a cross-sensor grouping layer, not as proof of compromise.",
+		},
+	}
 }
 
 func LoadSecurityEvents(path string) ([]SecurityEvent, error) {
@@ -181,6 +229,7 @@ func BuildAttackEvidenceReport(events []SecurityEvent) AttackEvidenceReport {
 				"Observed evidence is separated into blocked, accepted, and exposed-service attempts so before/after metrics are not interpreted as internet attack-volume reduction.",
 			},
 		},
+		TaxonomyPolicy: SecurityTaxonomyDecisionPolicy(),
 		Recommendations: []string{
 			"Prioritize findings that repeat, fan out across ports, or target sensitive IoT services.",
 			"Correlate attack evidence with device behavior before applying disruptive mitigation.",
@@ -193,6 +242,7 @@ func BuildAttackEvidenceReport(events []SecurityEvent) AttackEvidenceReport {
 	actionCounts := map[string]int{}
 	verdictCounts := map[string]int{}
 	techniqueCounts := map[string]int{}
+	taxonomyCounts := map[string]int{}
 	sources := map[string]bool{}
 	targets := map[string]bool{}
 	ports := map[uint16]bool{}
@@ -205,6 +255,9 @@ func BuildAttackEvidenceReport(events []SecurityEvent) AttackEvidenceReport {
 		addCount(actionCounts, event.Action)
 		addCount(verdictCounts, event.Verdict)
 		addCount(techniqueCounts, event.AttackTechnique)
+		for _, taxonomy := range event.Taxonomy {
+			addCount(taxonomyCounts, taxonomy)
+		}
 		addStringBool(sources, event.SrcIP)
 		addStringBool(targets, firstNonEmpty(event.DeviceIP, event.DstIP))
 		if event.DstPort != 0 {
@@ -272,6 +325,7 @@ func BuildAttackEvidenceReport(events []SecurityEvent) AttackEvidenceReport {
 	report.Metrics.ActionCounts = toSortedKV(actionCounts)
 	report.Metrics.VerdictCounts = toSortedKV(verdictCounts)
 	report.Metrics.TechniqueCounts = toSortedKV(techniqueCounts)
+	report.Metrics.TaxonomyCounts = toSortedKV(taxonomyCounts)
 	report.Window = securityEventWindow(events)
 	return report
 }
@@ -291,6 +345,7 @@ func normalizeSecurityEvent(event SecurityEvent) SecurityEvent {
 	event.EventType = strings.TrimSpace(event.EventType)
 	event.AttackCategory = strings.TrimSpace(event.AttackCategory)
 	event.AttackTechnique = strings.TrimSpace(event.AttackTechnique)
+	event.NormalizedTechnique = strings.TrimSpace(event.NormalizedTechnique)
 	event.Severity = strings.ToUpper(strings.TrimSpace(event.Severity))
 	event.Confidence = strings.ToLower(strings.TrimSpace(event.Confidence))
 	event.SID = strings.TrimSpace(event.SID)
@@ -323,6 +378,7 @@ func normalizeSecurityEvent(event SecurityEvent) SecurityEvent {
 	if event.AttackTechnique == "" && isInboundSecurityEvent(event) {
 		event.AttackTechnique = "inbound_block"
 	}
+	event.Taxonomy, event.NormalizedTechnique = normalizeSecurityTaxonomy(event)
 	if event.DeviceIP == "" && isLocalDeviceIP(event.DstIP) {
 		event.DeviceIP = event.DstIP
 	}
@@ -366,6 +422,93 @@ func verdictFromAction(action string) string {
 	default:
 		return ""
 	}
+}
+
+func normalizeSecurityTaxonomy(event SecurityEvent) ([]string, string) {
+	terms := map[string]bool{}
+	for _, taxonomy := range event.Taxonomy {
+		addSecurityTaxonomy(terms, taxonomy)
+	}
+	text := strings.ToLower(strings.Join([]string{
+		event.Source,
+		event.Engine,
+		event.EventType,
+		event.AttackCategory,
+		event.AttackTechnique,
+		event.ClassType,
+		event.Signature,
+	}, " "))
+	technique := strings.ToLower(strings.TrimSpace(firstNonEmpty(event.NormalizedTechnique, event.AttackTechnique)))
+
+	if isInboundSecurityEvent(event) {
+		addSecurityTaxonomy(terms, "attack_like")
+		addSecurityTaxonomy(terms, "reconnaissance")
+	}
+	switch {
+	case strings.Contains(technique, "xmas") || strings.Contains(technique, "fin_scan") || strings.Contains(technique, "null_scan") || strings.Contains(text, "xmas") || strings.Contains(text, " null ") || strings.Contains(text, " fin scan"):
+		addSecurityTaxonomy(terms, "suspicious_tcp_flags")
+		technique = "suspicious_tcp_flags"
+	case strings.Contains(technique, "syn") || strings.Contains(technique, "port_probe") || strings.Contains(technique, "port_scan") || strings.Contains(text, "scan") || strings.Contains(text, "probe"):
+		addSecurityTaxonomy(terms, "port_scan")
+		if technique == "" || technique == "inbound_block" || technique == "tcp_probe" || strings.Contains(text, "scan") {
+			technique = "port_scan"
+		}
+	}
+	if strings.Contains(text, "sweep") {
+		addSecurityTaxonomy(terms, "host_sweep")
+		technique = "host_sweep"
+	}
+	if isSensitiveSecurityEvent(event) || strings.Contains(text, "telnet") || strings.Contains(text, "rtsp") || strings.Contains(text, "mqtt") || strings.Contains(text, "ssh") || strings.Contains(text, "webcam") || strings.Contains(text, "camera") {
+		addSecurityTaxonomy(terms, "sensitive_service_probe")
+	}
+	switch {
+	case containsAnySecurityTaxonomyText(text, "attempted-admin", "attempted user", "attempted-user", "web application attack", "exploit", "shellcode", "sql injection", "command injection"):
+		addSecurityTaxonomy(terms, "exploit_attempt")
+		if technique == "" || technique == "port_scan" || technique == "inbound_block" {
+			technique = "exploit_attempt"
+		}
+	case containsAnySecurityTaxonomyText(text, "trojan", "malware", "botnet", "command and control", "c2", "cnc"):
+		addSecurityTaxonomy(terms, "malware_or_c2")
+		technique = "malware_or_c2"
+	case containsAnySecurityTaxonomyText(text, "denial of service", "denial-of-service", "dos", "ddos"):
+		addSecurityTaxonomy(terms, "dos")
+		technique = "dos"
+	case containsAnySecurityTaxonomyText(text, "policy", "protocol-command-decode", "pua", "bad-unknown"):
+		addSecurityTaxonomy(terms, "policy_violation")
+		if technique == "" || technique == "inbound_block" {
+			technique = "policy_violation"
+		}
+	}
+	if isIDSSecurityEvent(event) {
+		addSecurityTaxonomy(terms, "attack_like")
+		addSecurityTaxonomy(terms, "ids_alert")
+		if technique == "" || technique == "inbound_block" {
+			technique = "ids_alert"
+		}
+	}
+	if technique == "" && isInboundSecurityEvent(event) {
+		technique = "inbound_probe"
+	}
+	return sortedStringSet(terms), technique
+}
+
+func addSecurityTaxonomy(values map[string]bool, value string) {
+	value = strings.ToLower(strings.TrimSpace(value))
+	value = strings.ReplaceAll(value, " ", "_")
+	value = strings.ReplaceAll(value, "-", "_")
+	if value == "" {
+		return
+	}
+	values[value] = true
+}
+
+func containsAnySecurityTaxonomyText(text string, needles ...string) bool {
+	for _, needle := range needles {
+		if strings.Contains(text, needle) {
+			return true
+		}
+	}
+	return false
 }
 
 func isInboundSecurityEvent(event SecurityEvent) bool {
@@ -440,6 +583,7 @@ func ensureAttackEvidenceAccumulator(items map[string]*attackEvidenceAccumulator
 		targets:   map[string]bool{},
 		evidence:  map[string]bool{},
 		technique: map[string]bool{},
+		taxonomy:  map[string]bool{},
 	}
 	return items[key]
 }
@@ -454,6 +598,9 @@ func applyAttackEvidenceEvent(acc *attackEvidenceAccumulator, event SecurityEven
 	}
 	addStringBool(acc.targets, firstNonEmpty(event.DeviceIP, event.DstIP))
 	addStringBool(acc.technique, event.AttackTechnique)
+	for _, taxonomy := range event.Taxonomy {
+		addStringBool(acc.taxonomy, taxonomy)
+	}
 	if event.Raw != "" && len(acc.evidence) < 8 {
 		acc.evidence[event.Raw] = true
 	}
@@ -512,7 +659,7 @@ func attackFinding(acc *attackEvidenceAccumulator, kind, target string) AttackEv
 		Ports:          sortedUint16Set(acc.ports),
 		Targets:        sortedStringSet(acc.targets),
 		EventCount:     acc.events,
-		Taxonomy:       []string{"attack_like", kind},
+		Taxonomy:       attackFindingTaxonomy(acc, kind),
 		RecommendedUse: "precision_evidence",
 		Evidence:       limitEvidenceStrings(sortedStringSet(acc.evidence), 5),
 	}
@@ -525,6 +672,16 @@ func attackFinding(acc *attackEvidenceAccumulator, kind, target string) AttackEv
 	sum := sha1.Sum([]byte(strings.Join([]string{kind, acc.srcIP, target, acc.protocol, strings.Join(finding.Targets, ","), joinPorts(finding.Ports)}, "|")))
 	finding.ID = "atk_" + hex.EncodeToString(sum[:])[:12]
 	return finding
+}
+
+func attackFindingTaxonomy(acc *attackEvidenceAccumulator, kind string) []string {
+	values := map[string]bool{"attack_like": true, kind: true}
+	if acc != nil {
+		for taxonomy := range acc.taxonomy {
+			addStringBool(values, taxonomy)
+		}
+	}
+	return sortedStringSet(values)
 }
 
 func securityEventWindow(events []SecurityEvent) Window {

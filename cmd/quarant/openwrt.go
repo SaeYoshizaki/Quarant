@@ -530,6 +530,7 @@ func runOpenWrtImport(cfg openWrtImportConfig) (openWrtImportResult, error) {
 	flowsPath := filepath.Join(cfg.OutDir, "flows.jsonl")
 	observationsPath := filepath.Join(cfg.OutDir, "observations.jsonl")
 	inventoryPath := filepath.Join(cfg.OutDir, "device_inventory.json")
+	importer.securityEvents = reportapi.NormalizeSecurityEvents(importer.securityEvents)
 	if err := writeOpenWrtJSONL(eventsPath, importer.events); err != nil {
 		return openWrtImportResult{}, err
 	}

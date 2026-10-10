@@ -250,6 +250,7 @@ type precisionDeviceContext struct {
 	attackEvidenceSources         map[string]bool
 	attackEvidencePorts           map[uint16]bool
 	attackEvidenceTechniques      map[string]bool
+	attackEvidenceTaxonomies      map[string]bool
 	attackEvidenceSweepSources    map[string]bool
 	attackEvidenceSensitivePorts  map[uint16]bool
 	attackEvidenceSuspiciousFlags int
@@ -409,6 +410,10 @@ func BuildDetectionPrecisionReportWithSecurityEvents(events []Event, securityEve
 		}
 		addStringBool(ctx.attackEvidenceSources, event.SrcIP)
 		addStringBool(ctx.attackEvidenceTechniques, event.AttackTechnique)
+		addStringBool(ctx.attackEvidenceTechniques, event.NormalizedTechnique)
+		for _, taxonomy := range event.Taxonomy {
+			addStringBool(ctx.attackEvidenceTaxonomies, taxonomy)
+		}
 		if event.DstPort != 0 {
 			ctx.attackEvidencePorts[event.DstPort] = true
 			if isSensitiveEvidencePort(event.DstPort) {
@@ -583,6 +588,7 @@ func buildPrecisionDeviceContexts(flows []FlowRecord, observations []Observation
 			attackEvidenceSources:        map[string]bool{},
 			attackEvidencePorts:          map[uint16]bool{},
 			attackEvidenceTechniques:     map[string]bool{},
+			attackEvidenceTaxonomies:     map[string]bool{},
 			attackEvidenceSweepSources:   map[string]bool{},
 			attackEvidenceSensitivePorts: map[uint16]bool{},
 		}
@@ -658,6 +664,7 @@ func ensurePrecisionContext(contexts map[string]*precisionDeviceContext, ip stri
 			attackEvidenceSources:        map[string]bool{},
 			attackEvidencePorts:          map[uint16]bool{},
 			attackEvidenceTechniques:     map[string]bool{},
+			attackEvidenceTaxonomies:     map[string]bool{},
 			attackEvidenceSweepSources:   map[string]bool{},
 			attackEvidenceSensitivePorts: map[uint16]bool{},
 		}
@@ -1720,7 +1727,7 @@ func attackEvidencePrecisionDetail(ctx *precisionDeviceContext) string {
 		return ""
 	}
 	return fmt.Sprintf(
-		"observed=%d blocked=%d accepted=%d exposed_service_attempts=%d sources=%d ports=%d sensitive_ports=%s techniques=%s.",
+		"observed=%d blocked=%d accepted=%d exposed_service_attempts=%d sources=%d ports=%d sensitive_ports=%s techniques=%s taxonomy=%s.",
 		ctx.attackEvidenceCount,
 		ctx.attackEvidenceBlocked,
 		ctx.attackEvidenceAccepted,
@@ -1729,6 +1736,7 @@ func attackEvidencePrecisionDetail(ctx *precisionDeviceContext) string {
 		len(ctx.attackEvidencePorts),
 		joinPorts(sortedPortSet(ctx.attackEvidenceSensitivePorts)),
 		strings.Join(sortedStringSet(ctx.attackEvidenceTechniques), ","),
+		strings.Join(sortedStringSet(ctx.attackEvidenceTaxonomies), ","),
 	)
 }
 

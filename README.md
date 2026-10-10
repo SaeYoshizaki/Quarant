@@ -216,6 +216,23 @@ runs/suricata-001/observations.jsonl
 
 Suricata alert は precision / mitigation / before-after eval の `--security-events` としてそのまま接続できます。OpenWrt firewall evidence と同じ `security_events.jsonl` に連結すれば、accepted/exposed service attempt と IDS alert の重なりも評価できます。
 
+### Quarant security taxonomy
+
+`security_events.jsonl` には、各 sensor 固有の `attack_category` / `attack_technique` / `sid` / `signature` / `classtype` を残したまま、Quarant 共通語彙として `taxonomy` と `normalized_technique` も追加します。OpenWrt の SYN/FIN/XMAS/port probe、Suricata/Snort の category / classtype / signature を、以下のような横断分類に寄せます。
+
+- `reconnaissance`
+- `port_scan`
+- `host_sweep`
+- `sensitive_service_probe`
+- `suspicious_tcp_flags`
+- `exploit_attempt`
+- `malware_or_c2`
+- `dos`
+- `policy_violation`
+- `ids_alert`
+
+この正規化は説明可能性のための grouping layer であり、侵害を直接証明するものではありません。`attack_evidence_report.json` には `taxonomy_policy` と `taxonomy_counts` が入り、precision incident の detail にも taxonomy が残ります。
+
 ### Zeek import
 
 Zeek `conn.log` / `dns.log` / `http.log` / `ssl.log` または `tls.log` を passive observation と flow に変換します。

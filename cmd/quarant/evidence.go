@@ -150,6 +150,7 @@ func assembleEvidenceRun(sources []evidenceSourceDir, outDir string) (reportapi.
 	}
 	events = dedupeSlice(events, eventAssemblyKey)
 	securityEvents = dedupeSlice(securityEvents, securityEventAssemblyKey)
+	securityEvents = reportapi.NormalizeSecurityEvents(securityEvents)
 	flows = dedupeSlice(flows, flowAssemblyKey)
 	observations = dedupeSlice(observations, observationAssemblyKey)
 	eventsPath := filepath.Join(outDir, "events.jsonl")
@@ -241,7 +242,7 @@ func tagSecurityEventsSource(events []reportapi.SecurityEvent, source string) []
 		}
 		events[i].Evidence["assembled_source"] = source
 	}
-	return events
+	return reportapi.NormalizeSecurityEvents(events)
 }
 
 func dedupeSlice[T any](items []T, keyFn func(T) string) []T {

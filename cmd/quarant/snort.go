@@ -98,6 +98,7 @@ func runSnortImport(cfg snortImportConfig) (snortImportResult, error) {
 	if err != nil {
 		return snortImportResult{}, err
 	}
+	events = reportapi.NormalizeSecurityEvents(events)
 	securityEventsPath := defaultSibling(cfg.SecurityEventsOutPath, cfg.OutDir, "security_events.jsonl")
 	attackEvidencePath := defaultSibling(cfg.AttackEvidenceOutPath, cfg.OutDir, "attack_evidence_report.json")
 	if err := writeJSONL(securityEventsPath, events); err != nil {
