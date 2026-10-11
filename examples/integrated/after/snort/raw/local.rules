@@ -1,0 +1,1 @@
+alert tcp any any -> $HOME_NET 80 (msg:"ET SCAN HTTP Probe"; classtype:attempted-recon; sid:1000001; rev:2; priority:2; metadata: former_category SCAN, deployment Perimeter; reference:url,example.com/snort/http-probe;)

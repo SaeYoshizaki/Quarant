@@ -265,13 +265,29 @@ func runExperimentImports(window string, cfg experimentRunConfig, manifest *Expe
 	}
 	if strings.TrimSpace(snortAlerts) != "" {
 		outDir := filepath.Join(base, "snort")
-		if _, err := runSnortImport(snortImportConfig{AlertsPath: snortAlerts, OutDir: outDir, TaxonomyPolicyPath: cfg.TaxonomyPolicyPath}); err != nil {
+		if _, err := runSnortImport(snortImportConfig{AlertsPath: snortAlerts, OutDir: outDir, TaxonomyPolicyPath: cfg.TaxonomyPolicyPath, RulesPaths: experimentSnortRules(snortAlerts)}); err != nil {
 			return nil, fmt.Errorf("%s snort import: %w", window, err)
 		}
 		manifest.Steps = append(manifest.Steps, ExperimentRunStep{Name: window + "_snort_import", Status: "complete", Output: outDir})
 		sources = append(sources, evidenceSourceDir{name: "snort", path: outDir})
 	}
 	return sources, nil
+}
+
+func experimentSnortRules(alertsPath string) []string {
+	dir := filepath.Dir(alertsPath)
+	candidates := []string{
+		filepath.Join(dir, "local.rules"),
+		filepath.Join(dir, "snort.rules"),
+		filepath.Join(dir, "community.rules"),
+	}
+	out := []string{}
+	for _, path := range candidates {
+		if fileExists(path) {
+			out = append(out, path)
+		}
+	}
+	return out
 }
 
 func experimentWindowInputs(window string, cfg experimentRunConfig) (openwrtDir, suricataEVE, zeekDir, snortAlerts string) {

@@ -282,8 +282,13 @@ Snort fast alert log または JSONL alert を `security_events.jsonl` に変換
 ```bash
 go run ./cmd/quarant snort import \
   --alerts raw/alert.fast \
+  --rules raw/local.rules \
   --out-dir runs/snort-001
 ```
+
+`--rules` は複数指定できます。Snort `.rules` から `sid` / `msg` / `classtype` / `priority` / `metadata` / `reference` を読み、alert log に不足している metadata を補完します。出力には `snort_metadata_report.json` も含まれ、`sid` missing、`classtype` missing、metadata enrichment rate、generic `ids_alert` fallback count を確認できます。
+
+Snort JSONL は `src_ip` / `dst_ip` だけでなく、`src_addr` / `dst_addr`、`src_ap` / `dst_ap`、nested `rule.sid` / `rule.classtype` / `rule.priority` も吸収します。fast alert は port なし endpoint と bracketed IPv6 endpoint も parse します。
 
 ## Evidence assemble
 
@@ -565,6 +570,7 @@ research report には、以下の注意を含めています。
 - taxonomy coverage report / taxonomy policy / research package taxonomy table
 - experiment batch runner / batch summary report / batch summary CSV
 - coverage figure SVGs for source coverage, taxonomy coverage, and batch quality
+- Snort rule metadata enrichment / metadata quality report
 - accepted/exposed service attempt と IDS alert overlap の before/after evaluation
 
 今後の想定:
@@ -589,7 +595,7 @@ go test ./...
 - attack evidence label/eval が meaningful evidence、internet background noise、benign admin、unlabeled を分けて集計すること。
 - Suricata EVE importer が alert metadata を `security_events.jsonl` に保持し、flow / dns / http / tls を passive evidence に変換すること。
 - Zeek importer が conn / dns / http / ssl/tls log を flow / observation に変換すること。
-- Snort importer が fast alert / JSONL alert を security event に変換すること。
+- Snort importer が fast alert / JSONL alert を security event に変換し、rule metadata で補完できること。
 - evidence assemble が複数 source を merge / dedup し、attack evidence report と source coverage report を生成すること。
 - experiment run が integrated demo を raw evidence から research package まで一括生成すること。
 - experiment batch が複数 run の summary JSON / CSV を生成すること。
