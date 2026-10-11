@@ -141,7 +141,7 @@ func ResearchReportLaTeXTables(report ResearchReport) map[string]string {
 }
 
 func ResearchReportFiguresSVG(report ResearchReport) map[string]string {
-	return map[string]string{
+	figures := map[string]string{
 		"risk_reduction.svg": researchBarFigure("Risk Reduction", []ResearchFigureBar{
 			{Label: "Incident", Value: report.Metrics.IncidentReductionRate},
 			{Label: "High risk", Value: report.Metrics.HighRiskIncidentReductionRate},
@@ -154,6 +154,13 @@ func ResearchReportFiguresSVG(report ResearchReport) map[string]string {
 		}),
 		"experiment_counts.svg": researchCountFigure(report),
 	}
+	if len(report.Tables.SourceCoverage) > 0 {
+		figures["source_coverage.svg"] = researchSourceCoverageFigure(report)
+	}
+	if len(report.Tables.TaxonomyCoverage) > 0 {
+		figures["taxonomy_coverage.svg"] = researchTaxonomyCoverageFigure(report)
+	}
+	return figures
 }
 
 func ResearchPackageREADME(report ResearchReport) string {
@@ -182,8 +189,9 @@ func ResearchPackageREADME(report ResearchReport) string {
 }
 
 type ResearchFigureBar struct {
-	Label string
-	Value float64
+	Label   string
+	Value   float64
+	Display string
 }
 
 func ensureResearchDeviceRow(rows map[string]ResearchTableRow, ip string) ResearchTableRow {
@@ -287,7 +295,10 @@ func latexEscape(value string) string {
 
 func researchBarFigure(title string, bars []ResearchFigureBar) string {
 	width := 640
-	height := 260
+	height := 78 + len(bars)*56
+	if height < 260 {
+		height = 260
+	}
 	left := 150
 	barHeight := 34
 	gap := 22
@@ -299,10 +310,14 @@ func researchBarFigure(title string, bars []ResearchFigureBar) string {
 		y := 68 + i*(barHeight+gap)
 		value := clamp01(bar.Value)
 		barWidth := int(value * 420)
+		display := bar.Display
+		if display == "" {
+			display = fmt.Sprintf("%.3f", value)
+		}
 		b.WriteString(fmt.Sprintf(`<text x="24" y="%d" font-family="Arial" font-size="14">%s</text>`, y+22, svgEscape(bar.Label)))
 		b.WriteString(fmt.Sprintf(`<rect x="%d" y="%d" width="420" height="%d" fill="#e5e7eb"/>`, left, y, barHeight))
 		b.WriteString(fmt.Sprintf(`<rect x="%d" y="%d" width="%d" height="%d" fill="#2563eb"/>`, left, y, barWidth, barHeight))
-		b.WriteString(fmt.Sprintf(`<text x="%d" y="%d" font-family="Arial" font-size="14">%.3f</text>`, left+430, y+22, value))
+		b.WriteString(fmt.Sprintf(`<text x="%d" y="%d" font-family="Arial" font-size="14">%s</text>`, left+430, y+22, svgEscape(display)))
 	}
 	b.WriteString(`</svg>`)
 	return b.String()
@@ -316,6 +331,90 @@ func researchCountFigure(report ResearchReport) string {
 		{Label: "Blocked flows", Value: float64(report.Metrics.EstimatedBlockedFlows) / float64(maxValue)},
 		{Label: "Residual risk", Value: float64(report.Metrics.ResidualRiskScore) / float64(maxValue)},
 	})
+}
+
+func SimpleBarFigureSVG(title string, bars []ResearchFigureBar) string {
+	return researchBarFigure(title, bars)
+}
+
+func researchSourceCoverageFigure(report ResearchReport) string {
+	values := researchTableMetricMap(report.Tables.SourceCoverage)
+	maxValue := researchMaxInt(
+		1,
+		parseResearchInt(values["openwrt_only_services"]),
+		parseResearchInt(values["suricata_only_services"]),
+		parseResearchInt(values["zeek_only_services"]),
+		parseResearchInt(values["multi_source_services"]),
+		parseResearchInt(values["openwrt_suricata_overlap"]),
+		parseResearchInt(values["openwrt_zeek_overlap"]),
+		parseResearchInt(values["suricata_zeek_overlap"]),
+		parseResearchInt(values["all_source_overlap"]),
+	)
+	return researchBarFigure("Source Coverage", []ResearchFigureBar{
+		researchCountBar("OpenWrt only", values["openwrt_only_services"], maxValue),
+		researchCountBar("Suricata only", values["suricata_only_services"], maxValue),
+		researchCountBar("Zeek only", values["zeek_only_services"], maxValue),
+		researchCountBar("Multi-source", values["multi_source_services"], maxValue),
+		researchCountBar("OpenWrt+Suricata", values["openwrt_suricata_overlap"], maxValue),
+		researchCountBar("OpenWrt+Zeek", values["openwrt_zeek_overlap"], maxValue),
+		researchCountBar("Suricata+Zeek", values["suricata_zeek_overlap"], maxValue),
+		researchCountBar("All sources", values["all_source_overlap"], maxValue),
+	})
+}
+
+func researchTaxonomyCoverageFigure(report ResearchReport) string {
+	rows := []ResearchTableRow{}
+	for _, row := range report.Tables.TaxonomyCoverage {
+		if row["taxonomy"] != "" {
+			rows = append(rows, row)
+		}
+	}
+	sort.SliceStable(rows, func(i, j int) bool {
+		left := parseResearchInt(rows[i]["event_count"])
+		right := parseResearchInt(rows[j]["event_count"])
+		if left == right {
+			return rows[i]["taxonomy"] < rows[j]["taxonomy"]
+		}
+		return left > right
+	})
+	if len(rows) > 8 {
+		rows = rows[:8]
+	}
+	maxValue := 1
+	for _, row := range rows {
+		if value := parseResearchInt(row["event_count"]); value > maxValue {
+			maxValue = value
+		}
+	}
+	bars := make([]ResearchFigureBar, 0, len(rows))
+	for _, row := range rows {
+		bars = append(bars, researchCountBar(row["taxonomy"], row["event_count"], maxValue))
+	}
+	if len(bars) == 0 {
+		bars = append(bars, ResearchFigureBar{Label: "No taxonomy", Value: 0, Display: "0"})
+	}
+	return researchBarFigure("Taxonomy Coverage", bars)
+}
+
+func researchTableMetricMap(rows []ResearchTableRow) map[string]string {
+	out := map[string]string{}
+	for _, row := range rows {
+		if row["metric"] != "" {
+			out[row["metric"]] = row["value"]
+		}
+	}
+	return out
+}
+
+func researchCountBar(label, value string, maxValue int) ResearchFigureBar {
+	n := parseResearchInt(value)
+	return ResearchFigureBar{Label: label, Value: float64(n) / float64(maxValue), Display: fmt.Sprintf("%d", n)}
+}
+
+func parseResearchInt(value string) int {
+	var n int
+	_, _ = fmt.Sscanf(strings.TrimSpace(value), "%d", &n)
+	return n
 }
 
 func clamp01(value float64) float64 {

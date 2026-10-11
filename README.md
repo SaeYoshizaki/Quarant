@@ -385,6 +385,28 @@ runs/batch-001/batch_summary.csv
 
 `batch_summary_report.json` / `batch_summary.csv` は run ごとに incident count、mitigation action count、accepted/exposed reduction、IDS exposed overlap reduction、source coverage、taxonomy coverage、quality gate status をまとめます。
 
+## Coverage figures
+
+source coverage、taxonomy coverage、batch quality を SVG 図として出力します。
+
+```bash
+go run ./cmd/quarant coverage figure \
+  --source-coverage runs/experiment-001/before/assembled/source_coverage_report.json \
+  --taxonomy-coverage runs/experiment-001/before/assembled/taxonomy_coverage_report.json \
+  --batch-summary runs/batch-001/batch_summary_report.json \
+  --out-dir runs/figures
+```
+
+出力:
+
+```text
+runs/figures/source_coverage.svg
+runs/figures/taxonomy_coverage.svg
+runs/figures/batch_quality.svg
+```
+
+research package の `figures/` には、source coverage / taxonomy coverage の図も自動で同梱されます。
+
 ## Quality gate
 
 研究 claim を言いすぎないための guardrail report を生成します。
@@ -542,6 +564,7 @@ research report には、以下の注意を含めています。
 - research package source coverage table
 - taxonomy coverage report / taxonomy policy / research package taxonomy table
 - experiment batch runner / batch summary report / batch summary CSV
+- coverage figure SVGs for source coverage, taxonomy coverage, and batch quality
 - accepted/exposed service attempt と IDS alert overlap の before/after evaluation
 
 今後の想定:
@@ -570,6 +593,7 @@ go test ./...
 - evidence assemble が複数 source を merge / dedup し、attack evidence report と source coverage report を生成すること。
 - experiment run が integrated demo を raw evidence から research package まで一括生成すること。
 - experiment batch が複数 run の summary JSON / CSV を生成すること。
+- coverage figure CLI が source / taxonomy / batch の SVG を生成すること。
 - quality gate が claim guardrails と guarded research report を生成すること。
 - research package が source coverage table を出力すること。
 - before/after eval が IDS alert count と exposed service attempt overlap を分けて集計すること。

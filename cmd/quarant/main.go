@@ -44,6 +44,10 @@ func main() {
 		if err := runCompare(args[1:], os.Stdout); err != nil {
 			log.Fatal(err)
 		}
+	case "coverage":
+		if err := runCoverage(args[1:], os.Stdout); err != nil {
+			log.Fatal(err)
+		}
 	case "openwrt":
 		if err := runOpenWrt(args[1:]); err != nil {
 			log.Fatal(err)

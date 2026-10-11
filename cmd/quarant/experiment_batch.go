@@ -402,6 +402,35 @@ func experimentBatchSummaryCSV(summary ExperimentBatchSummary) string {
 	return b.String()
 }
 
+func experimentBatchQualityFigureSVG(summary ExperimentBatchSummary) string {
+	maxValue := researchMaxIntLocal(1, summary.Metrics.PassCount, summary.Metrics.WarnCount, summary.Metrics.FailCount, summary.Metrics.CompletedRunCount, summary.Metrics.FailedRunCount)
+	bars := []reportapi.ResearchFigureBar{
+		{Label: "Pass", Value: float64(summary.Metrics.PassCount) / float64(maxValue), Display: strconv.Itoa(summary.Metrics.PassCount)},
+		{Label: "Warn", Value: float64(summary.Metrics.WarnCount) / float64(maxValue), Display: strconv.Itoa(summary.Metrics.WarnCount)},
+		{Label: "Fail", Value: float64(summary.Metrics.FailCount) / float64(maxValue), Display: strconv.Itoa(summary.Metrics.FailCount)},
+		{Label: "Completed", Value: float64(summary.Metrics.CompletedRunCount) / float64(maxValue), Display: strconv.Itoa(summary.Metrics.CompletedRunCount)},
+		{Label: "Run errors", Value: float64(summary.Metrics.FailedRunCount) / float64(maxValue), Display: strconv.Itoa(summary.Metrics.FailedRunCount)},
+	}
+	for _, run := range summary.Runs {
+		bars = append(bars, reportapi.ResearchFigureBar{
+			Label:   run.ID,
+			Value:   run.TaxonomyClassificationCoverage,
+			Display: fmt.Sprintf("taxonomy %.3f", run.TaxonomyClassificationCoverage),
+		})
+	}
+	return reportapi.SimpleBarFigureSVG("Batch Quality", bars)
+}
+
+func researchMaxIntLocal(values ...int) int {
+	max := values[0]
+	for _, value := range values[1:] {
+		if value > max {
+			max = value
+		}
+	}
+	return max
+}
+
 func readOptionalJSONFileLocal(path string, dst any) (bool, error) {
 	if strings.TrimSpace(path) == "" {
 		return false, nil
