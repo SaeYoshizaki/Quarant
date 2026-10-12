@@ -1,0 +1,9 @@
+services:
+  openwrt-compatible-gateway:
+    image: alpine:3.20
+    working_dir: /lab
+    volumes:
+      - ./scripts:/lab/scripts:ro
+      - ./out:/lab/out
+    command: ["/bin/sh", "/lab/scripts/generate-openwrt-logs.sh", "/lab/out"]
+

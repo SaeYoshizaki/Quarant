@@ -1,70 +1,149 @@
 # Quarant
 
-Quarant は、IoT 環境をできるだけパッシブに観測し、観測証拠から incident を整理し、OpenWrt などのルーターで仮想パッチ/緩和候補を作り、その前後で本当にリスクが下がったかを評価する研究プロトタイプです。
+Quarant は、IoT 環境をできるだけ受動的に観測し、観測できた証拠から incident を整理し、ルーター側でできる緩和策を作り、その前後でリスクが本当に下がったかを確認するための研究プロトタイプです。
 
-現在の実装では、PCAP/flow 由来の IoT 挙動だけでなく、OpenWrt の firewall log から router boundary で観測された攻撃候補も取り込み、precision incident、mitigation plan、before/after evaluation、research report に接続できます。
+狙っているのは、IoT デバイスそのものを改造したり、エージェントを入れたりしなくても、ネットワーク境界で見える情報から「何が危ないのか」「どの対策が効きそうか」「対策後に何が変わったのか」を説明できるようにすることです。
 
-## 実装済みの流れ
+現在は、PCAP や flow から得られる IoT の通信だけでなく、OpenWrt の firewall log、Suricata、Zeek、Snort のような既存 OSS の出力も Quarant の evidence として取り込めます。
 
-現在実装済みの主なパイプラインは以下です。
+## 何をするツールか
+
+Quarant の基本的な流れは次の通りです。
 
 ```text
 passive observation
-  -> events.jsonl / flows.jsonl / observations.jsonl / device_inventory.json
-  -> precision_report.json / incidents.jsonl
-  -> mitigation_plan.json
-  -> OpenWrt gateway backend plan / dry-run / apply script / rollback script
-  -> mitigation_eval_report.json
+  -> events / flows / observations / device inventory
+  -> precision incident
+  -> mitigation plan
+  -> OpenWrt gateway plan
+  -> before/after evaluation
   -> research report package
 ```
 
-OpenWrt firewall log については、以下の境界証拠パイプラインも実装済みです。
+もう少し具体的には、次のような問いに答えるためのパイプラインです。
 
-```text
-OpenWrt firewall log / nft-style logread output
-  -> security_events.jsonl
-  -> attack_evidence_report.json
-  -> precision incident の attack evidence signal
-  -> mitigation plan の優先度/方針
-  -> before/after eval の boundary evidence metrics
-  -> research report の metrics / limitations
-```
+- IoT デバイスは、どの外部 host や service と通信しているか。
+- Telnet、plain HTTP、露出した admin service のような危険な兆候はあるか。
+- WAN 側から IoT デバイスへ scan や probe が届いているか。
+- それは firewall で落ちているだけか、それとも ACCEPT されているか。
+- IDS alert と router boundary evidence は同じ対象を指しているか。
+- 対策後に、accepted / exposed service attempt は減ったか。
+- 正常な DNS / DHCP / NTP / cloud 通信は壊れていないか。
 
-## 再現 demo
+## なぜ OSS を取り込むのか
 
-OpenWrt 境界証拠の再現用 fixture と実行手順は `examples/openwrt/` にあります。
+Quarant は研究プロトタイプなので、すべての判定を独自 heuristic だけで作ると、なぜその判断になったのか説明しにくくなります。
 
-```text
-examples/openwrt/before/raw/
-examples/openwrt/after/raw/
-examples/openwrt/README.md
-```
+そのため、既存の network security tool が長く使ってきた考え方を取り込みます。ただし、Quarant はそれらの OSS を丸ごと置き換えるものでも、単に依存して実行する wrapper でもありません。
 
-この demo は、before window に ACCEPT された inbound service attempt を含め、after window では同じ probe が DROP される形にしています。これにより、単なる observed scan volume ではなく、accepted / exposed service attempt の before/after reduction を確認できます。
+主な目的は次の通りです。
 
-## 主要な出力ファイル
+- ログ形式や schema を参考にする。
+- attack taxonomy や rule metadata を参考にする。
+- confidence / severity / priority の考え方を整理する。
+- 既存 IDS / NSM が見た evidence を Quarant の incident や mitigation に接続する。
+- 研究 report で「どの claim が、どの sensor evidence に支えられているか」を示す。
 
-### `events.jsonl`
+## OpenWrt を使う理由
 
-Quarant の既存 rule event です。PCAP 解析や OpenWrt import から、plaintext HTTP、Telnet、credential/token exposure、OpenWrt firewall block などのイベントが出力されます。
+OpenWrt は、IoT 環境の gateway として扱いやすく、firewall、DHCP、DNS、conntrack の情報を同じ場所で取れます。
 
-### `flows.jsonl`
+Quarant では OpenWrt を、実際に対策を入れる場所であると同時に、router boundary evidence を取る場所として扱います。
 
-通信 flow の要約です。source/destination、port、protocol、app protocol、direction、observed destination などを保持します。
+OpenWrt から取りたいものは次です。
 
-### `observations.jsonl`
+- firewall log: WAN から IoT subnet へ来た DROP / REJECT / ACCEPT。
+- dnsmasq log: IoT デバイスが問い合わせた domain。
+- DHCP lease: IP、MAC、hostname の対応。
+- conntrack: 実際に成立している通信の要約。
 
-SOC/precision 用の passive observation です。DNS query、HTTP host/request、TLS SNI、flow snapshot、local/external connection などを保持します。
+特に firewall log は重要です。IoT デバイス自身の通信だけを見ていると、「外から攻撃候補が来ていたが、gateway で落ちていた」ことが見えません。OpenWrt の境界ログを入れることで、外部からの scan / probe と、それが blocked だったのか exposed だったのかを分けて扱えます。
 
-### `device_inventory.json`
+## psad の考え方を使う理由
 
-観測された IoT device の inventory snapshot です。DHCP lease、hostname、MAC、観測 protocol/port/host などを含みます。
+psad は iptables / ip6tables / firewalld のログを見て、port scan、host sweep、怪しい TCP flag などを検出する軽量 IDS です。
 
-### `security_events.jsonl`
+Quarant では psad を直接組み込むというより、次の考え方を参考にしています。
 
-router boundary や IDS/NSM 由来の security evidence を表す Quarant native JSONL です。現在は OpenWrt firewall log と Suricata EVE alert から生成できます。
+- 単発の DROP だけでは強い attack claim にしない。
+- 同じ送信元が同じ宛先の複数 port を叩く場合は port scan 候補として扱う。
+- 同じ送信元が複数 host に同じような probe を送る場合は host sweep 候補として扱う。
+- SYN だけでなく FIN / NULL / XMAS のような TCP flag pattern を分ける。
+- firewall action を evidence の一部として扱い、DROP 済みと ACCEPT 済みを同列にしない。
 
-主な field:
+これにより、Quarant の `security_events.jsonl` と `attack_evidence_report.json` は、ただのログ変換ではなく、scan / sweep / suspicious flags という説明しやすい単位で整理されます。
+
+## Suricata を使う理由
+
+Suricata は IDS / IPS / NSM エンジンで、EVE JSON という構造化ログを出せます。
+
+Quarant では Suricata を、既存 IDS が検出した攻撃証拠を取り込むための入力元として扱います。
+
+現在の importer は、主に次を変換します。
+
+- `event_type=alert`
+- `signature`
+- `signature_id`
+- `category`
+- `severity`
+- `src_ip`
+- `dest_ip`
+- `dest_port`
+- `proto`
+- `flow_id`
+- `alert.action`
+
+Suricata alert は `security_events.jsonl` に入り、OpenWrt firewall evidence と同じ形式で扱えます。これにより、例えば「OpenWrt では ACCEPT されていた inbound attempt があり、同じ target/service に Suricata alert も出ている」という重なりを before/after evaluation で見られます。
+
+この overlap は、単なる alert count よりも研究上使いやすい指標です。IDS alert が減っただけでは、攻撃量が減ったのか、観測条件が変わったのか分かりません。一方で、accepted / exposed service attempt と IDS alert が同じ対象に重なっている場合は、gateway mitigation の優先度を上げる根拠になります。
+
+## Zeek を使う理由
+
+Zeek は IDS alert を出すためだけのツールではなく、通信を調査しやすいログに変換する Network Security Monitor です。
+
+Quarant では Zeek を、IoT デバイスの通常通信や周辺文脈を補強する passive evidence として扱います。
+
+現在の importer は、次の Zeek log を `flows.jsonl` と `observations.jsonl` に変換します。
+
+- `conn.log`
+- `dns.log`
+- `http.log`
+- `ssl.log` / `tls.log`
+
+Zeek の役割は、攻撃を断定することではありません。むしろ、次のような確認に使います。
+
+- 対象 IoT が普段どの外部 service と通信しているか。
+- DNS、HTTP host、TLS SNI から通信先の文脈が分かるか。
+- mitigation 後も正常な cloud / NTP / DNS 通信が残っているか。
+- IDS alert や firewall evidence に対応する flow があるか。
+
+つまり Zeek は、Quarant にとって「攻撃検出器」よりも「観測の解像度を上げるための NSM evidence」です。
+
+## Snort を使う理由
+
+Snort は長く使われている rule-based IDS / IPS です。
+
+Quarant では Snort を、攻撃分類や rule metadata の考え方を取り込むために使います。Suricata と同じように alert を `security_events.jsonl` に変換できますが、特に Snort では rule 側の情報が重要です。
+
+現在の importer は、fast alert log と JSONL alert を読みます。また `.rules` を渡すと、alert log に不足している metadata を補完します。
+
+取り込む主な情報は次です。
+
+- `sid`
+- `msg`
+- `classtype`
+- `priority`
+- `metadata`
+- `reference`
+- `rev`
+
+これにより、alert が単なる文字列ではなく、どの rule family や classification に属するかを Quarant 側で説明できます。研究 report では、generic な `ids_alert` のまま残っている割合も確認できます。
+
+## Quarant の共通 security event
+
+OpenWrt、Suricata、Snort はそれぞれ別の形式で evidence を出します。Quarant では、それらを `security_events.jsonl` に寄せます。
+
+例:
 
 ```json
 {
@@ -86,139 +165,30 @@ router boundary や IDS/NSM 由来の security evidence を表す Quarant native
   "protocol": "tcp",
   "tcp_flags": ["SYN"],
   "device_ip": "192.168.8.42",
-  "asset_role": "iot_device"
+  "asset_role": "iot_device",
+  "taxonomy": ["reconnaissance", "port_scan", "sensitive_service_probe"],
+  "normalized_technique": "port_scan"
 }
 ```
 
-### `attack_evidence_report.json`
+IDS 由来の event では、次の metadata も保持します。
 
-`security_events.jsonl` を psad 風に集約した report です。
+- `sid`
+- `signature`
+- `classtype`
+- `priority`
+- `engine`
+- `rule_source`
+- `flow_id`
+- `alert_action`
 
-現在は以下を集計します。
+## Taxonomy normalization
 
-- observed boundary evidence count
-- blocked / rejected / dropped count
-- accepted / allowed count
-- exposed service attempt count
-- port scan candidate
-- host sweep candidate
-- sensitive service probe
-- suspicious TCP flags
-- unique attack source count
-- unique target port count
+各 sensor の表現はばらばらです。OpenWrt は `DROP` や `DPT=23` のような firewall log、Suricata は `category` や `signature`、Snort は `classtype` や `sid` を持ちます。
 
-重要: `attack_evidence_reduction_rate` は「インターネット上の攻撃数が減った」ことを意味しません。外部 scan volume は gateway mitigation で制御できないため、Quarant では observed / blocked / accepted / exposed service attempt を分けて評価します。
+Quarant では、それらを残したまま、研究 report で比較しやすい共通分類も付けます。
 
-### `attack_evidence_eval_report.json`
-
-`attack_evidence_report.json` の finding に人手ラベルを付け、router-boundary detector の説明可能性を評価する report です。Suricata / Zeek / Snort importer を追加したあとも、同じラベル体系で importer 間の evidence quality を比較できます。
-
-まず label template を作ります。
-
-```bash
-go run ./cmd/quarant attack-eval \
-  --attack-evidence runs/openwrt-001/attack_evidence_report.json \
-  --labels runs/openwrt-001/attack_evidence_labels.jsonl \
-  --init-labels
-```
-
-`attack_evidence_labels.jsonl` の `label` をレビューしてから評価します。
-
-```bash
-go run ./cmd/quarant attack-eval \
-  --attack-evidence runs/openwrt-001/attack_evidence_report.json \
-  --labels runs/openwrt-001/attack_evidence_labels.jsonl \
-  --out runs/openwrt-001/attack_evidence_eval_report.json
-```
-
-label は以下を想定しています。
-
-- `true_attack`: 保護対象への実攻撃・明確な悪性 probe。
-- `scanner_lab_generated`: 実験用 scanner や controlled test traffic。
-- `internet_background_noise`: インターネット由来の scan noise。攻撃 traffic ではあり得るが、対象 deployment への targeted attack とは分ける。
-- `benign_admin`: 管理者や正常運用由来。
-- `unknown` / `unlabeled`: 判定保留。
-
-主な metrics:
-
-- `meaningful_evidence_count` / `meaningful_evidence_rate`: `true_attack` と `scanner_lab_generated` の合計。
-- `noise_or_benign_count` / `noise_or_benign_rate`: `internet_background_noise` と `benign_admin` の合計。
-- `label_coverage`: finding のうちレビュー済み label が付いた割合。
-
-注意: `meaningful_evidence_rate` は detector の evidence quality を見るための指標で、gateway mitigation が外部 scan volume を減らしたことは意味しません。
-
-## OpenWrt 連携
-
-### setup plan
-
-OpenWrt に IoT network、DHCP/DNS logging、firewall logging を設定するための script を生成します。
-
-```bash
-go run ./cmd/quarant openwrt setup-plan \
-  --iot-port lan4 \
-  --out openwrt-quarant-setup.sh
-```
-
-### import
-
-OpenWrt から取得済みの raw log を Quarant 形式に変換します。
-
-```bash
-go run ./cmd/quarant openwrt import \
-  --dhcp-leases raw/dhcp.leases \
-  --dns-log raw/dnsmasq.log \
-  --firewall-log raw/firewall.log \
-  --conntrack raw/conntrack.txt \
-  --out-dir runs/openwrt-001
-```
-
-出力:
-
-```text
-runs/openwrt-001/events.jsonl
-runs/openwrt-001/flows.jsonl
-runs/openwrt-001/observations.jsonl
-runs/openwrt-001/device_inventory.json
-runs/openwrt-001/security_events.jsonl
-runs/openwrt-001/attack_evidence_report.json
-```
-
-### collect
-
-SSH 経由で OpenWrt から DHCP/DNS/firewall/conntrack を収集し、そのまま import します。
-
-```bash
-go run ./cmd/quarant openwrt collect \
-  --host root@192.168.50.1 \
-  --out-dir runs/openwrt-001
-```
-
-## Suricata / Zeek / Snort 連携
-
-### Suricata EVE import
-
-Suricata `eve.json` を Quarant 形式に変換します。`event_type=alert` は `security_events.jsonl` に変換し、`alert.signature_id` / `signature` / `category` / `severity` / `action` / `flow_id` は IDS metadata として保持します。`flow` / `dns` / `http` / `tls` は passive visibility 用に `flows.jsonl` と `observations.jsonl` に変換します。
-
-```bash
-go run ./cmd/quarant suricata import \
-  --eve raw/eve.json \
-  --out-dir runs/suricata-001
-```
-
-出力:
-
-```text
-runs/suricata-001/security_events.jsonl
-runs/suricata-001/attack_evidence_report.json
-runs/suricata-001/flows.jsonl
-runs/suricata-001/observations.jsonl
-```
-
-Suricata alert は precision / mitigation / before-after eval の `--security-events` としてそのまま接続できます。OpenWrt firewall evidence と同じ `security_events.jsonl` に連結すれば、accepted/exposed service attempt と IDS alert の重なりも評価できます。
-
-### Quarant security taxonomy
-
-`security_events.jsonl` には、各 sensor 固有の `attack_category` / `attack_technique` / `sid` / `signature` / `classtype` を残したまま、Quarant 共通語彙として `taxonomy` と `normalized_technique` も追加します。OpenWrt の SYN/FIN/XMAS/port probe、Suricata/Snort の category / classtype / signature を、以下のような横断分類に寄せます。
+現在の主な taxonomy は次です。
 
 - `reconnaissance`
 - `port_scan`
@@ -231,18 +201,16 @@ Suricata alert は precision / mitigation / before-after eval の `--security-ev
 - `policy_violation`
 - `ids_alert`
 
-この正規化は説明可能性のための grouping layer であり、侵害を直接証明するものではありません。`attack_evidence_report.json` には `taxonomy_policy` と `taxonomy_counts` が入り、precision incident の detail にも taxonomy が残ります。
+この正規化は、侵害を証明するためのものではありません。複数 sensor の evidence を同じ表で比較し、「この incident はどの種類の証拠で支えられているか」を説明するための grouping layer です。
 
-default policy は JSON として出力でき、研究 artifact や再現 package に含められます。
+default policy は JSON として出力できます。
 
 ```bash
 go run ./cmd/quarant taxonomy policy \
   --out taxonomy_policy.json
 ```
 
-各 importer / assemble / experiment では、必要に応じて `--taxonomy-policy taxonomy_policy.json` を指定できます。指定しない場合は built-in default policy を使います。
-
-taxonomy coverage report は、`security_events.jsonl` から source 別・engine 別・taxonomy 別・normalized technique 別に分類の広がりを集計します。
+taxonomy coverage も確認できます。
 
 ```bash
 go run ./cmd/quarant taxonomy coverage \
@@ -251,76 +219,60 @@ go run ./cmd/quarant taxonomy coverage \
   --out taxonomy_coverage_report.json
 ```
 
-`taxonomy_coverage_report.json` は classification coverage、generic `ids_alert` fallback-only rate、single taxonomy dominance を含みます。quality gate と research report に接続できます。
+## 重要な評価方針
 
-### Zeek import
+Quarant では、境界で観測した攻撃証拠を次のように分けます。
 
-Zeek `conn.log` / `dns.log` / `http.log` / `ssl.log` または `tls.log` を passive observation と flow に変換します。
+- `observed`: 観測された security event 全体。
+- `blocked`: DROP / REJECT など、gateway で止まった evidence。
+- `accepted`: ACCEPT された inbound evidence。
+- `exposed_service_attempt`: 保護対象 service に到達した、または到達し得る evidence。
+- `ids_alert`: Suricata / Snort など IDS が出した alert。
+- `ids_exposed_overlap`: accepted / exposed service attempt と IDS alert が同じ target/service に重なる evidence。
+
+ここはとても重要です。`attack_evidence_reduction_rate` は「インターネットから来る攻撃数が減った」という意味ではありません。外部 scan volume は gateway mitigation では制御できません。
+
+研究上見るべきなのは、主に次です。
+
+- accepted attack evidence が減ったか。
+- exposed service attempt が減ったか。
+- IDS alert と exposed service attempt の overlap が減ったか。
+- blocked evidence は blocked のまま維持されているか。
+- 正常通信は維持されているか。
+
+DROP 済みの default deny evidence だけで mitigation priority を強く上げないようにしています。DROP だけなら `monitor_only` や posture confirmed に近い扱いです。ACCEPT や exposed service attempt、IDS overlap がある場合に優先度を上げます。
+
+## 主な出力
+
+Quarant の代表的な出力は次です。
+
+- `events.jsonl`: Quarant の rule event。plain HTTP、Telnet、credential/token exposure、OpenWrt firewall block など。
+- `flows.jsonl`: 通信 flow の要約。IP、port、protocol、direction、observed destination など。
+- `observations.jsonl`: DNS、HTTP host、TLS SNI、flow snapshot などの passive observation。
+- `device_inventory.json`: DHCP lease、hostname、MAC、観測 port / protocol / host など。
+- `security_events.jsonl`: OpenWrt / Suricata / Snort 由来の security evidence。
+- `attack_evidence_report.json`: scan / sweep / sensitive service probe / TCP flags などの集約 report。
+- `source_coverage_report.json`: OpenWrt only / Suricata only / Zeek only / overlap の集計。
+- `taxonomy_coverage_report.json`: taxonomy の分類 coverage と fallback 状況。
+- `precision_report.json`: incident の整理結果。
+- `mitigation_plan.json`: 緩和候補。
+- `mitigation_eval_report.json`: before/after 評価。
+- `research_report.json`: 研究用 summary。
+
+## 最小 demo
+
+OpenWrt 境界証拠の最小 fixture は `examples/openwrt/` にあります。
 
 ```bash
-go run ./cmd/quarant zeek import \
-  --conn raw/conn.log \
-  --dns raw/dns.log \
-  --http raw/http.log \
-  --ssl raw/ssl.log \
-  --out-dir runs/zeek-001
+go run ./cmd/quarant openwrt import \
+  --dhcp-leases examples/openwrt/before/raw/dhcp.leases \
+  --dns-log examples/openwrt/before/raw/dnsmasq.log \
+  --firewall-log examples/openwrt/before/raw/firewall.log \
+  --conntrack examples/openwrt/before/raw/conntrack.txt \
+  --out-dir runs/openwrt-demo/before
 ```
 
-出力:
-
-```text
-runs/zeek-001/flows.jsonl
-runs/zeek-001/observations.jsonl
-```
-
-Zeek は IDS alert ではなく NSM 証拠として扱います。device behavior、DNS、HTTP host、TLS SNI、external/local connection の補強証拠として precision incident に接続します。
-
-### Snort import
-
-Snort fast alert log または JSONL alert を `security_events.jsonl` に変換します。`sid` / `msg` / `classtype` / `priority` は IDS metadata として保持します。
-
-```bash
-go run ./cmd/quarant snort import \
-  --alerts raw/alert.fast \
-  --rules raw/local.rules \
-  --out-dir runs/snort-001
-```
-
-`--rules` は複数指定できます。Snort `.rules` から `sid` / `msg` / `classtype` / `priority` / `metadata` / `reference` を読み、alert log に不足している metadata を補完します。出力には `snort_metadata_report.json` も含まれ、`sid` missing、`classtype` missing、metadata enrichment rate、generic `ids_alert` fallback count を確認できます。
-
-Snort JSONL は `src_ip` / `dst_ip` だけでなく、`src_addr` / `dst_addr`、`src_ap` / `dst_ap`、nested `rule.sid` / `rule.classtype` / `rule.priority` も吸収します。fast alert は port なし endpoint と bracketed IPv6 endpoint も parse します。
-
-## Evidence assemble
-
-OpenWrt / Suricata / Zeek / Snort など複数 sensor の run directory を統合し、Quarant の標準入力セットを作ります。
-
-```bash
-go run ./cmd/quarant evidence assemble \
-  --openwrt runs/openwrt-001 \
-  --suricata runs/suricata-001 \
-  --zeek runs/zeek-001 \
-  --snort runs/snort-001 \
-  --out runs/experiment-001
-```
-
-出力:
-
-```text
-runs/experiment-001/events.jsonl
-runs/experiment-001/security_events.jsonl
-runs/experiment-001/flows.jsonl
-runs/experiment-001/observations.jsonl
-runs/experiment-001/attack_evidence_report.json
-runs/experiment-001/source_coverage_report.json
-runs/experiment-001/taxonomy_coverage_report.json
-runs/experiment-001/evidence_manifest.json
-```
-
-`source_coverage_report.json` は OpenWrt only / Suricata only / Zeek only / overlap を、device/protocol/port tuple 単位で集計します。研究 report には `--source-coverage` で接続できます。
-
-## Experiment run
-
-raw evidence から paper package までを一括生成します。
+before / after までまとめて見る場合は、integrated demo を使います。
 
 ```bash
 go run ./cmd/quarant experiment run \
@@ -332,28 +284,112 @@ go run ./cmd/quarant experiment run \
   --after-suricata examples/integrated/after/suricata/raw/eve.json \
   --after-zeek examples/integrated/after/zeek/raw \
   --after-snort examples/integrated/after/snort/raw/alert.fast \
-  --taxonomy-policy taxonomy_policy.json \
   --before-now 2026-09-26T12:30:00Z \
   --after-now 2026-09-26T13:30:00Z \
   --out runs/experiment-001
 ```
 
-実行内容:
+この command は、import、evidence assemble、precision、mitigation、before/after evaluation、quality gate、research package までを一括で実行します。
 
-- before / after の OpenWrt、Suricata、Zeek、Snort import
-- before / after の evidence assemble
-- before window の precision incident
-- mitigation plan / gateway backend / dry-run rollback artifacts
-- before/after mitigation evaluation
-- source coverage 付き research report
-- taxonomy coverage 付き research report
-- quality gate / guarded research report
-- reproducibility package
-- `experiment_manifest.json`
+## Docker OpenWrt-compatible lab
+
+実機 OpenWrt の前段階として、Docker で OpenWrt fw4 / nftables 互換の raw firewall log を生成できます。
+
+```bash
+cd evaluation/docker-openwrt-lab
+docker compose up --abort-on-container-exit
+```
+
+生成された before / after log は、Quarant の experiment pipeline に渡せます。
+
+```bash
+go run ./cmd/quarant experiment run \
+  --before-openwrt evaluation/docker-openwrt-lab/out/before/openwrt/raw \
+  --after-openwrt evaluation/docker-openwrt-lab/out/after/openwrt/raw \
+  --before-now 2026-09-26T12:30:00Z \
+  --after-now 2026-09-26T13:30:00Z \
+  --out runs/docker-openwrt-lab
+```
+
+この lab は実機評価の代替ではありません。controlled dataset / regression 用です。before/after で scan volume は維持し、ACCEPT / exposed service attempt が DROP / REJECT に寄るかを確認するために使います。
+
+## OpenWrt commands
+
+OpenWrt に IoT network、DHCP/DNS logging、firewall logging を設定するための plan script を生成できます。
+
+```bash
+go run ./cmd/quarant openwrt setup-plan \
+  --iot-port lan4 \
+  --out openwrt-quarant-setup.sh
+```
+
+取得済みの raw log を import します。
+
+```bash
+go run ./cmd/quarant openwrt import \
+  --dhcp-leases raw/dhcp.leases \
+  --dns-log raw/dnsmasq.log \
+  --firewall-log raw/firewall.log \
+  --conntrack raw/conntrack.txt \
+  --out-dir runs/openwrt-001
+```
+
+SSH 経由で OpenWrt から収集して、そのまま import することもできます。
+
+```bash
+go run ./cmd/quarant openwrt collect \
+  --host root@192.168.50.1 \
+  --out-dir runs/openwrt-001
+```
+
+## Suricata / Zeek / Snort commands
+
+Suricata EVE JSON:
+
+```bash
+go run ./cmd/quarant suricata import \
+  --eve raw/eve.json \
+  --out-dir runs/suricata-001
+```
+
+Zeek logs:
+
+```bash
+go run ./cmd/quarant zeek import \
+  --conn raw/conn.log \
+  --dns raw/dns.log \
+  --http raw/http.log \
+  --ssl raw/ssl.log \
+  --out-dir runs/zeek-001
+```
+
+Snort alert:
+
+```bash
+go run ./cmd/quarant snort import \
+  --alerts raw/alert.fast \
+  --rules raw/local.rules \
+  --out-dir runs/snort-001
+```
+
+## Evidence assemble
+
+複数 sensor の出力を統合するには `evidence assemble` を使います。
+
+```bash
+go run ./cmd/quarant evidence assemble \
+  --openwrt runs/openwrt-001 \
+  --suricata runs/suricata-001 \
+  --zeek runs/zeek-001 \
+  --snort runs/snort-001 \
+  --out runs/assembled-001
+```
+
+出力には、merged evidence のほか、source coverage、taxonomy coverage、evidence manifest が含まれます。
 
 ## Experiment batch
 
-複数 dataset / 複数 before-after window を一括実行し、研究評価用の横比較 summary を生成します。各 run は `experiment run` と同じ pipeline を使います。
+複数 dataset / 複数 before-after window をまとめて実行する場合は batch を使います。
 
 ```bash
 go run ./cmd/quarant experiment batch \
@@ -361,60 +397,11 @@ go run ./cmd/quarant experiment batch \
   --out runs/batch-001
 ```
 
-config は小さな YAML subset または JSON で書けます。
-
-```yaml
-version: experiment-batch-v1
-taxonomy_policy: taxonomy_policy.json
-runs:
-  - id: integrated-demo
-    before_openwrt: examples/integrated/before/openwrt/raw
-    before_suricata: examples/integrated/before/suricata/raw/eve.json
-    before_zeek: examples/integrated/before/zeek/raw
-    before_snort: examples/integrated/before/snort/raw/alert.fast
-    after_openwrt: examples/integrated/after/openwrt/raw
-    after_suricata: examples/integrated/after/suricata/raw/eve.json
-    after_zeek: examples/integrated/after/zeek/raw
-    after_snort: examples/integrated/after/snort/raw/alert.fast
-    before_now: 2026-09-26T12:30:00Z
-    after_now: 2026-09-26T13:30:00Z
-```
-
-出力:
-
-```text
-runs/batch-001/<run-id>/...
-runs/batch-001/batch_summary_report.json
-runs/batch-001/batch_summary.csv
-```
-
-`batch_summary_report.json` / `batch_summary.csv` は run ごとに incident count、mitigation action count、accepted/exposed reduction、IDS exposed overlap reduction、source coverage、taxonomy coverage、quality gate status をまとめます。
-
-## Coverage figures
-
-source coverage、taxonomy coverage、batch quality を SVG 図として出力します。
-
-```bash
-go run ./cmd/quarant coverage figure \
-  --source-coverage runs/experiment-001/before/assembled/source_coverage_report.json \
-  --taxonomy-coverage runs/experiment-001/before/assembled/taxonomy_coverage_report.json \
-  --batch-summary runs/batch-001/batch_summary_report.json \
-  --out-dir runs/figures
-```
-
-出力:
-
-```text
-runs/figures/source_coverage.svg
-runs/figures/taxonomy_coverage.svg
-runs/figures/batch_quality.svg
-```
-
-research package の `figures/` には、source coverage / taxonomy coverage の図も自動で同梱されます。
+`batch_summary_report.json` と `batch_summary.csv` には、run ごとの incident count、mitigation action count、accepted/exposed reduction、IDS exposed overlap reduction、source coverage、taxonomy coverage、quality gate status が入ります。
 
 ## Quality gate
 
-研究 claim を言いすぎないための guardrail report を生成します。
+研究 claim を言いすぎないために、quality gate を用意しています。
 
 ```bash
 go run ./cmd/quarant quality-gate \
@@ -424,108 +411,21 @@ go run ./cmd/quarant quality-gate \
   --research-out runs/experiment-001/guarded_research_report.json
 ```
 
-主な check:
+主な check は次です。
 
 - precision label coverage が十分か。
 - attack evidence label coverage が十分か。
 - `attack_evidence_reduction_rate` だけで mitigation 効果を主張していないか。
-- accepted / exposed service attempt や targeted signal が減っているか。
+- accepted / exposed service attempt が減っているか。
 - IDS alert count を gateway mitigation 効果として扱いすぎていないか。
 - normal flow preservation が低くないか。
-- source coverage が single-source only になっていないか。
-- taxonomy coverage が低すぎないか、IDS alert が generic `ids_alert` のまま粗く残っていないか。
-
-`guarded_research_report.json` には、弱めるべき claim と threats to validity / next steps が反映されます。
-
-## Precision incident
-
-precision report は、passive event、flow、observation、inventory、security event を統合して incident を生成します。
-
-```bash
-go run ./cmd/quarant precision \
-  --events runs/openwrt-001/events.jsonl \
-  --security-events runs/openwrt-001/security_events.jsonl \
-  --flows runs/openwrt-001/flows.jsonl \
-  --observations runs/openwrt-001/observations.jsonl \
-  --inventory runs/openwrt-001/device_inventory.json \
-  --out precision_report.json \
-  --incidents-out incidents.jsonl
-```
-
-`--security-events` を省略した場合は、`events.jsonl` と同じ directory の `security_events.jsonl` を sibling default として読みます。存在しない場合は空として扱います。
-
-現在の attack evidence signal:
-
-- `attack_evidence_inbound_scan`
-- `attack_evidence_port_scan`
-- `attack_evidence_host_sweep`
-- `attack_evidence_sensitive_service_probe`
-- `attack_evidence_suspicious_tcp_flags`
-
-単発の DROP/REJECT は background noise として扱い、繰り返し、複数 port、host sweep、sensitive service probe、suspicious TCP flags などで precision signal に昇格します。
-
-## Mitigation plan
-
-precision incident から mitigation plan を作ります。
-
-```bash
-go run ./cmd/quarant mitigate \
-  --events runs/openwrt-001/events.jsonl \
-  --security-events runs/openwrt-001/security_events.jsonl \
-  --flows runs/openwrt-001/flows.jsonl \
-  --observations runs/openwrt-001/observations.jsonl \
-  --inventory runs/openwrt-001/device_inventory.json \
-  --out mitigation_plan.json \
-  --gateway-out gateway_backend_plan.json \
-  --rules-out openwrt_mitigation_dryrun.sh \
-  --rollback-out openwrt_mitigation_rollback.sh
-```
-
-現在の方針:
-
-- credential/token exposure や plaintext insecure service は、対象 service block を候補にします。
-- DROP/REJECT 済みの default deny 証拠だけでは強い mitigation priority にしません。
-- blocked boundary evidence のみなら `monitor_only` / default-deny posture confirmed 寄りにします。
-- ACCEPT / exposed service attempt がある場合は、inbound exposure review / tighten gateway policy として priority を上げます。
-- disruptive な isolation は、人間の review が必要な fallback として扱います。
-
-## Mitigation evaluation
-
-before/after window を比較して、targeted signal、incident score、normal traffic continuity、boundary evidence を評価します。
-
-```bash
-go run ./cmd/quarant mitigation-eval \
-  --plan mitigation_plan.json \
-  --before-events runs/before/events.jsonl \
-  --before-security-events runs/before/security_events.jsonl \
-  --before-flows runs/before/flows.jsonl \
-  --before-observations runs/before/observations.jsonl \
-  --before-inventory runs/before/device_inventory.json \
-  --after-events runs/after/events.jsonl \
-  --after-security-events runs/after/security_events.jsonl \
-  --after-flows runs/after/flows.jsonl \
-  --after-observations runs/after/observations.jsonl \
-  --after-inventory runs/after/device_inventory.json \
-  --out mitigation_eval_report.json
-```
-
-Boundary evidence metrics は、誤解を避けるため以下に分けています。
-
-- `before_attack_evidence_count` / `after_attack_evidence_count`
-- `before_blocked_attack_evidence_count` / `after_blocked_attack_evidence_count`
-- `before_accepted_attack_evidence_count` / `after_accepted_attack_evidence_count`
-- `before_exposed_service_attempt_count` / `after_exposed_service_attempt_count`
-- `before_ids_alert_count` / `after_ids_alert_count`
-- `before_ids_exposed_overlap_count` / `after_ids_exposed_overlap_count`
-- `accepted_attack_evidence_reduction_rate`
-- `exposed_service_attempt_reduction_rate`
-- `ids_exposed_overlap_reduction_rate`
-
-注意: observed boundary evidence や IDS alert count が減っても、外部から来る scan volume が mitigation によって減ったとは主張しません。研究上は、accepted/exposed service attempt が減ったか、IDS alert が exposed service attempt と重ならなくなったか、blocked evidence が blocked のまま維持されたか、normal traffic が保たれたかを分けて見ます。
+- source coverage が single-source only に偏っていないか。
+- taxonomy coverage が低すぎないか。
+- IDS alert が generic `ids_alert` のまま粗く残っていないか。
 
 ## Research report
 
-precision report、human label による precision eval、mitigation plan、mitigation eval をまとめて研究用 report / Markdown / CSV package を作ります。
+研究用 report は、precision、human label eval、mitigation plan、before/after eval、source coverage、taxonomy coverage をまとめます。
 
 ```bash
 go run ./cmd/quarant research-report \
@@ -538,7 +438,7 @@ go run ./cmd/quarant research-report \
   --out research_report.json
 ```
 
-research report には、以下の注意を含めています。
+report には、次の limitation を明示します。
 
 - passive monitoring は exploitability、compromise、firmware-level remediation を証明しない。
 - before/after window は比較可能である必要がある。
@@ -546,38 +446,38 @@ research report には、以下の注意を含めています。
 - internet scan volume is not controlled by gateway mitigation.
 - router-boundary evidence reduction は accepted/exposed service attempt reduction と分けて解釈する必要がある。
 
-## 参考 OSS から取り込んでいる考え方
+## 現在できていること
 
-### psad 風の考え方
+- OpenWrt firewall / dnsmasq / DHCP / conntrack import。
+- OpenWrt 境界証拠から `security_events.jsonl` と `attack_evidence_report.json` を生成。
+- psad 風の port scan / host sweep / sensitive service probe / suspicious TCP flags 集約。
+- Suricata EVE `alert / flow / dns / http / tls` import。
+- Zeek `conn / dns / http / ssl/tls` import。
+- Snort fast alert / JSONL alert import。
+- Snort rule metadata enrichment。
+- OpenWrt / Suricata / Zeek / Snort の evidence assemble。
+- source coverage report。
+- taxonomy normalization と taxonomy coverage report。
+- precision incident への attack evidence 接続。
+- mitigation priority への accepted/exposed/IDS overlap 反映。
+- before/after mitigation evaluation。
+- quality gate。
+- research package。
+- Docker OpenWrt-compatible lab。
 
-実装済み:
+## まだ研究評価として足りないこと
 
-- OpenWrt firewall log を router-boundary evidence として扱う。
-- 単発 block は noise 寄りに扱う。
-- 同一 source / target / port / time-window 的な集約で、port scan、host sweep、sensitive service probe、suspicious TCP flags を整理する。
-- DROP/REJECT と ACCEPT/exposed を分ける。
+Docker lab と fixture は、pipeline の再現性確認には使えます。ただし、実機評価の代替にはなりません。
 
-### Zeek / Suricata / Snort について
+次に必要なのは、Raspberry Pi、mini PC、または OpenWrt router を使った小規模な実験環境です。
 
-実装済み:
+確認したいことは次です。
 
-- Suricata EVE JSON importer
-- Zeek connection/DNS/HTTP/TLS log importer
-- Snort alert importer
-- evidence assemble CLI
-- source coverage report
-- research package source coverage table
-- taxonomy coverage report / taxonomy policy / research package taxonomy table
-- experiment batch runner / batch summary report / batch summary CSV
-- coverage figure SVGs for source coverage, taxonomy coverage, and batch quality
-- Snort rule metadata enrichment / metadata quality report
-- accepted/exposed service attempt と IDS alert overlap の before/after evaluation
-
-今後の想定:
-
-- より多様な Snort unified2 / alert_json variants の importer
-
-Suricata / Snort alert は Quarant native `security_events.jsonl` に変換する adapter、Zeek は `flows.jsonl` / `observations.jsonl` に変換する passive visibility adapter として扱います。
+- 実 IoT device の通常通信を gateway で正しく観測できるか。
+- 実 OpenWrt の `logread`、fw4、nftables prefix、interface 名の揺れを importer が扱えるか。
+- mitigation 後に IoT の正常通信が壊れないか。
+- firewall log、conntrack、dnsmasq、Zeek、Suricata を同じ時間窓で収集できるか。
+- benign admin traffic、internet background noise、lab-generated scan、true attack をラベル分けできるか。
 
 ## テスト
 
@@ -587,22 +487,17 @@ Suricata / Snort alert は Quarant native `security_events.jsonl` に変換す�
 go test ./...
 ```
 
-現在のテストでは、以下を確認しています。
+現在のテストでは、主に次を確認しています。
 
-- OpenWrt import が `events.jsonl` / `flows.jsonl` / `observations.jsonl` / `device_inventory.json` / `security_events.jsonl` / `attack_evidence_report.json` を生成すること。
-- OpenWrt firewall parser が DROP / REJECT / ACCEPT、TCP / UDP、SPT / DPT、TCP flags あり/なしを扱えること。
-- attack evidence report が port scan candidate を検出すること。
-- attack evidence label/eval が meaningful evidence、internet background noise、benign admin、unlabeled を分けて集計すること。
-- Suricata EVE importer が alert metadata を `security_events.jsonl` に保持し、flow / dns / http / tls を passive evidence に変換すること。
-- Zeek importer が conn / dns / http / ssl/tls log を flow / observation に変換すること。
-- Snort importer が fast alert / JSONL alert を security event に変換し、rule metadata で補完できること。
-- evidence assemble が複数 source を merge / dedup し、attack evidence report と source coverage report を生成すること。
-- experiment run が integrated demo を raw evidence から research package まで一括生成すること。
-- experiment batch が複数 run の summary JSON / CSV を生成すること。
-- coverage figure CLI が source / taxonomy / batch の SVG を生成すること。
-- quality gate が claim guardrails と guarded research report を生成すること。
-- research package が source coverage table を出力すること。
-- before/after eval が IDS alert count と exposed service attempt overlap を分けて集計すること。
-- security events が precision incident の attack evidence signal に接続されること。
-- mitigation / gateway backend / apply report / before-after eval / research report の既存テストが通ること。
-
+- OpenWrt parser が DROP / REJECT / ACCEPT、TCP / UDP、SPT / DPT、TCP flags あり/なしを扱えること。
+- OpenWrt import が events / flows / observations / inventory / security events / attack evidence report を生成すること。
+- attack evidence report が port scan、sensitive service probe、suspicious TCP flags を検出すること。
+- attack evidence eval が meaningful evidence、internet background noise、benign admin、unlabeled を分けること。
+- Suricata importer が IDS metadata と passive evidence を保持すること。
+- Zeek importer が flow / observation を生成すること。
+- Snort importer が fast alert / JSONL / IPv6 / rule metadata enrichment を扱うこと。
+- evidence assemble が merge / dedup と coverage report を生成すること。
+- taxonomy normalization と taxonomy coverage が動くこと。
+- experiment run / batch が integrated demo から research package まで生成すること。
+- mitigation eval が observed / blocked / accepted / exposed / IDS overlap を分けること。
+- quality gate が claim guardrails を生成すること。
