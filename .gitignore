@@ -32,3 +32,6 @@ evaluation/docker-openwrt-lab/out/
 
 # Analysis output directories used in docs and experiments.
 runs/
+
+# containerlab runtime state (contains host paths)
+clab-*/

@@ -20,7 +20,7 @@
 | 外部ログの取り込みバグの修正（logread、Snort 3、Suricata、conntrack） | ✅ |
 | 正解ラベルつき合成シナリオ、`label-eval`、機器レポート `devices` | ✅ |
 | 実 IoT 機器の PCAP での検証 | ⬜（データの入手が必要） |
-| 不要ファイルの整理、`quarant-api`／`quarant-agg` の扱いの決定 | ⬜（利用者の確認待ち） |
+| 不要ファイルの整理、旧ツール `quarant-api`／`quarant-agg` の削除 | ✅ |
 
 **完了条件**：
 

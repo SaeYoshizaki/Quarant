@@ -1,6 +1,6 @@
 # 現在の開発状況
 
-最終更新：2026-10-17（branch `phase1-foundation`、未 push）
+最終更新：2026-10-17（branch `phase1-foundation`）
 
 ## できること（実装済み・テスト済み）
 
@@ -47,14 +47,12 @@
    - I4 の `ota` 部分一致
    - `I9_DEFAULT_HOSTNAME_PATTERN` が接続先のホスト名で判定している
    - 同じ弱い暗号について SELECTED と SUITE_OBSERVED の 2 件が出る
-5. **リポジトリ直下の不要ファイル**：`event.json`、`wget-log`、`.codex`、`events.old.jsonl`、`kari.json`、`report.json`、`tree.txt`、`package-lock.json`、`clab-*/`。削除するかどうかを利用者に確認中。
-6. **旧ツール**：`cmd/quarant-api` と `cmd/quarant-agg` はどこからも参照されていない。`quarant-agg` には時間窓の計算バグがある。
-7. **合成 PCAP の再現性**：TLS 部分のバイト列は実行のたびに変わる（解析結果は同じ）。
-8. **巨大ファイル**：`precision.go`、`mitigation.go`、`web/app/page.tsx`。分割は Phase 2 で行う。
+5. **合成 PCAP の再現性**：TLS 部分のバイト列は実行のたびに変わる（解析結果は同じ）。
+6. **巨大ファイル**：`precision.go`、`mitigation.go`、`web/app/page.tsx`。分割は Phase 2 で行う。
 
 ## 次に行う作業（優先順）
 
-1. 実 IoT 機器の PCAP を入手して検証する。公開データセット（例：UNSW IoT traffic、IoT-23）の利用規約も確認する。
+1. 公開データセットで実機トラフィックを検証する（候補の選定は [DATASETS.md](DATASETS.md)）。
 2. 相関エンジンの設計（Phase 2-1）と SQLite スキーマ。
 3. 脅威情報フィードの仕様と規約の確認、およびローカル照合の実装。
 4. Suricata と Zeek を実際に動かし、合成 PCAP と実 PCAP で比較する基盤。
