@@ -827,6 +827,8 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 
 	key := flowKeyTCP(srcIP, srcPort, dstIP, dstPort)
 	st := h.cache.GetOrCreate(key, now)
+	respondedBefore := st.ServerResponded
+	bufferedBefore := len(st.ClientData) + len(st.ServerData)
 	h.updateFlowState(st, srcIP, dstIP, srcPort, dstPort, len(tcp.Payload), (tcp.SYN && tcp.ACK) || len(tcp.Payload) > 0)
 
 	capturePayload := rules.NeedsPayloadCapture(dstPort) || rules.NeedsPayloadCapture(srcPort)
@@ -950,6 +952,17 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 		}
 	}
 	h.writeFlowRecordSnapshot(now, key, st, false)
+
+	// Rules only see the flow buffers and handshake state, so re-running
+	// them on packets that changed neither (bulk transfer after the 16 KB
+	// capture limit, pure ACKs) cannot produce new findings; it only cost
+	// time. Rules still run on the first packet and when the server first
+	// answers.
+	if st.PacketCount > 1 && respondedBefore == st.ServerResponded &&
+		len(st.ClientData)+len(st.ServerData) == bufferedBefore {
+		h.periodicMaintenance(now)
+		return
+	}
 	localClassification := d.Classification
 	localDeviceCategory := localClassification.NormalizedCategory()
 	localInferenceSource := string(localClassification.InferenceSource)
@@ -1214,19 +1227,7 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 		st.MarkReported(m.RuleID)
 	}
 
-	if h.lastCleanup.IsZero() {
-		h.lastCleanup = now
-	} else if now.Sub(h.lastCleanup) >= flowCleanupInterval {
-		h.lastCleanup = now
-		h.cache.Cleanup(now, func(key string, st *FlowState) {
-			h.finishFlow(now, key, st)
-		})
-	}
-	if h.lastBehaviorEval.IsZero() {
-		h.lastBehaviorEval = now
-	} else if now.Sub(h.lastBehaviorEval) >= behaviorEvalInterval {
-		h.evaluateBehavior(now)
-	}
+	h.periodicMaintenance(now)
 
 	if h.debug && capturePayload && len(tcp.Payload) > 0 {
 		p := tcp.Payload
@@ -1247,6 +1248,25 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 			Message: fmt.Sprintf("payload_len=%d payload_head_hex_prefix=%x", len(tcp.Payload), p[:min(len(p), 8)]),
 		})
 	}
+}
+
+// periodicMaintenance sweeps idle flows and runs behaviour detectors on a
+// capture-time schedule.
+func (h *FlowHandler) periodicMaintenance(now time.Time) {
+	if h.lastCleanup.IsZero() {
+		h.lastCleanup = now
+	} else if now.Sub(h.lastCleanup) >= flowCleanupInterval {
+		h.lastCleanup = now
+		h.cache.Cleanup(now, func(key string, st *FlowState) {
+			h.finishFlow(now, key, st)
+		})
+	}
+	if h.lastBehaviorEval.IsZero() {
+		h.lastBehaviorEval = now
+	} else if now.Sub(h.lastBehaviorEval) >= behaviorEvalInterval {
+		h.evaluateBehavior(now)
+	}
+
 }
 
 func (h *FlowHandler) annotateI6StorageObservation(ctx *rules.Context, d *device.DeviceProfile) {

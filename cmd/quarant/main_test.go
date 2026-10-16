@@ -196,3 +196,20 @@ func writeTestPCAP(t *testing.T, path string) {
 		t.Fatalf("write pcap file: %v", err)
 	}
 }
+
+func TestParseLocalNetsFlag(t *testing.T) {
+	ln, err := parseLocalNetsFlag("192.168.50.0/24, 10.9.0.0/16")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !ln.Contains("192.168.50.7") || !ln.Contains("10.9.1.1") || ln.Contains("192.168.1.7") {
+		t.Fatal("unexpected local network membership")
+	}
+	if _, err := parseLocalNetsFlag("not-a-cidr/99"); err == nil {
+		t.Fatal("expected error for invalid --local-net")
+	}
+	def, err := parseLocalNetsFlag("")
+	if err != nil || !def.Contains("192.168.1.7") {
+		t.Fatal("empty --local-net must fall back to defaults")
+	}
+}

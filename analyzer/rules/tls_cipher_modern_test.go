@@ -28,7 +28,15 @@ func TestWeakCipherOfferedIgnoresCBCFallbacks(t *testing.T) {
 		t.Fatal("CBC suites offered alongside AEAD suites must not be reported")
 	}
 	ctx.TLSInfo.CipherSuites = append(ctx.TLSInfo.CipherSuites, 0x000A)
-	if _, ok := rule.Apply(ctx); !ok {
+	m, ok := rule.Apply(ctx)
+	if !ok {
 		t.Fatal("3DES offered should still be reported")
+	}
+	if m.Severity != SeverityInfo {
+		t.Fatalf("3DES offered as a fallback next to AEAD should be INFO, got %s", m.Severity)
+	}
+	ctx.TLSInfo.CipherSuites = []uint16{0x002F, 0x000A}
+	if m, ok := rule.Apply(ctx); !ok || m.Severity != SeverityWarning {
+		t.Fatalf("3DES offered without AEAD should be WARNING, got %v %s", ok, m.Severity)
 	}
 }

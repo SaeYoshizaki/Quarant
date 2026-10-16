@@ -116,6 +116,24 @@ func (r *I7TLSLegacyCipherOfferedRule) Apply(ctx *Context) (Match, bool) {
 		parts = append(parts, fmt.Sprintf("%s:%s", classification.RiskKind, classification.ObservedValue))
 	}
 
+	inference := "This may indicate legacy compatibility behavior that requires review."
+	brokenOffered := false
+	for _, c := range classifications {
+		// NULL, EXPORT and anonymous suites are never acceptable, even as
+		// fallbacks: offering EXPORT suites enabled FREAK/Logjam downgrades.
+		if c.Severity == SeverityHigh {
+			brokenOffered = true
+		}
+	}
+	if !brokenOffered && HasModernOfferedTLSCipher(ctx.TLSInfo.CipherSuites) {
+		// Weak suites listed after AEAD suites are last-resort fallbacks
+		// (common in OS TLS stacks); a server normally selects the AEAD
+		// suite. A weak suite actually in use is reported by
+		// I7_TLS_WEAK_CIPHER_SELECTED instead.
+		severity = SeverityInfo
+		inference = "Weak suites are offered only as fallbacks next to modern AEAD suites; they are used only if the server cannot negotiate anything better."
+	}
+
 	version := ObservedTLSVersion(ctx)
 	return Match{
 		RuleID:         "I7_TLS_WEAK_CIPHER_OFFERED",
@@ -127,7 +145,7 @@ func (r *I7TLSLegacyCipherOfferedRule) Apply(ctx *Context) (Match, bool) {
 		OWASPTags:      uniqueTags("I7"),
 		Confidence:     "medium",
 		ObservedFact:   "The ClientHello offered one or more weak or legacy TLS cipher suites.",
-		Inference:      "This may indicate legacy compatibility behavior that requires review.",
+		Inference:      inference,
 		Limitation:     "HTTPS payload was not decrypted. Passive TLS metadata does not show which offered suites would actually be accepted by the server.",
 		Recommendation: "Review whether legacy cipher suites can be removed from the client or device TLS configuration.",
 	}, true

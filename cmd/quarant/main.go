@@ -1,15 +1,18 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"flag"
 	"fmt"
 	"io"
 	"log"
 	"os"
+	"os/signal"
 	"path/filepath"
 	"strings"
 	"sync"
+	"syscall"
 	"time"
 
 	"quarant/analyzer"
@@ -204,6 +207,11 @@ func runAnalyze(args []string) error {
 		return fmt.Errorf("parse analyze flags: %w", err)
 	}
 
+	localNets, err := parseLocalNetsFlag(*flags.localNets)
+	if err != nil {
+		return err
+	}
+
 	inputPath := "-"
 	if fs.NArg() > 0 {
 		inputPath = fs.Arg(0)
@@ -213,6 +221,7 @@ func runAnalyze(args []string) error {
 	}
 
 	cfg := buildAnalysisConfig(inputPath, "", flags)
+	cfg.LocalNetworks = localNets
 	return runCapture(cfg, func(engine *analyzer.Engine) error {
 		if cfg.InputPath == "-" {
 			return engine.RunPCAPStream(os.Stdin)
@@ -245,10 +254,19 @@ func runLive(args []string) error {
 	if strings.TrimSpace(*flags.iface) == "" {
 		return fmt.Errorf("live requires --iface")
 	}
+	localNets, err := parseLocalNetsFlag(*flags.localNets)
+	if err != nil {
+		return err
+	}
 
 	cfg := buildAnalysisConfig("", *flags.iface, flags)
+	cfg.LocalNetworks = localNets
+	// Stop on Ctrl-C / SIGTERM so open flows and behaviour findings are
+	// flushed before the outputs are closed.
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
 	return runCapture(cfg, func(engine *analyzer.Engine) error {
-		return engine.RunLive(cfg.Interface)
+		return engine.RunLiveContext(ctx, cfg.Interface)
 	})
 }
 
@@ -325,6 +343,7 @@ type analysisConfig struct {
 	ViewerAddr        string
 	WebDist           string
 	BlockOnViewer     bool
+	LocalNetworks     analyzer.LocalNetworks
 }
 
 type captureRunner func(*analyzer.Engine) error
@@ -342,6 +361,7 @@ type captureFlags struct {
 	addr              *string
 	webDist           *string
 	iface             *string
+	localNets         *string
 }
 
 type captureFlagDefaults struct {
@@ -372,6 +392,7 @@ func bindCaptureFlags(fs *flag.FlagSet, defaults captureFlagDefaults) captureFla
 		openViewer:        fs.Bool("open", false, "open the local report viewer in a browser"),
 		addr:              fs.String("addr", "127.0.0.1:8080", "HTTP listen address for the report viewer"),
 		webDist:           fs.String("web-dist", filepath.Join("web", "out"), "path to exported web UI assets"),
+		localNets:         fs.String("local-net", "", "comma-separated CIDRs of the monitored network; only hosts inside are tracked as devices (default: RFC1918, link-local and ULA ranges)"),
 	}
 	if defaults.allowIface {
 		ifaceDefault := defaults.iface
@@ -381,6 +402,10 @@ func bindCaptureFlags(fs *flag.FlagSet, defaults captureFlagDefaults) captureFla
 		flags.iface = fs.String("iface", ifaceDefault, "capture interface")
 	}
 	return flags
+}
+
+func parseLocalNetsFlag(value string) (analyzer.LocalNetworks, error) {
+	return analyzer.ParseLocalNetworks(strings.Split(value, ","))
 }
 
 func buildAnalysisConfig(inputPath, iface string, flags captureFlags) analysisConfig {
@@ -515,6 +540,7 @@ func newAnalysisRuntime(cfg analysisConfig) (*analysisRuntime, error) {
 	}
 
 	handler := analyzer.NewFlowHandlerWithObservations(sink, flowSink, observationSink, cfg.Debug, db)
+	handler.SetLocalNetworks(cfg.LocalNetworks)
 	var inventoryWriter *analyzer.DeviceInventoryWriter
 	if cfg.InventoryOut != "" {
 		inventoryWriter = analyzer.NewDeviceInventoryWriter(cfg.InventoryOut, cfg.InventoryInterval, handler.DeviceInventory)
@@ -643,7 +669,7 @@ func isBoolFlag(f *flag.Flag) bool {
 func runLegacyCapture(args []string) {
 	fs := flag.NewFlagSet("quarant", flag.ExitOnError)
 	debug := fs.Bool("debug", false, "enable debug payload logging")
-	iface := fs.String("i", "eth1", "interface to capture on")
+	iface := fs.String("i", "", "interface to capture on (default eth1 when -pcap is not given)")
 	pcapPath := fs.String("pcap", "", "pcap file to read, or - to read pcap stream from stdin")
 	inventoryOut := fs.String("inventory-out", "device_inventory.json", "path to write device inventory snapshot JSON (empty to disable)")
 	inventoryInterval := fs.Duration("inventory-interval", 10*time.Second, "interval to refresh device inventory snapshot JSON")
@@ -651,6 +677,9 @@ func runLegacyCapture(args []string) {
 
 	if *iface != "" && *pcapPath != "" {
 		log.Fatal("use either -i <interface> or -pcap <file|->, not both")
+	}
+	if *iface == "" && *pcapPath == "" {
+		*iface = "eth1"
 	}
 
 	cfg := analysisConfig{
