@@ -1,6 +1,7 @@
 package analyzer
 
 import (
+	"fmt"
 	"net"
 	"strings"
 	"time"
@@ -48,6 +49,9 @@ func (h *FlowHandler) bindMAC(now time.Time, ip string, mac net.HardwareAddr, so
 	info := discovery.LookupMAC(mac)
 	if info.Multicast {
 		return
+	}
+	if d.MAC != "" && !d.MACs[info.MAC] {
+		h.reportMACChange(now, ip, d.MAC, info.MAC, source)
 	}
 	d.ObserveMAC(info.MAC)
 	d.AddIdentityEvidence(now, "mac", info.MAC, string(discovery.BasisObserved), source)
@@ -172,4 +176,27 @@ func decodeDNS(payload []byte) *layers.DNS {
 		return nil
 	}
 	return dns
+}
+
+// reportMACChange records that an IP address was claimed by a second MAC.
+func (h *FlowHandler) reportMACChange(now time.Time, ip, oldMAC, newMAC, source string) {
+	event := Event{
+		Timestamp:      now,
+		Type:           "IP_MAC_BINDING_CHANGED",
+		Severity:       SeverityWarning,
+		RuleID:         "IP_MAC_BINDING_CHANGED",
+		Category:       "L2",
+		Confidence:     "high",
+		Basis:          BasisObserved,
+		DeviceKey:      ip,
+		SrcIP:          ip,
+		Evidence:       fmt.Sprintf("ip=%s previous_mac=%s new_mac=%s source=%s", ip, oldMAC, newMAC, source),
+		ObservedFact:   fmt.Sprintf("%s was seen with MAC %s after previously using %s.", ip, newMAC, oldMAC),
+		Inference:      "The address moved to another interface. This happens with DHCP reassignment, Wi-Fi repeaters and MAC randomization, but is also the visible effect of ARP spoofing (man-in-the-middle).",
+		Limitation:     "Passive monitoring cannot tell legitimate reassignment from spoofing on its own; check whether both MACs belong to known devices and whether the change repeats.",
+		Recommendation: "Identify both MAC addresses. Repeated alternation, or a MAC belonging to another device, warrants investigation.",
+		Message:        "IP-to-MAC binding changed.",
+	}
+	h.enrichEvent(&event)
+	_ = h.eventSink.Write(event)
 }

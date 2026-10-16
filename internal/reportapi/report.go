@@ -21,6 +21,7 @@ type Event struct {
 	FlowKey                 string       `json:"flow_key,omitempty"`
 	OWASPTags               []string     `json:"owasp_tags,omitempty"`
 	Confidence              string       `json:"confidence,omitempty"`
+	Basis                   string       `json:"basis,omitempty"`
 	Evidence                string       `json:"evidence,omitempty"`
 	ObservedFact            string       `json:"observed_fact,omitempty"`
 	Inference               string       `json:"inference,omitempty"`

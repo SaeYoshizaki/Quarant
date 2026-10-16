@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"quarant/analyzer/behavior"
 	"quarant/analyzer/device"
 	"quarant/analyzer/knowledge"
 	"quarant/analyzer/rules"
@@ -31,6 +32,10 @@ type FlowHandler struct {
 	mu          sync.Mutex
 	macToIP     map[string]string
 	pendingDHCP map[string]pendingDHCP
+
+	behavior         *behavior.Analyzer
+	dnsNames         map[string]string
+	lastBehaviorEval time.Time
 }
 
 // SetLocalNetworks restricts device tracking to the given ranges. Hosts
@@ -108,6 +113,13 @@ func (h *FlowHandler) affectedDeviceIP(eventType string, st *FlowState) string {
 // capture time so that offline analysis is deterministic.
 const flowCleanupInterval = 10 * time.Second
 
+// finishFlow writes the final record of a flow leaving the cache and hands it
+// to the behaviour analyzer.
+func (h *FlowHandler) finishFlow(now time.Time, key string, st *FlowState) {
+	h.writeFlowRecordSnapshot(now, key, st, true)
+	h.recordConnection(st)
+}
+
 // packetTime returns the capture timestamp of the packet. Offline analysis must
 // use the time the packet was recorded, not the time it was analyzed, so that
 // events, flows and device histories line up with the traffic itself. Packets
@@ -133,8 +145,9 @@ func (h *FlowHandler) Flush(at time.Time) {
 		if now.IsZero() || now.Before(st.LastSeen) {
 			now = st.LastSeen
 		}
-		h.writeFlowRecordSnapshot(now, key, st, true)
+		h.finishFlow(now, key, st)
 	})
+	h.evaluateBehavior(at)
 }
 
 func NewFlowHandler(eventSink, flowSink *JSONLSink, debug bool, db *knowledge.DB) *FlowHandler {
@@ -733,6 +746,7 @@ func (h *FlowHandler) buildFlowRecord(now time.Time, key string, st *FlowState) 
 		AppProtocol:         appProtocol,
 		Host:                host,
 		SNI:                 sni,
+		DNSName:             h.dnsNames[st.DstIP],
 		HTTPMethod:          strings.TrimSpace(st.HTTPMethod),
 		HTTPPath:            strings.TrimSpace(st.HTTPPath),
 		BytesOut:            st.ClientBytes,
@@ -741,7 +755,7 @@ func (h *FlowHandler) buildFlowRecord(now time.Time, key string, st *FlowState) 
 		Direction:           flowDirection(st.DstIP),
 		DeviceLabel:         "",
 		DeviceCategory:      deviceCategory,
-		ObservedDestination: observedDestination(sni, host, st.DstIP),
+		ObservedDestination: observedDestination(sni, host, firstNonEmptyString(h.dnsNames[st.DstIP], st.DstIP)),
 	}
 }
 
@@ -795,6 +809,7 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 			dns = decodeDNS(udp.Payload)
 		}
 		h.observeDiscovery(packet, now, srcIP, udp, dns)
+		h.observeDNSAnswers(dstIP, dns)
 		h.observeUDPActivity(now, srcIP, dstIP, uint16(udp.SrcPort), uint16(udp.DstPort), dns)
 		h.writeUDPPacketObservations(now, srcIP, dstIP, uint16(udp.SrcPort), uint16(udp.DstPort), len(udp.Payload), dns)
 		return
@@ -1204,8 +1219,13 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 	} else if now.Sub(h.lastCleanup) >= flowCleanupInterval {
 		h.lastCleanup = now
 		h.cache.Cleanup(now, func(key string, st *FlowState) {
-			h.writeFlowRecordSnapshot(now, key, st, true)
+			h.finishFlow(now, key, st)
 		})
+	}
+	if h.lastBehaviorEval.IsZero() {
+		h.lastBehaviorEval = now
+	} else if now.Sub(h.lastBehaviorEval) >= behaviorEvalInterval {
+		h.evaluateBehavior(now)
 	}
 
 	if h.debug && capturePayload && len(tcp.Payload) > 0 {

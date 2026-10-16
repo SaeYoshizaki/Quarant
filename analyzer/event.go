@@ -22,6 +22,7 @@ type Event struct {
 	Evidence                string       `json:"evidence,omitempty"`
 	OWASPTags               []string     `json:"owasp_tags,omitempty"`
 	Confidence              string       `json:"confidence,omitempty"`
+	Basis                   string       `json:"basis,omitempty"`
 	ObservedFact            string       `json:"observed_fact,omitempty"`
 	Inference               string       `json:"inference,omitempty"`
 	Limitation              string       `json:"limitation,omitempty"`

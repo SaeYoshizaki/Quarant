@@ -21,6 +21,9 @@ func (h *FlowHandler) enrichEvent(event *Event) {
 	if event == nil {
 		return
 	}
+	if event.Basis == "" && !event.Debug {
+		event.Basis = eventBasis(event.Type)
+	}
 
 	ctx := h.lookupKnownDevice(event.DeviceKey, event.SrcIP)
 	if event.DeviceKey == "" {

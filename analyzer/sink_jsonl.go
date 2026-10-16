@@ -32,8 +32,14 @@ func (s *JSONLSink) WriteObservation(observation ObservationRecord) error {
 }
 
 func (s *JSONLSink) writeValue(v any) error {
+	if s == nil {
+		return nil
+	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
+	if s.file == nil {
+		return nil
+	}
 
 	data, err := json.Marshal(v)
 	if err != nil {

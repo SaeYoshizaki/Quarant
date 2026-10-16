@@ -19,6 +19,7 @@ type FlowRecord struct {
 	AppProtocol         string    `json:"app_protocol"`
 	Host                string    `json:"host"`
 	SNI                 string    `json:"sni"`
+	DNSName             string    `json:"dns_name,omitempty"`
 	HTTPMethod          string    `json:"http_method"`
 	HTTPPath            string    `json:"http_path"`
 	BytesOut            int64     `json:"bytes_out"`
@@ -60,4 +61,13 @@ func normalizeDeviceCategory(d *device.DeviceProfile) string {
 		return ""
 	}
 	return category
+}
+
+func firstNonEmptyString(values ...string) string {
+	for _, v := range values {
+		if v = strings.TrimSpace(v); v != "" {
+			return v
+		}
+	}
+	return ""
 }

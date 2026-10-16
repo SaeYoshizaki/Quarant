@@ -205,3 +205,29 @@ func TestHomeScenarioFlushesFinalFlowRecords(t *testing.T) {
 	}
 	t.Fatal("camera TLS flow not found")
 }
+
+func TestHomeScenarioBehaviorFindings(t *testing.T) {
+	_, run := runHomeScenario(t)
+	if !run.has("192.168.50.22", "OUTBOUND_SCAN_SUSPECTED") {
+		t.Error("expected the DVR telnet scan to be detected")
+	}
+	if !run.has("192.168.50.22", "PERIODIC_COMMUNICATION_OBSERVED") {
+		t.Error("expected the DVR beacon to be detected")
+	}
+	for _, e := range run.events {
+		if e.Category == "BEHAVIOR" && e.DeviceKey != "192.168.50.22" {
+			t.Errorf("unexpected behaviour finding on %s: %s %s", e.DeviceKey, e.Type, e.Evidence)
+		}
+	}
+}
+
+func TestHomeScenarioEveryEventHasBasis(t *testing.T) {
+	_, run := runHomeScenario(t)
+	for _, e := range run.events {
+		switch e.Basis {
+		case BasisObserved, BasisInferred, BasisReferenceMatch:
+		default:
+			t.Errorf("event %s has basis %q", e.Type, e.Basis)
+		}
+	}
+}
