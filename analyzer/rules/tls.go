@@ -2,6 +2,7 @@ package rules
 
 import (
 	"crypto/md5"
+	"crypto/tls"
 	"crypto/x509"
 	"encoding/binary"
 	"encoding/hex"
@@ -308,6 +309,9 @@ func ObservedTLSVersion(ctx *Context) uint16 {
 func strongestTLSVersion(versions []uint16) uint16 {
 	var strongest uint16
 	for _, version := range versions {
+		if isGREASE(version) {
+			continue
+		}
 		if version > strongest {
 			strongest = version
 		}
@@ -333,6 +337,11 @@ func TLSVersionNames(versions []uint16) string {
 
 func TLSCipherSuiteName(id uint16) string {
 	if name, ok := tlsCipherSuiteNames[id]; ok {
+		return name
+	}
+	// crypto/tls knows the IANA names of every suite it implements,
+	// including the insecure ones; it returns "0x...." for anything else.
+	if name := tls.CipherSuiteName(id); !strings.HasPrefix(name, "0x") {
 		return name
 	}
 	return "0x" + strings.ToUpper(strconv.FormatUint(uint64(id), 16))
@@ -413,12 +422,20 @@ func ClassifyOfferedTLSCiphers(cipherSuites []uint16) []TLSRiskClassification {
 	return out
 }
 
+// HasModernOfferedTLSCipher reports whether at least one AEAD suite (TLS 1.3
+// suites, or GCM / ChaCha20-Poly1305 / CCM) was offered. Unknown IDs such as
+// GREASE values or TLS_EMPTY_RENEGOTIATION_INFO_SCSV are not cipher suites a
+// connection can use, so they do not count as modern.
 func HasModernOfferedTLSCipher(cipherSuites []uint16) bool {
 	for _, id := range cipherSuites {
-		if _, weak := ClassifyTLSCipherSuite(id, "offered"); weak {
-			continue
+		if id >= 0x1301 && id <= 0x1305 {
+			return true
 		}
-		return true
+		upper := strings.ToUpper(TLSCipherSuiteName(id))
+		if strings.Contains(upper, "_GCM_") || strings.HasSuffix(upper, "_GCM") ||
+			strings.Contains(upper, "CHACHA20") || strings.Contains(upper, "_CCM") {
+			return true
+		}
 	}
 	return false
 }

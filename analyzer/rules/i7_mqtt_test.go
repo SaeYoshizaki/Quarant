@@ -83,17 +83,27 @@ func TestI7MQTTSensitivePayloadDetectsPublishAfterConnect(t *testing.T) {
 	}
 }
 
-func TestI7MQTTSensitivePayloadDetectsSensitiveTopic(t *testing.T) {
+func TestI7MQTTSensitivePayloadIgnoresTopicNamesWithoutSecrets(t *testing.T) {
+	// "token" here is a topic *name*; the payload carries no secret.
 	info, ok := ParseMQTT(mqttPublishPacket("devices/token/report", []byte(`{"temperature":21}`)))
 	if !ok {
 		t.Fatal("expected MQTT PUBLISH to parse")
 	}
+	if match, ok := (&I7MQTTSensitivePayloadRule{}).Apply(&Context{MQTT: info}); ok {
+		t.Fatalf("topic names alone must not be reported as secrets: %+v", match)
+	}
+}
 
+func TestI7MQTTSensitivePayloadDetectsSecretValueInTopic(t *testing.T) {
+	info, ok := ParseMQTT(mqttPublishPacket("devices/eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0In0.c2lnbmF0dXJlLXZhbHVl/report", []byte(`{"temperature":21}`)))
+	if !ok {
+		t.Fatal("expected MQTT PUBLISH to parse")
+	}
 	match, ok := (&I7MQTTSensitivePayloadRule{}).Apply(&Context{MQTT: info})
 	if !ok {
-		t.Fatal("expected sensitive MQTT topic to be detected")
+		t.Fatal("expected a token embedded in the topic to be detected")
 	}
-	if match.Evidence != "topic/token=***" {
+	if match.Evidence != "topic/segment=***" {
 		t.Fatalf("unexpected evidence: %s", match.Evidence)
 	}
 }

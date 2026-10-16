@@ -7,6 +7,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"net/url"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -184,7 +185,14 @@ func Serve(opts Options) error {
 			}
 		}(viewerURL)
 	}
-	return http.Serve(listener, withCORS(mux))
+	server := &http.Server{
+		Handler:           withLocalAccessGuard(mux, opts.Addr),
+		ReadHeaderTimeout: 10 * time.Second,
+		ReadTimeout:       30 * time.Second,
+		WriteTimeout:      120 * time.Second,
+		IdleTimeout:       120 * time.Second,
+	}
+	return server.Serve(listener)
 }
 
 func writeJSON(w http.ResponseWriter, v any) {
@@ -194,17 +202,62 @@ func writeJSON(w http.ResponseWriter, v any) {
 	_ = enc.Encode(v)
 }
 
-func withCORS(next http.Handler) http.Handler {
+// withLocalAccessGuard protects the unauthenticated local data API.
+//
+// The API serves captured network data (events, flows, inventory), so it must
+// not be readable by arbitrary web pages open in the user's browser:
+//   - CORS is granted only to loopback origins (e.g. the Next.js dev server on
+//     http://localhost:3000); the bundled UI is same-origin and needs no CORS.
+//   - Requests whose Host header is neither a loopback name nor the configured
+//     listen host are rejected, which blocks DNS-rebinding attacks.
+func withLocalAccessGuard(next http.Handler, listenAddr string) http.Handler {
+	listenHost := hostOnly(listenAddr)
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+		host := hostOnly(r.Host)
+		if !isLoopbackHost(host) && !strings.EqualFold(host, listenHost) {
+			http.Error(w, "forbidden host", http.StatusForbidden)
+			return
+		}
+		if origin := r.Header.Get("Origin"); origin != "" && isLoopbackOrigin(origin) {
+			w.Header().Set("Access-Control-Allow-Origin", origin)
+			w.Header().Set("Vary", "Origin")
+			w.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
+			w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+		}
 		if r.Method == http.MethodOptions {
 			w.WriteHeader(http.StatusNoContent)
 			return
 		}
+		if r.Method != http.MethodGet && r.Method != http.MethodHead {
+			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
 		next.ServeHTTP(w, r)
 	})
+}
+
+func hostOnly(hostport string) string {
+	hostport = strings.TrimSpace(hostport)
+	if host, _, err := net.SplitHostPort(hostport); err == nil {
+		return strings.Trim(host, "[]")
+	}
+	return strings.Trim(hostport, "[]")
+}
+
+func isLoopbackHost(host string) bool {
+	if strings.EqualFold(host, "localhost") {
+		return true
+	}
+	ip := net.ParseIP(host)
+	return ip != nil && ip.IsLoopback()
+}
+
+func isLoopbackOrigin(origin string) bool {
+	u, err := url.Parse(origin)
+	if err != nil || (u.Scheme != "http" && u.Scheme != "https") {
+		return false
+	}
+	return isLoopbackHost(u.Hostname())
 }
 
 func attachUIRoutes(mux *http.ServeMux, webDist, viewerURL string) bool {

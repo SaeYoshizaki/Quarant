@@ -264,10 +264,23 @@ func detectSensitiveJSONMap(m map[string]any) (string, bool) {
 	return "", false
 }
 
+// protocolNonceKeys carry random-looking values that are protocol nonces or
+// cache validators, not secrets (e.g. the WebSocket handshake key is a
+// public, single-use nonce defined by RFC 6455).
+var protocolNonceKeys = map[string]bool{
+	"sec-websocket-key":        true,
+	"sec-websocket-accept":     true,
+	"sec-websocket-version":    true,
+	"sec-websocket-extensions": true,
+	"sec-websocket-protocol":   true,
+	"if-none-match":            true,
+	"etag":                     true,
+}
+
 func detectSensitiveField(key, value string, siblings map[string]bool) (string, bool) {
 	normalizedKey := normalizeSensitiveKey(key)
 	trimmedValue := strings.TrimSpace(value)
-	if trimmedValue == "" {
+	if trimmedValue == "" || protocolNonceKeys[normalizedKey] {
 		return "", false
 	}
 

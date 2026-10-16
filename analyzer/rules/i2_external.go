@@ -14,7 +14,7 @@ func (r *I2ExternalExposureRule) Apply(ctx *Context) (Match, bool) {
 		return Match{}, false
 	}
 
-	if service, ok := InsecureServiceNameByPort(ctx.DstPort); ok {
+	if service, ok := InsecureServiceNameByPort(ctx.DstPort); ok && !ctx.ServerSilent {
 		display := serviceDisplayName(service)
 		return Match{
 			RuleID:         "I2_EXTERNAL_" + service,

@@ -125,11 +125,12 @@ func detectSensitiveMQTTTopic(topic string) (string, bool) {
 	if topic == "" {
 		return "", false
 	}
+	// A topic segment is a name, not a value: a segment called "token" or
+	// "keypad" exposes nothing. Only a segment that itself looks like a
+	// secret value (e.g. an API key embedded in the topic) is reported.
 	for _, part := range splitMQTTTopic(topic) {
-		if HasSensitiveKey(part) || looksSuspiciousKeyName(part) {
-			if ev, ok := detectSensitiveField(part, "AbCdEf1234567890ZYXWVutsrq", nil); ok {
-				return "topic/" + ev, true
-			}
+		if looksSensitiveTokenValue(part) {
+			return "topic/segment=***", true
 		}
 	}
 	return "", false

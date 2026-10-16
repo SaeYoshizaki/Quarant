@@ -30,7 +30,7 @@ func (r *I2InsecureServiceRule) Apply(ctx *Context) (Match, bool) {
 			Type:           "I2_" + upper + "_PROTOCOL_EVIDENCE",
 			Category:       "I2",
 			Severity:       SeverityWarning,
-			Message:        display + " service traffic was observed on the local network.",
+			Message:        display + " protocol traffic was observed.",
 			Evidence:       fmt.Sprintf("service=%s port=%d indicators=[%s]", service, ctx.DstPort, strings.Join(indicators, ",")),
 			OWASPTags:      uniqueTags("I2", "I7", "I9"),
 			Confidence:     "high",
@@ -41,18 +41,25 @@ func (r *I2InsecureServiceRule) Apply(ctx *Context) (Match, bool) {
 		}, true
 	}
 
+	if ctx.ServerSilent {
+		// An unanswered connection attempt does not show that a service
+		// exists; it is scan-like behaviour, which the behaviour analysis
+		// reports at the source with aggregate evidence.
+		return Match{}, false
+	}
+
 	return Match{
 		RuleID:         "I2_" + upper + "_SERVICE_OBSERVED",
 		Type:           "I2_" + upper + "_SERVICE_OBSERVED",
 		Category:       "I2",
 		Severity:       SeverityWarning,
-		Message:        display + " service was observed on the local network.",
-		Evidence:       fmt.Sprintf("service=%s port=%d", service, ctx.DstPort),
+		Message:        display + " service port answered a connection.",
+		Evidence:       fmt.Sprintf("service=%s port=%d basis=port_number", service, ctx.DstPort),
 		OWASPTags:      uniqueTags("I2", "I7", "I9"),
-		Confidence:     "high",
-		ObservedFact:   display + " service traffic was observed.",
+		Confidence:     "medium",
+		ObservedFact:   fmt.Sprintf("A TCP connection to port %d was answered by %s.", ctx.DstPort, ctx.DstIP),
+		Limitation:     "The service is inferred from the port number only; no " + display + " protocol content was seen. Passive monitoring does not confirm whether the service is enabled by default, intentionally exposed, or limited to trusted clients.",
 		Inference:      inference + " This may indicate that a risky or legacy service remains enabled and should be reviewed.",
-		Limitation:     "Passive monitoring does not confirm whether the service is enabled by default, intentionally exposed, or limited to trusted clients.",
 		Recommendation: "Disable unused services and restrict management access to trusted networks. " + recommendation,
 	}, true
 }

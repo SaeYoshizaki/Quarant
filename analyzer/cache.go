@@ -1,6 +1,7 @@
 package analyzer
 
 import (
+	"sort"
 	"sync"
 	"time"
 
@@ -24,6 +25,11 @@ type FlowState struct {
 	PacketCount int
 	ClientBytes int64
 	ServerBytes int64
+
+	// ServerResponded is set once the responder sent SYN/ACK or payload,
+	// i.e. a service actually answered (a bare SYN proves nothing).
+	ServerResponded bool
+	HTTPEnriched    bool
 
 	TLSClientSeen bool
 	TLSClientInfo *rules.TLSClientHelloInfo
@@ -135,5 +141,24 @@ func (c *FlowCache) Cleanup(now time.Time, onEvict func(string, *FlowState)) {
 			}
 			delete(c.m, k)
 		}
+	}
+}
+
+// Drain removes every flow from the cache, calling onEvict for each one in a
+// stable key order.
+func (c *FlowCache) Drain(onEvict func(string, *FlowState)) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	keys := make([]string, 0, len(c.m))
+	for k := range c.m {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	for _, k := range keys {
+		if onEvict != nil {
+			onEvict(k, c.m[k])
+		}
+		delete(c.m, k)
 	}
 }

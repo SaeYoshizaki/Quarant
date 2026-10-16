@@ -99,7 +99,10 @@ func (r *I7TLSLegacyCipherOfferedRule) Apply(ctx *Context) (Match, bool) {
 	if ctx == nil || ctx.TLSInfo == nil || len(ctx.TLSInfo.CipherSuites) == 0 {
 		return Match{}, false
 	}
-	classifications := ClassifyOfferedTLSCiphers(ctx.TLSInfo.CipherSuites)
+	// CBC suites offered next to AEAD suites are routine in current client
+	// stacks (they are fallbacks the server almost never picks), so offering
+	// them is not reported. Only clearly broken suites are.
+	classifications := withoutRiskKind(ClassifyOfferedTLSCiphers(ctx.TLSInfo.CipherSuites), "cbc_cipher")
 	if len(classifications) == 0 {
 		return Match{}, false
 	}
@@ -301,4 +304,14 @@ func init() {
 	Register(&I7TLSLegacyCipherOfferedRule{})
 	Register(&I7TLSOnlyLegacyCiphersOfferedRule{})
 	Register(&I7TLSCertificateAnomalyRule{})
+}
+
+func withoutRiskKind(classifications []TLSRiskClassification, kind string) []TLSRiskClassification {
+	out := classifications[:0:0]
+	for _, c := range classifications {
+		if c.RiskKind != kind {
+			out = append(out, c)
+		}
+	}
+	return out
 }

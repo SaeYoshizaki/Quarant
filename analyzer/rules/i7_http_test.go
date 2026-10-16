@@ -350,3 +350,12 @@ func TestI7HTTPTokenMetadataDoesNotExposeRawValue(t *testing.T) {
 		t.Fatalf("expected limitation, got empty match: %+v", match)
 	}
 }
+
+func TestSensitiveFieldIgnoresWebSocketHandshakeKey(t *testing.T) {
+	if ev, ok := detectSensitiveField("Sec-WebSocket-Key", "dGhlIHNhbXBsZSBub25jZQ==", nil); ok {
+		t.Fatalf("WebSocket handshake nonce must not be reported as a secret: %s", ev)
+	}
+	if _, ok := detectSensitiveField("api_key", "dGhlIHNhbXBsZSBub25jZQ==", nil); !ok {
+		t.Fatal("expected api_key with a token value to be reported")
+	}
+}

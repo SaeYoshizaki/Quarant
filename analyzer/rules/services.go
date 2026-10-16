@@ -183,7 +183,18 @@ func DetectHTTPAdminIndicators(http *HTTPInfo) ([]string, bool) {
 		indicators = append(indicators, "www-authenticate")
 	}
 
-	return indicators, len(indicators) > 0
+	// Host keywords ("cam", "dvr", ...) and an Authorization header are only
+	// supporting hints: they also match ordinary cloud APIs (an upload API
+	// with Basic auth, a vendor update host), so an admin interface is
+	// claimed only with a management path or an auth challenge.
+	strong := false
+	for _, indicator := range indicators {
+		if strings.HasPrefix(indicator, "path=") || indicator == "www-authenticate" {
+			strong = true
+			break
+		}
+	}
+	return indicators, strong
 }
 
 func DetectTelnetIndicators(payload []byte) []string {

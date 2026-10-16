@@ -22,6 +22,110 @@ type FlowHandler struct {
 	debug           bool
 	devices         *device.Store
 	knowledge       *knowledge.DB
+	lastCleanup     time.Time
+	localNets       LocalNetworks
+}
+
+// SetLocalNetworks restricts device tracking to the given ranges. Hosts
+// outside them are treated as remote peers, never as devices.
+func (h *FlowHandler) SetLocalNetworks(ln LocalNetworks) {
+	if h != nil {
+		h.localNets = ln
+	}
+}
+
+func (h *FlowHandler) isLocal(ip string) bool {
+	return h.localNets.Contains(ip)
+}
+
+// localDevice returns the profile for ip when it is inside the monitored
+// network, or nil for remote hosts.
+func (h *FlowHandler) localDevice(ip string) *device.DeviceProfile {
+	if h == nil || h.devices == nil || !h.isLocal(ip) {
+		return nil
+	}
+	return h.devices.GetOrCreate(ip)
+}
+
+// flowDeviceIP picks the monitored device a flow belongs to: the client
+// (initiator) when it is local, otherwise the server when it is local.
+// Flows between two remote hosts have no device.
+func (h *FlowHandler) flowDeviceIP(st *FlowState) string {
+	switch {
+	case st == nil:
+		return ""
+	case h.isLocal(st.SrcIP):
+		return st.SrcIP
+	case h.isLocal(st.DstIP):
+		return st.DstIP
+	default:
+		return ""
+	}
+}
+
+// serverSideFindings are rules that describe the service a server exposes
+// (listening Telnet, an HTTP admin page) rather than what a client sent.
+// When the server is a local device it is the one at risk, not the client
+// that happened to connect to it.
+func isServerSideFinding(eventType string) bool {
+	switch {
+	case strings.HasPrefix(eventType, "I2_") && (strings.HasSuffix(eventType, "_SERVICE_OBSERVED") || strings.HasSuffix(eventType, "_PROTOCOL_EVIDENCE")):
+		return true
+	case strings.HasPrefix(eventType, "I2_HTTP_ADMIN_"),
+		// Plaintext request findings toward a local server describe the
+		// server's interface (e.g. a camera web UI accepting Basic auth).
+		strings.HasPrefix(eventType, "INSECURE_HTTP"),
+		strings.HasPrefix(eventType, "INSECURE_MQTT"),
+		strings.HasPrefix(eventType, "INSECURE_TELNET"),
+		strings.HasPrefix(eventType, "I3_"),
+		eventType == "I3_MANAGEMENT_API_EXPOSED",
+		eventType == "I9_SETUP_ENDPOINT_STILL_ACTIVE":
+		return true
+	default:
+		return false
+	}
+}
+
+// affectedDeviceIP decides which local device a finding is attributed to.
+func (h *FlowHandler) affectedDeviceIP(eventType string, st *FlowState) string {
+	if st == nil {
+		return ""
+	}
+	if isServerSideFinding(eventType) && h.isLocal(st.DstIP) {
+		return st.DstIP
+	}
+	return h.flowDeviceIP(st)
+}
+
+// flowCleanupInterval bounds how often idle flows are swept. It is measured in
+// capture time so that offline analysis is deterministic.
+const flowCleanupInterval = 10 * time.Second
+
+// packetTime returns the capture timestamp of the packet. Offline analysis must
+// use the time the packet was recorded, not the time it was analyzed, so that
+// events, flows and device histories line up with the traffic itself. Packets
+// without capture metadata (e.g. built in tests) fall back to the wall clock.
+func packetTime(packet gopacket.Packet) time.Time {
+	if md := packet.Metadata(); md != nil && !md.Timestamp.IsZero() {
+		return md.Timestamp
+	}
+	return time.Now()
+}
+
+// Flush writes a final record for every flow still held in the cache. It is
+// called by the Engine when the input ends so that the last byte and packet
+// counters of each flow are not lost.
+func (h *FlowHandler) Flush(at time.Time) {
+	if h == nil || h.cache == nil {
+		return
+	}
+	h.cache.Drain(func(key string, st *FlowState) {
+		now := at
+		if now.IsZero() || now.Before(st.LastSeen) {
+			now = st.LastSeen
+		}
+		h.writeFlowRecordSnapshot(now, key, st, true)
+	})
 }
 
 func NewFlowHandler(eventSink, flowSink *JSONLSink, debug bool, db *knowledge.DB) *FlowHandler {
@@ -517,7 +621,7 @@ func i4LegacySignals(d *device.DeviceProfile) []string {
 	return signals
 }
 
-func (h *FlowHandler) updateFlowState(st *FlowState, srcIP, dstIP string, srcPort, dstPort uint16, payloadLen int) {
+func (h *FlowHandler) updateFlowState(st *FlowState, srcIP, dstIP string, srcPort, dstPort uint16, payloadLen int, serverSignal bool) {
 	if st == nil {
 		return
 	}
@@ -535,6 +639,9 @@ func (h *FlowHandler) updateFlowState(st *FlowState, srcIP, dstIP string, srcPor
 	}
 	if srcIP == st.DstIP && srcPort == st.DstPort && dstIP == st.SrcIP && dstPort == st.SrcPort {
 		st.ServerBytes += int64(payloadLen)
+		if serverSignal {
+			st.ServerResponded = true
+		}
 		return
 	}
 	st.ClientBytes += int64(payloadLen)
@@ -601,8 +708,8 @@ func (h *FlowHandler) buildFlowRecord(now time.Time, key string, st *FlowState) 
 	host := strings.TrimSpace(st.HTTPHost)
 	protocol, appProtocol := classifyFlowProtocol(st)
 	deviceCategory := ""
-	if h != nil && h.devices != nil && strings.TrimSpace(st.SrcIP) != "" {
-		deviceCategory = normalizeDeviceCategory(h.devices.GetOrCreate(st.SrcIP))
+	if d := h.localDevice(h.flowDeviceIP(st)); d != nil {
+		deviceCategory = normalizeDeviceCategory(d)
 	}
 	return FlowRecord{
 		Timestamp:           now,
@@ -661,7 +768,7 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 		return
 	}
 
-	now := time.Now()
+	now := packetTime(packet)
 	if udpLayer := packet.Layer(layers.LayerTypeUDP); udpLayer != nil {
 		udp := udpLayer.(*layers.UDP)
 		var dns *layers.DNS
@@ -684,7 +791,7 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 
 	key := flowKeyTCP(srcIP, srcPort, dstIP, dstPort)
 	st := h.cache.GetOrCreate(key, now)
-	h.updateFlowState(st, srcIP, dstIP, srcPort, dstPort, len(tcp.Payload))
+	h.updateFlowState(st, srcIP, dstIP, srcPort, dstPort, len(tcp.Payload), (tcp.SYN && tcp.ACK) || len(tcp.Payload) > 0)
 
 	capturePayload := rules.NeedsPayloadCapture(dstPort) || rules.NeedsPayloadCapture(srcPort)
 	isHTTPClientToServer := rules.IsHTTPPort(dstPort)
@@ -767,27 +874,46 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 			st.TLSClientSeen = true
 			st.TLSClientInfo = &tlsInfo
 
-			d := h.devices.GetOrCreate(srcIP)
-			device.EnrichFromTLS(d, tlsInfo)
-			device.AddTLSBehaviorHints(d, dstPort)
-			h.writeDeviceDebug(now, srcIP, d)
+			if d := h.localDevice(srcIP); d != nil {
+				device.EnrichFromTLS(d, tlsInfo)
+				device.AddTLSBehaviorHints(d, dstPort)
+				h.writeDeviceDebug(now, srcIP, d)
+			}
 		}
 	}
 
-	if httpInfo != nil {
-		d := h.devices.GetOrCreate(srcIP)
-		device.EnrichFromHTTP(d, httpInfo.Headers)
-		device.AddHTTPBehaviorHints(d, httpInfo, dstPort, isTLSClientToServer)
-		h.writeDeviceDebug(now, srcIP, d)
+	if httpInfo != nil && !st.HTTPEnriched {
+		// Enrich identity once per flow: the request buffer is re-parsed on
+		// every packet, and repeated enrichment inflated identity counters.
+		st.HTTPEnriched = true
+		if d := h.localDevice(srcIP); d != nil {
+			device.EnrichFromHTTP(d, httpInfo.Headers)
+			device.AddHTTPBehaviorHints(d, httpInfo, dstPort, isTLSClientToServer)
+			h.writeDeviceDebug(now, srcIP, d)
+		}
 	}
 	h.updateFlowMetadata(st, httpInfo, mqttInfo, telnetInfo)
 
-	d := h.devices.GetOrCreate(srcIP)
-	observeDeviceFlow(d, now, dstPort, observedProtocolsForFlow(dstPort, httpInfo, mqttInfo, telnetInfo, st.TLSClientSeen))
-	h.writeFlowRecordSnapshot(now, key, st, false)
-	for _, event := range h.buildDeviceNotificationEvents(now, key, srcIP, dstIP, srcPort, dstPort, d) {
-		_ = h.eventSink.Write(event)
+	flowProtocols := observedProtocolsForFlow(st.DstPort, httpInfo, mqttInfo, telnetInfo, st.TLSClientSeen)
+	deviceIP := h.flowDeviceIP(st)
+	d := h.localDevice(deviceIP)
+	if d != nil {
+		observeDeviceFlow(d, now, st.DstPort, flowProtocols)
+		for _, event := range h.buildDeviceNotificationEvents(now, key, deviceIP, dstIP, srcPort, dstPort, d) {
+			_ = h.eventSink.Write(event)
+		}
+	} else {
+		// Remote-to-remote traffic (e.g. a mirror port seeing transit
+		// packets): analyse it, but do not create a device for it.
+		d = device.NewProfile("")
 	}
+	if deviceIP != st.DstIP && st.ServerResponded {
+		// A local server that answered is an active device too.
+		if server := h.localDevice(st.DstIP); server != nil {
+			server.ObserveActivity(now)
+		}
+	}
+	h.writeFlowRecordSnapshot(now, key, st, false)
 	localClassification := d.Classification
 	localDeviceCategory := localClassification.NormalizedCategory()
 	localInferenceSource := string(localClassification.InferenceSource)
@@ -843,6 +969,7 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 		DstPort:                   dstPort,
 		Payload:                   st.ClientData,
 		ServerPayload:             st.ServerData,
+		ServerSilent:              !st.ServerResponded,
 		Debug:                     h.debug,
 		UploadBytes:               estimateUploadBytes(httpInfo),
 		HTTP:                      httpInfo,
@@ -1004,7 +1131,7 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 	if composite := buildCompositeRiskMatch(ctx, matches); composite != nil {
 		matches = append(matches, *composite)
 	}
-	if quarantine := h.buildQuarantineRecommendationEvent(now, key, srcIP, dstIP, srcPort, dstPort, d, matches); quarantine != nil {
+	if quarantine := h.buildQuarantineRecommendationEvent(now, key, deviceIP, dstIP, srcPort, dstPort, d, matches); deviceIP != "" && quarantine != nil {
 		_ = h.eventSink.Write(*quarantine)
 		d.RecordRiskEvent(now, quarantine.Type, string(quarantine.Severity), []string{quarantine.Category})
 	}
@@ -1035,21 +1162,26 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 			DstPort:        dstPort,
 			Message:        m.Message,
 		}
+		affected := h.affectedDeviceIP(m.Type, st)
+		event.DeviceKey = affected
 		h.enrichEvent(&event)
 		_ = h.eventSink.Write(event)
 
-		deviceProfile := h.devices.GetOrCreate(srcIP)
-		deviceProfile.RecordRiskEvent(now, m.Type, string(m.Severity), m.OWASPTags)
-
-		if isI2RiskEvent(m.Type) {
-			h.updateDeviceRiskFromMatch(srcIP, m)
-			h.writeDeviceDebug(now, srcIP, h.devices.GetOrCreate(srcIP))
+		if deviceProfile := h.localDevice(affected); deviceProfile != nil {
+			deviceProfile.RecordRiskEvent(now, m.Type, string(m.Severity), m.OWASPTags)
+			if isI2RiskEvent(m.Type) {
+				h.updateDeviceRiskFromMatch(affected, m)
+				h.writeDeviceDebug(now, affected, deviceProfile)
+			}
 		}
 
 		st.MarkReported(m.RuleID)
 	}
 
-	if now.Unix()%10 == 0 {
+	if h.lastCleanup.IsZero() {
+		h.lastCleanup = now
+	} else if now.Sub(h.lastCleanup) >= flowCleanupInterval {
+		h.lastCleanup = now
 		h.cache.Cleanup(now, func(key string, st *FlowState) {
 			h.writeFlowRecordSnapshot(now, key, st, true)
 		})
@@ -1069,7 +1201,9 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 			SrcPort:   srcPort,
 			DstIP:     dstIP,
 			DstPort:   dstPort,
-			Message:   fmt.Sprintf("payload_head=%q", string(p)),
+			// Never write raw payload bytes: plaintext protocols carry
+			// passwords and tokens, and debug logs are easy to share.
+			Message: fmt.Sprintf("payload_len=%d payload_head_hex_prefix=%x", len(tcp.Payload), p[:min(len(p), 8)]),
 		})
 	}
 }
