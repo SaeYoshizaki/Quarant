@@ -1,0 +1,123 @@
+# 評価用公開データセットの選定
+
+調査日：2026-10-17。この時点ではデータはダウンロードしていない。
+
+**表記**
+
+- ✔：一次情報（公式ページ、ライセンス本文）で確認済み
+- （未確認）：論文や二次情報によるもので、まだ確かめていない
+
+## 選定条件（Quarant の要件）
+
+1. **生の PCAP**であること。特徴量 CSV だけのデータセットは使えない。
+2. **LAN 側のキャプチャ**であること。Ethernet ヘッダ、DHCP、mDNS、SSDP が見えないと機器識別を検証できない。
+3. **正解ラベル**があること。機器（MAC から機器への対応）、または攻撃（時間窓かフロー単位）。
+4. **研究で使える条件**であること。ライセンスが明確で、引用条件を満たせる。必要なら再配布も可能。
+
+## 推奨する組み合わせ
+
+| 用途 | データセット | 理由 |
+|---|---|---|
+| 機器識別と正常時のベースライン（主） | **UNSW IoT Traffic Traces** | MIT-0 ✔。PCAP ✔。MAC と機器の対応表 31 件 ✔。OpenWrt ゲートウェイの LAN 側で取得（論文による。未確認）。DHCP、mDNS、SSDP、識別、誤検知（正常な機器）を検証できる |
+| ARP スプーフィングと、同じ環境での攻撃（補助） | **UNSW IoT Attack Traces** | MIT-0 ✔。PCAP ✔。攻撃の開始・終了時刻、種類の注釈 ✔（例：`ArpSpoof100L2D`、2018 年 6 月）。ベースラインと同じテストベッドなので比較しやすい |
+| マルウェアの振る舞い（主） | **IoT-23**（Stratosphere） | CC BY 4.0 ✔（Zenodo）。PCAP と、ラベル付きの Zeek conn.log ✔。ラベルに `PartOfAHorizontalPortScan`、`C&C-HeartBeat`、`Mirai` などがある ✔。実際のマルウェア（Mirai など）を動かしたキャプチャ |
+| 新しい機器の識別と TLS（補助） | **CIC IoT Dataset 2022** | 引用すれば再配布可 ✔。登録フォームが必要。2022 年の機器なので、古いデータセットだけで生じる TLS 評価の偏りを補える |
+
+この組み合わせにより、研究の問い「パッシブ監視で何が分かり、何が分からないか」を、次の 3 つの軸で測れる。
+
+- 機器識別（UNSW traces、CIC 2022）
+- 平文と TLS（全データセット）
+- 攻撃と振る舞い（IoT-23、UNSW attacks）
+
+あわせて、ファームウェアの年代の違い（2016、2018–19、2022）も比較できる。
+
+## 各データセットで検証できることと限界
+
+### UNSW IoT Traffic Traces
+
+- **引用**：Sivanathan et al., "Classifying IoT Devices in Smart Environments Using Network Traffic Characteristics", IEEE TMC
+- **URL**：https://iotanalytics.unsw.edu.au/iottraces.html
+- **ライセンス**：MIT-0 ✔
+- **形式**：日ごとの PCAP と CSV。シェルスクリプトで一括ダウンロードできる ✔。キャプチャ日（2016 年ごろ）と容量は未確認。
+- **正解**：`List_Of_Devices.txt`（機器名、MAC、有線／無線）✔。攻撃のラベルはなく、全体を正常として扱う。
+- **検証できること**：
+  - OUI ベンダー、DHCP ホスト名、option 55、mDNS、SSDP の識別率（正解 MAC との一致）
+  - 正常な機器での誤検知（特に `PERIODIC_*`、TLS、I3〜I6）
+  - クラウドへの死活監視通信を周期通信として検出できるか
+- **限界**：2016 年前後のファームウェアなので、TLS の評価は現在の機器より悪く出る。攻撃は含まれない。
+
+### UNSW IoT Benign and Attack Traces
+
+- **引用**：Hamza et al., "Detecting Volumetric Attacks on IoT Devices via SDN-Based Monitoring of MUD Activity", ACM SOSR 2019
+- **URL**：https://iotanalytics.unsw.edu.au/attack-data.html
+- **ライセンス**：MIT-0 ✔
+- **形式**：PCAP、フローカウンタ、注釈 ✔。注釈は「開始と終了の Unix 時刻、影響を受けたフロー、攻撃の種類」✔。
+- **攻撃**：ARP スプーフィング ✔、SYN flood、各種リフレクション（後者は未確認）。
+- **検証できること**：`IP_MAC_BINDING_CHANGED`（ARP スプーフィング）の再現率。フラッド攻撃は、Quarant に現在検出器がないことを確認する用途（Phase 2 の候補）。
+- **限界**：
+  - 攻撃はラボのツールで生成したもので、量で押すタイプが中心。
+  - Mirai、外向きのスキャン、C2 は含まれない。
+
+### IoT-23
+
+- **引用**：Garcia, Parmisano, Erquiaga (2020), IoT-23, Zenodo, doi:10.5281/zenodo.4743746
+- **URL**：https://www.stratosphereips.org/datasets-iot23
+- **ライセンス**：CC BY 4.0 ✔
+- **形式**：全体アーカイブ 21.5GB（PCAP を含む）✔。PCAP を除いた版は 8.8GB ✔。
+- **シナリオ**：悪性 20 件と正常 3 件 ✔。正常の 3 件は Philips Hue、Amazon Echo、Somfy のドアロック ✔。
+- **正解**：Zeek の flow 単位のラベル ✔。
+- **検証できること**：
+  - `OUTBOUND_SCAN_SUSPECTED`（Mirai の 23/2323 番ポートへのスキャン）
+  - `PERIODIC_COMMUNICATION_OBSERVED`（`C&C-HeartBeat`）
+  - 正常な 3 機器での誤検知
+- **限界**：
+  - 感染させた機器は主に Raspberry Pi で、市販の IoT 機器ではない（論文と二次情報による。未確認）。
+  - 1 シナリオに 1 台なので、LAN の文脈（他の機器の mDNS など）はほぼない。機器識別の検証には使えない。
+  - ラベルは flow 単位なので、5-tuple と時刻で Quarant のイベントと結合する必要がある。
+
+### CIC IoT Dataset 2022
+
+- **引用**：Dadkhah et al., PST 2022
+- **URL**：https://www.unb.ca/cic/datasets/iotdataset-2022.html
+- **ライセンス**：CIC 共通の条件 ✔ ── "You may redistribute, republish, and mirror our datasets in any form; however, any use or redistribution of the data must include a citation to the dataset and the research paper listed."
+- **形式**：PCAP。起動時、待機時、操作時などの種類別に分かれている（未確認）。登録フォームが必要。
+- **検証できること**：新しい機器での識別（起動時の DHCP）、TLS の実態、RTSP のブルートフォース。
+- **限界**：攻撃は少ない。ハブを経由する Zigbee や Z-Wave の機器はハブの MAC にまとめられてしまう。
+
+## 見送ったデータセットと理由
+
+| データセット | 理由 |
+|---|---|
+| N-BaIoT（UCI） | 特徴量 CSV だけで、PCAP がない |
+| CICIoT2023 / CIC IoT-DIAD 2024 | 容量が非常に大きい。Mirai はフラッド攻撃だけでスキャンの段階がない。DIAD は PCAP の提供が未確認。Recon と Spoofing のファイルは Phase 2 の補助候補として残す |
+| Bot-IoT / TON_IoT | Cyber Range 上の模擬 IoT で、家庭 LAN の識別情報がない。利用は学術目的に限られる。スキャンのラベルは補助候補 |
+| Mon(IoT)r IMC'19 | 実機 81 台で、平文での情報露出の正解として最も強い。ただしデータ共有契約が必要で、機関の外に出せず、機密保持の義務もある。リポジトリやテストには使えない。平文検出の評価が必要になった段階で、利用者が申請するかを判断する |
+| YourThings | 手作業の脆弱性評価が「パッシブ監視で見逃したこと」の正解になり得る。ただし正式なライセンスがなく、IP と機器の対応しかない。Phase 2 の候補 |
+| IoT Sentinel | セットアップ時の通信だけ。ライセンスが明記されていない。DHCP 指紋の補助候補 |
+| MQTT-IoT-IDS2020 / IoT Network Intrusion（Kang） | ライセンスが明記されていない（未確認）。MQTT の認証情報と、Telnet のブルートフォースの小規模な確認には有用。利用前に条件を確認する |
+
+## どのデータセットでも測れないこと
+
+- **ファームウェアと CVE の正解**：公開データセットにない。I5 の照合は、引き続き「適用可否は未確認」とする。
+- **TLS 1.3 の証明書**：暗号化されているため検査できない。
+- **ハブ配下の機器**：Zigbee や Z-Wave の機器は見えない。
+- **実環境での感染**：ラボで生成した攻撃は、実際の感染とは違う。IoT-23 が最も近い。
+- **ラベルの粒度**：ファイル単位や flow 単位のラベルを Quarant のイベントと結合するときに誤差が出る。
+
+## データの取り扱い
+
+- ダウンロードしたデータは**リポジトリの外**に置く（例：`~/datasets/`）。
+  - `.gitignore` で `*.pcap` と `runs/` を除外済み。
+  - IoT-23 と CIC は引用すれば再配布できるが、容量の点からもリポジトリには入れない。
+- 実験ごとに、データセット名、ファイル名、SHA-256、Quarant のコミットを記録する（[EVALUATION.md](EVALUATION.md)）。
+- 引用の条件：
+  - 論文と発表資料では、上の引用を必ず付ける。
+  - CIC は「データセットと論文の両方」を引用する。
+  - IoT-23 は CC BY に従ってクレジットを表示する。
+
+## 次の作業
+
+1. **UNSW traces を 1 日分取得する**：`List_Of_Devices.txt` を正解ラベルに変換するツールを作り、識別率を `label-eval` で測る。
+2. **IoT-23 の小さな悪性シナリオを 1 件と、正常シナリオを 1 件取得する**：`conn.log.labeled` を Quarant のイベントと結合して評価する仕組みを作る（`label-eval` を flow 単位のラベルに対応させる）。
+3. **UNSW attack traces の ARP スプーフィング区間を取得する**：その区間での `IP_MAC_BINDING_CHANGED` の再現率を測る。
+4. **結果の記録**：上の 3 つを `docs/EXPERIMENTS.md` に記録する。
