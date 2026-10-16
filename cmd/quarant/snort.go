@@ -23,6 +23,7 @@ type snortImportConfig struct {
 	TaxonomyPolicyPath    string
 	MetadataReportOutPath string
 	RulesPaths            []string
+	BaseTime              time.Time
 }
 
 type snortImportResult struct {
@@ -39,14 +40,15 @@ type snortAlertJSON struct {
 	Signature   string `json:"signature"`
 	Msg         string `json:"msg"`
 	ClassType   string `json:"classtype"`
+	Class       string `json:"class"`
 	Category    string `json:"category"`
 	Priority    int    `json:"priority"`
 	SrcIP       string `json:"src_ip"`
-	SrcPort     uint16 `json:"src_port"`
+	SrcPort     any    `json:"src_port"`
 	DstIP       string `json:"dst_ip"`
-	DstPort     uint16 `json:"dst_port"`
+	DstPort     any    `json:"dst_port"`
 	DestIP      string `json:"dest_ip"`
-	DestPort    uint16 `json:"dest_port"`
+	DestPort    any    `json:"dest_port"`
 	SrcAddr     string `json:"src_addr"`
 	DstAddr     string `json:"dst_addr"`
 	SrcAP       string `json:"src_ap"`
@@ -120,11 +122,19 @@ func runSnortImportCLI(args []string, out io.Writer) error {
 	fs.StringVar(&cfg.MetadataReportOutPath, "metadata-report-out", "", "Snort metadata quality report JSON output path (default: out-dir/snort_metadata_report.json)")
 	fs.StringVar(&cfg.TaxonomyPolicyPath, "taxonomy-policy", "", "taxonomy policy JSON path, empty for built-in default")
 	fs.Var(&rulesPaths, "rules", "Snort .rules file for sid/msg/classtype/priority metadata enrichment; may be repeated")
+	nowValue := fs.String("now", "", "base time for alert timestamps without a year, RFC3339")
 	if err := fs.Parse(normalizeFlagArgs(fs, args)); err != nil {
 		return fmt.Errorf("parse snort import flags: %w", err)
 	}
 	if fs.NArg() != 0 {
 		return fmt.Errorf("snort import accepts flags only")
+	}
+	if strings.TrimSpace(*nowValue) != "" {
+		now, err := time.Parse(time.RFC3339, strings.TrimSpace(*nowValue))
+		if err != nil {
+			return fmt.Errorf("parse --now: %w", err)
+		}
+		cfg.BaseTime = now
 	}
 	cfg.RulesPaths = rulesPaths
 	result, err := runSnortImport(cfg)
@@ -145,7 +155,10 @@ func runSnortImport(cfg snortImportConfig) (snortImportResult, error) {
 	if err := os.MkdirAll(cfg.OutDir, 0755); err != nil {
 		return snortImportResult{}, err
 	}
-	events, err := readSnortAlerts(cfg.AlertsPath)
+	if cfg.BaseTime.IsZero() {
+		cfg.BaseTime = time.Now()
+	}
+	events, err := readSnortAlerts(cfg.AlertsPath, cfg.BaseTime)
 	if err != nil {
 		return snortImportResult{}, err
 	}
@@ -177,7 +190,7 @@ func runSnortImport(cfg snortImportConfig) (snortImportResult, error) {
 	return snortImportResult{SecurityEventCount: len(events), AttackFindingCount: len(attackEvidence.Findings), MetadataEnrichmentCount: enriched, RuleMetadataCount: len(rules)}, nil
 }
 
-func readSnortAlerts(path string) ([]reportapi.SecurityEvent, error) {
+func readSnortAlerts(path string, base time.Time) ([]reportapi.SecurityEvent, error) {
 	file, err := os.Open(path)
 	if err != nil {
 		return nil, fmt.Errorf("open %s: %w", path, err)
@@ -191,11 +204,11 @@ func readSnortAlerts(path string) ([]reportapi.SecurityEvent, error) {
 		if line == "" {
 			continue
 		}
-		if event, ok := parseSnortAlertJSON(line); ok {
+		if event, ok := parseSnortAlertJSON(line, base); ok {
 			events = append(events, event)
 			continue
 		}
-		if event, ok := parseSnortFastAlert(line); ok {
+		if event, ok := parseSnortFastAlert(line, base); ok {
 			events = append(events, event)
 		}
 	}
@@ -205,7 +218,7 @@ func readSnortAlerts(path string) ([]reportapi.SecurityEvent, error) {
 	return events, nil
 }
 
-func parseSnortAlertJSON(line string) (reportapi.SecurityEvent, bool) {
+func parseSnortAlertJSON(line string, base time.Time) (reportapi.SecurityEvent, bool) {
 	var alert snortAlertJSON
 	if err := json.Unmarshal([]byte(line), &alert); err != nil {
 		return reportapi.SecurityEvent{}, false
@@ -214,12 +227,8 @@ func parseSnortAlertJSON(line string) (reportapi.SecurityEvent, bool) {
 	_ = json.Unmarshal([]byte(line), &raw)
 	srcIP := firstNonEmptyString(alert.SrcIP, alert.SrcAddr, snortMapString(raw, "src_ip", "src_addr", "source_ip", "source.address"))
 	dstIP := firstNonEmptyString(alert.DstIP, alert.DestIP, alert.DstAddr, snortMapString(raw, "dst_ip", "dest_ip", "dst_addr", "destination_ip", "destination.address"))
-	srcPort := firstNonZeroUint16(alert.SrcPort, snortMapUint16(raw, "src_port", "source_port", "source.port"))
-	dstPort := alert.DstPort
-	if dstPort == 0 {
-		dstPort = alert.DestPort
-	}
-	dstPort = firstNonZeroUint16(dstPort, snortMapUint16(raw, "dst_port", "dest_port", "destination_port", "destination.port"))
+	srcPort := firstNonZeroUint16(snortUint16(alert.SrcPort), snortMapUint16(raw, "src_port", "source_port", "source.port"))
+	dstPort := firstNonZeroUint16(snortUint16(alert.DstPort), snortUint16(alert.DestPort), snortMapUint16(raw, "dst_port", "dest_port", "destination_port", "destination.port"))
 	if apIP, apPort := splitSnortEndpoint(alert.SrcAP); srcIP == "" && apIP != "" {
 		srcIP = apIP
 		if srcPort == 0 {
@@ -238,7 +247,7 @@ func parseSnortAlertJSON(line string) (reportapi.SecurityEvent, bool) {
 	}
 	signature := firstNonEmptyString(alert.Signature, alert.Msg, snortMapString(raw, "signature", "msg", "message", "alert.signature"))
 	sid := firstNonEmptyString(scalarString(alert.SID), snortMapString(raw, "sid", "signature_id", "alert.signature_id", "rule.sid"))
-	classtype := firstNonEmptyString(alert.ClassType, alert.Category, snortMapString(raw, "classtype", "class_type", "category", "alert.category", "rule.classtype"))
+	classtype := firstNonEmptyString(alert.ClassType, alert.Class, alert.Category, snortMapString(raw, "classtype", "class", "class_type", "category", "alert.category", "rule.classtype"))
 	priority := firstNonZeroInt(alert.Priority, snortMapInt(raw, "priority", "alert.severity", "rule.priority"))
 	protocol := firstNonEmptyString(alert.Protocol, alert.IPProto, snortMapString(raw, "proto", "protocol", "ip_proto"))
 	action := firstNonEmptyString(alert.Action, alert.AlertAction, snortMapString(raw, "action", "alert_action"), "alert")
@@ -246,7 +255,7 @@ func parseSnortAlertJSON(line string) (reportapi.SecurityEvent, bool) {
 		return reportapi.SecurityEvent{}, false
 	}
 	return snortSecurityEvent(
-		parseSensorTimestamp(firstNonEmptyString(alert.Timestamp, alert.Ts)),
+		parseSnortFastTimestamp(firstNonEmptyString(alert.Timestamp, alert.Ts), base),
 		sid,
 		signature,
 		classtype,
@@ -260,7 +269,7 @@ func parseSnortAlertJSON(line string) (reportapi.SecurityEvent, bool) {
 	), true
 }
 
-func parseSnortFastAlert(line string) (reportapi.SecurityEvent, bool) {
+func parseSnortFastAlert(line string, base time.Time) (reportapi.SecurityEvent, bool) {
 	matches := snortFastAlertPattern.FindStringSubmatch(line)
 	if len(matches) == 0 {
 		return reportapi.SecurityEvent{}, false
@@ -269,7 +278,7 @@ func parseSnortFastAlert(line string) (reportapi.SecurityEvent, bool) {
 	srcIP, srcPort := splitSnortEndpoint(matches[9])
 	dstIP, dstPort := splitSnortEndpoint(matches[10])
 	return snortSecurityEvent(
-		parseSnortFastTimestamp(matches[1]),
+		parseSnortFastTimestamp(matches[1], base),
 		matches[3],
 		matches[5],
 		matches[6],
@@ -552,14 +561,20 @@ func snortOnlyGenericTaxonomy(values []string) bool {
 	return true
 }
 
-func parseSnortFastTimestamp(value string) time.Time {
-	now := time.Now().UTC()
-	for _, layout := range []string{time.RFC3339Nano, time.RFC3339, "2006-01-02-15:04:05.999999", "2006-01-02-15:04:05", "01/02-15:04:05.999999", "01/02-15:04:05"} {
+// parseSnortFastTimestamp parses Snort fast-alert and alert_json timestamps
+// ("09/26-12:00:02.123456", or "26/09/26-12:00:02.123456" with snort -y).
+// Timestamps without a year take it from base, rolling back a year across New Year.
+func parseSnortFastTimestamp(value string, base time.Time) time.Time {
+	if base.IsZero() {
+		base = time.Now()
+	}
+	base = base.UTC()
+	for _, layout := range []string{time.RFC3339Nano, time.RFC3339, "2006-01-02-15:04:05.999999", "2006-01-02-15:04:05", "06/01/02-15:04:05.999999", "06/01/02-15:04:05", "01/02-15:04:05.999999", "01/02-15:04:05"} {
 		if t, err := time.Parse(layout, strings.TrimSpace(value)); err == nil {
 			if t.Year() > 0 {
 				return t.UTC()
 			}
-			return time.Date(now.Year(), t.Month(), t.Day(), t.Hour(), t.Minute(), t.Second(), t.Nanosecond(), time.UTC)
+			return withInferredLogYear(t, base).UTC()
 		}
 	}
 	return parseSensorTimestamp(value)
@@ -606,14 +621,28 @@ func snortMapUint16(raw map[string]any, keys ...string) uint16 {
 		if !ok {
 			continue
 		}
-		switch v := value.(type) {
-		case float64:
-			return uint16(v)
-		case int:
-			return uint16(v)
-		case string:
-			return uint16FromString(v)
+		if port := snortUint16(value); port != 0 {
+			return port
 		}
+	}
+	return 0
+}
+
+// snortUint16 accepts ports encoded as JSON numbers or strings ("45124").
+func snortUint16(value any) uint16 {
+	switch v := value.(type) {
+	case float64:
+		if v > 0 && v <= 65535 {
+			return uint16(v)
+		}
+	case int:
+		if v > 0 && v <= 65535 {
+			return uint16(v)
+		}
+	case json.Number:
+		return uint16FromString(v.String())
+	case string:
+		return uint16FromString(v)
 	}
 	return 0
 }

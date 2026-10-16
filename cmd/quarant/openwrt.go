@@ -41,6 +41,7 @@ type openWrtImportResult struct {
 	FlowCount          int
 	ObservationCount   int
 	DeviceCount        int
+	SkippedLineCount   int
 }
 
 type openWrtCollectConfig struct {
@@ -354,6 +355,9 @@ func runOpenWrtImportCLI(args []string, out io.Writer) error {
 		result.AttackFindingCount,
 		cfg.OutDir,
 	)
+	if result.SkippedLineCount > 0 {
+		fmt.Fprintf(out, "Skipped over-long log lines: %d\n", result.SkippedLineCount)
+	}
 	return nil
 }
 
@@ -406,10 +410,16 @@ func runOpenWrtCollectCLI(args []string, out io.Writer) error {
 	if len(result.CollectionErrors) > 0 {
 		fmt.Fprintf(out, "Collection warnings: %s\n", strings.Join(result.CollectionErrors, "; "))
 	}
+	if result.Import.SkippedLineCount > 0 {
+		fmt.Fprintf(out, "Skipped over-long log lines: %d\n", result.Import.SkippedLineCount)
+	}
 	return nil
 }
 
 func runOpenWrtCollect(cfg openWrtCollectConfig) (openWrtCollectResult, error) {
+	if err := validateOpenWrtSSHHost(cfg.Host); err != nil {
+		return openWrtCollectResult{}, err
+	}
 	if cfg.BaseTime.IsZero() {
 		cfg.BaseTime = time.Now()
 	}
@@ -480,8 +490,9 @@ func runOpenWrtSSHCommand(cfg openWrtCollectConfig, remoteCommand string) ([]byt
 	ctx, cancel := context.WithTimeout(context.Background(), cfg.Timeout)
 	defer cancel()
 
+	// "--" ends ssh option parsing so the destination can never be read as an option.
 	args := append([]string{}, cfg.SSHOptions...)
-	args = append(args, cfg.Host, remoteCommand)
+	args = append(args, "--", cfg.Host, remoteCommand)
 	cmd := exec.CommandContext(ctx, cfg.SSHBin, args...)
 	output, err := cmd.CombinedOutput()
 	if ctx.Err() == context.DeadlineExceeded {
@@ -491,6 +502,18 @@ func runOpenWrtSSHCommand(cfg openWrtCollectConfig, remoteCommand string) ([]byt
 		return output, fmt.Errorf("%w: %s", err, strings.TrimSpace(string(output)))
 	}
 	return output, nil
+}
+
+// validateOpenWrtSSHHost rejects SSH destinations that ssh would parse as options (for example "-oProxyCommand=...").
+func validateOpenWrtSSHHost(host string) error {
+	host = strings.TrimSpace(host)
+	if host == "" {
+		return fmt.Errorf("--host is required")
+	}
+	if strings.HasPrefix(host, "-") {
+		return fmt.Errorf("--host %q must not start with '-'", host)
+	}
+	return nil
 }
 
 func writeOpenWrtCollectStatus(path string, result openWrtCollectResult) error {
@@ -565,6 +588,7 @@ func runOpenWrtImport(cfg openWrtImportConfig) (openWrtImportResult, error) {
 		FlowCount:          len(importer.flows),
 		ObservationCount:   len(importer.observations),
 		DeviceCount:        len(importer.devices),
+		SkippedLineCount:   importer.skippedLines,
 	}, nil
 }
 
@@ -575,29 +599,40 @@ type openWrtImporter struct {
 	securityEvents []reportapi.SecurityEvent
 	flows          []analyzer.FlowRecord
 	observations   []analyzer.ObservationRecord
+	skippedLines   int
+}
+
+func (i *openWrtImporter) scan(path string, fn func(string) error) error {
+	skipped, err := scanOptionalFile(path, fn)
+	i.skippedLines += skipped
+	return err
 }
 
 func (i *openWrtImporter) readDHCPLeases(path string) error {
-	return scanOptionalFile(path, func(line string) error {
-		lease, ok := parseOpenWrtDHCPLease(line)
+	return i.scan(path, func(line string) error {
+		lease, ok := parseOpenWrtDHCPLease(line, i.baseTime)
 		if !ok {
 			return nil
 		}
 		device := i.device(lease.IP)
 		device.MAC = lease.MAC
-		device.LeaseExpiresAt = lease.SeenAt
+		device.LeaseExpiresAt = lease.ExpiresAt
 		device.LeaseState = lease.State
 		if lease.Hostname != "*" {
 			device.Hostname = lease.Hostname
 		}
-		device.FirstSeen = minNonZeroTime(device.FirstSeen, lease.SeenAt)
-		device.LastSeen = maxTime(device.LastSeen, lease.SeenAt)
+		// The lease file is a snapshot taken at the reference time; a lease that is
+		// still held shows the device was present then. The expiry is not a seen time.
+		if lease.State != "expired" {
+			device.FirstSeen = minNonZeroTime(device.FirstSeen, i.baseTime.UTC())
+			device.LastSeen = maxTime(device.LastSeen, i.baseTime.UTC())
+		}
 		return nil
 	})
 }
 
 func (i *openWrtImporter) readDNSLog(path string) error {
-	return scanOptionalFile(path, func(line string) error {
+	return i.scan(path, func(line string) error {
 		record, ok := parseOpenWrtDNSQuery(line, i.baseTime)
 		if !ok {
 			return nil
@@ -620,7 +655,7 @@ func (i *openWrtImporter) readDNSLog(path string) error {
 }
 
 func (i *openWrtImporter) readFirewallLog(path string) error {
-	return scanOptionalFile(path, func(line string) error {
+	return i.scan(path, func(line string) error {
 		record, ok := parseOpenWrtFirewallLine(line, i.baseTime)
 		if !ok {
 			return nil
@@ -654,7 +689,7 @@ func (i *openWrtImporter) readFirewallLog(path string) error {
 }
 
 func (i *openWrtImporter) readConntrack(path string) error {
-	return scanOptionalFile(path, func(line string) error {
+	return i.scan(path, func(line string) error {
 		record, ok := parseOpenWrtConntrackLine(line, i.baseTime)
 		if !ok {
 			return nil
@@ -786,14 +821,16 @@ func (i *openWrtImporter) inventory() []device.InventorySnapshot {
 }
 
 type openWrtDHCPLease struct {
-	SeenAt   time.Time
-	MAC      string
-	IP       string
-	Hostname string
-	State    string
+	ExpiresAt time.Time
+	MAC       string
+	IP        string
+	Hostname  string
+	State     string
 }
 
-func parseOpenWrtDHCPLease(line string) (openWrtDHCPLease, bool) {
+// parseOpenWrtDHCPLease parses a dnsmasq lease line. The first field is the lease
+// expiry epoch; 0 means an infinite lease and leaves ExpiresAt zero.
+func parseOpenWrtDHCPLease(line string, base time.Time) (openWrtDHCPLease, bool) {
 	fields := strings.Fields(line)
 	if len(fields) < 4 {
 		return openWrtDHCPLease{}, false
@@ -806,20 +843,28 @@ func parseOpenWrtDHCPLease(line string) (openWrtDHCPLease, bool) {
 	if net.ParseIP(ip) == nil {
 		return openWrtDHCPLease{}, false
 	}
-	return openWrtDHCPLease{
-		SeenAt:   time.Unix(epoch, 0).UTC(),
+	lease := openWrtDHCPLease{
 		MAC:      strings.ToLower(fields[1]),
 		IP:       ip,
 		Hostname: fields[3],
-		State:    openWrtLeaseState(time.Unix(epoch, 0).UTC()),
-	}, true
+	}
+	if epoch <= 0 {
+		lease.State = "infinite"
+		return lease, true
+	}
+	lease.ExpiresAt = time.Unix(epoch, 0).UTC()
+	lease.State = openWrtLeaseState(lease.ExpiresAt, base)
+	return lease, true
 }
 
-func openWrtLeaseState(expiresAt time.Time) string {
+func openWrtLeaseState(expiresAt, base time.Time) string {
 	if expiresAt.IsZero() {
 		return ""
 	}
-	if expiresAt.Before(time.Now().UTC()) {
+	if base.IsZero() {
+		base = time.Now()
+	}
+	if expiresAt.Before(base.UTC()) {
 		return "expired"
 	}
 	return "active"
@@ -904,6 +949,11 @@ func parseOpenWrtConntrackLine(line string, base time.Time) (openWrtConntrackRec
 		return openWrtConntrackRecord{}, false
 	}
 	protocol := strings.ToLower(fields[0])
+	// /proc/net/nf_conntrack lines start with the L3 family and number
+	// ("ipv4 2 tcp 6 ..."); conntrack -L starts with the L4 protocol.
+	if (protocol == "ipv4" || protocol == "ipv6") && len(fields) >= 3 {
+		protocol = strings.ToLower(fields[2])
+	}
 	srcIP := openWrtKV(line, "src")
 	dstIP := openWrtKV(line, "dst")
 	if net.ParseIP(srcIP) == nil || net.ParseIP(dstIP) == nil {
@@ -919,18 +969,41 @@ func parseOpenWrtConntrackLine(line string, base time.Time) (openWrtConntrackRec
 	}, true
 }
 
-var logTimePrefixRe = regexp.MustCompile(`^([A-Z][a-z]{2}\s+\d{1,2}\s+\d\d:\d\d:\d\d)`)
+// logreadTimePrefixRe matches OpenWrt logread output ("Sat Sep 26 12:00:02 2026 kern.warn ..."),
+// which carries the year; logTimePrefixRe matches classic syslog ("Sep 26 12:00:02 host ...").
+var (
+	logreadTimePrefixRe = regexp.MustCompile(`^[A-Z][a-z]{2}\s+([A-Z][a-z]{2})\s+(\d{1,2})\s+(\d\d:\d\d:\d\d)\s+(\d{4})\b`)
+	logTimePrefixRe     = regexp.MustCompile(`^([A-Z][a-z]{2})\s+(\d{1,2})\s+(\d\d:\d\d:\d\d)\b`)
+)
 
 func parseOpenWrtLogTime(line string, base time.Time) time.Time {
+	if matches := logreadTimePrefixRe.FindStringSubmatch(line); len(matches) == 5 {
+		parsed, err := time.ParseInLocation("Jan 2 15:04:05 2006", strings.Join(matches[1:], " "), base.Location())
+		if err == nil {
+			return parsed.UTC()
+		}
+	}
 	matches := logTimePrefixRe.FindStringSubmatch(line)
-	if len(matches) != 2 {
+	if len(matches) != 4 {
 		return base.UTC()
 	}
-	parsed, err := time.ParseInLocation("Jan 2 15:04:05", matches[1], base.Location())
+	parsed, err := time.ParseInLocation("Jan 2 15:04:05", strings.Join(matches[1:], " "), base.Location())
 	if err != nil {
 		return base.UTC()
 	}
-	return time.Date(base.Year(), parsed.Month(), parsed.Day(), parsed.Hour(), parsed.Minute(), parsed.Second(), 0, base.Location()).UTC()
+	return withInferredLogYear(parsed, base).UTC()
+}
+
+// withInferredLogYear places a timestamp parsed without a year in the year of base,
+// falling back to the previous year when that would land more than a day after base
+// (for example a "Dec 31" line imported with a January reference time).
+func withInferredLogYear(parsed, base time.Time) time.Time {
+	loc := base.Location()
+	t := time.Date(base.Year(), parsed.Month(), parsed.Day(), parsed.Hour(), parsed.Minute(), parsed.Second(), parsed.Nanosecond(), loc)
+	if t.After(base.Add(24 * time.Hour)) {
+		t = time.Date(base.Year()-1, parsed.Month(), parsed.Day(), parsed.Hour(), parsed.Minute(), parsed.Second(), parsed.Nanosecond(), loc)
+	}
+	return t
 }
 
 func openWrtKV(line, key string) string {
@@ -1220,23 +1293,53 @@ func firstNonEmptyString(values ...string) string {
 	return ""
 }
 
-func scanOptionalFile(path string, fn func(string) error) error {
+const openWrtMaxLineBytes = 16 * 1024 * 1024
+
+// scanOptionalFile calls fn for each line of path. Lines longer than
+// openWrtMaxLineBytes are skipped and counted instead of aborting the import.
+func scanOptionalFile(path string, fn func(string) error) (int, error) {
 	if strings.TrimSpace(path) == "" {
-		return nil
+		return 0, nil
 	}
 	file, err := os.Open(path)
 	if err != nil {
-		return err
+		return 0, err
 	}
 	defer file.Close()
 
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		if err := fn(scanner.Text()); err != nil {
-			return err
+	reader := bufio.NewReaderSize(file, 64*1024)
+	skipped := 0
+	var line []byte
+	tooLong := false
+	for {
+		chunk, err := reader.ReadSlice('\n')
+		if !tooLong {
+			if len(line)+len(chunk) > openWrtMaxLineBytes {
+				tooLong = true
+				line = line[:0]
+			} else {
+				line = append(line, chunk...)
+			}
+		}
+		if err == bufio.ErrBufferFull {
+			continue
+		}
+		if err != nil && err != io.EOF {
+			return skipped, err
+		}
+		if tooLong {
+			skipped++
+		} else if len(line) > 0 {
+			if fnErr := fn(strings.TrimRight(string(line), "\r\n")); fnErr != nil {
+				return skipped, fnErr
+			}
+		}
+		line = line[:0]
+		tooLong = false
+		if err == io.EOF {
+			return skipped, nil
 		}
 	}
-	return scanner.Err()
 }
 
 func writeOpenWrtJSONL[T any](path string, items []T) error {

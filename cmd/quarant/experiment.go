@@ -265,7 +265,7 @@ func runExperimentImports(window string, cfg experimentRunConfig, manifest *Expe
 	}
 	if strings.TrimSpace(snortAlerts) != "" {
 		outDir := filepath.Join(base, "snort")
-		if _, err := runSnortImport(snortImportConfig{AlertsPath: snortAlerts, OutDir: outDir, TaxonomyPolicyPath: cfg.TaxonomyPolicyPath, RulesPaths: experimentSnortRules(snortAlerts)}); err != nil {
+		if _, err := runSnortImport(snortImportConfig{AlertsPath: snortAlerts, OutDir: outDir, TaxonomyPolicyPath: cfg.TaxonomyPolicyPath, RulesPaths: experimentSnortRules(snortAlerts), BaseTime: now}); err != nil {
 			return nil, fmt.Errorf("%s snort import: %w", window, err)
 		}
 		manifest.Steps = append(manifest.Steps, ExperimentRunStep{Name: window + "_snort_import", Status: "complete", Output: outDir})

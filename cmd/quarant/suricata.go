@@ -192,8 +192,11 @@ func readSuricataEVE(path string) ([]suricataEVERecord, error) {
 		if err := json.Unmarshal([]byte(line), &raw); err != nil {
 			continue
 		}
+		// UseNumber keeps 64-bit flow_id values exact; float64 would merge distinct flows.
 		var record suricataEVERecord
-		if err := json.Unmarshal([]byte(line), &record); err != nil {
+		dec := json.NewDecoder(strings.NewReader(line))
+		dec.UseNumber()
+		if err := dec.Decode(&record); err != nil {
 			continue
 		}
 		record.Raw = raw

@@ -10,10 +10,12 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"time"
 
 	"quarant/analyzer"
+	"quarant/analyzer/device"
 	"quarant/internal/reportapi"
 )
 
@@ -117,7 +119,15 @@ func assembleEvidenceRunWithPolicy(sources []evidenceSourceDir, outDir, taxonomy
 	manifest := reportapi.EvidenceManifest{GeneratedAt: time.Now().UTC().Format(time.RFC3339), Version: "evidence-manifest-v1"}
 	var rawEventCount, rawSecurityCount, rawFlowCount, rawObservationCount int
 	coverageInputs := []reportapi.SourceCoverageInput{}
+	inventories := []analyzer.DeviceInventoryReport{}
 	for _, source := range sources {
+		inventory, ok, err := loadDeviceInventoryReport(filepath.Join(source.path, "device_inventory.json"))
+		if err != nil {
+			return reportapi.EvidenceManifest{}, err
+		}
+		if ok {
+			inventories = append(inventories, inventory)
+		}
 		sourceEvents, err := loadAnalyzerEvents(filepath.Join(source.path, "events.jsonl"))
 		if err != nil {
 			return reportapi.EvidenceManifest{}, err
@@ -170,6 +180,13 @@ func assembleEvidenceRunWithPolicy(sources []evidenceSourceDir, outDir, taxonomy
 	coveragePath := filepath.Join(outDir, "source_coverage_report.json")
 	taxonomyCoveragePath := filepath.Join(outDir, "taxonomy_coverage_report.json")
 	manifestPath := filepath.Join(outDir, "evidence_manifest.json")
+	inventoryPath := filepath.Join(outDir, "device_inventory.json")
+	if len(inventories) > 0 {
+		generatedAt, devices := mergeDeviceInventories(inventories)
+		if err := analyzer.WriteDeviceInventoryJSON(inventoryPath, generatedAt, devices); err != nil {
+			return reportapi.EvidenceManifest{}, err
+		}
+	}
 	if err := writeJSONL(eventsPath, events); err != nil {
 		return reportapi.EvidenceManifest{}, err
 	}
@@ -250,6 +267,127 @@ func loadAnalyzerEvents(path string) ([]analyzer.Event, error) {
 		return nil, fmt.Errorf("scan %s: %w", path, err)
 	}
 	return out, nil
+}
+
+// loadDeviceInventoryReport reads a sensor's device_inventory.json; ok is false when the file is absent.
+func loadDeviceInventoryReport(path string) (analyzer.DeviceInventoryReport, bool, error) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return analyzer.DeviceInventoryReport{}, false, nil
+		}
+		return analyzer.DeviceInventoryReport{}, false, fmt.Errorf("read %s: %w", path, err)
+	}
+	if strings.TrimSpace(string(data)) == "" {
+		return analyzer.DeviceInventoryReport{}, false, nil
+	}
+	// Malformed inventories are skipped, matching reportapi.LoadInventory.
+	var report analyzer.DeviceInventoryReport
+	if err := json.Unmarshal(data, &report); err != nil {
+		return analyzer.DeviceInventoryReport{}, false, nil
+	}
+	return report, true, nil
+}
+
+// mergeDeviceInventories merges sensor inventories by IP so DHCP identity (MAC,
+// hostname) survives assembly. Entries carrying MAC/hostname win identity fields,
+// other fields are filled when empty, seen times widen and observed sets are unioned.
+// The returned time is the latest input generated_at, keeping replays deterministic.
+func mergeDeviceInventories(reports []analyzer.DeviceInventoryReport) (time.Time, []device.InventorySnapshot) {
+	var generatedAt time.Time
+	byIP := map[string]*device.InventorySnapshot{}
+	for _, report := range reports {
+		if t, err := time.Parse(time.RFC3339, report.GeneratedAt); err == nil && t.After(generatedAt) {
+			generatedAt = t
+		}
+		for _, item := range report.Devices {
+			ip := strings.TrimSpace(item.IP)
+			if ip == "" {
+				continue
+			}
+			current := byIP[ip]
+			if current == nil {
+				copied := item
+				copied.IP = ip
+				byIP[ip] = &copied
+				continue
+			}
+			mergeInventorySnapshot(current, item)
+		}
+	}
+	out := make([]device.InventorySnapshot, 0, len(byIP))
+	for _, item := range byIP {
+		out = append(out, *item)
+	}
+	sort.SliceStable(out, func(a, b int) bool { return out[a].IP < out[b].IP })
+	return generatedAt, out
+}
+
+func mergeInventorySnapshot(dst *device.InventorySnapshot, src device.InventorySnapshot) {
+	srcHasIdentity := src.MACAddress != "" || src.Hostname != ""
+	dstHasIdentity := dst.MACAddress != "" || dst.Hostname != ""
+	if srcHasIdentity && !dstHasIdentity {
+		merged := src
+		merged.IP = dst.IP
+		mergeInventorySnapshot(&merged, *dst)
+		*dst = merged
+		return
+	}
+	fill := func(target *string, value string) {
+		if strings.TrimSpace(*target) == "" {
+			*target = value
+		}
+	}
+	fill(&dst.MACAddress, src.MACAddress)
+	fill(&dst.Hostname, src.Hostname)
+	fill(&dst.DHCPLeaseExpiresAt, src.DHCPLeaseExpiresAt)
+	fill(&dst.DHCPLeaseState, src.DHCPLeaseState)
+	fill(&dst.CategoryCandidate, src.CategoryCandidate)
+	fill(&dst.CategoryConfidence, src.CategoryConfidence)
+	fill(&dst.VendorCandidate, src.VendorCandidate)
+	fill(&dst.VendorConfidence, src.VendorConfidence)
+	fill(&dst.FamilyCandidate, src.FamilyCandidate)
+	fill(&dst.FamilyConfidence, src.FamilyConfidence)
+	dst.FirstSeen = inventoryTimeBound(dst.FirstSeen, src.FirstSeen, true)
+	dst.LastSeen = inventoryTimeBound(dst.LastSeen, src.LastSeen, false)
+	dst.ObservedProtocols = unionSortedStrings(dst.ObservedProtocols, src.ObservedProtocols)
+	dst.ObservedHosts = unionSortedStrings(dst.ObservedHosts, src.ObservedHosts)
+	dst.ObservedSNI = unionSortedStrings(dst.ObservedSNI, src.ObservedSNI)
+	ports := map[uint16]bool{}
+	for _, port := range append(append([]uint16{}, dst.ObservedPorts...), src.ObservedPorts...) {
+		ports[port] = true
+	}
+	dst.ObservedPorts = sortedOpenWrtPortSet(ports)
+}
+
+func inventoryTimeBound(current, candidate string, earliest bool) string {
+	if strings.TrimSpace(candidate) == "" {
+		return current
+	}
+	if strings.TrimSpace(current) == "" {
+		return candidate
+	}
+	a, errA := time.Parse(time.RFC3339, current)
+	b, errB := time.Parse(time.RFC3339, candidate)
+	if errA != nil || errB != nil {
+		return current
+	}
+	if (earliest && b.Before(a)) || (!earliest && b.After(a)) {
+		return candidate
+	}
+	return current
+}
+
+func unionSortedStrings(a, b []string) []string {
+	set := map[string]bool{}
+	for _, value := range append(append([]string{}, a...), b...) {
+		set[value] = true
+	}
+	out := sortedOpenWrtStringSet(set)
+	if len(out) == 0 {
+		return nil
+	}
+	return out
 }
 
 func tagSecurityEventsSource(events []reportapi.SecurityEvent, source string) []reportapi.SecurityEvent {

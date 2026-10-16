@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"io"
@@ -271,6 +272,14 @@ func readZeekRows(path string) ([]map[string]string, error) {
 		if strings.HasPrefix(line, "#") {
 			continue
 		}
+		// Zeek writes one JSON object per line with LogAscii::use_json=T.
+		if strings.HasPrefix(line, "{") {
+			// Malformed (for example truncated) JSON lines are skipped.
+			if row, err := zeekJSONRow(line); err == nil {
+				rows = append(rows, row)
+			}
+			continue
+		}
 		values := strings.Split(line, "\t")
 		if len(fields) == 0 {
 			values = strings.Fields(line)
@@ -288,6 +297,47 @@ func readZeekRows(path string) ([]map[string]string, error) {
 		return nil, fmt.Errorf("scan %s: %w", path, err)
 	}
 	return rows, nil
+}
+
+// zeekJSONRow flattens a Zeek JSON log record into the same field map the TSV
+// reader produces; keys are already dotted ("id.orig_h") in Zeek JSON output.
+func zeekJSONRow(line string) (map[string]string, error) {
+	dec := json.NewDecoder(strings.NewReader(line))
+	dec.UseNumber()
+	var raw map[string]any
+	if err := dec.Decode(&raw); err != nil {
+		return nil, err
+	}
+	row := map[string]string{}
+	for key, value := range raw {
+		row[key] = zeekJSONValue(value)
+	}
+	return row, nil
+}
+
+func zeekJSONValue(value any) string {
+	switch v := value.(type) {
+	case nil:
+		return ""
+	case string:
+		return zeekValue(v)
+	case json.Number:
+		return v.String()
+	case bool:
+		if v {
+			return "T"
+		}
+		return "F"
+	case []any:
+		parts := make([]string, 0, len(v))
+		for _, item := range v {
+			parts = append(parts, zeekJSONValue(item))
+		}
+		return strings.Join(parts, ",")
+	default:
+		data, _ := json.Marshal(v)
+		return string(data)
+	}
 }
 
 func defaultZeekFields(count int) []string {
