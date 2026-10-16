@@ -3,11 +3,11 @@ package reportapi
 import (
 	"encoding/json"
 	"net"
-	"os"
-	"path/filepath"
 	"sort"
 	"strings"
 	"time"
+
+	"quarant/analyzer/knowledge"
 )
 
 type ProtectionSummary struct {
@@ -564,11 +564,7 @@ func normalizeProtectionCategory(category string) string {
 }
 
 func loadProtectionCategoryBaselines() map[string]protectionCategoryBaseline {
-	path := findKnowledgeFile("category_behavior_baselines.json")
-	if path == "" {
-		return fallbackProtectionCategoryBaselines()
-	}
-	data, err := os.ReadFile(path)
+	data, err := knowledge.ReadFile("category_behavior_baselines.json")
 	if err != nil {
 		return fallbackProtectionCategoryBaselines()
 	}
@@ -605,31 +601,6 @@ func fallbackProtectionCategoryBaselines() map[string]protectionCategoryBaseline
 			PlaintextTolerance: "limited",
 		},
 	}
-}
-
-func findKnowledgeFile(name string) string {
-	candidates := []string{
-		filepath.Join("knowledge", name),
-		filepath.Join("..", "knowledge", name),
-		filepath.Join("..", "..", "knowledge", name),
-	}
-	if cwd, err := os.Getwd(); err == nil {
-		current := cwd
-		for i := 0; i < 6; i++ {
-			candidates = append(candidates, filepath.Join(current, "knowledge", name))
-			parent := filepath.Dir(current)
-			if parent == current {
-				break
-			}
-			current = parent
-		}
-	}
-	for _, candidate := range candidates {
-		if info, err := os.Stat(candidate); err == nil && !info.IsDir() {
-			return candidate
-		}
-	}
-	return ""
 }
 
 func applyCategoryExpectations(profile *DeviceBehaviorProfile, category string, baselines map[string]protectionCategoryBaseline) {

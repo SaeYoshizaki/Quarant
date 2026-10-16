@@ -2,10 +2,14 @@ package knowledge
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
+
+	knowledgefiles "quarant/knowledge"
 )
 
 const knowledgeDir = "knowledge"
@@ -185,10 +189,24 @@ type KnownDevicesCatalog struct {
 	index   map[string]KnownDeviceRecord
 }
 
+// DirEnv names an environment variable that, when set, makes Quarant read the
+// knowledge base from that directory instead of the copy embedded at build
+// time. Use it to try edited knowledge files without rebuilding.
+const DirEnv = "QUARANT_KNOWLEDGE_DIR"
+
+// ReadFile returns the content of a knowledge file by base name.
+func ReadFile(name string) ([]byte, error) {
+	name = filepath.Base(name)
+	if dir := strings.TrimSpace(os.Getenv(DirEnv)); dir != "" {
+		return os.ReadFile(filepath.Join(dir, name))
+	}
+	return fs.ReadFile(knowledgefiles.Files, name)
+}
+
 func loadJSON(path string, out any) error {
-	data, err := os.ReadFile(path)
+	data, err := ReadFile(path)
 	if err != nil {
-		return fmt.Errorf("read %s: %w", path, err)
+		return fmt.Errorf("read knowledge file %s: %w", filepath.Base(path), err)
 	}
 
 	if err := json.Unmarshal(data, out); err != nil {
@@ -199,8 +217,8 @@ func loadJSON(path string, out any) error {
 }
 
 func optionalKnowledgeFileMissing(path string) bool {
-	_, err := os.Stat(path)
-	return err != nil && os.IsNotExist(err)
+	_, err := ReadFile(path)
+	return err != nil && errors.Is(err, fs.ErrNotExist)
 }
 
 func LoadDeviceCategories() (*DeviceCategories, error) {
