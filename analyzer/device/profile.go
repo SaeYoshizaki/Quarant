@@ -43,6 +43,12 @@ type DeviceProfile struct {
 
 	JA3 string
 
+	// Link-layer and discovery identity (see identity_hints.go).
+	MAC           string
+	MACs          map[string]bool
+	IdentityHints map[string]*identityHint
+	DNSQueries    map[string]bool
+
 	IdentitySignalObservations map[string]ObservationCounter
 	NotificationObservations   map[string]ObservationCounter
 

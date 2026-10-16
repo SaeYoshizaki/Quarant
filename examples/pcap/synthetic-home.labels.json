@@ -1,0 +1,95 @@
+{
+  "name": "home-iot-v1",
+  "description": "Synthetic household network: IP camera, smart plug, compromised DVR, smartphone. One hour, generated in code.",
+  "start": "2026-09-26T10:00:00Z",
+  "end": "2026-09-26T11:00:00Z",
+  "local_net": "192.168.50.0/24",
+  "devices": {
+    "192.168.50.20": "ip_camera",
+    "192.168.50.21": "smart_plug",
+    "192.168.50.22": "dvr_compromised",
+    "192.168.50.30": "smartphone"
+  },
+  "labels": [
+    {
+      "id": "L01",
+      "device_ip": "192.168.50.20",
+      "kind": "weak_tls_version",
+      "malicious": false,
+      "visibility": "observable",
+      "description": "Camera offers only TLS 1.0 to its cloud endpoint."
+    },
+    {
+      "id": "L02",
+      "device_ip": "192.168.50.20",
+      "kind": "cleartext_credentials_http",
+      "malicious": false,
+      "visibility": "observable",
+      "description": "Camera sends HTTP Basic credentials over plain HTTP."
+    },
+    {
+      "id": "L03",
+      "device_ip": "192.168.50.20",
+      "kind": "cleartext_firmware_update",
+      "malicious": false,
+      "visibility": "observable",
+      "description": "Camera checks for firmware over plain HTTP."
+    },
+    {
+      "id": "L04",
+      "device_ip": "192.168.50.20",
+      "kind": "telnet_service_exposed",
+      "malicious": false,
+      "visibility": "observable",
+      "description": "Camera runs a Telnet login service reachable on the LAN."
+    },
+    {
+      "id": "L05",
+      "device_ip": "192.168.50.20",
+      "kind": "http_admin_interface",
+      "malicious": false,
+      "visibility": "observable",
+      "description": "Camera serves its admin login page over plain HTTP."
+    },
+    {
+      "id": "L06",
+      "device_ip": "192.168.50.21",
+      "kind": "cleartext_credentials_mqtt",
+      "malicious": false,
+      "visibility": "observable",
+      "description": "Smart plug sends MQTT username/password without TLS."
+    },
+    {
+      "id": "L07",
+      "device_ip": "192.168.50.22",
+      "kind": "periodic_beacon",
+      "malicious": true,
+      "visibility": "observable",
+      "description": "DVR contacts the same external host every 60 s (C2-like beacon)."
+    },
+    {
+      "id": "L08",
+      "device_ip": "192.168.50.22",
+      "kind": "outbound_telnet_scan",
+      "malicious": true,
+      "visibility": "observable",
+      "description": "DVR sends TCP SYNs to 120 external hosts on 23/2323 within 60 s (Mirai-like)."
+    },
+    {
+      "id": "L09",
+      "device_ip": "192.168.50.20",
+      "kind": "known_vulnerable_firmware",
+      "malicious": false,
+      "visibility": "hidden",
+      "description": "Camera firmware 5.4.1 is assumed vulnerable in this scenario; only the version string in a User-Agent is visible, the vulnerability itself is not."
+    },
+    {
+      "id": "N01",
+      "device_ip": "192.168.50.30",
+      "kind": "benign_modern_tls",
+      "malicious": false,
+      "visibility": "observable",
+      "description": "Negative control: phone uses TLS 1.2/1.3 to a web server; nothing should be flagged."
+    }
+  ]
+}

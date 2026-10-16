@@ -19,6 +19,9 @@ type RiskSummary struct {
 type InventorySnapshot struct {
 	IP                 string         `json:"ip"`
 	MACAddress         string         `json:"mac_address,omitempty"`
+	MACAddresses       []string       `json:"mac_addresses,omitempty"`
+	MACVendor          string         `json:"mac_vendor,omitempty"`
+	MACRandomized      bool           `json:"mac_locally_administered,omitempty"`
 	Hostname           string         `json:"hostname,omitempty"`
 	DHCPLeaseExpiresAt string         `json:"dhcp_lease_expires_at,omitempty"`
 	DHCPLeaseState     string         `json:"dhcp_lease_state,omitempty"`
@@ -40,6 +43,9 @@ type InventorySnapshot struct {
 	LastRiskEventType  string         `json:"last_risk_event_type,omitempty"`
 	LastRiskEventTS    string         `json:"last_risk_event_ts,omitempty"`
 	RiskSummary        *RiskSummary   `json:"risk_summary,omitempty"`
+
+	DNSQueries       []string           `json:"dns_queries,omitempty"`
+	IdentityEvidence []IdentityEvidence `json:"identity_evidence,omitempty"`
 }
 
 func (p *DeviceProfile) ObserveActivity(now time.Time) {
@@ -101,8 +107,21 @@ func (p *DeviceProfile) Snapshot() InventorySnapshot {
 		categoryConfidence = "very_low"
 	}
 
+	var macs []string
+	if len(p.MACs) > 1 {
+		macs = sortedStringMapKeys(p.MACs)
+	}
+	hostname := p.firstIdentityValue("hostname", "dhcp", "mdns")
+
 	return InventorySnapshot{
 		IP:                 p.IP,
+		MACAddress:         p.MAC,
+		MACAddresses:       macs,
+		MACVendor:          p.firstIdentityValue("mac_vendor", "oui_registry"),
+		MACRandomized:      p.firstIdentityValue("mac_locally_administered", "ethernet") == "true",
+		Hostname:           hostname,
+		DNSQueries:         sortedStringMapKeys(p.DNSQueries),
+		IdentityEvidence:   p.IdentityEvidenceList(),
 		FirstSeen:          formatSnapshotTime(p.FirstSeen),
 		LastSeen:           formatSnapshotTime(p.LastSeen),
 		ObservedProtocols:  sortedStringMapKeys(p.Protocols),

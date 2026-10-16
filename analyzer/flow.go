@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sort"
 	"strings"
+	"sync"
 	"time"
 
 	"quarant/analyzer/device"
@@ -24,6 +25,12 @@ type FlowHandler struct {
 	knowledge       *knowledge.DB
 	lastCleanup     time.Time
 	localNets       LocalNetworks
+
+	// mu serializes packet handling with snapshot readers (the periodic
+	// inventory writer runs in another goroutine).
+	mu          sync.Mutex
+	macToIP     map[string]string
+	pendingDHCP map[string]pendingDHCP
 }
 
 // SetLocalNetworks restricts device tracking to the given ranges. Hosts
@@ -119,6 +126,8 @@ func (h *FlowHandler) Flush(at time.Time) {
 	if h == nil || h.cache == nil {
 		return
 	}
+	h.mu.Lock()
+	defer h.mu.Unlock()
 	h.cache.Drain(func(key string, st *FlowState) {
 		now := at
 		if now.IsZero() || now.Before(st.LastSeen) {
@@ -148,6 +157,8 @@ func (h *FlowHandler) DeviceInventory() []device.InventorySnapshot {
 	if h == nil || h.devices == nil {
 		return nil
 	}
+	h.mu.Lock()
+	defer h.mu.Unlock()
 	return h.devices.Snapshots()
 }
 
@@ -763,18 +774,28 @@ func classifyFlowProtocol(st *FlowState) (string, string) {
 }
 
 func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+
+	now := packetTime(packet)
 	srcIP, dstIP, ok := packetIPStrings(packet)
+	h.observeLinkLayer(packet, now, srcIP)
 	if !ok {
 		return
 	}
 
-	now := packetTime(packet)
 	if udpLayer := packet.Layer(layers.LayerTypeUDP); udpLayer != nil {
 		udp := udpLayer.(*layers.UDP)
 		var dns *layers.DNS
 		if dnsLayer := packet.Layer(layers.LayerTypeDNS); dnsLayer != nil {
 			dns = dnsLayer.(*layers.DNS)
+		} else if udp.SrcPort == 5353 || udp.DstPort == 5353 {
+			// gopacket only auto-decodes DNS on port 53; mDNS uses the same
+			// wire format on 5353.
+			dns = decodeDNS(udp.Payload)
 		}
+		h.observeDiscovery(packet, now, srcIP, udp, dns)
+		h.observeUDPActivity(now, srcIP, dstIP, uint16(udp.SrcPort), uint16(udp.DstPort), dns)
 		h.writeUDPPacketObservations(now, srcIP, dstIP, uint16(udp.SrcPort), uint16(udp.DstPort), len(udp.Payload), dns)
 		return
 	}

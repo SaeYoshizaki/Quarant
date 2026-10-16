@@ -5,5 +5,5 @@ package knowledge
 
 import "embed"
 
-//go:embed *.json
+//go:embed *.json *.tsv
 var Files embed.FS
