@@ -30,6 +30,34 @@ passive observation
 - 対策後に、accepted / exposed service attempt は減ったか。
 - 正常な DNS / DHCP / NTP / cloud 通信は壊れていないか。
 
+## PCAP から機器ごとのリスクを見る
+
+Quarant 独自の解析エンジンは、PCAP（またはライブキャプチャ）から次のものを作ります。
+
+- 機器ごとの識別情報：MAC、OUI ベンダー、DHCP、mDNS、SSDP、DNS
+- 平文での認証情報露出、TLS の弱点
+- 振る舞い：スキャン、周期通信
+
+各検出結果には、根拠の種類として `basis`（`observed`、`inferred`、`reference_match`）が付きます。
+
+リポジトリには、正解ラベル付きの合成 PCAP（実データを含まない）が同梱されています。
+
+```bash
+go run ./cmd/quarant analyze examples/pcap/synthetic-home.pcap --out runs/demo/events.jsonl
+go run ./cmd/quarant devices --in runs/demo          # 機器単位のレポート（見えなかったことも表示）
+go run ./cmd/quarant label-eval --events runs/demo/events.jsonl \
+  --labels examples/pcap/synthetic-home.labels.json  # 正解ラベルとの比較
+```
+
+自分のネットワークの PCAP を解析するときは、`--local-net 192.168.1.0/24` のように監視範囲を指定します。
+
+設計、現状、計画は `docs/` にあります。
+
+- [docs/STATUS.md](docs/STATUS.md)
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+- [docs/ROADMAP.md](docs/ROADMAP.md)
+- [docs/AUDIT-2026-10.md](docs/AUDIT-2026-10.md)
+
 ## なぜ OSS を取り込むのか
 
 Quarant は研究プロトタイプなので、すべての判定を独自 heuristic だけで作ると、なぜその判断になったのか説明しにくくなります。
