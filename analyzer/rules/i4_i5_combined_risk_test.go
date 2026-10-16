@@ -42,7 +42,8 @@ func TestI4I5CombinedRiskLikelyEOLWins(t *testing.T) {
 	if match.Type != "I4_I5_COMBINED_RISK" {
 		t.Fatalf("unexpected type: %s", match.Type)
 	}
-	if match.Severity != SeverityCritical {
+	// HIGH, not CRITICAL: CVE applicability is unconfirmed for passive matches.
+	if match.Severity != SeverityHigh {
 		t.Fatalf("unexpected severity: %s", match.Severity)
 	}
 	for _, want := range []string{

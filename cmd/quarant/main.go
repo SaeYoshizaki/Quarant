@@ -100,6 +100,10 @@ func main() {
 		if err := runQualityGate(args[1:], os.Stdout); err != nil {
 			log.Fatal(err)
 		}
+	case "label-eval":
+		if err := runLabelEval(args[1:], os.Stdout); err != nil {
+			log.Fatal(err)
+		}
 	case "synth":
 		if err := runSynth(args[1:], os.Stdout); err != nil {
 			log.Fatal(err)

@@ -410,13 +410,13 @@ func formatI5KnownVulnerableComponentMatch(
 	}
 }
 
-func i5Severity(severity string) Severity {
-	switch strings.ToLower(strings.TrimSpace(severity)) {
-	case "critical":
-		return SeverityCritical
-	default:
-		return SeverityWarning
-	}
+// i5Severity deliberately ignores the knowledge-base severity of the matched
+// family: the match says the device *may* belong to a family with known
+// CVEs, not that this device is vulnerable (model and firmware version are
+// unconfirmed). The KB severity stays visible as knowledge_severity in the
+// evidence; the event itself is a review prompt.
+func i5Severity(string) Severity {
+	return SeverityWarning
 }
 
 func i5BestContextCategory(ctx *Context) string {

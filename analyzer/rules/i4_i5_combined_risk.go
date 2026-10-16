@@ -61,7 +61,8 @@ func (r *I4I5CombinedRiskRule) Apply(ctx *Context) (Match, bool) {
 
 	switch {
 	case eol.likely:
-		severity = SeverityCritical
+		// Capped below CRITICAL: CVE applicability is unconfirmed.
+		severity = SeverityHigh
 		combinedBasis = i4I5BasisKnownVulnerableLikelyEOL
 		message = "Device appears to belong to a known vulnerable family and is likely beyond its support lifecycle; known issues may remain unpatched, so review firmware, support status, and replacement necessity"
 		recommendedChecks = []string{
@@ -83,11 +84,15 @@ func (r *I4I5CombinedRiskRule) Apply(ctx *Context) (Match, bool) {
 	}
 
 	return Match{
-		RuleID:   I4I5CombinedRiskRuleID,
-		Type:     I4I5CombinedRiskRuleID,
-		Category: "I4_I5",
-		Severity: severity,
-		Message:  message,
+		RuleID:       I4I5CombinedRiskRuleID,
+		Type:         I4I5CombinedRiskRuleID,
+		Category:     "I4_I5",
+		Severity:     severity,
+		Message:      message,
+		Confidence:   "low",
+		ObservedFact: "Identification signals matched a device family listed in the local vulnerability knowledge base, and update-related signals were evaluated for the same device.",
+		Inference:    "Known issues of the matched family may apply and may remain unpatched.",
+		Limitation:   "The device model and firmware version are not confirmed by passive monitoring, so applicability of the listed CVEs is unconfirmed. The knowledge base entry may be incomplete or outdated.",
 		Evidence: formatI4I5CombinedRiskEvidence(
 			ctx,
 			i5Match.component,
