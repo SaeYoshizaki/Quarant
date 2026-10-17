@@ -52,7 +52,7 @@
    "status": "implemented",
    "assumption": "the weak channel carries authentication",
    "require_pattern": "risk_kind=deprecated_tls_version|risk_kind=(rc4|3des|des|null|export|anonymous|md5)_cipher",
-   "audit": "E4 sample: weak version 15/15 correct; all 15 'weak cipher selected' were CBC suites, which are not violation evidence by themselves, so only broken suites count. E6 (CIC 2022 power-on): 4/4 devices correct (Echo Spot, Nest Cam, Netatmo camera, Hue bridge: servers selected TLS 1.0)."
+   "audit": "E4 sample: weak version 15/15 correct; all 15 'weak cipher selected' were CBC suites, which are not violation evidence by themselves, so only broken suites count. E6 (CIC 2022 power-on): 4/4 devices correct. Nest Cam, Netatmo camera and Hue bridge offered at most TLS 1.0 themselves; Echo Spot offered TLS 1.2 and a video-service server selected TLS 1.0."
   },
   {
    "provision": "5.1-5",
@@ -109,7 +109,7 @@
    ],
    "status": "implemented",
    "require_pattern": "risk_kind=deprecated_tls_version|risk_kind=(rc4|3des|des|null|export|anonymous|md5)_cipher",
-   "audit": "E4 sample: weak version 15/15 correct; all 15 'weak cipher selected' were CBC suites, which are not violation evidence by themselves, so only broken suites count. E6 (CIC 2022 power-on): 4/4 devices correct (Echo Spot, Nest Cam, Netatmo camera, Hue bridge: servers selected TLS 1.0)."
+   "audit": "E4 sample: weak version 15/15 correct; all 15 'weak cipher selected' were CBC suites, which are not violation evidence by themselves, so only broken suites count. E6 (CIC 2022 power-on): 4/4 devices correct. Nest Cam, Netatmo camera and Hue bridge offered at most TLS 1.0 themselves; Echo Spot offered TLS 1.2 and a video-service server selected TLS 1.0."
   },
   {
    "provision": "5.5-4",
