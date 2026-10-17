@@ -660,3 +660,55 @@ python3 scripts/assessment/evidence_rates.py docs/assessment/evidence-map.json <
 - 2022 年の機器では、操作時の通信も、ほぼすべてクラウドとの TLS だった。操作のときにだけ出るような平文の証拠（ログイン、設定の変更）は見つからなかった。
 - 「人が操作したときの通信」でも、暗号化された 2022 年の機器では、パッシブに示せる違反は増えない。この結果は E7 の解釈を補強する。
 - 操作が LAN 内の通信として記録されていないことは、データセットの限界である。LAN 内の操作が観測できる構成（スマートフォンを観測対象のネットワークにつなぐ）での確認は、実機テストベッド（Step 4）の課題になる。
+
+## C1：機器カテゴリの推定精度（2026-10-17、ROADMAP Step 1-2）
+
+**目的**：Quarant が機器に付けるカテゴリ（Camera、Hub、Sensor、Controller、Appliance、VoiceAssistant、Wearable）が、どれだけ正しいかを測る。あわせて、確信度が当たり外れと対応しているかを確かめる。
+
+**方法**
+
+- **データ**：UNSW 2016 の 20 日分を、現在の Quarant で 1 日ずつ解析した。
+- **評価の単位**：各日の `device_inventory.json` のカテゴリ候補と確信度を、機器と日の組み合わせ（417 件）ごとに評価した。
+- **正解**：[assessment/unsw-categories.json](assessment/unsw-categories.json)。UNSW の機器一覧の 31 台に、製品名から Claude がカテゴリを付けた。どちらとも取れる場合は、両方を正解とした（例：体重計は Sensor か Wearable）。人による確認はしていない。
+  - IoT ではない機器（スマートフォン、PC、タブレット、ゲートウェイ）と、分類の体系に当てはまらない機器（プリンター、フォトフレーム）は、GenericIoT（保留）だけを正解とした。
+- **集計**：`scripts/assessment/category_accuracy.py`。結果の表は [assessment/category-accuracy.md](assessment/category-accuracy.md)。
+
+**結果**
+
+| 機器 | 機器と日の組み合わせ | 正解 | 保留（GenericIoT） | 誤り | カテゴリを付けたうちの正解率 |
+|---|---|---|---|---|---|
+| 分類の体系に収まる IoT 機器（23 台） | 321 | 15（5%） | 273（85%） | 33 | 15/48（31%） |
+| IoT ではない機器（8 台） | 63 | 49 | — | 14 | — |
+
+| 確信度 | カテゴリを付けた件数 | 正解率 |
+|---|---|---|
+| strong | 60 | **25%** |
+| medium | 2 | 0% |
+
+- **機器単位**：最も多かった推定で見ると、正しくカテゴリを付けた機器は Netatmo Welcome（Camera）の 1 台だけだった。
+- **誤りの例**：
+  - Amazon Echo：20 日すべてで「Hub、strong」。Philips Hue のクラウド（`www.meethue.com`）への接続が根拠だった。
+  - TP-Link のクラウド対応カメラ：13 日すべてで「Controller、strong」。TP-Link のクラウド（`tplinkcloud.com`）は、スマートプラグとカメラで共通。
+  - Samsung Galaxy Tab（タブレット）：10 日で Hub か Controller、どれも strong。SmartThings のアプリの接続による。
+
+**原因**（`analyzer/device/identity.go`、`inference.go`）
+
+- **接続先のホスト名に頼っている**：ホスト名や SNI に `tplinkcloud`、`meethue`、`smartthings` などがあれば、それだけで機器の種類を決めている。ハブ、音声アシスタント、スマートフォンは連携先のクラウドにも接続し、同じベンダーのクラウドは製品の種類をまたいで共通なので、誤る。
+- **確信度が固定**：この経路で決めたカテゴリは、根拠の量や種類に関係なく、確信度を一律に strong にしている（`resolveKnownClassification`）。
+- **機器自身の名乗りを使っていない**：
+  - Samsung SmartCam：mDNS で `_rtsp._tcp`（映像配信）と「H.264 streaming」を名乗っていた。
+  - SmartThings：DHCP のホスト名が「SmartThings」、MAC アドレスのベンダーが Physical Graph（SmartThings の会社）だった。
+  - TP-Link のカメラ：DHCP のホスト名が「Little Cam」だった。
+
+  これらは、どれもカテゴリの推定に使われていなかった。
+
+**解釈**
+
+- **今のカテゴリの推定は、研究の根拠に使えない**：保留が 85%、付けた場合の正解率が 31%、strong でも 25% だった。カテゴリを前提にする検出（I6 の基準からのずれ、I5 の照合など）の結論は、この誤りを引き継ぐ。
+- **確信度の表示が誤解を招く**：「strong」の 4 件に 3 件は誤りだった。CLAUDE.md の「断定しない」に反する状態である。
+
+**限界**
+
+- 正解のラベルは 1 人（Claude）が付け、人による確認はしていない。
+- データは UNSW 2016 の 1 か所だけ。
+- 機器と日の組み合わせは独立ではない（同じ機器が 20 日分ある）。
