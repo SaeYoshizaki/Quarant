@@ -49,7 +49,7 @@ func TestParseUNSWDevices(t *testing.T) {
 }
 
 func TestEvaluateUNSWAttacks(t *testing.T) {
-	ws, _ := parseUNSWAnnotations(strings.NewReader("1000,1600,Arpfeatures,ArpSpoof1L2D\n5000,5600,Localfeatures,TcpSynDevice10L2D\n9000,9600,Arpfeatures,ArpSpoof100L2D\n"), "aa:bb:cc:dd:ee:ff")
+	ws, _ := parseUNSWAnnotations(strings.NewReader("1000,1600,Arpfeatures,ArpSpoof1L2D\n5000,5600,localIcmp,Localfeatures,TcpSynDevice10L2D\n9000,9600,Arpfeatures,ArpSpoof100L2D\n"), "aa:bb:cc:dd:ee:ff")
 	inv := []device.InventorySnapshot{{FirstSeen: time.Unix(0, 0).UTC().Format(time.RFC3339), LastSeen: time.Unix(20000, 0).UTC().Format(time.RFC3339)}}
 	events := []Event{
 		{TS: time.Unix(1100, 0), Type: "IP_MAC_BINDING_CHANGED"},

@@ -77,7 +77,9 @@ func parseUNSWAnnotations(r io.Reader, mac string) ([]UNSWAttackWindow, error) {
 		if err1 != nil || err2 != nil {
 			continue
 		}
-		out = append(out, UNSWAttackWindow{VictimMAC: mac, Start: time.Unix(s, 0).UTC(), End: time.Unix(e, 0).UTC(), Attack: strings.TrimSpace(cols[3])})
+		// Most rows have 4 columns; some list features in two columns. The
+		// attack name is always the last one.
+		out = append(out, UNSWAttackWindow{VictimMAC: mac, Start: time.Unix(s, 0).UTC(), End: time.Unix(e, 0).UTC(), Attack: strings.TrimSpace(cols[len(cols)-1])})
 	}
 	return out, sc.Err()
 }
