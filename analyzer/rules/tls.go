@@ -291,19 +291,44 @@ func ObservedTLSVersion(ctx *Context) uint16 {
 	if ctx == nil {
 		return 0
 	}
-	if ctx.TLSServerInfo != nil && ctx.TLSServerInfo.SelectedVersion != 0 {
-		return ctx.TLSServerInfo.SelectedVersion
+	// Once the ServerHello is seen it decides: without a supported_versions
+	// extension its legacy version is the negotiated one (RFC 8446 4.1.3),
+	// even when the client offered TLS 1.3 in its own extension.
+	if v := ServerNegotiatedTLSVersion(ctx.TLSServerInfo); v != 0 {
+		return v
 	}
-	if ctx.TLSInfo != nil && len(ctx.TLSInfo.SupportedVersions) > 0 {
-		return strongestTLSVersion(ctx.TLSInfo.SupportedVersions)
+	return ClientMaxTLSVersion(ctx.TLSInfo)
+}
+
+// ServerNegotiatedTLSVersion is the version the ServerHello selected, or 0
+// when no ServerHello was seen.
+func ServerNegotiatedTLSVersion(s *TLSServerInfo) uint16 {
+	if s == nil {
+		return 0
 	}
-	if ctx.TLSServerInfo != nil && ctx.TLSServerInfo.ServerVersion != 0 {
-		return ctx.TLSServerInfo.ServerVersion
+	if s.SelectedVersion != 0 {
+		return s.SelectedVersion
 	}
-	if ctx.TLSInfo != nil {
-		return ctx.TLSInfo.ClientVersion
+	return s.ServerVersion
+}
+
+// ClientMaxTLSVersion is the highest version the ClientHello offered.
+func ClientMaxTLSVersion(c *TLSClientHelloInfo) uint16 {
+	if c == nil {
+		return 0
 	}
-	return 0
+	if len(c.SupportedVersions) > 0 {
+		return strongestTLSVersion(c.SupportedVersions)
+	}
+	return c.ClientVersion
+}
+
+// ServerChoseWeakerTLS reports whether the server selected a deprecated
+// version although the client offered a newer one: the weak version is then
+// the server's choice, not the client's limit.
+func ServerChoseWeakerTLS(c *TLSClientHelloInfo, s *TLSServerInfo) bool {
+	selected := ServerNegotiatedTLSVersion(s)
+	return IsWeakTLSVersion(selected) && ClientMaxTLSVersion(c) > selected
 }
 
 func strongestTLSVersion(versions []uint16) uint16 {

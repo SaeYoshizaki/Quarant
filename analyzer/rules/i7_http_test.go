@@ -364,14 +364,17 @@ func TestI7HTTPAuthNamesChallengeResponseSchemes(t *testing.T) {
 	for header, want := range map[string]string{
 		"AWS4-HMAC-SHA256 Credential=AKIDEXAMPLE/20211102/us-east-2/s3/aws4_request, Signature=abc": "Authorization: AWS4-HMAC-SHA256 ***",
 		"Digest username=\"admin\", response=\"6629fae49393a053\"":                                  "Authorization: Digest ***",
-		"Basic YWRtaW46YWRtaW4=": "Authorization: Basic ***",
-		"Token abc123":           "Authorization: ***",
+		"Basic YWRtaW46YWRtaW4=":         "Authorization: Basic ***",
+		"Token abc123":                   "Authorization: ***",
+		"OSS LTAIexample:c2lnbmF0dXJl":   "Authorization: OSS ***",
+		"WSSE profile=\"UsernameToken\"": "Authorization: WSSE ***",
+		"ossabc123secret":                "Authorization: ***",
 	} {
 		m, ok := (&I7HTTPAuthRule{}).Apply(&Context{HTTP: &HTTPInfo{Headers: map[string]string{"authorization": header}}})
 		if !ok || m.Evidence != want {
 			t.Errorf("%q: got %q", header, m.Evidence)
 		}
-		if strings.Contains(m.Evidence, "AKIDEXAMPLE") || strings.Contains(m.Evidence, "admin") {
+		if strings.Contains(m.Evidence, "AKIDEXAMPLE") || strings.Contains(m.Evidence, "admin") || strings.Contains(m.Evidence, "LTAI") || strings.Contains(m.Evidence, "abc123") {
 			t.Errorf("value leaked: %q", m.Evidence)
 		}
 	}

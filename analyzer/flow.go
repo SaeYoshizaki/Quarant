@@ -39,7 +39,9 @@ type FlowHandler struct {
 	streamReported map[string]time.Time
 	pendingDHCP    map[string]pendingDHCP
 
-	deviceReported   map[string]bool
+	deviceReported map[string]bool
+	// payloadReported de-duplicates the protocol-independent payload checks.
+	payloadReported  map[string]bool
 	i5Cache          map[string]i5CacheEntry
 	behavior         *behavior.Analyzer
 	dnsNames         map[string]string
@@ -112,6 +114,13 @@ func (h *FlowHandler) affectedDeviceIP(eventType string, st *FlowState) string {
 		return ""
 	}
 	if isServerSideFinding(eventType) && h.isLocal(st.DstIP) {
+		return st.DstIP
+	}
+	// A local TLS server that picked a deprecated version although the client
+	// offered a newer one is the device whose cryptography is weak (E11: a
+	// camera chose TLS 1.0 for a phone offering TLS 1.2).
+	if eventType == "I7_TLS_WEAK_VERSION_OBSERVED" && h.isLocal(st.DstIP) &&
+		rules.ServerChoseWeakerTLS(st.TLSClientInfo, st.TLSServerInfo) {
 		return st.DstIP
 	}
 	return h.flowDeviceIP(st)
@@ -823,6 +832,9 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 		h.observeDNSAnswers(dstIP, dns)
 		h.observeUDPActivity(now, srcIP, dstIP, uint16(udp.SrcPort), uint16(udp.DstPort), dns)
 		h.writeUDPPacketObservations(now, srcIP, dstIP, uint16(udp.SrcPort), uint16(udp.DstPort), len(udp.Payload), dns)
+		if dns == nil {
+			h.scanUDPCredentials(now, srcIP, dstIP, uint16(udp.SrcPort), uint16(udp.DstPort), udp.Payload)
+		}
 		return
 	}
 
@@ -858,15 +870,19 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 		st.TLSByContent = true
 	}
 	if fromClient && len(tcp.Payload) > 0 && st.ClientBytes == int64(len(tcp.Payload)) && !rules.IsHTTPPort(dstPort) &&
-		h.isLocal(dstIP) && rules.LooksLikeHTTPRequest(tcp.Payload) {
-		st.HTTPByContent = true
+		rules.LooksLikeHTTPRequest(tcp.Payload) {
+		st.HTTPContent = true
+		st.HTTPByContent = h.isLocal(dstIP)
+	}
+	if len(tcp.Payload) > 0 {
+		h.scanTCPMedia(now, st, srcIP, dstIP, srcPort, dstPort, tcp.Payload)
 	}
 	httpFlow := rules.IsHTTPPort(st.DstPort) || st.HTTPByContent
 	h.observeRTSP(now, st, fromClient, tcp.Payload)
 	tlsClient := st.TLSByContent && fromClient
 	tlsServer := st.TLSByContent && !fromClient
 
-	captureClient := rules.NeedsPayloadCapture(dstPort) || tlsClient || (st.HTTPByContent && fromClient)
+	captureClient := rules.NeedsPayloadCapture(dstPort) || tlsClient || (st.HTTPContent && fromClient)
 	captureServer := rules.NeedsPayloadCapture(srcPort) || tlsServer || (st.HTTPByContent && !fromClient)
 	capturePayload := captureClient || captureServer
 	// HTTP recognised by content (st.HTTPByContent) is only used for the
@@ -958,6 +974,16 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 	if isHTTPClientToServer && rules.LooksLikeHTTP(st.ClientData) {
 		if hi, ok := rules.ParseHTTP(st.ClientData); ok {
 			httpInfo = hi
+		}
+	}
+
+	// HTTP on another port, recognised by content, is parsed for the secret
+	// and media rules only (D23); identity, protocols and categories keep
+	// using the standard ports.
+	var contentHTTP *rules.HTTPInfo
+	if httpInfo == nil && st.HTTPContent && !isHTTPClientToServer && !isTLSClientToServer && rules.LooksLikeHTTP(st.ClientData) {
+		if hi, ok := rules.ParseHTTP(st.ClientData); ok {
+			contentHTTP = hi
 		}
 	}
 
@@ -1228,6 +1254,11 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 	}
 
 	matches := rules.Run(ctx)
+	if contentHTTP != nil {
+		cctx := *ctx
+		cctx.HTTP = contentHTTP
+		matches = append(matches, rules.RunContentHTTP(&cctx)...)
+	}
 
 	if h.knowledge != nil {
 		i6Rule := rules.NewI6PrivacyRule(h.knowledge)
@@ -1455,8 +1486,19 @@ func (h *FlowHandler) cachedI5(deviceIP string, ctx *rules.Context, d *device.De
 
 // looksLikeTLSRecord reports whether payload starts like a TLS handshake
 // record carrying a ClientHello: content type 22, version 3.x, handshake 1.
+// looksLikeTLSRecord reports whether a stream starts with a TLS handshake
+// record carrying a ClientHello. Some stacks send the 5-byte record header in
+// a segment of its own (E11: a blood-pressure meter on port 8777); the header
+// alone counts when its version and length are those of a handshake record.
 func looksLikeTLSRecord(payload []byte) bool {
-	return len(payload) >= 6 && payload[0] == 22 && payload[1] == 3 && payload[5] == 1
+	if len(payload) < 5 || payload[0] != 22 || payload[1] != 3 || payload[2] > 4 {
+		return false
+	}
+	if len(payload) == 5 {
+		n := int(payload[3])<<8 | int(payload[4])
+		return n >= 40 && n <= 16384
+	}
+	return payload[5] == 1
 }
 
 // ImportIdentityState loads per-MAC self-descriptions saved by an earlier

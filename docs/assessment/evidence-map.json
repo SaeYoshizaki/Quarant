@@ -146,11 +146,13 @@
     "INSECURE_HTTP_TOKEN",
     "INSECURE_MQTT_CREDENTIALS",
     "INSECURE_TELNET_CREDENTIALS",
-    "I3_AUTH_TOKEN_IN_URL"
+    "I3_AUTH_TOKEN_IN_URL",
+    "INSECURE_HTTP_BODY_SECRET",
+    "INSECURE_UDP_CREDENTIALS"
    ],
    "status": "implemented",
-   "exclude_pattern": "^(serial|device_id)=|Authorization: (Digest|AWS4-HMAC-SHA256|AWS) ",
-   "audit": "E4 sample: HTTP auth/token headers 15/15 and session IDs in URLs 4/4 correct; 4/4 'token' events were device serial numbers (identifiers, not CSPs) and are excluded; cookies may be non-session (probable). IoT-23: a Philips Hue sent Authorization headers and auth= URL parameters in cleartext to its cloud (correct). E6 (CIC 2022 power-on): Hue bridge (Authorization headers, auth= in URL) and Home Eye camera (Authorization header) to cloud over HTTP, both correct. E8 (CIC 2022 interactions/scenarios): Hue bridge again (correct); a Sonos One sent sid= in cleartext URLs to opml.radiotime.com (TuneIn radio session ID; whether it is a critical security parameter is unclear, undecided). E9 (CIC 2022 active): SimCam's Authorization headers to S3 were AWS SigV4 signatures (per-request, not reusable), now named in the evidence and excluded; the same requests uploaded JPEG snapshots in cleartext, which is 5.8-1 evidence Quarant does not yet detect."
+   "exclude_pattern": "^(serial|device_id)=|Authorization: (Digest|AWS4-HMAC-SHA256|AWS|OSS|WSSE) ",
+   "audit": "E4 sample: HTTP auth/token headers 15/15 and session IDs in URLs 4/4 correct; 4/4 'token' events were device serial numbers (identifiers, not CSPs) and are excluded; cookies may be non-session (probable). IoT-23: a Philips Hue sent Authorization headers and auth= URL parameters in cleartext to its cloud (correct). E6 (CIC 2022 power-on): Hue bridge (Authorization headers, auth= in URL) and Home Eye camera (Authorization header) to cloud over HTTP, both correct. E8 (CIC 2022 interactions/scenarios): Hue bridge again (correct); a Sonos One sent sid= in cleartext URLs to opml.radiotime.com (TuneIn radio session ID; whether it is a critical security parameter is unclear, undecided). E9 (CIC 2022 active): SimCam's Authorization headers to S3 were AWS SigV4 signatures (per-request, not reusable), now named in the evidence and excluded; the same requests uploaded JPEG snapshots in cleartext, which is 5.8-1 evidence Quarant does not yet detect. E11 (miss measurement): INSECURE_HTTP_BODY_SECRET was missing from this list; across all data its IoT events outside the serial=/device_id= exclusion were Withings sessionid= (4 devices) and an iHome evrythng.api_key= (all correct), so it is now included. INSECURE_MQTT_PAYLOAD_SECRET and INSECURE_TELNET_PAYLOAD_SECRET never occurred and stay out (unaudited). Home Eye's Authorization was an Alibaba OSS per-request signature (false positive); OSS and WSSE are now named in the evidence and excluded like AWS SigV4."
   },
   {
    "provision": "5.5-7",
@@ -160,11 +162,13 @@
     "INSECURE_HTTP_AUTH",
     "INSECURE_HTTP_TOKEN",
     "INSECURE_MQTT_CREDENTIALS",
-    "I3_AUTH_TOKEN_IN_URL"
+    "I3_AUTH_TOKEN_IN_URL",
+    "INSECURE_HTTP_BODY_SECRET",
+    "INSECURE_UDP_CREDENTIALS"
    ],
-   "filter": "destination is external",
+   "filter": "peer is external (the source or the destination is a public address)",
    "status": "implemented",
-   "exclude_pattern": "^(serial|device_id)=|Authorization: (Digest|AWS4-HMAC-SHA256|AWS) "
+   "exclude_pattern": "^(serial|device_id)=|Authorization: (Digest|AWS4-HMAC-SHA256|AWS|OSS|WSSE) "
   },
   {
    "provision": "5.6-2",

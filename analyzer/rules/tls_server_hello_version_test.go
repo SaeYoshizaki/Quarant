@@ -78,3 +78,36 @@ func TestObservedTLSVersionFallsBackInPriorityOrder(t *testing.T) {
 		})
 	}
 }
+
+func TestObservedTLSVersionUsesServerLegacyVersionOverClientOffer(t *testing.T) {
+	// A client offering TLS 1.3 in supported_versions, answered by a server
+	// that does not know the extension and selects TLS 1.0.
+	ctx := &Context{
+		TLSInfo:       &TLSClientHelloInfo{ClientVersion: 0x0303, SupportedVersions: []uint16{0x0304, 0x0303}},
+		TLSServerInfo: &TLSServerInfo{ServerVersion: 0x0301},
+	}
+	if got := ObservedTLSVersion(ctx); got != 0x0301 {
+		t.Fatalf("ObservedTLSVersion=%#04x, want %#04x", got, 0x0301)
+	}
+}
+
+func TestServerChoseWeakerTLS(t *testing.T) {
+	tests := []struct {
+		name   string
+		client *TLSClientHelloInfo
+		server *TLSServerInfo
+		want   bool
+	}{
+		{"client offered 1.2, server chose 1.0", &TLSClientHelloInfo{ClientVersion: 0x0303}, &TLSServerInfo{ServerVersion: 0x0301}, true},
+		{"client offered only 1.0", &TLSClientHelloInfo{ClientVersion: 0x0301}, &TLSServerInfo{ServerVersion: 0x0301}, false},
+		{"server chose 1.2", &TLSClientHelloInfo{ClientVersion: 0x0303}, &TLSServerInfo{ServerVersion: 0x0303}, false},
+		{"no ServerHello", &TLSClientHelloInfo{ClientVersion: 0x0303}, nil, false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := ServerChoseWeakerTLS(tt.client, tt.server); got != tt.want {
+				t.Fatalf("ServerChoseWeakerTLS=%v, want %v", got, tt.want)
+			}
+		})
+	}
+}

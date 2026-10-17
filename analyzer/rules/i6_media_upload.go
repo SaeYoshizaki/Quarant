@@ -65,14 +65,22 @@ func mediaInRequest(req *HTTPInfo) (declared, sniffed string) {
 	if isMediaType(ct) {
 		declared = ct
 	} else if ct == "multipart/form-data" || strings.HasPrefix(ct, "multipart/") {
+		// Every part counts: a camera sent a text/plain part first and the
+		// h264 video and AAC audio parts after it (E11).
 		low := bytes.ToLower(req.Body)
-		if i := bytes.Index(low, []byte("content-type:")); i >= 0 {
-			rest := strings.TrimSpace(string(low[i+len("content-type:"):]))
-			if j := strings.IndexAny(rest, "\r\n;"); j >= 0 {
-				rest = rest[:j]
+		for rest := low; ; {
+			i := bytes.Index(rest, []byte("content-type:"))
+			if i < 0 {
+				break
 			}
-			if isMediaType(rest) {
-				declared = "multipart:" + rest
+			rest = rest[i+len("content-type:"):]
+			part := strings.TrimSpace(string(rest[:min(len(rest), 128)]))
+			if j := strings.IndexAny(part, "\r\n;"); j >= 0 {
+				part = part[:j]
+			}
+			if isMediaType(part) {
+				declared = "multipart:" + part
+				break
 			}
 		}
 	}

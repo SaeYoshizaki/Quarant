@@ -20,3 +20,9 @@ e8:1b:69:f8:d6:e6
 # CIC IoT 2022 scenarios: non-IoT hosts (an Apple device and a randomised-MAC phone)
 06:57:6f:72:9a:50
 f0:18:98:0c:aa:af
+# UNSW 2018 attack captures (no device list ships with them; identified by hostname in E11):
+# kali (attacker), two HP Compaq 8200 Elite PCs, a MacBook Pro.
+08:00:27:93:ee:29
+08:2e:5f:25:88:e5
+2c:27:d7:3b:e1:05
+8c:85:90:1c:a7:d4

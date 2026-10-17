@@ -73,6 +73,10 @@ def matches(prov, e):
     dst = e.get("dst_ip", "")
     if "server is external" in f or "destination is external" in f:
         return bool(dst) and not local(dst)
+    if "peer is external" in f:
+        # a remotely accessible interface: either end is outside (a device
+        # sending to its cloud, or a WAN peer reaching the device)
+        return any(ip and not local(ip) for ip in (dst, e.get("src_ip", "")))
     return True
 
 

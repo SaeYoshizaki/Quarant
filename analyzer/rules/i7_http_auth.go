@@ -60,19 +60,25 @@ func (r *I7HTTPAuthRule) Apply(ctx *Context) (Match, bool) {
 	return Match{}, false
 }
 
+// perRequestSchemes are Authorization schemes whose value is a per-request
+// proof (a signature or a digest over a nonce) rather than the credential
+// itself: HTTP Digest, AWS SigV4 and SigV2, Alibaba Cloud OSS signatures and
+// WS-Security UsernameToken digests (E9, E11).
+var perRequestSchemes = []struct{ prefix, name string }{
+	{"digest", "Digest"},
+	{"aws4-hmac-sha256", "AWS4-HMAC-SHA256"},
+	{"aws ", "AWS"},
+	{"oss ", "OSS"},
+	{"wsse ", "WSSE"},
+}
+
 // challengeResponseScheme names Authorization schemes whose value is a
 // per-request proof rather than the credential itself.
 func challengeResponseScheme(lower string) string {
-	for _, s := range []string{"digest", "aws4-hmac-sha256", "aws "} {
-		if strings.HasPrefix(strings.TrimSpace(lower), s) {
-			switch s {
-			case "digest":
-				return "Digest"
-			case "aws4-hmac-sha256":
-				return "AWS4-HMAC-SHA256"
-			default:
-				return "AWS"
-			}
+	lower = strings.TrimSpace(lower)
+	for _, s := range perRequestSchemes {
+		if strings.HasPrefix(lower, s.prefix) {
+			return s.name
 		}
 	}
 	return ""

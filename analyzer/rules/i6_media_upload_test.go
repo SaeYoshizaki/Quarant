@@ -53,3 +53,14 @@ func TestMediaUploadIgnoresLocalTLSAndDownloads(t *testing.T) {
 		t.Fatal("non-media body must not be reported")
 	}
 }
+
+// A camera streaming to its cloud relay sent a text part first and the video
+// part after it (E11, TP-Link camera on UNSW 2016).
+func TestMediaUploadMultipartLaterPart(t *testing.T) {
+	raw := "POST /relay HTTP/1.1\r\nHost: relay.example\r\nContent-Type: multipart/x-mixed-replace; boundary=b\r\n\r\n" +
+		"--b\r\nContent-Type: text/http-header\r\n\r\nHTTP/1.1 200 OK\r\n\r\n--b\r\nContent-Type: video/x-h264\r\n\r\n\x00\x00\x00\x01"
+	m, ok := (&I6MediaUploadCleartextRule{}).Apply(mediaCtx(t, "203.0.113.7", raw))
+	if !ok || !strings.Contains(m.Evidence, "content_type=multipart:video/x-h264") {
+		t.Fatalf("got %v %q", ok, m.Evidence)
+	}
+}

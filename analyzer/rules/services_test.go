@@ -121,3 +121,15 @@ func TestI2InsecureServiceCarriesI9Tag(t *testing.T) {
 		t.Fatalf("expected remains-enabled phrasing, got: %s", match.Inference)
 	}
 }
+
+func TestContentHTTPRulesAreRegistered(t *testing.T) {
+	ids := map[string]bool{}
+	for _, r := range registered {
+		ids[r.ID()] = true
+	}
+	for _, id := range ContentHTTPRuleIDs() {
+		if !ids[id] {
+			t.Errorf("content-HTTP rule %s is not registered", id)
+		}
+	}
+}
