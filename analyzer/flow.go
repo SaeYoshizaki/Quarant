@@ -33,7 +33,11 @@ type FlowHandler struct {
 	macToIP map[string]string
 	// macChangeReported rate-limits binding-change events per IP/MAC pair.
 	macChangeReported map[string]time.Time
-	pendingDHCP       map[string]pendingDHCP
+	// guesses counts failed credential attempts per (device, client).
+	guesses map[string]*guessState
+	// streamReported rate-limits unauthenticated stream findings.
+	streamReported map[string]time.Time
+	pendingDHCP    map[string]pendingDHCP
 
 	deviceReported   map[string]bool
 	i5Cache          map[string]i5CacheEntry
@@ -858,6 +862,7 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 		st.HTTPByContent = true
 	}
 	httpFlow := rules.IsHTTPPort(st.DstPort) || st.HTTPByContent
+	h.observeRTSP(now, st, fromClient, tcp.Payload)
 	tlsClient := st.TLSByContent && fromClient
 	tlsServer := st.TLSByContent && !fromClient
 
