@@ -71,13 +71,19 @@
 
 ### 最優先：論文の前に精度を上げる（2026-10-17 に利用者と合意）
 
-テーマが「パッシブでどこまで判定できるか」なので、数字の信頼性を先に固める。正しさ（誤検出）は E4〜E10 で抜き取り確認済み。網羅性（見逃し）はほとんど測れていない。次の順で進める。
+テーマが「パッシブでどこまで判定できるか」なので、数字の信頼性を先に固める。正しさ（誤検出）は E4〜E10 で抜き取り確認済み。網羅性（見逃し）は E11 で測った。次の順で進める。
 
-1. **見逃しを測る**：要件ごとに、Quarant とは独立した方法で元の通信から「正解」を作り、Quarant の結果と比べる。
-   - 平文のパスワード、トークン、画像：ポートを問わず、元の PCAP を直接探す（E10 で `tcpdump -A` を使ったやり方）。
-   - 古い TLS：Zeek の `ssl.log` と照合する（S2 の出力を使える）。
-   - 既知の弱点：HTTP は既定のポート（80、8000、8080、8888）でしか解析しない（既知の問題 8）。
-2. **見つかった見逃しを直す**：直したら 1 で測り直し、効果を数字で示す。
+1. **見逃しを測る**：済み（E11、[assessment/miss-audit.md](assessment/miss-audit.md)）。Zeek と生パケットの検索で、Quarant とは独立に正解を作って比べた。
+   - 古い TLS：36 台のうち 34 台を検出。平文の秘密情報：UNSW 2016 で 9 台のうち 3 台（ほかのデータは全件）。メディアの平文送信：5 台のうち 3 台。
+   - 見逃し 11 件（10 台）の原因：要件への対応づけ漏れ 5、機器の帰属 1、解析の範囲 4、検出条件の不備 1。
+2. **見つかった見逃しを直す**（次の作業）：直したら `scripts/accuracy/compare_misses.py`（判定は `docs/assessment/miss-judgments.json`。判定のない候補は unjudged と表示される）で測り直し、効果を数字で示す。正解（`~/datasets/gt-e10/`）は作り直さなくてよい。
+   - 対応表：`INSECURE_HTTP_BODY_SECRET`（ほか MQTT、Telnet のペイロードの秘密情報）を 5.5-6 に入れるか判断する。入れる前に精度を抜き取りで確かめる（ROADMAP では誤検知の疑いがあるとしていた）。
+   - 帰属：TLS のサーバー側が古い版を選んだときは、サーバー側の機器の証拠にもする。
+   - TLS の中身による判定：レコードヘッダだけのパケット（5 バイト）でも TLS と認識する（`looksLikeTLSRecord`）。
+   - メディア：multipart のすべての部分の Content-Type を見る。
+   - 誤検出：Authorization の方式名（OSS など）をイベントに残し、要求ごとの署名を 5.5-6 から外す。
+   - 集計：UNSW 2018 の IoT ではない 4 台（kali、HP Compaq の PC 2 台、MacBook Pro）を除外リストに加え、E4 の表を集計し直す。E4 の UNSW 2018 の 5.8-1（1 台）は MacBook Pro だった。
+   - 範囲を広げるか利用者と相談すること：LAN 内の既定外ポートの HTTP（D17 の範囲）、UDP の中身、HTTP 以外のプロトコルの中のメディアの署名。
 3. **候補止まりを確定に近づける**：パッシブのまま判定できる範囲を広げる。例：初期パスワード（5.1-1）は、値を保存せずに、公開されている初期パスワードの一覧とメモリ上で照合し、一致したかどうかだけを記録する。
 4. **人による確認**：正しさの判定は Claude 1 人だけ。抜き取った 30〜50 件を利用者にも判定してもらう（E3 の human-review.md と同じ形）。
 
@@ -87,7 +93,8 @@
 - 全データの再解析：`~/datasets/scripts/rerun-e10.sh`（バイナリと出力先を書き換えて使う。1 時間ほどかかる）。
 - 出現率の集計：`python3 scripts/assessment/evidence_rates.py docs/assessment/evidence-map.json $HOME/datasets/runs-e10 docs/assessment/evidence-rates.md <samples.json> docs/assessment/non-iot-macs.txt`
 - 機器の対応づけは、run ごとの `device_inventory.json` で行う。IP アドレスは日によって変わるので、run をまたいで IP で機器を特定しない（E7 で一度まちがえた）。
-- 要件と検出の対応、精度の監査の記録：`docs/assessment/evidence-map.json`、`precision-audit.md`。実験の記録：`docs/EXPERIMENTS.md` の E4〜E10。
+- 要件と検出の対応、精度の監査の記録：`docs/assessment/evidence-map.json`、`precision-audit.md`、見逃しの監査：`miss-audit.md`。実験の記録：`docs/EXPERIMENTS.md` の E4〜E11。
+- 見逃しの正解：`~/datasets/gt-e10/<run>/`（`gt.log` は Zeek、`raw.jsonl` は生パケットの検索。名前だけで値は含まない）。作り方は `scripts/accuracy/run_gt.sh`。tshark は Homebrew の Lua の不整合で起動しない。
 
 ### 研究の全体（ROADMAP）
 

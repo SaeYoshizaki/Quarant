@@ -1,0 +1,348 @@
+{
+ "description": "E11 judgments of ground-truth candidates (scripts/accuracy/compare_misses.py). family csp/media: verdict for a device that the ground truth lists; family csp:quarant: verdict on a Quarant-side device. TLS needs no judgment (objective version/suite). Judged by Claude from key names and context only, with values masked.",
+ "judgments": [
+  {
+   "group": "UNSW traces 2016",
+   "family": "csp",
+   "mac": "00:24:e4:10:ee:4c",
+   "verdict": "real",
+   "note": "Withings baby monitor: sessionid/auth keys in cleartext HTTP bodies to withings.net, sessionid in responses"
+  },
+  {
+   "group": "UNSW traces 2016",
+   "family": "csp",
+   "mac": "00:24:e4:11:18:a8",
+   "verdict": "real",
+   "note": "Withings baby monitor: sessionid/auth keys in cleartext HTTP bodies to withings.net, sessionid in responses"
+  },
+  {
+   "group": "UNSW traces 2016",
+   "family": "csp",
+   "mac": "00:24:e4:1b:6f:96",
+   "verdict": "real",
+   "note": "Withings scale: sessionid/auth keys in cleartext HTTP bodies to withings.net, sessionid in responses"
+  },
+  {
+   "group": "UNSW traces 2016",
+   "family": "csp",
+   "mac": "00:24:e4:20:28:c6",
+   "verdict": "real",
+   "note": "Withings Aura sleep sensor: sessionid/auth keys in cleartext HTTP bodies to withings.net, sessionid in responses"
+  },
+  {
+   "group": "UNSW traces 2016",
+   "family": "csp",
+   "mac": "00:62:6e:51:27:2e",
+   "verdict": "real",
+   "note": "Insteon camera: app logs in with user and password in the URL over HTTP on port 34100 (LAN); password keys in the camera's responses"
+  },
+  {
+   "group": "UNSW traces 2016",
+   "family": "csp",
+   "mac": "74:c6:3b:29:d7:1d",
+   "verdict": "real",
+   "note": "iHome: evrythng.api_key in a cleartext HTTP body (LAN)"
+  },
+  {
+   "group": "UNSW traces 2016",
+   "family": "csp",
+   "mac": "18:b7:9e:02:20:44",
+   "verdict": "real",
+   "note": "Invoxia: Authorization Basic to its server over HTTP"
+  },
+  {
+   "group": "UNSW traces 2016",
+   "family": "csp",
+   "mac": "70:5a:0f:e4:9b:c0",
+   "verdict": "real",
+   "note": "HP printer: management-page session cookies and X-Privet-Token over HTTP (LAN); probable"
+  },
+  {
+   "group": "UNSW traces 2016",
+   "family": "csp",
+   "mac": "f4:f2:6d:93:51:f1",
+   "verdict": "real",
+   "note": "TP-Link camera: Basic auth and x-token over HTTP; password keys in its config responses"
+  },
+  {
+   "group": "UNSW traces 2016",
+   "family": "csp",
+   "mac": "44:65:0d:56:cc:d3",
+   "verdict": "undecided",
+   "note": "Amazon: sid= URL parameter; what session it is is unknown"
+  },
+  {
+   "group": "UNSW traces 2016",
+   "family": "csp",
+   "mac": "ec:1a:59:79:f4:89",
+   "verdict": "not",
+   "note": "Belkin: a random string that happens to contain 'pwd'; UPnP GENA SID"
+  },
+  {
+   "group": "UNSW traces 2016",
+   "family": "csp",
+   "mac": "ec:1a:59:83:28:11",
+   "verdict": "not",
+   "note": "Belkin: a random string that happens to contain 'pwd'; UPnP GENA SID"
+  },
+  {
+   "group": "UNSW traces 2016",
+   "family": "media",
+   "mac": "f4:f2:6d:93:51:f1",
+   "verdict": "real",
+   "note": "TP-Link camera: h264 video and AAC audio in a multipart POST to tplinkcloud.com over HTTP"
+  },
+  {
+   "group": "UNSW attacks 2018",
+   "family": "csp",
+   "mac": "00:17:88:2b:9a:25",
+   "verdict": "real",
+   "note": "Philips Hue: Authorization CBAuth and auth= over HTTP"
+  },
+  {
+   "group": "UNSW attacks 2018",
+   "family": "csp",
+   "mac": "84:f3:eb:52:42:db",
+   "verdict": "real",
+   "note": "Tuya ESP device: MQTT CONNECT with password on 1883 ('sign' URL parameter is a signature and not counted)"
+  },
+  {
+   "group": "UNSW attacks 2018",
+   "family": "csp",
+   "mac": "08:2e:5f:25:88:e5",
+   "verdict": "not",
+   "note": "not an IoT device (PC); missing from the exclusion list"
+  },
+  {
+   "group": "UNSW attacks 2018",
+   "family": "csp",
+   "mac": "2c:27:d7:3b:e1:05",
+   "verdict": "not",
+   "note": "not an IoT device (PC); missing from the exclusion list"
+  },
+  {
+   "group": "UNSW attacks 2018",
+   "family": "csp",
+   "mac": "8c:85:90:1c:a7:d4",
+   "verdict": "not",
+   "note": "not an IoT device (PC); missing from the exclusion list"
+  },
+  {
+   "group": "UNSW attacks 2018",
+   "family": "media",
+   "mac": "00:17:88:2b:9a:25",
+   "verdict": "not",
+   "note": "Zeek's content sniffing guessed audio for a 720-byte API body; the Hue has no microphone"
+  },
+  {
+   "group": "IoT-23 2018-19",
+   "family": "csp",
+   "mac": "00:17:88:75:b3:82",
+   "verdict": "real",
+   "note": "Philips Hue: Authorization CBAuth and auth= over HTTP"
+  },
+  {
+   "group": "CIC IoT 2022 power-on",
+   "family": "csp",
+   "mac": "00:17:88:60:d6:4f",
+   "verdict": "real",
+   "note": "Philips Hue: Authorization CBAuth and auth= over HTTP"
+  },
+  {
+   "group": "CIC IoT 2022 idle",
+   "family": "csp",
+   "mac": "00:17:88:60:d6:4f",
+   "verdict": "real",
+   "note": "Philips Hue: Authorization CBAuth and auth= over HTTP"
+  },
+  {
+   "group": "CIC IoT 2022 interactions",
+   "family": "csp",
+   "mac": "00:17:88:60:d6:4f",
+   "verdict": "real",
+   "note": "Philips Hue: Authorization CBAuth and auth= over HTTP"
+  },
+  {
+   "group": "CIC IoT 2022 active",
+   "family": "csp",
+   "mac": "00:17:88:60:d6:4f",
+   "verdict": "real",
+   "note": "Philips Hue: Authorization CBAuth and auth= over HTTP"
+  },
+  {
+   "group": "CIC IoT 2022 power-on",
+   "family": "csp",
+   "mac": "44:01:bb:ec:10:4a",
+   "verdict": "not",
+   "note": "closeli camera: 'sign' body key is a request signature"
+  },
+  {
+   "group": "CIC IoT 2022 idle",
+   "family": "csp",
+   "mac": "44:01:bb:ec:10:4a",
+   "verdict": "not",
+   "note": "closeli camera: 'sign' body key is a request signature"
+  },
+  {
+   "group": "CIC IoT 2022 power-on",
+   "family": "csp",
+   "mac": "c0:e7:bf:0a:79:d1",
+   "verdict": "not",
+   "note": "Borun camera: 'sign' body key is a request signature"
+  },
+  {
+   "group": "CIC IoT 2022 idle",
+   "family": "csp",
+   "mac": "c0:e7:bf:0a:79:d1",
+   "verdict": "not",
+   "note": "Borun camera: 'sign' body key is a request signature"
+  },
+  {
+   "group": "CIC IoT 2022 active",
+   "family": "csp",
+   "mac": "c0:e7:bf:0a:79:d1",
+   "verdict": "not",
+   "note": "Borun camera: 'sign' body key is a request signature"
+  },
+  {
+   "group": "CIC IoT 2022 power-on",
+   "family": "csp",
+   "mac": "9c:8e:cd:1d:ab:9f",
+   "verdict": "not",
+   "note": "Amcrest: Authorization WSSE (per-request password digest), treated like Digest"
+  },
+  {
+   "group": "CIC IoT 2022 idle",
+   "family": "csp",
+   "mac": "9c:8e:cd:1d:ab:9f",
+   "verdict": "not",
+   "note": "Amcrest: Authorization WSSE (per-request password digest), treated like Digest"
+  },
+  {
+   "group": "CIC IoT 2022 interactions",
+   "family": "csp",
+   "mac": "9c:8e:cd:1d:ab:9f",
+   "verdict": "not",
+   "note": "Amcrest: Authorization WSSE (per-request password digest), treated like Digest"
+  },
+  {
+   "group": "CIC IoT 2022 idle",
+   "family": "csp",
+   "mac": "48:a6:b8:f9:1b:88",
+   "verdict": "not",
+   "note": "Sonos: sonosid/householdid/serial are identifiers; 'pwd' matched inside a binary download"
+  },
+  {
+   "group": "CIC IoT 2022 interactions",
+   "family": "csp",
+   "mac": "7c:a7:b0:cd:18:32",
+   "verdict": "real",
+   "note": "Luohe camera: user=/pwd= login sent in cleartext over UDP P2P from WAN peers"
+  },
+  {
+   "group": "CIC IoT 2022 interactions",
+   "family": "csp",
+   "mac": "48:a6:b8:f9:1b:88",
+   "verdict": "undecided",
+   "note": "Sonos: AISSessionId cookie set by a radio streaming server"
+  },
+  {
+   "group": "CIC IoT 2022 scenarios",
+   "family": "csp",
+   "mac": "48:a6:b8:f9:1b:88",
+   "verdict": "undecided",
+   "note": "Sonos: sid= in TuneIn URLs (E8: undecided)"
+  },
+  {
+   "group": "CIC IoT 2022 active",
+   "family": "csp",
+   "mac": "34:75:63:73:f3:36",
+   "verdict": "not",
+   "note": "Home Eye: 'pwd' matched inside JPEG data; Authorization OSS is a request signature"
+  },
+  {
+   "group": "CIC IoT 2022 RTSP attacks",
+   "family": "csp",
+   "mac": "10:2c:6b:1b:43:be",
+   "verdict": "not",
+   "note": "RTSP brute force: the credentials are the attacker's guesses, not the device's"
+  },
+  {
+   "group": "CIC IoT 2022 RTSP attacks",
+   "family": "csp",
+   "mac": "44:01:bb:ec:10:4a",
+   "verdict": "not",
+   "note": "RTSP brute force: the credentials are the attacker's guesses, not the device's"
+  },
+  {
+   "group": "CIC IoT 2022 RTSP attacks",
+   "family": "csp",
+   "mac": "7c:a7:b0:cd:18:32",
+   "verdict": "not",
+   "note": "RTSP brute force: the credentials are the attacker's guesses, not the device's"
+  },
+  {
+   "group": "CIC IoT 2022 RTSP attacks",
+   "family": "csp",
+   "mac": "9c:8e:cd:1d:ab:9f",
+   "verdict": "not",
+   "note": "RTSP brute force: the credentials are the attacker's guesses, not the device's"
+  },
+  {
+   "group": "CIC IoT 2022 power-on",
+   "family": "media",
+   "mac": "34:75:63:73:f3:36",
+   "verdict": "real",
+   "note": "Home Eye: JPEG PUT to Alibaba OSS over HTTP"
+  },
+  {
+   "group": "CIC IoT 2022 power-on",
+   "family": "media",
+   "mac": "c0:e7:bf:0a:79:d1",
+   "verdict": "real",
+   "note": "Borun camera: JPEG inside a proprietary cleartext TCP protocol to port 8899"
+  },
+  {
+   "group": "CIC IoT 2022 idle",
+   "family": "media",
+   "mac": "34:75:63:73:f3:36",
+   "verdict": "real",
+   "note": "Home Eye: JPEG PUT to Alibaba OSS over HTTP"
+  },
+  {
+   "group": "CIC IoT 2022 active",
+   "family": "media",
+   "mac": "34:75:63:73:f3:36",
+   "verdict": "real",
+   "note": "Home Eye: JPEG PUT to Alibaba OSS over HTTP"
+  },
+  {
+   "group": "CIC IoT 2022 active",
+   "family": "media",
+   "mac": "10:2c:6b:1b:43:be",
+   "verdict": "real",
+   "note": "SimCam: JPEG PUT to S3 over HTTP"
+  },
+  {
+   "group": "CIC IoT 2022 power-on",
+   "family": "csp:quarant",
+   "mac": "34:75:63:73:f3:36",
+   "verdict": "not",
+   "note": "Home Eye: Quarant counted Authorization OSS (per-request signature) as a CSP"
+  },
+  {
+   "group": "CIC IoT 2022 idle",
+   "family": "csp:quarant",
+   "mac": "34:75:63:73:f3:36",
+   "verdict": "not",
+   "note": "Home Eye: Quarant counted Authorization OSS (per-request signature) as a CSP"
+  },
+  {
+   "group": "CIC IoT 2022 active",
+   "family": "csp:quarant",
+   "mac": "34:75:63:73:f3:36",
+   "verdict": "not",
+   "note": "Home Eye: Quarant counted Authorization OSS (per-request signature) as a CSP"
+  }
+ ]
+}
