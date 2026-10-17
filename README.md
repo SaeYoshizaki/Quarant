@@ -1,12 +1,82 @@
 # Quarant
 
-Quarant は、IoT 環境をできるだけ受動的に観測し、観測できた証拠から incident を整理し、ルーター側でできる緩和策を作り、その前後でリスクが本当に下がったかを確認するための研究プロトタイプです。
+**家庭内 IoT のセキュリティは、ゲートウェイでの「厳密にパッシブな」通信観測だけで、どこまで判定できるのか。何が判定できないのか。**
 
-狙っているのは、IoT デバイスそのものを改造したり、エージェントを入れたりしなくても、ネットワーク境界で見える情報から「何が危ないのか」「どの対策が効きそうか」「対策後に何が変わったのか」を説明できるようにすることです。
+Quarant は、この問いに答えるための研究用の計測基盤です（Go 製）。機器に手を加えず、通信を変えず、TLS を復号せず、こちらからパケットを送ることもしません。そのうえで、観測した通信から、機器ごとのセキュリティ上の判定と、その**根拠の種類**、そして**見えなかったこと**を出力します。
 
-現在は、PCAP や flow から得られる IoT の通信だけでなく、OpenWrt の firewall log、Suricata、Zeek、Snort のような既存 OSS の出力も Quarant の evidence として取り込めます。
+## 研究の問い
 
-## 何をするツールか
+消費者向け IoT のセキュリティ要件である **ETSI EN 303 645** の各要件について、パッシブな観測者にとって、それが次のどれにあたるかを体系的に示し、実データで裏づけます。
+
+| 区分 | 意味 | 例 |
+|---|---|---|
+| 観測 | 適合・不適合が通信に直接現れる | 平文の通信、TLS のバージョン |
+| 推定 | 観測からの推論にとどまる | 更新の有無、障害時の振る舞い |
+| 照合 | 外部の参照情報（脆弱性 DB など）との照合が必要 | 既知の脆弱性がある製品群かどうか |
+| 判定不能 | 原理的に通信には現れない | パスワードの保存方法、脆弱性報告の体制、使われていない開放ポート |
+
+あわせて、その境界が暗号化の普及（TLS 1.3、ECH、QUIC）やキャプチャ位置でどう変わるかを、年代の異なる公開データ（2016〜2026 年）で調べます。詳細は [docs/RESEARCH.md](docs/RESEARCH.md)、1 ページの要約は [docs/RESEARCH-SUMMARY.md](docs/RESEARCH-SUMMARY.md) にあります。
+
+**近い先行研究との違い**：COPSEC（MobiCom 2023）などの先行研究は、判定できる項目を、スキャンなどの能動的な試験を含めて調べています。本研究は厳密にパッシブな立場をとり、**判定できない要件とその理由**まで含めて、要件全体を整理します。
+
+## Quarant が出力するもの
+
+- **機器ごとの識別情報**：MAC、OUI ベンダー、DHCP、mDNS、SSDP、DNS。それぞれに、観測したものか照合したものかを付けます。
+- **セキュリティ上の判定**：平文での認証情報の送信、TLS の弱点、知識 DB との照合（脆弱性の候補。適用可否は「未確認」とします）。
+- **振る舞い**：スキャン、周期通信、執拗な再接続、ARP スプーフィングの兆候。
+- **根拠の種類**：すべての判定に `basis`（`observed`／`inferred`／`reference_match`）と、観測した事実、推定、限界を付けます。
+- **見えなかったこと**：機器ごとに、暗号化された割合、識別できなかった情報などを示します。未検出は安全の証明ではないからです。
+
+## これまでの結果（予備的なもの）
+
+詳細は [docs/EXPERIMENTS.md](docs/EXPERIMENTS.md) にあります。
+
+| 対象 | 結果 |
+|---|---|
+| 機器識別（UNSW、20 日、31 台） | 31/31 台を捕捉。OUI のベンダーは、7 台で製品ブランドと異なった |
+| ARP スプーフィング（UNSW 攻撃データ） | 27/27 を検出 |
+| 実マルウェア（IoT-23） | 再接続ループとスキャンは検出できた。少量の TLS による C2 は検出できなかった |
+| 正常データでの誤検知候補 | 1 日あたり約 0.8 件 |
+| 測定装置の妥当性（差分ファジング） | TLS パーサの読み違いを 5 件修正。ポート番号に頼った判定では、ClientHello の 1.8〜3.7% を見落としていた |
+
+## 使い方
+
+```bash
+go test ./...
+
+# 正解ラベル付きの合成 PCAP（実データを含まない）を解析する
+go run ./cmd/quarant analyze examples/pcap/synthetic-home.pcap --out runs/demo/events.jsonl
+go run ./cmd/quarant devices --in runs/demo          # 機器単位のレポート（見えなかったことも表示）
+go run ./cmd/quarant label-eval --events runs/demo/events.jsonl \
+  --labels examples/pcap/synthetic-home.labels.json  # 正解ラベルとの比較
+
+# 自分のネットワークの PCAP（監視範囲を指定する）
+go run ./cmd/quarant analyze capture.pcap --local-net 192.168.1.0/24 --out runs/home/events.jsonl
+
+# 公開データセットでの評価、パーサの差分検証
+go run ./cmd/quarant dataset-eval iot23|unsw|unsw-attacks ...
+go run ./cmd/quarant parser-diff --pcap capture.pcap
+```
+
+PCAP と解析の出力（`runs/`）は git に入れません。リポジトリに含める PCAP は、合成したものだけです。
+
+## ドキュメント
+
+| 文書 | 内容 |
+|---|---|
+| [docs/RESEARCH.md](docs/RESEARCH.md) | 研究の問い、関連研究、可観測性の表、評価計画 |
+| [docs/STATUS.md](docs/STATUS.md) | 現状、既知の問題、次の作業 |
+| [docs/ROADMAP.md](docs/ROADMAP.md) | 研究として進める順序（Step 0〜5） |
+| [docs/EXPERIMENTS.md](docs/EXPERIMENTS.md) | 実験の記録 |
+| [docs/DATASETS.md](docs/DATASETS.md) | 公開データセットの選定と規約 |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | 設計原則と構成 |
+| [docs/DETECTION.md](docs/DETECTION.md) | 検出の仕様と根拠の種類 |
+| [docs/DECISIONS.md](docs/DECISIONS.md) | 設計判断の記録 |
+| [docs/TESTING.md](docs/TESTING.md) | テストと動作確認 |
+
+## 既存機能：外部ログの取り込みと緩和策の評価パイプライン
+
+OpenWrt、Suricata、Zeek、Snort の出力を取り込み、インシデントの整理、緩和策の作成、前後比較を行う仕組みです。研究の中心は上の「研究の問い」ですが、この仕組みも Quarant の一部として維持しています。
 
 Quarant の基本的な流れは次の通りです。
 
@@ -30,36 +100,7 @@ passive observation
 - 対策後に、accepted / exposed service attempt は減ったか。
 - 正常な DNS / DHCP / NTP / cloud 通信は壊れていないか。
 
-## PCAP から機器ごとのリスクを見る
-
-Quarant 独自の解析エンジンは、PCAP（またはライブキャプチャ）から次のものを作ります。
-
-- 機器ごとの識別情報：MAC、OUI ベンダー、DHCP、mDNS、SSDP、DNS
-- 平文での認証情報露出、TLS の弱点
-- 振る舞い：スキャン、周期通信
-
-各検出結果には、根拠の種類として `basis`（`observed`、`inferred`、`reference_match`）が付きます。
-
-リポジトリには、正解ラベル付きの合成 PCAP（実データを含まない）が同梱されています。
-
-```bash
-go run ./cmd/quarant analyze examples/pcap/synthetic-home.pcap --out runs/demo/events.jsonl
-go run ./cmd/quarant devices --in runs/demo          # 機器単位のレポート（見えなかったことも表示）
-go run ./cmd/quarant label-eval --events runs/demo/events.jsonl \
-  --labels examples/pcap/synthetic-home.labels.json  # 正解ラベルとの比較
-```
-
-自分のネットワークの PCAP を解析するときは、`--local-net 192.168.1.0/24` のように監視範囲を指定します。
-
-設計、現状、計画は `docs/` にあります。
-
-- [docs/STATUS.md](docs/STATUS.md)
-- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
-- [docs/RESEARCH.md](docs/RESEARCH.md)
-- [docs/ROADMAP.md](docs/ROADMAP.md)
-- [docs/AUDIT-2026-10.md](docs/AUDIT-2026-10.md)
-
-## なぜ OSS を取り込むのか
+### なぜ OSS を取り込むのか
 
 Quarant は研究プロトタイプなので、すべての判定を独自 heuristic だけで作ると、なぜその判断になったのか説明しにくくなります。
 
@@ -73,7 +114,7 @@ Quarant は研究プロトタイプなので、すべての判定を独自 heuri
 - 既存 IDS / NSM が見た evidence を Quarant の incident や mitigation に接続する。
 - 研究 report で「どの claim が、どの sensor evidence に支えられているか」を示す。
 
-## OpenWrt を使う理由
+### OpenWrt を使う理由
 
 OpenWrt は、IoT 環境の gateway として扱いやすく、firewall、DHCP、DNS、conntrack の情報を同じ場所で取れます。
 
@@ -88,7 +129,7 @@ OpenWrt から取りたいものは次です。
 
 特に firewall log は重要です。IoT デバイス自身の通信だけを見ていると、「外から攻撃候補が来ていたが、gateway で落ちていた」ことが見えません。OpenWrt の境界ログを入れることで、外部からの scan / probe と、それが blocked だったのか exposed だったのかを分けて扱えます。
 
-## psad の考え方を使う理由
+### psad の考え方を使う理由
 
 psad は iptables / ip6tables / firewalld のログを見て、port scan、host sweep、怪しい TCP flag などを検出する軽量 IDS です。
 
@@ -102,7 +143,7 @@ Quarant では psad を直接組み込むというより、次の考え方を参
 
 これにより、Quarant の `security_events.jsonl` と `attack_evidence_report.json` は、ただのログ変換ではなく、scan / sweep / suspicious flags という説明しやすい単位で整理されます。
 
-## Suricata を使う理由
+### Suricata を使う理由
 
 Suricata は IDS / IPS / NSM エンジンで、EVE JSON という構造化ログを出せます。
 
@@ -126,7 +167,7 @@ Suricata alert は `security_events.jsonl` に入り、OpenWrt firewall evidence
 
 この overlap は、単なる alert count よりも研究上使いやすい指標です。IDS alert が減っただけでは、攻撃量が減ったのか、観測条件が変わったのか分かりません。一方で、accepted / exposed service attempt と IDS alert が同じ対象に重なっている場合は、gateway mitigation の優先度を上げる根拠になります。
 
-## Zeek を使う理由
+### Zeek を使う理由
 
 Zeek は IDS alert を出すためだけのツールではなく、通信を調査しやすいログに変換する Network Security Monitor です。
 
@@ -148,7 +189,7 @@ Zeek の役割は、攻撃を断定することではありません。むしろ
 
 つまり Zeek は、Quarant にとって「攻撃検出器」よりも「観測の解像度を上げるための NSM evidence」です。
 
-## Snort を使う理由
+### Snort を使う理由
 
 Snort は長く使われている rule-based IDS / IPS です。
 
@@ -168,7 +209,7 @@ Quarant では Snort を、攻撃分類や rule metadata の考え方を取り�
 
 これにより、alert が単なる文字列ではなく、どの rule family や classification に属するかを Quarant 側で説明できます。研究 report では、generic な `ids_alert` のまま残っている割合も確認できます。
 
-## Quarant の共通 security event
+### Quarant の共通 security event
 
 OpenWrt、Suricata、Snort はそれぞれ別の形式で evidence を出します。Quarant では、それらを `security_events.jsonl` に寄せます。
 
@@ -211,7 +252,7 @@ IDS 由来の event では、次の metadata も保持します。
 - `flow_id`
 - `alert_action`
 
-## Taxonomy normalization
+### Taxonomy normalization
 
 各 sensor の表現はばらばらです。OpenWrt は `DROP` や `DPT=23` のような firewall log、Suricata は `category` や `signature`、Snort は `classtype` や `sid` を持ちます。
 
@@ -248,7 +289,7 @@ go run ./cmd/quarant taxonomy coverage \
   --out taxonomy_coverage_report.json
 ```
 
-## 重要な評価方針
+### 重要な評価方針
 
 Quarant では、境界で観測した攻撃証拠を次のように分けます。
 
@@ -271,7 +312,7 @@ Quarant では、境界で観測した攻撃証拠を次のように分けます
 
 DROP 済みの default deny evidence だけで mitigation priority を強く上げないようにしています。DROP だけなら `monitor_only` や posture confirmed に近い扱いです。ACCEPT や exposed service attempt、IDS overlap がある場合に優先度を上げます。
 
-## 主な出力
+### 主な出力
 
 Quarant の代表的な出力は次です。
 
@@ -288,7 +329,7 @@ Quarant の代表的な出力は次です。
 - `mitigation_eval_report.json`: before/after 評価。
 - `research_report.json`: 研究用 summary。
 
-## 最小 demo
+### 最小 demo
 
 OpenWrt 境界証拠の最小 fixture は `examples/openwrt/` にあります。
 
@@ -320,7 +361,7 @@ go run ./cmd/quarant experiment run \
 
 この command は、import、evidence assemble、precision、mitigation、before/after evaluation、quality gate、research package までを一括で実行します。
 
-## Docker OpenWrt-compatible lab
+### Docker OpenWrt-compatible lab
 
 実機 OpenWrt の前段階として、Docker で OpenWrt fw4 / nftables 互換の raw firewall log を生成できます。
 
@@ -342,7 +383,7 @@ go run ./cmd/quarant experiment run \
 
 この lab は実機評価の代替ではありません。controlled dataset / regression 用です。before/after で scan volume は維持し、ACCEPT / exposed service attempt が DROP / REJECT に寄るかを確認するために使います。
 
-## OpenWrt commands
+### OpenWrt commands
 
 OpenWrt に IoT network、DHCP/DNS logging、firewall logging を設定するための plan script を生成できます。
 
@@ -371,7 +412,7 @@ go run ./cmd/quarant openwrt collect \
   --out-dir runs/openwrt-001
 ```
 
-## Suricata / Zeek / Snort commands
+### Suricata / Zeek / Snort commands
 
 Suricata EVE JSON:
 
@@ -401,7 +442,7 @@ go run ./cmd/quarant snort import \
   --out-dir runs/snort-001
 ```
 
-## Evidence assemble
+### Evidence assemble
 
 複数 sensor の出力を統合するには `evidence assemble` を使います。
 
@@ -416,7 +457,7 @@ go run ./cmd/quarant evidence assemble \
 
 出力には、merged evidence のほか、source coverage、taxonomy coverage、evidence manifest が含まれます。
 
-## Experiment batch
+### Experiment batch
 
 複数 dataset / 複数 before-after window をまとめて実行する場合は batch を使います。
 
@@ -428,7 +469,7 @@ go run ./cmd/quarant experiment batch \
 
 `batch_summary_report.json` と `batch_summary.csv` には、run ごとの incident count、mitigation action count、accepted/exposed reduction、IDS exposed overlap reduction、source coverage、taxonomy coverage、quality gate status が入ります。
 
-## Quality gate
+### Quality gate
 
 研究 claim を言いすぎないために、quality gate を用意しています。
 
@@ -452,7 +493,7 @@ go run ./cmd/quarant quality-gate \
 - taxonomy coverage が低すぎないか。
 - IDS alert が generic `ids_alert` のまま粗く残っていないか。
 
-## Research report
+### Research report
 
 研究用 report は、precision、human label eval、mitigation plan、before/after eval、source coverage、taxonomy coverage をまとめます。
 
@@ -475,58 +516,6 @@ report には、次の limitation を明示します。
 - internet scan volume is not controlled by gateway mitigation.
 - router-boundary evidence reduction は accepted/exposed service attempt reduction と分けて解釈する必要がある。
 
-## 現在できていること
+## テストと現状
 
-- OpenWrt firewall / dnsmasq / DHCP / conntrack import。
-- OpenWrt 境界証拠から `security_events.jsonl` と `attack_evidence_report.json` を生成。
-- psad 風の port scan / host sweep / sensitive service probe / suspicious TCP flags 集約。
-- Suricata EVE `alert / flow / dns / http / tls` import。
-- Zeek `conn / dns / http / ssl/tls` import。
-- Snort fast alert / JSONL alert import。
-- Snort rule metadata enrichment。
-- OpenWrt / Suricata / Zeek / Snort の evidence assemble。
-- source coverage report。
-- taxonomy normalization と taxonomy coverage report。
-- precision incident への attack evidence 接続。
-- mitigation priority への accepted/exposed/IDS overlap 反映。
-- before/after mitigation evaluation。
-- quality gate。
-- research package。
-- Docker OpenWrt-compatible lab。
-
-## まだ研究評価として足りないこと
-
-Docker lab と fixture は、pipeline の再現性確認には使えます。ただし、実機評価の代替にはなりません。
-
-次に必要なのは、Raspberry Pi、mini PC、または OpenWrt router を使った小規模な実験環境です。
-
-確認したいことは次です。
-
-- 実 IoT device の通常通信を gateway で正しく観測できるか。
-- 実 OpenWrt の `logread`、fw4、nftables prefix、interface 名の揺れを importer が扱えるか。
-- mitigation 後に IoT の正常通信が壊れないか。
-- firewall log、conntrack、dnsmasq、Zeek、Suricata を同じ時間窓で収集できるか。
-- benign admin traffic、internet background noise、lab-generated scan、true attack をラベル分けできるか。
-
-## テスト
-
-全体テスト:
-
-```bash
-go test ./...
-```
-
-現在のテストでは、主に次を確認しています。
-
-- OpenWrt parser が DROP / REJECT / ACCEPT、TCP / UDP、SPT / DPT、TCP flags あり/なしを扱えること。
-- OpenWrt import が events / flows / observations / inventory / security events / attack evidence report を生成すること。
-- attack evidence report が port scan、sensitive service probe、suspicious TCP flags を検出すること。
-- attack evidence eval が meaningful evidence、internet background noise、benign admin、unlabeled を分けること。
-- Suricata importer が IDS metadata と passive evidence を保持すること。
-- Zeek importer が flow / observation を生成すること。
-- Snort importer が fast alert / JSONL / IPv6 / rule metadata enrichment を扱うこと。
-- evidence assemble が merge / dedup と coverage report を生成すること。
-- taxonomy normalization と taxonomy coverage が動くこと。
-- experiment run / batch が integrated demo から research package まで生成すること。
-- mitigation eval が observed / blocked / accepted / exposed / IDS overlap を分けること。
-- quality gate が claim guardrails を生成すること。
+テストの手順は [docs/TESTING.md](docs/TESTING.md)、実装の状況と既知の問題は [docs/STATUS.md](docs/STATUS.md) を参照してください。

@@ -51,6 +51,9 @@
   - [RESEARCH.md](RESEARCH.md) の草案（研究の問い、想定する貢献、可観測性マトリクスの初版）について、教授と合意する。
   - 関連研究を一次資料で調べる（IoT Sentinel、IoT Inspector、Mon(IoT)r、YourThings など）。
 - **完了条件**：研究の問いとスコープが確定し、RESEARCH.md の状態が「確定」になっている。
+- **状況（2026-10-17）**：
+  - 済み：問いの方向を合意した（ETSI EN 303 645 × 厳密にパッシブな可観測性、計測研究が中心）。COPSEC を含む関連研究を一次資料で確認した。RESEARCH.md、1 ページの要約（[RESEARCH-SUMMARY.md](RESEARCH-SUMMARY.md)）、README を書き直した。
+  - 残り：教授との合意（SaeYoshizaki が担当）。
 
 ## Step 1：評価の土台を信頼できるものにする
 

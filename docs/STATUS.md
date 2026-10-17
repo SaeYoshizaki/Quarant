@@ -58,6 +58,6 @@
 
 [ROADMAP.md](ROADMAP.md) の Step 0〜5 の順に進める。直近の作業は次のとおり。
 
-1. **Step 0**：[RESEARCH.md](RESEARCH.md)（草案）について、教授と議論して確定させる。関連研究を一次資料で調べる。
+1. **Step 0**：問いと関連研究の整理は済み。残りは教授との合意（[RESEARCH-SUMMARY.md](RESEARCH-SUMMARY.md) を使う）。
 2. **Step 1**：既存ルールの精度監査。カテゴリ推定の正解率を出す。実験をスクリプト化する。
 3. **Step 2**：Zeek、Suricata との比較。

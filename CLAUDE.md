@@ -5,7 +5,7 @@ Quarant：家庭内 IoT 機器の通信を**パッシブに**監視し、何が�
 ## 最初に読むもの
 
 - [docs/STATUS.md](docs/STATUS.md)：現状、既知の問題、次の作業
-- [docs/RESEARCH.md](docs/RESEARCH.md)：研究の問い、貢献、可観測性マトリクス、評価計画（草案）
+- [docs/RESEARCH.md](docs/RESEARCH.md)：研究の問い（ETSI EN 303 645 × 厳密にパッシブな可観測性）、関連研究、評価計画。1 ページの要約は [docs/RESEARCH-SUMMARY.md](docs/RESEARCH-SUMMARY.md)
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)：設計原則と構成
 - [docs/ROADMAP.md](docs/ROADMAP.md)：研究として進める順序（Step 0〜5）
 - [docs/DECISIONS.md](docs/DECISIONS.md)：設計判断の記録（判断を変えたら追記する）
