@@ -3,7 +3,9 @@ package analyzer
 import (
 	"bufio"
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
+	"net"
 	"os"
 	"path/filepath"
 	"testing"
@@ -272,5 +274,37 @@ func TestARPSpoofingFlipsAreReported(t *testing.T) {
 	})
 	if changes != 4 {
 		t.Fatalf("expected 4 binding flips for the gateway IP, got %d", changes)
+	}
+}
+
+func TestTLSOnNonStandardPortIsParsed(t *testing.T) {
+	db, err := knowledge.LoadAll()
+	if err != nil {
+		t.Fatal(err)
+	}
+	dir := t.TempDir()
+	sink, _ := NewJSONSink(filepath.Join(dir, "events.jsonl"))
+	h := NewFlowHandlerWithObservations(sink, nil, nil, false, db)
+
+	b := &synth.Builder{}
+	phone := synth.NewHost("02:11:22:33:44:55", "192.168.50.31")
+	push := synth.Host{MAC: phone.MAC, IP: net.ParseIP("198.51.100.90").To4()}
+	// TLS 1.0 on 5228 (a push-service port Quarant does not list as TLS).
+	b.TCP(phone, push, 51515, 5228).Handshake(time.Date(2026, 9, 26, 10, 0, 0, 0, time.UTC)).
+		Client(synth.TLSClientHello("push.example.test", tls.VersionTLS10, tls.VersionTLS10)).Close()
+	var pcap bytes.Buffer
+	_ = b.WritePCAP(&pcap)
+	if err := NewEngine(h).RunPCAPStream(&pcap); err != nil {
+		t.Fatal(err)
+	}
+	_ = sink.Close()
+	found := map[string]bool{}
+	readJSONL(t, filepath.Join(dir, "events.jsonl"), func(line []byte) {
+		var e Event
+		_ = json.Unmarshal(line, &e)
+		found[e.Type] = true
+	})
+	if !found["TLS_CLIENT_HELLO"] || !found["I7_TLS_WEAK_VERSION_OBSERVED"] {
+		t.Fatalf("TLS on port 5228 must be parsed and assessed, got %v", found)
 	}
 }

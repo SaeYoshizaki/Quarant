@@ -501,62 +501,21 @@ var tlsCipherSuiteNames = map[uint16]string{
 	0x1303: "TLS_CHACHA20_POLY1305_SHA256",
 }
 
-func extractSNI(exts []byte) string {
-	for j := 0; j+4 <= len(exts); {
+// parseExtensions fills info from the extension block and reports whether
+// the block is well formed (every extension length consistent and the block
+// consumed exactly). A malformed block must not yield a partial result:
+// silently dropping later extensions such as supported_versions made a
+// TLS 1.3 client look like a legacy one (found by differential fuzzing
+// against crypto/tls, internal/parserdiff).
+func parseExtensions(exts []byte, info *TLSClientHelloInfo) bool {
+	j := 0
+	for j+4 <= len(exts) {
 		typ := binary.BigEndian.Uint16(exts[j : j+2])
 		l := int(binary.BigEndian.Uint16(exts[j+2 : j+4]))
 		j += 4
 
 		if l < 0 || j+l > len(exts) {
-			return ""
-		}
-
-		body := exts[j : j+l]
-		j += l
-
-		if typ != 0 {
-			continue
-		}
-
-		if len(body) < 2 {
-			return ""
-		}
-
-		listLen := int(binary.BigEndian.Uint16(body[0:2]))
-		if listLen < 0 || 2+listLen > len(body) {
-			return ""
-		}
-
-		k := 2
-		for k+3 <= 2+listLen {
-			nameType := body[k]
-			k++
-			nameLen := int(binary.BigEndian.Uint16(body[k : k+2]))
-			k += 2
-
-			if nameLen < 0 || k+nameLen > len(body) {
-				return ""
-			}
-
-			if nameType == 0 {
-				return string(body[k : k+nameLen])
-			}
-
-			k += nameLen
-		}
-		return ""
-	}
-	return ""
-}
-
-func parseExtensions(exts []byte, info *TLSClientHelloInfo) {
-	for j := 0; j+4 <= len(exts); {
-		typ := binary.BigEndian.Uint16(exts[j : j+2])
-		l := int(binary.BigEndian.Uint16(exts[j+2 : j+4]))
-		j += 4
-
-		if l < 0 || j+l > len(exts) {
-			return
+			return false
 		}
 
 		body := exts[j : j+l]
@@ -565,48 +524,62 @@ func parseExtensions(exts []byte, info *TLSClientHelloInfo) {
 		info.Extensions = append(info.Extensions, typ)
 
 		switch typ {
+		// The fields Quarant reports must be exactly well formed (RFC 8446
+		// §4.2; OpenSSL and crypto/tls reject trailing or short data).
+		case 0:
+			name, ok := parseSNIExtension(body)
+			if !ok {
+				return false
+			}
+			info.SNI = name
 		case 10:
 			if len(body) < 2 {
-				continue
+				return false
 			}
 			n := int(binary.BigEndian.Uint16(body[:2]))
-			if 2+n > len(body) {
-				continue
+			if 2+n != len(body) || n%2 != 0 {
+				return false
 			}
 			for k := 2; k+2 <= 2+n; k += 2 {
 				info.SupportedGroups = append(info.SupportedGroups, binary.BigEndian.Uint16(body[k:k+2]))
 			}
 		case 11:
 			if len(body) < 1 {
-				continue
+				return false
 			}
 			n := int(body[0])
-			if 1+n > len(body) {
-				continue
+			if 1+n != len(body) {
+				return false
 			}
 			info.ECPointFormats = append(info.ECPointFormats, body[1:1+n]...)
 		case 43:
 			if len(body) < 1 {
-				continue
+				return false
 			}
 			n := int(body[0])
-			if n <= 0 || 1+n > len(body) || n%2 != 0 {
-				continue
+			if n <= 0 || 1+n != len(body) || n%2 != 0 {
+				return false
 			}
 			for k := 1; k < 1+n; k += 2 {
 				info.SupportedVersions = append(info.SupportedVersions, binary.BigEndian.Uint16(body[k:k+2]))
 			}
 		}
 	}
+	return j == len(exts)
 }
 
 func DetectTLSClientHello(data []byte) (TLSClientHelloInfo, bool) {
 	var info TLSClientHelloInfo
 
-	for off := 0; off+5 <= len(data); off++ {
-		if data[off] != 22 {
+	// A TLS client sends its ClientHello as the first bytes of the
+	// connection, so only offset 0 is parsed. Scanning for a 0x16 byte
+	// anywhere let non-TLS payload (or crafted data) produce a phantom
+	// ClientHello with nonsense versions (found by differential fuzzing).
+	for off := 0; off == 0 && off+5 <= len(data); off++ {
+		if data[off] != 22 || data[off+1] != 3 {
 			continue
 		}
+		info = TLSClientHelloInfo{}
 		recVer := binary.BigEndian.Uint16(data[off+1 : off+3])
 		recLen := int(binary.BigEndian.Uint16(data[off+3 : off+5]))
 
@@ -658,8 +631,9 @@ func DetectTLSClientHello(data []byte) (TLSClientHelloInfo, bool) {
 		}
 		i += csLen
 
+		// compression_methods is mandatory (RFC 8446 §4.1.2).
 		if i >= len(ch) {
-			return info, true
+			continue
 		}
 		cmLen := int(ch[i])
 		i++
@@ -676,15 +650,53 @@ func DetectTLSClientHello(data []byte) (TLSClientHelloInfo, bool) {
 		}
 		extLen := int(binary.BigEndian.Uint16(ch[i : i+2]))
 		i += 2
-		if extLen < 0 || i+extLen > len(ch) {
+		// The extension block must end exactly where the ClientHello ends.
+		if extLen < 0 || i+extLen != len(ch) {
 			continue
 		}
 		exts := ch[i : i+extLen]
 
-		info.SNI = extractSNI(exts)
-		parseExtensions(exts, &info)
+		if !parseExtensions(exts, &info) {
+			continue
+		}
 		return info, true
 	}
 
 	return info, false
+}
+
+// parseSNIExtension validates a ClientHello server_name extension body the
+// way crypto/tls does: a non-empty list of (type, non-empty name) entries, at
+// most one host_name, no trailing dot. ok is false for a malformed body.
+func parseSNIExtension(body []byte) (string, bool) {
+	if len(body) < 2 {
+		return "", false
+	}
+	listLen := int(binary.BigEndian.Uint16(body[:2]))
+	if listLen == 0 || 2+listLen != len(body) {
+		return "", false
+	}
+	name := ""
+	for k := 2; k < len(body); {
+		if k+3 > len(body) {
+			return "", false
+		}
+		nameType := body[k]
+		nameLen := int(binary.BigEndian.Uint16(body[k+1 : k+3]))
+		k += 3
+		if nameLen == 0 || k+nameLen > len(body) {
+			return "", false
+		}
+		if nameType == 0 {
+			if name != "" {
+				return "", false
+			}
+			name = string(body[k : k+nameLen])
+			if strings.HasSuffix(name, ".") {
+				return "", false
+			}
+		}
+		k += nameLen
+	}
+	return name, true
 }

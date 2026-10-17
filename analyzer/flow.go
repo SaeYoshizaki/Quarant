@@ -835,18 +835,31 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 	bufferedBefore := len(st.ClientData) + len(st.ServerData)
 	h.updateFlowState(st, srcIP, dstIP, srcPort, dstPort, len(tcp.Payload), (tcp.SYN && tcp.ACK) || len(tcp.Payload) > 0)
 
-	capturePayload := rules.NeedsPayloadCapture(dstPort) || rules.NeedsPayloadCapture(srcPort)
+	// TLS is recognised by content as well as by port: on real traffic
+	// 1.8-3.7% of ClientHellos used ports outside rules.IsTLSPort (IMAPS
+	// 993, push services on 5228, TLS on 80, ...) and were never parsed
+	// (measured with quarant parser-diff).
+	fromClient := srcIP == st.SrcIP && srcPort == st.SrcPort
+	if fromClient && len(tcp.Payload) > 0 && st.ClientBytes == int64(len(tcp.Payload)) && looksLikeTLSRecord(tcp.Payload) {
+		st.TLSByContent = true
+	}
+	tlsClient := st.TLSByContent && fromClient
+	tlsServer := st.TLSByContent && !fromClient
+
+	captureClient := rules.NeedsPayloadCapture(dstPort) || tlsClient
+	captureServer := rules.NeedsPayloadCapture(srcPort) || tlsServer
+	capturePayload := captureClient || captureServer
 	isHTTPClientToServer := rules.IsHTTPPort(dstPort)
 	isTelnetClientToServer := rules.IsTelnetPort(dstPort)
 	isMQTTClientToServer := rules.IsMQTTPort(dstPort)
-	isTLSClientToServer := rules.IsTLSPort(dstPort)
-	isTLSServerToClient := rules.IsTLSPort(srcPort)
+	isTLSClientToServer := rules.IsTLSPort(dstPort) || tlsClient
+	isTLSServerToClient := rules.IsTLSPort(srcPort) || tlsServer
 
 	if len(tcp.Payload) > 0 {
-		if rules.NeedsPayloadCapture(dstPort) {
+		if captureClient {
 			h.cache.AppendClientUpToLimit(st, tcp.Payload)
 		}
-		if rules.NeedsPayloadCapture(srcPort) {
+		if captureServer {
 			h.cache.AppendServerUpToLimit(st, tcp.Payload)
 		}
 	}
@@ -1366,4 +1379,10 @@ func (h *FlowHandler) cachedI5(deviceIP string, ctx *rules.Context, d *device.De
 		h.i5Cache[deviceIP] = e
 	}
 	return e.i5, e.i4i5, e.i4i5ok
+}
+
+// looksLikeTLSRecord reports whether payload starts like a TLS handshake
+// record carrying a ClientHello: content type 22, version 3.x, handshake 1.
+func looksLikeTLSRecord(payload []byte) bool {
+	return len(payload) >= 6 && payload[0] == 22 && payload[1] == 3 && payload[5] == 1
 }

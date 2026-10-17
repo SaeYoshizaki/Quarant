@@ -30,6 +30,9 @@ type FlowState struct {
 	// i.e. a service actually answered (a bare SYN proves nothing).
 	ServerResponded bool
 	HTTPEnriched    bool
+	// TLSByContent: the client's first payload is a TLS ClientHello record,
+	// whatever the port.
+	TLSByContent bool
 
 	TLSClientSeen bool
 	TLSClientInfo *rules.TLSClientHelloInfo
