@@ -36,6 +36,7 @@ type FlowHandler struct {
 	pendingDHCP       map[string]pendingDHCP
 
 	deviceReported   map[string]bool
+	i5Cache          map[string]i5CacheEntry
 	behavior         *behavior.Analyzer
 	dnsNames         map[string]string
 	lastBehaviorEval time.Time
@@ -1163,10 +1164,8 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 			matches = append(matches, i4Matches...)
 		}
 
-		i5Rule := rules.NewI5KnownVulnerableComponentRule(h.knowledge)
-		if i5Matches := i5Rule.ApplyAll(ctx); len(i5Matches) > 0 {
-			matches = append(matches, i5Matches...)
-		}
+		i5, i4i5, i4i5ok := h.cachedI5(deviceIP, ctx, d)
+		matches = append(matches, i5...)
 
 		i3Rule := rules.NewI3UnexpectedCloudEndpointRule(h.knowledge)
 		if i3Matches := i3Rule.ApplyAll(ctx); len(i3Matches) > 0 {
@@ -1174,9 +1173,8 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 		}
 
 		if !st.AlreadyReported(rules.I4I5CombinedRiskRuleID) {
-			i4I5Rule := rules.NewI4I5CombinedRiskRule(h.knowledge)
-			if i4I5Match, ok := i4I5Rule.Apply(ctx); ok {
-				matches = append(matches, i4I5Match)
+			if i4i5ok {
+				matches = append(matches, i4i5)
 			}
 		}
 	}
@@ -1334,4 +1332,38 @@ func estimateUploadBytes(httpInfo *rules.HTTPInfo) int {
 		}
 	}
 	return len(httpInfo.Body)
+}
+
+// i5CacheEntry memoizes the device-level vulnerability-knowledge matches.
+type i5CacheEntry struct {
+	sig    string
+	i5     []rules.Match
+	i4i5   rules.Match
+	i4i5ok bool
+}
+
+// cachedI5 evaluates the I5 and I4+I5 knowledge-base rules only when the
+// device's identity inputs changed. Both rules depend solely on identity
+// candidates and the device's observed host/UA/SNI sets, but re-running
+// them per flow normalised every observed value each time, which grew
+// quadratically for devices with many destinations (one UNSW day: 21 min).
+func (h *FlowHandler) cachedI5(deviceIP string, ctx *rules.Context, d *device.DeviceProfile) ([]rules.Match, rules.Match, bool) {
+	sig := fmt.Sprintf("%s|%s|%s|%s|%s|%s|%d|%d|%d|%s|%v",
+		ctx.DeviceCategory, ctx.CategoryCandidate, ctx.VendorCandidate, ctx.FamilyCandidate, ctx.FamilyConfidence, ctx.MACVendor,
+		len(d.Hosts), len(d.UserAgents), len(d.SNIValues), ctx.UpdateVisibility, ctx.LegacySignals)
+	if deviceIP != "" {
+		if e, ok := h.i5Cache[deviceIP]; ok && e.sig == sig {
+			return e.i5, e.i4i5, e.i4i5ok
+		}
+	}
+	e := i5CacheEntry{sig: sig}
+	e.i5 = rules.NewI5KnownVulnerableComponentRule(h.knowledge).ApplyAll(ctx)
+	e.i4i5, e.i4i5ok = rules.NewI4I5CombinedRiskRule(h.knowledge).Apply(ctx)
+	if deviceIP != "" {
+		if h.i5Cache == nil {
+			h.i5Cache = map[string]i5CacheEntry{}
+		}
+		h.i5Cache[deviceIP] = e
+	}
+	return e.i5, e.i4i5, e.i4i5ok
 }

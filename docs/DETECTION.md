@@ -20,6 +20,8 @@
 |---|---|---|
 | `OUTBOUND_SCAN_SUSPECTED`、`LATERAL_SCAN_SUSPECTED`（横方向） | 同じポートについて、60 秒の窓内に異なる宛先が 20 以上あり、未応答率が 0.7 以上。宛先の過半がローカルなら LATERAL | HIGH。宛先 60 以上かつ未応答率 0.9 以上なら確信度 high |
 | `PORT_SCAN_SUSPECTED`、`LATERAL_SCAN_SUSPECTED`（縦方向） | 同じ宛先について、60 秒の窓内に異なるポートが 20 以上あり、未応答率が 0.7 以上 | HIGH |
+| `PERSISTENT_CONNECTION_ATTEMPTS` | 同じ外部の宛先（IP、ポート、プロトコル）に、1 時間の窓内で 30 回以上の接続試行がある。応答の有無は問わない | INFO。文脈フラグが 2 つ以上なら WARNING |
+| `IP_MAC_BINDING_CHANGED` | ローカル IP の MAC が、直前の MAC から切り替わった（Ethernet、ARP、DHCP のいずれかで観測）。同じ組み合わせは 10 分に 1 回まで報告する | WARNING |
 | `PERIODIC_COMMUNICATION_OBSERVED` | 同じ宛先（DNS 名または IP）、ポート、プロトコルへの応答ありの接続が 8 回以上あり、間隔の中央値が 10 秒以上で、MAD を中央値で割った値が 0.1 以下 | INFO。文脈フラグが 2 つ以上なら WARNING |
 
 周期通信の文脈フラグ：
@@ -27,6 +29,14 @@
 - `direct_ip_no_dns_observed`：DNS で名前を解決せずに外部 IP へ接続している。
 - `plaintext_protocol`：平文のプロトコルを使っている。
 - `non_standard_port`：443、8883、123 以外のポートを使っている。
+
+執拗な接続試行の文脈フラグ：
+
+- `direct_ip_no_dns_observed`
+- `non_standard_port`（53、80、123、443、8883 以外）
+- `mostly_unanswered`（未応答率 0.5 以上）
+
+しきい値の 30 回／時は、UNSW の正常データ 1 日分の分布から決めた。外部の宛先 535 件のうち、30 回以上だったのは 7 件で、いずれも WARNING の条件を満たさなかった。詳しくは [EXPERIMENTS.md](EXPERIMENTS.md) E1 を参照。
 
 **評価のタイミング**：キャプチャ時刻で 5 分ごとと、入力の終わり。同じ所見は 2 回報告しない。
 
@@ -45,3 +55,14 @@
 | `hostname` | DHCP option 12、mDNS | observed | 機器自身が名乗った名前なので、偽装できる |
 | `dhcp_vendor_class`、`dhcp_param_request_list` | DHCP option 60、55 | observed | option 55 の並び順は、受動的な OS／機器の指紋として知られている |
 | `mdns_*`、`ssdp_*` | mDNS の応答、SSDP の NOTIFY と応答 | observed | |
+
+## 機器についての判断の重複抑制
+
+次のイベントは、フローではなく機器についての判断なので、機器と照合先の組み合わせごとに 1 回だけ出す（`analyzer/basis.go` の `deviceScopedTypes`）。
+
+- I5 と I4_I5 の知識 DB との照合
+- 更新の可視性
+- R1 の複合リスク
+- 想定外の SNI やクラウド接続先
+
+I5 の照合は、OUI のベンダーとファミリーのベンダーが矛盾する場合には出さない。宛先から推定したファミリーは、連携先のクラウドを機器自身と取り違えることがあるため（例：Echo→meethue.com）。Wi-Fi モジュールの製造元は、矛盾の判断に使わない。

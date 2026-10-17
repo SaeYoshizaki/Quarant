@@ -18,6 +18,10 @@
   - IP と MAC の対応の変化
 - **根拠の種類**：すべてのイベントに `basis`（observed／inferred／reference_match）を付ける。
 - **知識ベースとの照合**：I3〜I6（カテゴリ方針、脆弱性候補。適用可否は未確認として扱う）。
+- **公開データセットでの評価**：`quarant dataset-eval iot23|unsw|unsw-attacks`。結果は [EXPERIMENTS.md](EXPERIMENTS.md) を参照。
+  - ARP スプーフィング：27/27 を検出。
+  - IoT-23：検出器のあるラベル 10 種類のうち 5 種類を検出。
+  - UNSW の正常データ：誤検知候補の WARNING は 1 日あたり約 0.8 件。
 - **レポート**
   - `quarant devices`：機器単位のレポート（見えなかったことも出す）。
   - `quarant label-eval`：正解ラベルとの比較。
@@ -52,8 +56,8 @@
 
 ## 次に行う作業（優先順）
 
-1. 公開データセットで実機トラフィックを検証する（候補の選定は [DATASETS.md](DATASETS.md)）。
-2. 相関エンジンの設計（Phase 2-1）と SQLite スキーマ。
-3. 脅威情報フィードの仕様と規約の確認、およびローカル照合の実装。
+1. フラッド（SYN、UDP、ICMP）とリフレクションの検出器。UNSW の攻撃データに 135 窓あり、評価の準備はできている。
+2. 少量の C2 への対策として、脅威情報フィードとのローカル照合（Torii を見逃した）。
+3. 相関エンジンの設計（Phase 2-1）と SQLite スキーマ。
 4. Suricata と Zeek を実際に動かし、合成 PCAP と実 PCAP で比較する基盤。
 5. Web UI に basis、識別の根拠、visibility limits を表示する。

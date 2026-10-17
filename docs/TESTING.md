@@ -35,3 +35,13 @@ go run ./cmd/quarant devices --in runs/real
 ## OpenWrt と IDS の統合デモ
 
 README の「最小 demo」と `experiment run` を参照。
+
+## 公開データセットでの評価
+
+データは `~/datasets/` に置く（リポジトリの外）。手順と結果は [EXPERIMENTS.md](EXPERIMENTS.md) を参照。
+
+```bash
+quarant dataset-eval iot23 --run runs/x --labels conn.log.labeled --scenario NAME
+quarant dataset-eval unsw --run runs/x --devices List_Of_Devices.txt
+quarant dataset-eval unsw-attacks --run runs/x --annotations annotations/
+```

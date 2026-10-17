@@ -115,9 +115,11 @@
   - CIC は「データセットと論文の両方」を引用する。
   - IoT-23 は CC BY に従ってクレジットを表示する。
 
-## 次の作業
+## 取得と評価の状況（2026-10-17）
 
-1. **UNSW traces を 1 日分取得する**：`List_Of_Devices.txt` を正解ラベルに変換するツールを作り、識別率を `label-eval` で測る。
-2. **IoT-23 の小さな悪性シナリオを 1 件と、正常シナリオを 1 件取得する**：`conn.log.labeled` を Quarant のイベントと結合して評価する仕組みを作る（`label-eval` を flow 単位のラベルに対応させる）。
-3. **UNSW attack traces の ARP スプーフィング区間を取得する**：その区間での `IP_MAC_BINDING_CHANGED` の再現率を測る。
-4. **結果の記録**：上の 3 つを `docs/EXPERIMENTS.md` に記録する。
+| データセット | 取得したもの | 評価 |
+|---|---|---|
+| UNSW IoT traces | 20 日分すべて（6.4GB）と機器一覧 | 済み（[EXPERIMENTS.md](EXPERIMENTS.md) E1-2） |
+| UNSW IoT attack traces | ARP スプーフィングを含む 5 日分（約 9.5GB）と注釈 | 済み（E1-3） |
+| IoT-23 | 悪性 6 シナリオと正常 2 シナリオ（PCAP、ラベル、README のみ。マルウェア本体は取得していない） | 済み（E1-1） |
+| CIC IoT 2022 | 未取得（登録フォームが必要） | 未実施 |
