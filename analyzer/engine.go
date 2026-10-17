@@ -80,6 +80,14 @@ func (e *Engine) RunOffline(path string) error {
 	log.Println("reading pcap", path)
 	err = e.runPacketSource(context.Background(), packetSource)
 	e.flush(e.lastPacketTime)
+	if err != nil && e.packets > 0 {
+		// Truncated captures are common in published datasets (a file cut
+		// mid-record); libpcap reports them only as a generic read error.
+		// Keep the results for the packets read so far and say so.
+		log.Printf("warning: reading %s stopped after %d packets: %v (capture may be truncated; results cover packets up to %s)",
+			path, e.packets, err, e.lastPacketTime.UTC().Format(time.RFC3339))
+		return nil
+	}
 	return err
 }
 

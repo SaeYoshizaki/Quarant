@@ -296,3 +296,15 @@ func mqttString(s string) []byte {
 	binary.BigEndian.PutUint16(out, uint16(len(s)))
 	return append(out, s...)
 }
+
+// ARPReply emits an ARP reply in which sender claims sender.IP.
+func (b *Builder) ARPReply(ts time.Time, sender, target Host) {
+	arp := &layers.ARP{
+		AddrType: layers.LinkTypeEthernet, Protocol: layers.EthernetTypeIPv4,
+		HwAddressSize: 6, ProtAddressSize: 4, Operation: layers.ARPReply,
+		SourceHwAddress: sender.MAC, SourceProtAddress: sender.IP.To4(),
+		DstHwAddress: target.MAC, DstProtAddress: target.IP.To4(),
+	}
+	e := &layers.Ethernet{SrcMAC: sender.MAC, DstMAC: target.MAC, EthernetType: layers.EthernetTypeARP}
+	b.add(ts, e, arp)
+}

@@ -231,3 +231,46 @@ func TestHomeScenarioEveryEventHasBasis(t *testing.T) {
 		}
 	}
 }
+
+func TestARPSpoofingFlipsAreReported(t *testing.T) {
+	db, err := knowledge.LoadAll()
+	if err != nil {
+		t.Fatal(err)
+	}
+	dir := t.TempDir()
+	sink, _ := NewJSONSink(filepath.Join(dir, "events.jsonl"))
+	h := NewFlowHandlerWithObservations(sink, nil, nil, false, db)
+
+	b := &synth.Builder{}
+	gw := synth.NewHost("02:00:5e:00:00:01", "192.168.50.1")
+	victim := synth.NewHost("0c:75:d2:1a:2b:3c", "192.168.50.20")
+	attacker := synth.NewHost("68:dd:b7:55:66:77", "192.168.50.22")
+	start := time.Date(2026, 9, 26, 10, 0, 0, 0, time.UTC)
+	// Genuine gateway traffic, then two spoofing episodes 30 minutes apart,
+	// each answered by the genuine gateway again.
+	for i, spoof := range []bool{false, true, false, true, false} {
+		ts := start.Add(time.Duration(i) * 15 * time.Minute)
+		sender := gw
+		if spoof {
+			sender = synth.Host{MAC: attacker.MAC, IP: gw.IP}
+		}
+		b.ARPReply(ts, sender, victim)
+	}
+	var pcap bytes.Buffer
+	_ = b.WritePCAP(&pcap)
+	if err := NewEngine(h).RunPCAPStream(&pcap); err != nil {
+		t.Fatal(err)
+	}
+	_ = sink.Close()
+	changes := 0
+	readJSONL(t, filepath.Join(dir, "events.jsonl"), func(line []byte) {
+		var e Event
+		_ = json.Unmarshal(line, &e)
+		if e.Type == "IP_MAC_BINDING_CHANGED" && e.DeviceKey == "192.168.50.1" {
+			changes++
+		}
+	})
+	if changes != 4 {
+		t.Fatalf("expected 4 binding flips for the gateway IP, got %d", changes)
+	}
+}

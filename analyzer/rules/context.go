@@ -24,8 +24,11 @@ type Context struct {
 	// ServerSilent is true while the responder of a TCP flow has sent
 	// neither SYN/ACK nor payload, e.g. an unanswered SYN during a scan.
 	ServerSilent bool
-	Debug        bool
-	UploadBytes  int
+	// MACVendor is the IEEE OUI vendor of the device's MAC (empty when
+	// unknown or locally administered).
+	MACVendor   string
+	Debug       bool
+	UploadBytes int
 
 	StorageEndpointRepeatCount  int
 	StableIdentifierRepeatCount int

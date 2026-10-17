@@ -103,6 +103,10 @@ func main() {
 		if err := runQualityGate(args[1:], os.Stdout); err != nil {
 			log.Fatal(err)
 		}
+	case "dataset-eval":
+		if err := runDatasetEval(args[1:], os.Stdout); err != nil {
+			log.Fatal(err)
+		}
 	case "devices":
 		if err := runDevices(args[1:], os.Stdout); err != nil {
 			log.Fatal(err)

@@ -45,6 +45,8 @@ type DeviceProfile struct {
 
 	// Link-layer and discovery identity (see identity_hints.go).
 	MAC           string
+	MACVendor     string // IEEE OUI vendor of MAC; empty if unknown/randomized
+	CurrentMAC    string // MAC most recently seen for this IP
 	MACs          map[string]bool
 	IdentityHints map[string]*identityHint
 	DNSQueries    map[string]bool

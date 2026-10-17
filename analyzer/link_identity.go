@@ -13,6 +13,10 @@ import (
 	"quarant/analyzer/discovery"
 )
 
+// macChangeReportInterval rate-limits IP_MAC_BINDING_CHANGED per IP and
+// MAC pair.
+const macChangeReportInterval = 10 * time.Minute
+
 // pendingDHCPLimit bounds DHCP hints held for MACs whose IP is not known yet.
 const pendingDHCPLimit = 1024
 
@@ -50,15 +54,29 @@ func (h *FlowHandler) bindMAC(now time.Time, ip string, mac net.HardwareAddr, so
 	if info.Multicast {
 		return
 	}
-	if d.MAC != "" && !d.MACs[info.MAC] {
-		h.reportMACChange(now, ip, d.MAC, info.MAC, source)
+	// Report every switch of the binding (rate-limited per MAC pair), not
+	// only the first appearance of a new MAC: ARP spoofing flips an
+	// address back and forth between the genuine and the attacker MAC.
+	if d.CurrentMAC != "" && d.CurrentMAC != info.MAC {
+		pair := ip + "|" + d.CurrentMAC + "|" + info.MAC
+		if last, ok := h.macChangeReported[pair]; !ok || now.Sub(last) >= macChangeReportInterval {
+			if h.macChangeReported == nil {
+				h.macChangeReported = map[string]time.Time{}
+			}
+			h.macChangeReported[pair] = now
+			h.reportMACChange(now, ip, d.CurrentMAC, info.MAC, source)
+		}
 	}
+	d.CurrentMAC = info.MAC
 	d.ObserveMAC(info.MAC)
 	d.AddIdentityEvidence(now, "mac", info.MAC, string(discovery.BasisObserved), source)
 	if info.LocallyAdministered {
 		d.AddIdentityEvidence(now, "mac_locally_administered", "true", string(discovery.BasisObserved), "ethernet")
 	} else if info.Vendor != "" {
 		d.AddIdentityEvidence(now, "mac_vendor", info.Vendor, string(discovery.BasisReference), "oui_registry")
+		if d.MACVendor == "" {
+			d.MACVendor = info.Vendor
+		}
 	}
 	if h.macToIP == nil {
 		h.macToIP = map[string]string{}

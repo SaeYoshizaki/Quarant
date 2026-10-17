@@ -29,10 +29,13 @@ type FlowHandler struct {
 
 	// mu serializes packet handling with snapshot readers (the periodic
 	// inventory writer runs in another goroutine).
-	mu          sync.Mutex
-	macToIP     map[string]string
-	pendingDHCP map[string]pendingDHCP
+	mu      sync.Mutex
+	macToIP map[string]string
+	// macChangeReported rate-limits binding-change events per IP/MAC pair.
+	macChangeReported map[string]time.Time
+	pendingDHCP       map[string]pendingDHCP
 
+	deviceReported   map[string]bool
 	behavior         *behavior.Analyzer
 	dnsNames         map[string]string
 	lastBehaviorEval time.Time
@@ -1019,6 +1022,7 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 		Payload:                   st.ClientData,
 		ServerPayload:             st.ServerData,
 		ServerSilent:              !st.ServerResponded,
+		MACVendor:                 d.MACVendor,
 		Debug:                     h.debug,
 		UploadBytes:               estimateUploadBytes(httpInfo),
 		HTTP:                      httpInfo,
@@ -1212,6 +1216,19 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 			Message:        m.Message,
 		}
 		affected := h.affectedDeviceIP(m.Type, st)
+		if key := deviceScopedKey(m, affected); key != "" {
+			// A conclusion about the device itself is reported once per
+			// device, not once per flow (one Echo produced >1000 identical
+			// knowledge-base matches in a day of real traffic).
+			if h.deviceReported[key] {
+				st.MarkReported(m.RuleID)
+				continue
+			}
+			if h.deviceReported == nil {
+				h.deviceReported = map[string]bool{}
+			}
+			h.deviceReported[key] = true
+		}
 		event.DeviceKey = affected
 		h.enrichEvent(&event)
 		_ = h.eventSink.Write(event)

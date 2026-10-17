@@ -2,12 +2,16 @@ package analyzer
 
 import (
 	"bytes"
+	"os"
+	"path/filepath"
 	"testing"
 	"time"
 
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/layers"
 	"github.com/google/gopacket/pcapgo"
+
+	"quarant/internal/synth"
 )
 
 type packetCounter struct {
@@ -74,5 +78,26 @@ func TestRunPCAPStream(t *testing.T) {
 	}
 	if counter.count != 1 {
 		t.Fatalf("expected 1 packet, got %d", counter.count)
+	}
+}
+
+func TestRunOfflineToleratesTruncatedCapture(t *testing.T) {
+	var buf bytes.Buffer
+	if err := synth.HomeScenario(time.Date(2026, 9, 26, 10, 0, 0, 0, time.UTC)).Builder.WritePCAP(&buf); err != nil {
+		t.Fatal(err)
+	}
+	// Cut the file in the middle of a record, as seen in published datasets.
+	data := buf.Bytes()[:buf.Len()-37]
+	path := filepath.Join(t.TempDir(), "truncated.pcap")
+	if err := os.WriteFile(path, data, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	counter := &packetCounter{}
+	engine := NewEngine(counter)
+	if err := engine.RunOffline(path); err != nil {
+		t.Fatalf("truncated capture should not fail the run: %v", err)
+	}
+	if counter.count < 700 {
+		t.Fatalf("expected the packets before the cut to be processed, got %d", counter.count)
 	}
 }

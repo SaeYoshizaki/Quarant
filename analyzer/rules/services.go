@@ -189,7 +189,9 @@ func DetectHTTPAdminIndicators(http *HTTPInfo) ([]string, bool) {
 	// claimed only with a management path or an auth challenge.
 	strong := false
 	for _, indicator := range indicators {
-		if strings.HasPrefix(indicator, "path=") || indicator == "www-authenticate" {
+		// "/cgi-bin" is a generic CGI convention used by many cloud APIs
+		// (seen on real device-to-cloud traffic), so it only supports.
+		if (strings.HasPrefix(indicator, "path=") && indicator != "path=/cgi-bin") || indicator == "www-authenticate" {
 			strong = true
 			break
 		}

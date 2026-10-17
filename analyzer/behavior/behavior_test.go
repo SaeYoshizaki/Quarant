@@ -87,3 +87,39 @@ func TestMedian(t *testing.T) {
 		t.Fatal("median")
 	}
 }
+
+func TestPersistentConnectionAttempts(t *testing.T) {
+	a := New(DefaultConfig())
+	// A bursty reconnect loop to a raw IP on IRC: not periodic, but persistent.
+	gaps := []time.Duration{7200 * time.Millisecond, 2800 * time.Millisecond, 60 * time.Second, time.Second}
+	ts := t0
+	for i := 0; i < 120; i++ {
+		ts = ts.Add(gaps[i%len(gaps)])
+		a.Add(Conn{Start: ts, DeviceIP: "192.168.1.195", DstIP: "203.0.113.7", DstPort: 6667, Proto: "tcp", Answered: i%4 == 0})
+	}
+	var p *Finding
+	for _, f := range a.Evaluate() {
+		if f.Type == "PERSISTENT_CONNECTION_ATTEMPTS" {
+			f := f
+			p = &f
+		}
+	}
+	if p == nil || p.Severity != "WARNING" {
+		t.Fatalf("expected a WARNING persistent finding, got %+v", p)
+	}
+	if !strings.Contains(p.Evidence, "mostly_unanswered") || !strings.Contains(p.Evidence, "non_standard_port") {
+		t.Fatalf("missing context flags: %s", p.Evidence)
+	}
+}
+
+func TestPersistentBelowThresholdIgnored(t *testing.T) {
+	a := New(DefaultConfig())
+	for i := 0; i < 29; i++ {
+		a.Add(Conn{Start: t0.Add(time.Duration(i) * 30 * time.Second), DeviceIP: "192.168.1.5", DstIP: "198.51.100.9", DstName: "api.vendor.test", DstPort: 443, Proto: "tcp", Answered: true})
+	}
+	for _, f := range a.Evaluate() {
+		if f.Type == "PERSISTENT_CONNECTION_ATTEMPTS" {
+			t.Fatalf("29 attempts must not trigger: %+v", f)
+		}
+	}
+}

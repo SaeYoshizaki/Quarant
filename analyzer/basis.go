@@ -1,6 +1,11 @@
 package analyzer
 
-import "strings"
+import (
+	"regexp"
+	"strings"
+
+	"quarant/analyzer/rules"
+)
 
 // Evidence basis values. Every event states what its detection rests on:
 //
@@ -46,4 +51,33 @@ func eventBasis(eventType string) string {
 	default:
 		return BasisInferred
 	}
+}
+
+// deviceScopedTypes are findings about a device rather than about one flow.
+var deviceScopedTypes = map[string]bool{
+	"I5_KNOWN_VULNERABLE_COMPONENT":  true,
+	"I4_I5_COMBINED_RISK":            true,
+	"I4_FIRMWARE_RISK_ENRICHMENT":    true,
+	"I4_WEAK_UPDATE_VISIBILITY":      true,
+	"I4_MAYBE_EOL_DEVICE":            true,
+	"I4_LIKELY_EOL_DEVICE":           true,
+	"R1_COMPOSITE_RISK":              true,
+	"I6_TLS_UNEXPECTED_SNI_OBSERVED": true,
+	"I3_UNEXPECTED_CLOUD_ENDPOINT":   true,
+}
+
+var evidenceKeyRe = regexp.MustCompile(`(?:knowledge_id|matched_component_id|sni|host|risk_level)=(\S+)`)
+
+// deviceScopedKey returns the de-duplication key for device-level findings,
+// or "" for per-flow findings. The key keeps the matched entity (knowledge
+// entry, SNI, host) so that a different match is still reported.
+func deviceScopedKey(m rules.Match, deviceIP string) string {
+	if deviceIP == "" || !deviceScopedTypes[m.Type] {
+		return ""
+	}
+	key := deviceIP + "|" + m.Type
+	if sub := evidenceKeyRe.FindStringSubmatch(m.Evidence); sub != nil {
+		key += "|" + sub[1]
+	}
+	return key
 }

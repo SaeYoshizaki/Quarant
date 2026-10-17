@@ -48,17 +48,23 @@ type Config struct {
 	PeriodicMinInterval time.Duration
 	// PeriodicMaxJitter is the maximum ratio MAD(interval)/median(interval).
 	PeriodicMaxJitter float64
+
+	// Persistent attempts: many connections to one destination endpoint.
+	PersistentWindow      time.Duration
+	PersistentMinAttempts int
 }
 
 func DefaultConfig() Config {
 	return Config{
-		ScanWindow:           60 * time.Second,
-		HorizontalMinTargets: 20,
-		VerticalMinPorts:     20,
-		MinUnansweredRatio:   0.7,
-		PeriodicMinConns:     8,
-		PeriodicMinInterval:  10 * time.Second,
-		PeriodicMaxJitter:    0.1,
+		ScanWindow:            60 * time.Second,
+		HorizontalMinTargets:  20,
+		VerticalMinPorts:      20,
+		MinUnansweredRatio:    0.7,
+		PeriodicMinConns:      8,
+		PeriodicMinInterval:   10 * time.Second,
+		PeriodicMaxJitter:     0.1,
+		PersistentWindow:      time.Hour,
+		PersistentMinAttempts: 30,
 	}
 }
 
@@ -125,6 +131,7 @@ func (a *Analyzer) Evaluate() []Finding {
 		found = append(found, a.horizontalScans(ip, conns)...)
 		found = append(found, a.verticalScans(ip, conns)...)
 		found = append(found, a.periodic(ip, conns)...)
+		found = append(found, a.persistent(ip, conns)...)
 		for _, f := range found {
 			if a.reported[f.Key] {
 				continue
@@ -308,7 +315,7 @@ func (a *Analyzer) periodic(ip string, conns []Conn) []Finding {
 		if c0.Plaintext {
 			flags = append(flags, "plaintext_protocol")
 		}
-		if !c0.DstLocal && net.ParseIP(c0.DstIP) != nil && c0.DstPort != 443 && c0.DstPort != 8883 && c0.DstPort != 123 {
+		if !c0.DstLocal && net.ParseIP(c0.DstIP) != nil && !standardServicePorts[c0.DstPort] {
 			flags = append(flags, "non_standard_port")
 		}
 		severity, confidence := "INFO", "high"
@@ -327,6 +334,84 @@ func (a *Analyzer) periodic(ip string, conns []Conn) []Finding {
 			Limitation:   "Periodicity alone does not distinguish benign telemetry from malware beacons. Compare the destination with the vendor's documented services and threat intelligence before drawing conclusions.",
 			Recommend:    "Check whether the destination belongs to the device vendor; if it does not, block it and investigate the device.",
 			Key:          "PERIODIC|" + ip + "|" + k,
+		})
+	}
+	return out
+}
+
+// standardServicePorts are well-known ports for ordinary device-to-cloud
+// traffic; plaintext on 80 is flagged separately as plaintext_protocol.
+var standardServicePorts = map[uint16]bool{53: true, 80: true, 123: true, 443: true, 8883: true}
+
+// ---- persistent connection attempts ----------------------------------------
+
+// persistent reports devices that keep (re)connecting to one remote endpoint
+// at a high rate. Malware reconnect loops to command-and-control servers
+// (often dead or sinkholed, so most attempts go unanswered) look like this
+// without being periodic; a device whose cloud is down can too, which is why
+// the severity depends on context flags.
+func (a *Analyzer) persistent(ip string, conns []Conn) []Finding {
+	byEndpoint := map[string][]Conn{}
+	for _, c := range conns {
+		if c.DstLocal {
+			continue
+		}
+		k := fmt.Sprintf("%s|%s|%d", c.DstIP, c.Proto, c.DstPort)
+		byEndpoint[k] = append(byEndpoint[k], c)
+	}
+	var out []Finding
+	for _, k := range sortedKeys(byEndpoint) {
+		list := byEndpoint[k]
+		if len(list) < a.cfg.PersistentMinAttempts {
+			continue
+		}
+		// Densest window of attempts.
+		best, lo := 0, 0
+		var w []Conn
+		for hi := range list {
+			for list[hi].Start.Sub(list[lo].Start) > a.cfg.PersistentWindow {
+				lo++
+			}
+			if hi-lo+1 > best {
+				best = hi - lo + 1
+				w = list[lo : hi+1]
+			}
+		}
+		if best < a.cfg.PersistentMinAttempts {
+			continue
+		}
+		c0 := w[0]
+		ratio := unansweredRatio(w)
+		var flags []string
+		if c0.DstName == "" {
+			flags = append(flags, "direct_ip_no_dns_observed")
+		}
+		if !standardServicePorts[c0.DstPort] {
+			flags = append(flags, "non_standard_port")
+		}
+		if ratio >= 0.5 {
+			flags = append(flags, "mostly_unanswered")
+		}
+		severity := "INFO"
+		inference := "The device repeatedly connects to the same remote endpoint at a high rate. Persistent reconnect loops are typical of malware trying to reach a command-and-control server, but also of a device whose cloud service is unreachable."
+		if len(flags) >= 2 {
+			severity = "WARNING"
+			inference += " The endpoint is contacted without observed DNS and/or on an unusual port, which is uncommon for vendor services."
+		}
+		dest := c0.DstIP
+		if c0.DstName != "" {
+			dest = c0.DstName + " (" + c0.DstIP + ")"
+		}
+		out = append(out, Finding{
+			Type: "PERSISTENT_CONNECTION_ATTEMPTS", Severity: severity, Confidence: "high", DeviceIP: ip, DstIP: c0.DstIP, DstPort: c0.DstPort,
+			First: w[0].Start, Last: w[len(w)-1].Start,
+			Evidence: fmt.Sprintf("pattern=persistent_attempts destination=%s proto=%s dst_port=%d attempts_in_window=%d total_attempts=%d window=%s unanswered_ratio=%.2f context_flags=%s thresholds=attempts>=%d/%s",
+				dest, c0.Proto, c0.DstPort, len(w), len(list), w[len(w)-1].Start.Sub(w[0].Start).Round(time.Second), ratio, strings.Join(flags, ","), a.cfg.PersistentMinAttempts, a.cfg.PersistentWindow),
+			ObservedFact: fmt.Sprintf("%s made %d connection attempts to %s port %d within %s (%.0f%% unanswered).", ip, len(w), dest, c0.DstPort, w[len(w)-1].Start.Sub(w[0].Start).Round(time.Second), ratio*100),
+			Inference:    inference,
+			Limitation:   "Connection metadata alone cannot show what was exchanged or whether the endpoint is malicious; check the destination against vendor documentation and threat intelligence.",
+			Recommend:    "Identify the destination. If it is not a documented vendor service, block it and investigate the device.",
+			Key:          "PERSISTENT|" + ip + "|" + k,
 		})
 	}
 	return out

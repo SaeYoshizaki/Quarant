@@ -86,6 +86,13 @@ func matchI5VulnerableComponent(ctx *Context, component knowledge.I5VulnerableCo
 	if ctx == nil {
 		return i5ComponentMatch{}, false
 	}
+	if macVendorContradicts(ctx.MACVendor, component.Vendor) {
+		// Family candidates are largely derived from destinations (SNI,
+		// Host). Hubs, assistants and phone apps talk to partner clouds
+		// (an Echo talks to meethue.com), so a family whose vendor
+		// contradicts the observed hardware vendor is not this device.
+		return i5ComponentMatch{}, false
+	}
 
 	signals := make([]string, 0, 8)
 	basis := make([]string, 0, 4)
@@ -435,4 +442,33 @@ func i5BestContextCategory(ctx *Context) string {
 	}
 
 	return ""
+}
+
+// moduleVendors make Wi-Fi/SoC modules used inside many brands' products;
+// their OUI says nothing about the product vendor.
+var moduleVendors = []string{
+	"espressif", "azurewave", "ampak", "murata", "realtek", "mediatek", "texas instruments",
+	"hon hai", "foxconn", "liteon", "lite-on", "universal global scientific", "usi", "gainspan",
+	"silicon labs", "nordic", "qualcomm", "broadcom", "intel", "tuya", "hui zhou gaoshengda", "shenzhen",
+}
+
+// macVendorContradicts reports whether the OUI vendor clearly belongs to a
+// different company than the knowledge-base family vendor.
+func macVendorContradicts(macVendor, familyVendor string) bool {
+	mv := strings.ToLower(strings.TrimSpace(macVendor))
+	fv := strings.ToLower(strings.TrimSpace(familyVendor))
+	if mv == "" || fv == "" {
+		return false
+	}
+	for _, m := range moduleVendors {
+		if strings.Contains(mv, m) {
+			return false
+		}
+	}
+	for _, token := range strings.FieldsFunc(fv, func(r rune) bool { return r == ' ' || r == '-' || r == '_' || r == '/' }) {
+		if len(token) >= 3 && strings.Contains(mv, token) {
+			return false
+		}
+	}
+	return true
 }
