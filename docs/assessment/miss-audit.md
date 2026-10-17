@@ -89,3 +89,12 @@
 - **TLS の正解は Zeek に依存する**：S2 では、Zeek と Suricata のログが同じ機器を記録していた。Zeek が TLS と判断できない通信は、正解にも入らない。
 - **判定は 1 人（Claude）**：手順 4 で、利用者による抜き取り確認を行う。
 - **値を確かめていない**：たとえば、Withings の `sessionid` が本当に有効なセッションかは確かめていない（値を見ないため）。
+
+## 測り直し（E12）
+
+修正（`3ae8b2c`、D23）のあとに、同じ正解と判定で測り直した。上の一覧の見逃し 11 件は、すべて Quarant が検出するようになった。Home Eye の OSS の署名は、5.5-6 に数えなくなった。詳細は EXPERIMENTS.md の E12。
+
+```bash
+python3 scripts/accuracy/compare_misses.py docs/assessment/evidence-map.json ~/datasets/runs-fix ~/datasets/gt-e10 docs/assessment/non-iot-macs.txt <out.json> docs/assessment/miss-judgments.json
+```
+

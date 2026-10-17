@@ -52,7 +52,7 @@
    "status": "implemented",
    "assumption": "the weak channel carries authentication",
    "require_pattern": "risk_kind=deprecated_tls_version|risk_kind=(rc4|3des|des|null|export|anonymous|md5)_cipher",
-   "audit": "E4 sample: weak version 15/15 correct; all 15 'weak cipher selected' were CBC suites, which are not violation evidence by themselves, so only broken suites count. E6 (CIC 2022 power-on): 4/4 devices correct. Nest Cam, Netatmo camera and Hue bridge offered at most TLS 1.0 themselves; Echo Spot offered TLS 1.2 and a video-service server selected TLS 1.0."
+   "audit": "E4 sample: weak version 15/15 correct; all 15 'weak cipher selected' were CBC suites, which are not violation evidence by themselves, so only broken suites count. E6 (CIC 2022 power-on): 4/4 devices correct. Nest Cam, Netatmo camera and Hue bridge offered at most TLS 1.0 themselves; Echo Spot offered TLS 1.2 and a video-service server selected TLS 1.0. E11/E12: two 2016 misses fixed: a camera serving TLS that chose TLS 1.0 for a phone offering 1.2 (finding now goes to the server), and a blood-pressure meter on port 8777 whose first segment held only the record header."
   },
   {
    "provision": "5.1-5",
@@ -113,7 +113,7 @@
    ],
    "status": "implemented",
    "require_pattern": "risk_kind=deprecated_tls_version|risk_kind=(rc4|3des|des|null|export|anonymous|md5)_cipher",
-   "audit": "E4 sample: weak version 15/15 correct; all 15 'weak cipher selected' were CBC suites, which are not violation evidence by themselves, so only broken suites count. E6 (CIC 2022 power-on): 4/4 devices correct. Nest Cam, Netatmo camera and Hue bridge offered at most TLS 1.0 themselves; Echo Spot offered TLS 1.2 and a video-service server selected TLS 1.0."
+   "audit": "E4 sample: weak version 15/15 correct; all 15 'weak cipher selected' were CBC suites, which are not violation evidence by themselves, so only broken suites count. E6 (CIC 2022 power-on): 4/4 devices correct. Nest Cam, Netatmo camera and Hue bridge offered at most TLS 1.0 themselves; Echo Spot offered TLS 1.2 and a video-service server selected TLS 1.0. E11/E12: two 2016 misses fixed: a camera serving TLS that chose TLS 1.0 for a phone offering 1.2 (finding now goes to the server), and a blood-pressure meter on port 8777 whose first segment held only the record header."
   },
   {
    "provision": "5.5-4",
@@ -195,7 +195,7 @@
     "I6_MEDIA_UPLOAD_CLEARTEXT"
    ],
    "status": "implemented",
-   "audit": "E4 sample: 10/10 correct (user identifier in cleartext body); all from one device. E10 (I6_MEDIA_UPLOAD_CLEARTEXT): all matches checked. Home Eye camera PUT JPEG snapshots to Alibaba Cloud OSS (Hong Kong) over HTTP at power-on (3/3), on 14/30 idle nights and in the active day; SimCam PUT JPEGs to S3 over HTTP. Both correct. No match in UNSW 2016/2018 or IoT-23; a direct search of the raw traffic of three UNSW days found no media upload either."
+   "audit": "E4 sample: 10/10 correct (user identifier in cleartext body); all from one device. E10 (I6_MEDIA_UPLOAD_CLEARTEXT): all matches checked. Home Eye camera PUT JPEG snapshots to Alibaba Cloud OSS (Hong Kong) over HTTP at power-on (3/3), on 14/30 idle nights and in the active day; SimCam PUT JPEGs to S3 over HTTP. Both correct. No match in UNSW 2016/2018 or IoT-23; a direct search of the raw traffic of three UNSW days found no media upload either. E11/E12: the rule read only the first multipart part and missed a 2016 TP-Link camera streaming h264 video and AAC audio to tplinkcloud.com over HTTP (now every part is read); a Borun camera (CIC 2022 power-on) sent JPEGs inside a proprietary TCP protocol to port 8899 (now detected by file signature, device to public address only). E4's 2018 match was a MacBook Pro, not an IoT device."
   },
   {
    "provision": "5.8-2",
