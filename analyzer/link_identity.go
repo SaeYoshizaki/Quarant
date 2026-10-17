@@ -69,6 +69,7 @@ func (h *FlowHandler) bindMAC(now time.Time, ip string, mac net.HardwareAddr, so
 	}
 	d.CurrentMAC = info.MAC
 	d.ObserveMAC(info.MAC)
+	h.devices.LinkMAC(d, info.MAC)
 	d.AddIdentityEvidence(now, "mac", info.MAC, string(discovery.BasisObserved), source)
 	if info.LocallyAdministered {
 		d.AddIdentityEvidence(now, "mac_locally_administered", "true", string(discovery.BasisObserved), "ethernet")

@@ -55,6 +55,8 @@ go run ./cmd/quarant label-eval --events runs/demo/events.jsonl \
 
 # 自分のネットワークの PCAP（監視範囲を指定する）
 go run ./cmd/quarant analyze capture.pcap --local-net 192.168.1.0/24 --out runs/home/events.jsonl
+# 日ごとの PCAP を続けて解析するときは、機器の名乗りを引き継ぐ（D22）
+go run ./cmd/quarant analyze day2.pcap --identity-state runs/home/identity-state.json --out runs/day2/events.jsonl
 
 # 公開データセットでの評価、パーサの差分検証
 go run ./cmd/quarant dataset-eval iot23|unsw|unsw-attacks ...

@@ -9,6 +9,7 @@ type Store struct {
 	mu sync.Mutex
 
 	devices map[string]*DeviceProfile
+	macs    map[string]*linkedIdentity
 }
 
 func NewStore() *Store {

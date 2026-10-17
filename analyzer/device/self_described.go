@@ -18,7 +18,8 @@ import (
 //
 //   - protocol-defined types: the HomeKit accessory category (ci= in the
 //     _hap._tcp TXT record, HomeKit Accessory Protocol "Accessory
-//     Categories"), the UPnP device type in SSDP NT/USN, and mDNS service
+//     Categories"), the UPnP device type in SSDP NT/USN (standard types and
+//     a few vendor-defined ones, upnpVendorTypes), and mDNS service
 //     types with a fixed meaning (_rtsp._tcp: video streaming; printing
 //     services);
 //   - generic words in names the device chose (DHCP host name, mDNS
@@ -57,6 +58,17 @@ var upnpStandardTypes = map[string]string{
 	"binarylight":           "Controller",
 	"dimmablelight":         "Controller",
 	"hvac_system":           "Appliance",
+}
+
+// upnpVendorTypes maps device types that a vendor defines in its own UPnP
+// namespace (urn:<vendor>:device:<type>), where the type word is the
+// vendor's vocabulary rather than a generic word. These are protocol
+// vocabularies, not product names: every WeMo plug announces "controllee"
+// whatever its model. Belkin WeMo: controllee (plug/switch), lightswitch,
+// insight (plug with metering), dimmer, bridge (WeMo Link). The sensor type
+// is already a generic word.
+var upnpVendorTypes = map[string]map[string]string{
+	"belkin": {"controllee": "Controller", "lightswitch": "Controller", "insight": "Controller", "dimmer": "Controller", "bridge": "Hub"},
 }
 
 var upnpNotIoT = map[string]string{
@@ -156,8 +168,10 @@ func describeSelf(p *DeviceProfile) selfDescription {
 					if r := upnpNotIoT[typ]; r != "" {
 						weakNotIoT = r
 					}
+				} else if c := upnpVendorTypes[domain][typ]; c != "" {
+					protocol[c] = append(protocol[c], "UPnP device type "+m[0])
 				} else {
-					// Vendor device types: only generic words count.
+					// Other vendor device types: only generic words count.
 					addNameWords(protocol, typ, "UPnP device type "+m[0])
 				}
 			}

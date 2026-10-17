@@ -371,6 +371,7 @@ type analysisConfig struct {
 	WebDist           string
 	BlockOnViewer     bool
 	LocalNetworks     analyzer.LocalNetworks
+	IdentityState     string
 }
 
 type captureRunner func(*analyzer.Engine) error
@@ -381,6 +382,7 @@ type captureFlags struct {
 	observationsOut   *string
 	inventoryOut      *string
 	inventoryInterval *time.Duration
+	identityState     *string
 	debug             *bool
 	appendOutput      *bool
 	report            *bool
@@ -419,6 +421,7 @@ func bindCaptureFlags(fs *flag.FlagSet, defaults captureFlagDefaults) captureFla
 		openViewer:        fs.Bool("open", false, "open the local report viewer in a browser"),
 		addr:              fs.String("addr", "127.0.0.1:8080", "HTTP listen address for the report viewer"),
 		webDist:           fs.String("web-dist", filepath.Join("web", "out"), "path to exported web UI assets"),
+		identityState:     fs.String("identity-state", "", "JSON file of what each MAC announced about itself (DHCP, mDNS, SSDP); loaded before the capture if it exists and saved after it, so later captures keep earlier self-descriptions"),
 		localNets:         fs.String("local-net", "", "comma-separated CIDRs of the monitored network; only hosts inside are tracked as devices (default: RFC1918, link-local and ULA ranges)"),
 	}
 	if defaults.allowIface {
@@ -464,6 +467,7 @@ func buildAnalysisConfig(inputPath, iface string, flags captureFlags) analysisCo
 		ViewerAddr:        *flags.addr,
 		WebDist:           *flags.webDist,
 		BlockOnViewer:     inputPath != "",
+		IdentityState:     *flags.identityState,
 	}
 }
 
@@ -501,6 +505,7 @@ func analyzePCAP(cfg analysisConfig) error {
 
 type analysisRuntime struct {
 	engine          *analyzer.Engine
+	handler         *analyzer.FlowHandler
 	eventSink       *analyzer.JSONLSink
 	flowSink        *analyzer.JSONLSink
 	observationSink *analyzer.JSONLSink
@@ -568,6 +573,14 @@ func newAnalysisRuntime(cfg analysisConfig) (*analysisRuntime, error) {
 
 	handler := analyzer.NewFlowHandlerWithObservations(sink, flowSink, observationSink, cfg.Debug, db)
 	handler.SetLocalNetworks(cfg.LocalNetworks)
+	if err := loadIdentityState(cfg.IdentityState, handler); err != nil {
+		_ = flowSink.Close()
+		_ = sink.Close()
+		if observationSink != nil {
+			_ = observationSink.Close()
+		}
+		return nil, err
+	}
 	var inventoryWriter *analyzer.DeviceInventoryWriter
 	if cfg.InventoryOut != "" {
 		inventoryWriter = analyzer.NewDeviceInventoryWriter(cfg.InventoryOut, cfg.InventoryInterval, handler.DeviceInventory)
@@ -576,6 +589,7 @@ func newAnalysisRuntime(cfg analysisConfig) (*analysisRuntime, error) {
 
 	return &analysisRuntime{
 		engine:          analyzer.NewEngine(handler),
+		handler:         handler,
 		eventSink:       sink,
 		flowSink:        flowSink,
 		observationSink: observationSink,
@@ -607,6 +621,9 @@ func (r *analysisRuntime) close() {
 	}
 	if r.inventoryWriter != nil {
 		r.inventoryWriter.Stop()
+	}
+	if err := saveIdentityState(r.cfg.IdentityState, r.handler); err != nil {
+		log.Printf("warning: %v", err)
 	}
 	if r.flowSink != nil {
 		_ = r.flowSink.Close()

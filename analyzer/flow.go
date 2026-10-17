@@ -1458,3 +1458,25 @@ func (h *FlowHandler) cachedI5(deviceIP string, ctx *rules.Context, d *device.De
 func looksLikeTLSRecord(payload []byte) bool {
 	return len(payload) >= 6 && payload[0] == 22 && payload[1] == 3 && payload[5] == 1
 }
+
+// ImportIdentityState loads per-MAC self-descriptions saved by an earlier
+// capture (device.IdentityState). Call it before the first packet.
+func (h *FlowHandler) ImportIdentityState(state device.IdentityState) {
+	if h == nil || h.devices == nil {
+		return
+	}
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	h.devices.ImportIdentityState(state)
+}
+
+// ExportIdentityState returns the per-MAC self-descriptions to save for the
+// next capture.
+func (h *FlowHandler) ExportIdentityState() device.IdentityState {
+	if h == nil || h.devices == nil {
+		return device.IdentityState{}
+	}
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	return h.devices.ExportIdentityState()
+}
