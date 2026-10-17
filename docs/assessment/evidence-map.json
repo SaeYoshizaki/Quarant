@@ -120,7 +120,8 @@
    ],
    "status": "implemented",
    "assumption": "the function is not meant as open access inside the home network (EN 303 645 5.5-4 itself allows services made available without authentication within a restricted network, e.g. DLNA)",
-   "gap": "Authentication outside the request (earlier pairing, host allow-lists, a physical button) is not visible; whether the function was carried out is not known."
+   "gap": "Authentication outside the request (earlier pairing, host allow-lists, a physical button) is not visible; whether the function was carried out is not known.",
+   "audit": "E5: IoT devices with evidence: 2016 HP printer (status queries on 3910/3911 and IPP printing from a PC answered without credentials; one unauthenticated PUT of /DevMgmt/ProductConfigDyn.xml), 2018 Belkin WeMo (GetHomeInfo SOAP answered 200 without credentials). Printer status and printing may fall under the restricted-network exception; the configuration write and the WeMo call do not obviously. Most matches overall were the gateway's UPnP IGD (non-IoT, excluded)."
   },
   {
    "provision": "5.5-5",
@@ -233,7 +234,8 @@
     "I9_UPNP_PORT_MAPPING_REQUESTED"
    ],
    "status": "candidate_only",
-   "gap": "Default vs user-enabled is not known (applies to listening services and to UPnP port mappings alike)."
+   "gap": "Default vs user-enabled is not known (applies to listening services and to UPnP port mappings alike).",
+   "audit": "E5: one IoT device (2018 Belkin NetCam) repeatedly mapped external TCP 9031 to itself through UPnP and the gateway accepted; the other mappings came from a PC and an Android phone (excluded)."
   },
   {
    "provision": "5.13-1B",
