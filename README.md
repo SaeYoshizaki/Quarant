@@ -49,6 +49,7 @@ go test ./...
 # 正解ラベル付きの合成 PCAP（実データを含まない）を解析する
 go run ./cmd/quarant analyze examples/pcap/synthetic-home.pcap --out runs/demo/events.jsonl
 go run ./cmd/quarant devices --in runs/demo          # 機器単位のレポート（見えなかったことも表示）
+go run ./cmd/quarant findings --in runs/demo         # 機器 × 状態の要約（findings.json）
 go run ./cmd/quarant label-eval --events runs/demo/events.jsonl \
   --labels examples/pcap/synthetic-home.labels.json  # 正解ラベルとの比較
 
@@ -322,6 +323,7 @@ Quarant の代表的な出力は次です。
 - `flows.jsonl`: 通信 flow の要約。IP、port、protocol、direction、observed destination など。
 - `observations.jsonl`: DNS、HTTP host、TLS SNI、flow snapshot などの passive observation。
 - `device_inventory.json`: DHCP lease、hostname、MAC、観測 port / protocol / host など。
+- `findings.json`: `events.jsonl` の要約。機器 × イベントの種類（finding）と、同じ観測事実を言い換えたイベントをまとめた機器 × 状態（condition）。
 - `security_events.jsonl`: OpenWrt / Suricata / Snort 由来の security evidence。
 - `attack_evidence_report.json`: scan / sweep / sensitive service probe / TCP flags などの集約 report。
 - `source_coverage_report.json`: OpenWrt only / Suricata only / Zeek only / overlap の集計。

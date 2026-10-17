@@ -4,7 +4,7 @@
 
 ## できること（実装済み・テスト済み）
 
-- **PCAP の解析**：`quarant analyze <pcap>`。出力は `events.jsonl`、`flows.jsonl`、`observations.jsonl`、`device_inventory.json`。
+- **PCAP の解析**：`quarant analyze <pcap>`。出力は `events.jsonl`、`flows.jsonl`、`observations.jsonl`、`device_inventory.json`、`findings.json`（機器 × 状態の要約）。
   - 時刻：キャプチャ時刻を使う。
   - 監視範囲：`--local-net` で指定できる。
   - 実行場所：リポジトリの外からでも実行できる（知識ベースを組み込み済み）。
@@ -26,6 +26,7 @@
   - UNSW の正常データ：誤検知候補の WARNING は 1 日あたり約 0.8 件。
 - **レポート**
   - `quarant devices`：機器単位のレポート（見えなかったことも出す）。
+  - `quarant findings`：既存の解析結果から `findings.json` を作り直し、機器 × 状態の表を出す。
   - `quarant label-eval`：正解ラベルとの比較。
   - `quarant synth`：合成シナリオの生成。
 - **外部ログの取り込み**：OpenWrt、Suricata、Zeek（TSV と JSON）、Snort。統合、インシデント化、緩和計画（dry-run）、before/after 評価、研究レポート。
@@ -48,7 +49,9 @@
 
 ## 既知の問題
 
-1. **イベントの冗長性**：同じ条件について複数のルールが発火する（合成シナリオでは 8 条件に対して 16 種類）。Phase 2 の相関で対処する。
+1. **イベントの冗長性**：同じ条件について複数のルールが発火し、ルールは通信ごとに報告する。
+   - 対処：`findings.json`（機器 × 種類、機器 × 状態）を加えた（D19）。UNSW の正常データでは、IoT 機器のイベント 1 日 1,579〜4,593 件が、状態 49〜54 件にまとまる。
+   - 残り：`events.jsonl` 自体は通信ごとのまま。時間窓をまたぐ相関（Phase 2）は未実装。
 2. **重みの根拠**：`internal/reportapi/precision.go` の加重スコアには根拠が文書化されていない。研究方針 6.4 に沿って見直しが必要。
 3. **知識ベースの出典**：`knowledge/i5_vulnerable_components.json` の 14/21 件に出典がない。CVE-2023-1389 の対応づけが誤っている。キーワード照合（`amazon` など）が広すぎる。
 4. **ルールの誤検知の可能性**（AUDIT にあるもののうち未修正）：
@@ -73,4 +76,4 @@
    - E6（CIC IoT 2022 の起動時の通信、40 台）は済み：古い TLS は 2016 年の 48% から 10% に減った。
    - 次：CIC IoT 2022 の待機時（2-Idle）と操作時（3-Interactions）で年代比較（RQ3）を完成させる。（Zeek・Suricata との比較（Step 2）は S2 で済み。）
    - データの置き場所：元データは USB ドライブ（/Volumes/Untitled/quarant-datasets）にあり、~/datasets からリンクしている。
-3. **Step 2**：Zeek、Suricata との比較は済み（S2）。残りは、フラッド系の検出器を自作するかの判断と、CIC IoT 2022 での比較。
+3. **Step 2**：Zeek、Suricata との比較は済み（S2）。フラッド系の検出器は今は作らない（D19）。残りは CIC IoT 2022 での比較。
