@@ -20,6 +20,7 @@ import (
 
 	"quarant/analyzer"
 	"quarant/analyzer/device"
+	"quarant/internal/findings"
 )
 
 // Inputs are the analysis outputs the report is built from.
@@ -47,8 +48,11 @@ type Device struct {
 	Activity Activity `json:"activity"`
 	// FindingCounts[severity][basis] = number of distinct finding types.
 	FindingCounts map[string]map[string]int `json:"finding_counts"`
-	Findings      []Finding                 `json:"findings"`
-	Visibility    []string                  `json:"visibility_limits"`
+	// Conditions merges finding types that restate one observed fact
+	// (internal/findings, D19).
+	Conditions []Condition `json:"conditions"`
+	Findings   []Finding   `json:"findings"`
+	Visibility []string    `json:"visibility_limits"`
 }
 
 type Identity struct {
@@ -94,6 +98,15 @@ type Finding struct {
 	Inference    string `json:"inference,omitempty"`
 	Limitation   string `json:"limitation,omitempty"`
 	Evidence     string `json:"example_evidence,omitempty"`
+}
+
+// Condition is one device x condition: the finding types that report it.
+type Condition struct {
+	Condition string   `json:"condition"`
+	Severity  string   `json:"severity"`
+	Basis     []string `json:"basis"`
+	Types     []string `json:"types"`
+	Count     int      `json:"count"`
 }
 
 // contextOnly are events that describe the device rather than a risk.
@@ -239,6 +252,7 @@ func Build(in Inputs, generatedAt time.Time) Report {
 	}
 
 	for _, d := range devices {
+		d.Conditions = conditionsOf(d.Findings)
 		sort.Slice(d.Findings, func(i, j int) bool {
 			a, b := d.Findings[i], d.Findings[j]
 			if severityRank(a.Severity) != severityRank(b.Severity) {
@@ -261,6 +275,7 @@ func Build(in Inputs, generatedAt time.Time) Report {
 		"No finding does not mean no risk: encrypted payloads, traffic that did not cross the capture point, and device internals (firmware, SBOM) are not visible to passive monitoring.",
 		"basis=observed: the trigger was seen in traffic; basis=inferred: derived by heuristics or statistics; basis=reference_match: matched against a curated or external reference whose accuracy and applicability to this device are not confirmed.",
 		"finding_counts counts distinct finding types, not events; repeated events of one type are summarised in each finding's count.",
+		"conditions merge finding types that restate the same observed fact (see docs/DECISIONS.md D19); they add no new judgement.",
 	}
 	return rep
 }
@@ -292,6 +307,48 @@ func visibilityLimits(d *Device, sawTLS13 bool) []string {
 		out = append(out, "No DNS queries were observed; destinations are known by IP only (DNS over HTTPS/TLS, cached names, or capture placement).")
 	}
 	out = append(out, "Firmware version, installed software components and local (Bluetooth/Zigbee/same-switch) traffic are not observable from this capture.")
+	return out
+}
+
+// conditionsOf groups a device's findings by condition, strongest first.
+func conditionsOf(fs []Finding) []Condition {
+	byCond := map[string]*Condition{}
+	basis := map[string]map[string]bool{}
+	for _, f := range fs {
+		if severityRank(f.Severity) < severityRank("WARNING") {
+			continue
+		}
+		name := findings.ConditionOf(f.Type)
+		c := byCond[name]
+		if c == nil {
+			c = &Condition{Condition: name, Severity: f.Severity}
+			byCond[name] = c
+			basis[name] = map[string]bool{}
+		}
+		c.Types = append(c.Types, f.Type)
+		c.Count += f.Count
+		if severityRank(f.Severity) > severityRank(c.Severity) {
+			c.Severity = f.Severity
+		}
+		if f.Basis != "" {
+			basis[name][f.Basis] = true
+		}
+	}
+	out := make([]Condition, 0, len(byCond))
+	for name, c := range byCond {
+		for b := range basis[name] {
+			c.Basis = append(c.Basis, b)
+		}
+		sort.Slice(c.Basis, func(i, j int) bool { return basisRank(c.Basis[i]) < basisRank(c.Basis[j]) })
+		sort.Strings(c.Types)
+		out = append(out, *c)
+	}
+	sort.Slice(out, func(i, j int) bool {
+		if severityRank(out[i].Severity) != severityRank(out[j].Severity) {
+			return severityRank(out[i].Severity) > severityRank(out[j].Severity)
+		}
+		return out[i].Condition < out[j].Condition
+	})
 	return out
 }
 
@@ -438,6 +495,16 @@ func WriteMarkdown(w io.Writer, rep Report) {
 			fmt.Fprintln(w, "|---|---|---|---|")
 			for _, ds := range a.TopDestinations {
 				fmt.Fprintf(w, "| %s | %d | %d | %d |\n", ds.Name, ds.Flows, ds.BytesOut, ds.BytesIn)
+			}
+			fmt.Fprintln(w)
+		}
+		if len(d.Conditions) > 0 {
+			fmt.Fprintln(w, "**Conditions** (WARNING and above; event types that restate one observed fact are merged)")
+			fmt.Fprintln(w)
+			fmt.Fprintln(w, "| Severity | Condition | Basis | Event types | Events |")
+			fmt.Fprintln(w, "|---|---|---|---|---|")
+			for _, c := range d.Conditions {
+				fmt.Fprintf(w, "| %s | %s | %s | %s | %d |\n", c.Severity, c.Condition, strings.Join(c.Basis, ", "), strings.Join(c.Types, ", "), c.Count)
 			}
 			fmt.Fprintln(w)
 		}

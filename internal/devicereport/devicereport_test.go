@@ -54,3 +54,21 @@ func TestBuild(t *testing.T) {
 		t.Fatalf("markdown missing inbound flow:\n%s", buf.String())
 	}
 }
+
+func TestConditionsMergeRestatedFindings(t *testing.T) {
+	ts := time.Date(2026, 9, 26, 10, 0, 0, 0, time.UTC)
+	rep := Build(Inputs{Events: []analyzer.Event{
+		{Timestamp: ts, Type: "INSECURE_HTTP", Severity: "WARNING", Basis: "observed", DeviceKey: "192.168.1.20"},
+		{Timestamp: ts, Type: "I3_API_OVER_PLAINTEXT", Severity: "WARNING", Basis: "inferred", DeviceKey: "192.168.1.20"},
+		{Timestamp: ts, Type: "INSECURE_HTTP_AUTH", Severity: "CRITICAL", Basis: "observed", DeviceKey: "192.168.1.20"},
+	}}, ts)
+	c := rep.Devices[0].Conditions
+	if len(c) != 2 || c[0].Condition != "insecure_http_auth" || c[1].Condition != "cleartext_http" || len(c[1].Types) != 2 {
+		t.Fatalf("conditions: %+v", c)
+	}
+	var buf bytes.Buffer
+	WriteMarkdown(&buf, rep)
+	if !strings.Contains(buf.String(), "| WARNING | cleartext_http | observed, inferred |") {
+		t.Fatalf("markdown missing condition row:\n%s", buf.String())
+	}
+}
