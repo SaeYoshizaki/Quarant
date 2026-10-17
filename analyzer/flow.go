@@ -760,6 +760,9 @@ func (h *FlowHandler) buildFlowRecord(now time.Time, key string, st *FlowState) 
 		DeviceLabel:         "",
 		DeviceCategory:      deviceCategory,
 		ObservedDestination: observedDestination(sni, host, firstNonEmptyString(h.dnsNames[st.DstIP], st.DstIP)),
+		CaptureGaps:         st.ClientAsm.Gaps + st.ServerAsm.Gaps,
+		CaptureGapBytes:     st.ClientAsm.GapBytes + st.ServerAsm.GapBytes,
+		RetransmittedBytes:  st.ClientAsm.RetransmittedBytes + st.ServerAsm.RetransmittedBytes,
 	}
 }
 
@@ -840,7 +843,14 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 	// 993, push services on 5228, TLS on 80, ...) and were never parsed
 	// (measured with quarant parser-diff).
 	fromClient := srcIP == st.SrcIP && srcPort == st.SrcPort
-	if fromClient && len(tcp.Payload) > 0 && st.ClientBytes == int64(len(tcp.Payload)) && looksLikeTLSRecord(tcp.Payload) {
+	// The start of the stream is found by sequence number, so a reordered
+	// capture whose first data segment is not the first one still
+	// recognises TLS when the real first segment arrives.
+	if fromClient && len(tcp.Payload) > 0 {
+		st.ClientAsm.markStart(tcp.Seq)
+	}
+	if fromClient && len(tcp.Payload) > 0 && !st.TLSByContent &&
+		st.ClientAsm.isStreamStart(tcp.Seq, st.ClientBytes == int64(len(tcp.Payload))) && looksLikeTLSRecord(tcp.Payload) {
 		st.TLSByContent = true
 	}
 	tlsClient := st.TLSByContent && fromClient
@@ -855,12 +865,39 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 	isTLSClientToServer := rules.IsTLSPort(dstPort) || tlsClient
 	isTLSServerToClient := rules.IsTLSPort(srcPort) || tlsServer
 
+	// Each direction goes through its own sequence-order assembler. A
+	// packet travelling to the watched port is client data, as before:
+	// the flow's first packet can be the server's SYN/ACK when the capture
+	// starts mid-handshake, so the flow's initiator is not always the
+	// client. Only when both ports are watched does the sender decide,
+	// which keeps one direction's bytes out of the other's buffer.
+	toServer := captureClient && (fromClient || !captureServer)
+	toClient := captureServer && !toServer
+	// Initial sequence numbers are recorded from the flags (SYN: client,
+	// SYN/ACK: server) whatever is captured yet: TLS and HTTP found by
+	// content are only known after the handshake, and without the ISN a
+	// reordered first segment looked like a retransmission and was dropped.
+	if tcp.SYN && !tcp.ACK {
+		st.ClientAsm.syn(tcp.Seq)
+	} else if tcp.SYN {
+		st.ServerAsm.syn(tcp.Seq)
+	}
 	if len(tcp.Payload) > 0 {
-		if captureClient {
-			h.cache.AppendClientUpToLimit(st, tcp.Payload)
+		if toServer {
+			h.cache.AppendClientSegment(st, tcp.Seq, tcp.Payload)
+		} else if toClient {
+			h.cache.AppendServerSegment(st, tcp.Seq, tcp.Payload)
+		} else if fromClient {
+			st.ClientAsm.hold(tcp.Seq, tcp.Payload)
 		}
-		if captureServer {
-			h.cache.AppendServerUpToLimit(st, tcp.Payload)
+	}
+	if tcp.ACK {
+		// An acknowledgement for bytes the capture never saw proves a
+		// capture gap in the other direction; the assembler skips it.
+		if toServer {
+			h.cache.AppendServerUpToLimit(st, st.ServerAsm.ack(tcp.Ack))
+		} else if toClient {
+			h.cache.AppendClientUpToLimit(st, st.ClientAsm.ack(tcp.Ack))
 		}
 	}
 

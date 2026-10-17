@@ -155,6 +155,15 @@ func (c *TCPConn) Handshake(ts time.Time) *TCPConn {
 	return c
 }
 
+// HandshakeMissedSyn is Handshake as seen by a capture that started just
+// after the client's SYN: the first packet is the server's SYN/ACK.
+func (c *TCPConn) HandshakeMissedSyn(ts time.Time) *TCPConn {
+	c.cseq++ // the unseen SYN consumed one sequence number
+	c.seg(ts, false, func(t *layers.TCP) { t.SYN = true; t.ACK = true }, nil)
+	c.seg(c.next(), true, func(t *layers.TCP) { t.ACK = true }, nil)
+	return c
+}
+
 // SynOnly emits a single SYN that is never answered (scan / failed connect).
 func (c *TCPConn) SynOnly(ts time.Time) {
 	c.seg(ts, true, func(t *layers.TCP) { t.SYN = true; t.Ack = 0 }, nil)
@@ -169,6 +178,27 @@ func (c *TCPConn) SynRst(ts time.Time) {
 // Client sends data from the client, followed by an ACK from the server.
 func (c *TCPConn) Client(payload []byte) *TCPConn {
 	c.seg(c.next(), true, func(t *layers.TCP) { t.ACK = true; t.PSH = true }, payload)
+	c.seg(c.next(), false, func(t *layers.TCP) { t.ACK = true }, nil)
+	return c
+}
+
+// ClientSegments sends parts as separate client segments in sendOrder
+// (indices into parts; repeating an index retransmits that segment, leaving
+// one out loses it on the wire), then an ACK from the server for all parts.
+// It models reordering, retransmission and capture loss.
+func (c *TCPConn) ClientSegments(parts [][]byte, sendOrder []int) *TCPConn {
+	base := c.cseq
+	offsets := make([]uint32, len(parts))
+	total := uint32(0)
+	for i, p := range parts {
+		offsets[i] = total
+		total += uint32(len(p))
+	}
+	for _, i := range sendOrder {
+		c.cseq = base + offsets[i]
+		c.seg(c.next(), true, func(t *layers.TCP) { t.ACK = true; t.PSH = true }, parts[i])
+	}
+	c.cseq = base + total
 	c.seg(c.next(), false, func(t *layers.TCP) { t.ACK = true }, nil)
 	return c
 }

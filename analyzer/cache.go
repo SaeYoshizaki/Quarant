@@ -14,6 +14,10 @@ type FlowState struct {
 
 	ClientData []byte
 	ServerData []byte
+	// ClientAsm and ServerAsm restore sequence order (and count
+	// retransmissions and capture gaps) for the captured directions.
+	ClientAsm streamAssembler
+	ServerAsm streamAssembler
 
 	Reported map[string]bool
 
@@ -117,6 +121,23 @@ func (c *FlowCache) AppendClientUpToLimit(st *FlowState, chunk []byte) {
 		chunk = chunk[:remain]
 	}
 	st.ClientData = append(st.ClientData, chunk...)
+}
+
+// AppendClientSegment passes a client segment through the assembler and
+// appends the bytes that are now in order, up to the buffer limit.
+func (c *FlowCache) AppendClientSegment(st *FlowState, seq uint32, payload []byte) {
+	if len(st.ClientData) >= c.maxSize {
+		return
+	}
+	c.AppendClientUpToLimit(st, st.ClientAsm.add(seq, payload))
+}
+
+// AppendServerSegment is AppendClientSegment for the server direction.
+func (c *FlowCache) AppendServerSegment(st *FlowState, seq uint32, payload []byte) {
+	if len(st.ServerData) >= c.maxSize {
+		return
+	}
+	c.AppendServerUpToLimit(st, st.ServerAsm.add(seq, payload))
 }
 
 func (c *FlowCache) AppendServerUpToLimit(st *FlowState, chunk []byte) {

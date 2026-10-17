@@ -132,6 +132,38 @@ func TestI3ManagementAPIExposedPublicDestinationIsHigh(t *testing.T) {
 	}
 }
 
+// UPnP description, control and eventing requests are protocol traffic: the
+// WeMo description document "/setup.xml" is not a setup interface.
+func TestUPnPProtocolRequestsAreNotSetupOrManagementEndpoints(t *testing.T) {
+	reqs := []*HTTPInfo{
+		{Method: "GET", Path: "/setup.xml", Headers: map[string]string{"host": "192.168.1.223:49152"}},
+		{Method: "POST", Path: "/upnp/control/setup1", Headers: map[string]string{"soapaction": `"urn:Belkin:service:basicevent:1#GetBinaryState"`}},
+		{Method: "SUBSCRIBE", Path: "/upnp/event/setup1", Headers: map[string]string{}},
+	}
+	for _, h := range reqs {
+		ctx := &Context{DstIP: "192.168.1.223", HTTP: h}
+		if _, ok := (&I3ManagementAPIExposedRule{}).Apply(ctx); ok {
+			t.Errorf("%s %s reported as management API", h.Method, h.Path)
+		}
+		if _, ok := (&I9SetupEndpointStillActiveRule{}).Apply(ctx); ok {
+			t.Errorf("%s %s reported as setup endpoint", h.Method, h.Path)
+		}
+		if _, ok := (&I2HTTPAdminRule{}).Apply(ctx); ok {
+			t.Errorf("%s %s reported as admin interface", h.Method, h.Path)
+		}
+	}
+	// The same shapes towards a public server are not UPnP.
+	pub := &Context{DstIP: "203.0.113.50", HTTP: &HTTPInfo{Method: "GET", Path: "/app/68/config.xml", Headers: map[string]string{"host": "dl.example.com"}}}
+	if _, ok := (&I3ManagementAPIExposedRule{}).Apply(pub); !ok {
+		t.Error("config.xml from a public server must not be excluded as UPnP")
+	}
+	// A setup page that is not UPnP is still reported.
+	ctx := &Context{DstIP: "192.168.1.223", HTTP: &HTTPInfo{Method: "GET", Path: "/setup", Headers: map[string]string{}}}
+	if _, ok := (&I9SetupEndpointStillActiveRule{}).Apply(ctx); !ok {
+		t.Error("GET /setup must still be reported")
+	}
+}
+
 func TestI3WeakEcosystemCryptoSignal(t *testing.T) {
 	match, ok := (&I3WeakEcosystemCryptoSignalRule{}).Apply(&Context{
 		DstIP: "8.8.8.8",

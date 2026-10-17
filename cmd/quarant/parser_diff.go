@@ -10,8 +10,9 @@ import (
 	"quarant/internal/parserdiff"
 )
 
-// runParserDiff compares Quarant's TLS ClientHello parser with crypto/tls on
-// every TLS client stream of a capture (offline; nothing is sent anywhere).
+// runParserDiff compares Quarant's TLS ClientHello, HTTP request and MQTT
+// parsers with reference implementations (crypto/tls, net/http, mochi-mqtt)
+// on every client stream of a capture (offline; nothing is sent anywhere).
 func runParserDiff(args []string, out io.Writer) error {
 	fs := flag.NewFlagSet("parser-diff", flag.ContinueOnError)
 	fs.SetOutput(io.Discard)
@@ -22,7 +23,7 @@ func runParserDiff(args []string, out io.Writer) error {
 	if strings.TrimSpace(*pcapPath) == "" {
 		return fmt.Errorf("parser-diff requires --pcap")
 	}
-	rep, err := parserdiff.AnalyzePCAP(*pcapPath)
+	rep, err := parserdiff.AnalyzePCAPAll(*pcapPath)
 	if err != nil {
 		return err
 	}

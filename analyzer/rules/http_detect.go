@@ -11,6 +11,11 @@ var httpPrefixed = [][]byte{
 	[]byte("OPTIONS "),
 	[]byte("PATCH "),
 	[]byte("CONNECT "),
+	// UPnP eventing (GENA, UPnP Device Architecture 2.0 section 4) runs
+	// over HTTP/1.1 on TCP; NOTIFY carries device state changes.
+	[]byte("SUBSCRIBE "),
+	[]byte("UNSUBSCRIBE "),
+	[]byte("NOTIFY "),
 	[]byte("HTTP/1."),
 }
 

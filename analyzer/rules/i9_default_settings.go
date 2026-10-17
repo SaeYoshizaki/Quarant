@@ -14,7 +14,7 @@ func (r *I9SetupEndpointStillActiveRule) Severity() Severity { return SeverityWa
 func (r *I9SetupEndpointStillActiveRule) Type() string       { return "I9_SETUP_ENDPOINT_STILL_ACTIVE" }
 
 func (r *I9SetupEndpointStillActiveRule) Apply(ctx *Context) (Match, bool) {
-	if ctx == nil || ctx.HTTP == nil {
+	if ctx == nil || ctx.HTTP == nil || isUPnPProtocolRequest(ctx) {
 		return Match{}, false
 	}
 

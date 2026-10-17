@@ -18,12 +18,29 @@ type HTTPInfo struct {
 	ContentType string
 }
 
-func ParseHTTP(payload []byte) (*HTTPInfo, bool) {
-	i := bytes.Index(payload, []byte("\r\n\r\n"))
-	if i < 0 {
-		i = bytes.Index(payload, []byte("\n\n"))
+// httpHeadEnd finds the empty line that ends the request head, scanning line
+// by line as net/http does: lines end in "\n" with an optional "\r", so the
+// terminator can be "\r\n\r\n", "\n\n" or a mix. Searching for a fixed
+// terminator instead found a later "\r\n\r\n" inside the body after a
+// "\n\n" head and read body lines as headers (internal/parserdiff).
+func httpHeadEnd(payload []byte) (headEnd, bodyStart int, ok bool) {
+	for start := 0; start < len(payload); {
+		nl := bytes.IndexByte(payload[start:], '\n')
+		if nl < 0 {
+			return 0, 0, false
+		}
+		line := payload[start : start+nl]
+		if start > 0 && (len(line) == 0 || (len(line) == 1 && line[0] == '\r')) {
+			return start, start + nl + 1, true
+		}
+		start += nl + 1
 	}
-	if i < 0 {
+	return 0, 0, false
+}
+
+func ParseHTTP(payload []byte) (*HTTPInfo, bool) {
+	i, bodyStart, ok := httpHeadEnd(payload)
+	if !ok {
 		return nil, false
 	}
 
@@ -58,11 +75,24 @@ func ParseHTTP(payload []byte) (*HTTPInfo, bool) {
 	qv, _ := url.ParseQuery(rawQuery)
 
 	h := map[string]string{}
+	// foldKey is the header a continuation line extends ("" when the last
+	// header line was a duplicate that was not stored).
+	foldKey := ""
 	for _, ln := range lines[1:] {
 		ln = strings.TrimRight(ln, "\r")
 		if ln == "" {
 			break
 		}
+		if ln[0] == ' ' || ln[0] == '\t' {
+			// Obsolete line folding (RFC 9112 5.2): the line continues the
+			// previous header value, as net/http reads it. Dropping it read
+			// "Authorization:\n Basic ..." as an empty credential.
+			if foldKey != "" {
+				h[foldKey] = strings.TrimSpace(h[foldKey] + " " + strings.TrimSpace(ln))
+			}
+			continue
+		}
+		foldKey = ""
 		col := strings.IndexByte(ln, ':')
 		if col <= 0 {
 			continue
@@ -71,14 +101,13 @@ func ParseHTTP(payload []byte) (*HTTPInfo, bool) {
 		v := strings.TrimSpace(ln[col+1:])
 		if _, exists := h[k]; !exists {
 			h[k] = v
+			foldKey = k
 		}
 	}
 
-	var body []byte
-	if i+4 <= len(payload) && string(payload[i:i+4]) == "\r\n\r\n" {
-		body = payload[i+4:]
-	} else if i+2 <= len(payload) && string(payload[i:i+2]) == "\n\n" {
-		body = payload[i+2:]
+	body := payload[bodyStart:]
+	if len(body) == 0 {
+		body = nil
 	}
 
 	ct := ""

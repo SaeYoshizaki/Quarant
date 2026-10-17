@@ -10,7 +10,9 @@ func (r *I2HTTPAdminRule) Severity() Severity { return SeverityWarning }
 func (r *I2HTTPAdminRule) Type() string       { return "I2_HTTP_ADMIN_INTERFACE_SUSPECTED" }
 
 func (r *I2HTTPAdminRule) Apply(ctx *Context) (Match, bool) {
-	if ctx.HTTP == nil {
+	// UPnP control URLs ("/upnp/control/...") are protocol endpoints, not
+	// an administration UI.
+	if ctx.HTTP == nil || isUPnPProtocolRequest(ctx) {
 		return Match{}, false
 	}
 

@@ -328,3 +328,27 @@ func i3HasQuerySupportHint(values url.Values) bool {
 func i3ContainsSensitiveKey(values url.Values) bool {
 	return len(i3SensitiveURLKeys(values)) > 0
 }
+
+// isUPnPProtocolRequest reports whether an HTTP request to a local server
+// is one the UPnP Device Architecture defines: fetching a description
+// document (GET of an .xml file), a SOAP control call (SOAPACTION header) or
+// GENA eventing. These follow from the protocol, so path keywords in them
+// ("/setup.xml" is the Belkin WeMo description document) say nothing about a
+// setup or management interface; parsing UPnP HTTP turned them into ~2,200
+// such findings per UNSW day. UPnP is a LAN protocol: the same shapes sent
+// to public servers (an app downloading config.xml, web-service SOAP) are
+// not excluded.
+func isUPnPProtocolRequest(ctx *Context) bool {
+	if ctx == nil || ctx.HTTP == nil || IsPublicIP(ctx.DstIP) {
+		return false
+	}
+	h := ctx.HTTP
+	switch strings.ToUpper(h.Method) {
+	case "SUBSCRIBE", "UNSUBSCRIBE", "NOTIFY":
+		return true
+	}
+	if _, ok := h.Headers["soapaction"]; ok {
+		return true
+	}
+	return strings.EqualFold(h.Method, "GET") && strings.HasSuffix(strings.ToLower(h.Path), ".xml") && len(h.Query) == 0
+}

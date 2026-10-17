@@ -29,6 +29,12 @@ type FlowRecord struct {
 	DeviceLabel         string    `json:"device_label"`
 	DeviceCategory      string    `json:"device_category"`
 	ObservedDestination string    `json:"observed_destination"`
+	// Reassembly counters for the payload-captured directions: gaps are
+	// bytes the receiver acknowledged but the capture never saw (or that
+	// were given up on), so content in them could not be analysed.
+	CaptureGaps        int `json:"capture_gaps,omitempty"`
+	CaptureGapBytes    int `json:"capture_gap_bytes,omitempty"`
+	RetransmittedBytes int `json:"retransmitted_bytes,omitempty"`
 }
 
 func observedDestination(sni, host, dstIP string) string {

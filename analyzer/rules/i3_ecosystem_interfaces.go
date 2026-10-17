@@ -93,6 +93,9 @@ func (r *I3ManagementAPIExposedRule) Apply(ctx *Context) (Match, bool) {
 	var path string
 	var host string
 	plaintext := false
+	if isUPnPProtocolRequest(ctx) {
+		return Match{}, false
+	}
 	switch {
 	case ctx.HTTP != nil:
 		path = ctx.HTTP.Path

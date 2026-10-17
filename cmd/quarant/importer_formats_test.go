@@ -211,7 +211,9 @@ func TestRunOpenWrtSSHCommandEndsOptionsBeforeHost(t *testing.T) {
 		Host:       "root@192.0.2.1",
 		SSHBin:     sshPath,
 		SSHOptions: []string{"-oBatchMode=yes"},
-		Timeout:    time.Second,
+		// Generous: the test checks argv, and a 1 s limit failed when the
+		// machine was busy.
+		Timeout: 10 * time.Second,
 	}, "true")
 	if err != nil {
 		t.Fatalf("runOpenWrtSSHCommand: %v", err)

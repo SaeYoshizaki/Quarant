@@ -50,6 +50,9 @@ func parseMQTTPacket(payload []byte) (*MQTTInfo, int, bool) {
 
 	packetType := payload[0] >> 4
 	flags := payload[0] & 0x0f
+	if !validMQTTFixedHeaderFlags(packetType, flags) {
+		return nil, 0, false
+	}
 	remainingLength, used, ok := parseMQTTRemainingLength(payload[1:])
 	if !ok {
 		return nil, 0, false
@@ -81,6 +84,23 @@ func parseMQTTPacket(payload []byte) (*MQTTInfo, int, bool) {
 			PacketName: mqttPacketName(packetType),
 			Plaintext:  true,
 		}, packetEnd, true
+	}
+}
+
+// validMQTTFixedHeaderFlags applies the fixed-header rules of MQTT 3.1.1
+// (2.2.2) and 5 (2.1.3): type 0 is reserved, PUBLISH must not use QoS 3,
+// PUBREL/SUBSCRIBE/UNSUBSCRIBE carry flags 0010 and every other type 0000.
+// Without the check any two bytes on port 1883 counted as an MQTT packet.
+func validMQTTFixedHeaderFlags(packetType, flags byte) bool {
+	switch packetType {
+	case 0:
+		return false
+	case 3:
+		return flags&0x06 != 0x06
+	case 6, 8, 10:
+		return flags == 0x02
+	default:
+		return flags == 0
 	}
 }
 
@@ -151,6 +171,16 @@ func parseMQTTConnect(packet []byte) (*MQTTInfo, bool) {
 	}
 
 	if connectFlags&0x04 != 0 {
+		if level == 5 {
+			// MQTT 5 (3.1.3.2): will properties precede the will topic.
+			// Not skipping them made every v5 CONNECT with a will fail to
+			// parse, hiding its cleartext username and password.
+			propsLen, used, ok := parseMQTTRemainingLength(packet[offset:])
+			if !ok || offset+used+propsLen > len(packet) {
+				return nil, false
+			}
+			offset += used + propsLen
+		}
 		if _, ok := readMQTTString(packet, &offset); !ok {
 			return nil, false
 		}
