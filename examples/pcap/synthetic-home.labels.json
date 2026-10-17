@@ -84,6 +84,14 @@
       "description": "Camera firmware 5.4.1 is assumed vulnerable in this scenario; only the version string in a User-Agent is visible, the vulnerability itself is not."
     },
     {
+      "id": "L10",
+      "device_ip": "192.168.50.20",
+      "kind": "cleartext_media_upload",
+      "malicious": false,
+      "visibility": "observable",
+      "description": "Camera uploads a JPEG snapshot to its cloud over plain HTTP."
+    },
+    {
       "id": "N01",
       "device_ip": "192.168.50.30",
       "kind": "benign_modern_tls",

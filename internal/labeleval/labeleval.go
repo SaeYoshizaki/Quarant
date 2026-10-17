@@ -40,6 +40,7 @@ var KindEventTypes = map[string][]string{
 	"periodic_beacon":            {"PERIODIC_COMMUNICATION_OBSERVED"},
 	"outbound_telnet_scan":       {"OUTBOUND_SCAN_SUSPECTED"},
 	"known_vulnerable_firmware":  {"I5_KNOWN_VULNERABLE_COMPONENT"},
+	"cleartext_media_upload":     {"I6_MEDIA_UPLOAD_CLEARTEXT"},
 }
 
 // NegativeKindForbidden lists event-type prefixes that must not appear on a

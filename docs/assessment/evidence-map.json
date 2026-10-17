@@ -187,7 +187,8 @@
    "signals": [
     "I6_HTTP_PRIVACY_EXPOSURE",
     "I6_HTTP_UNEXPECTED_PII",
-    "I6_PII_TO_UNEXPECTED_DESTINATION"
+    "I6_PII_TO_UNEXPECTED_DESTINATION",
+    "I6_MEDIA_UPLOAD_CLEARTEXT"
    ],
    "status": "implemented",
    "audit": "E4 sample: 10/10 correct (user identifier in cleartext body); all from one device."
