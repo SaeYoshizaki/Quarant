@@ -40,6 +40,8 @@ type FlowState struct {
 	// HTTPByContent: the client's first payload is an HTTP request to a
 	// local server on a port outside rules.IsHTTPPort (UPnP control).
 	HTTPByContent bool
+	// RTSPPending holds this connection's RTSP requests awaiting an answer.
+	RTSPPending []rtspRequest
 
 	TLSClientSeen bool
 	TLSClientInfo *rules.TLSClientHelloInfo

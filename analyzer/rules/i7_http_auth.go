@@ -24,6 +24,10 @@ func (r *I7HTTPAuthRule) Apply(ctx *Context) (Match, bool) {
 			evidence = "Authorization: Basic ***"
 		} else if strings.Contains(evidenceLower, "bearer") {
 			evidence = "Authorization: Bearer ***"
+		} else if scheme := challengeResponseScheme(evidenceLower); scheme != "" {
+			// Per-request signatures and digests are not reusable secrets;
+			// naming the scheme lets consumers tell them from passwords.
+			evidence = "Authorization: " + scheme + " ***"
 		}
 
 		return Match{
@@ -54,6 +58,24 @@ func (r *I7HTTPAuthRule) Apply(ctx *Context) (Match, bool) {
 	}
 
 	return Match{}, false
+}
+
+// challengeResponseScheme names Authorization schemes whose value is a
+// per-request proof rather than the credential itself.
+func challengeResponseScheme(lower string) string {
+	for _, s := range []string{"digest", "aws4-hmac-sha256", "aws "} {
+		if strings.HasPrefix(strings.TrimSpace(lower), s) {
+			switch s {
+			case "digest":
+				return "Digest"
+			case "aws4-hmac-sha256":
+				return "AWS4-HMAC-SHA256"
+			default:
+				return "AWS"
+			}
+		}
+	}
+	return ""
 }
 
 func init() {
