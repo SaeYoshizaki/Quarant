@@ -50,6 +50,7 @@ type DeviceProfile struct {
 	MACs          map[string]bool
 	IdentityHints map[string]*identityHint
 	DNSQueries    map[string]bool
+	linked        *linkedIdentity // self-descriptions shared by MAC (linked.go)
 
 	IdentitySignalObservations map[string]ObservationCounter
 	NotificationObservations   map[string]ObservationCounter

@@ -18,6 +18,10 @@ type IdentityEvidence struct {
 	FirstSeen string `json:"first_seen,omitempty"`
 	LastSeen  string `json:"last_seen,omitempty"`
 	Count     int    `json:"count"`
+	// Via is set when the profile did not record the hint itself: it was
+	// announced from another address of the same MAC (same_mac) or loaded
+	// from an earlier capture (earlier_capture). See linked.go.
+	Via string `json:"via,omitempty"`
 }
 
 // maxIdentityEvidence bounds per-device identity hints so that a noisy or
@@ -31,6 +35,7 @@ type identityHint struct {
 	evidence  IdentityEvidence
 	firstSeen time.Time
 	lastSeen  time.Time
+	fromState bool // loaded from an earlier capture and not seen since
 }
 
 // AddIdentityEvidence records an identity attribute. Repeated values only
@@ -49,16 +54,19 @@ func (p *DeviceProfile) AddIdentityEvidence(now time.Time, attribute, value, bas
 		if now.After(h.lastSeen) {
 			h.lastSeen = now
 		}
+		p.shareIdentityHint(key, h)
 		return
 	}
 	if len(p.IdentityHints) >= maxIdentityEvidence {
 		return
 	}
-	p.IdentityHints[key] = &identityHint{
+	h := &identityHint{
 		evidence:  IdentityEvidence{Attribute: attribute, Value: value, Basis: basis, Source: source, Count: 1},
 		firstSeen: now,
 		lastSeen:  now,
 	}
+	p.IdentityHints[key] = h
+	p.shareIdentityHint(key, h)
 	// A new self-description can change the category; before, the category
 	// was only recomputed on HTTP/TLS observations, so devices known only
 	// from DHCP and mDNS stayed GenericIoT.
@@ -104,18 +112,25 @@ func (p *DeviceProfile) ObserveDNSQuery(name string) {
 	}
 }
 
-// IdentityEvidenceList returns hints sorted by attribute, source and value.
+// IdentityEvidenceList returns the profile's hints, followed by the
+// self-descriptions shared from the same MAC (marked with Via), sorted by
+// attribute, source and value.
 func (p *DeviceProfile) IdentityEvidenceList() []IdentityEvidence {
-	if p == nil || len(p.IdentityHints) == 0 {
+	if p == nil {
 		return nil
 	}
-	out := make([]IdentityEvidence, 0, len(p.IdentityHints))
+	linked := p.linkedEvidence()
+	if len(p.IdentityHints) == 0 && len(linked) == 0 {
+		return nil
+	}
+	out := make([]IdentityEvidence, 0, len(p.IdentityHints)+len(linked))
 	for _, h := range p.IdentityHints {
 		e := h.evidence
 		e.FirstSeen = formatSnapshotTime(h.firstSeen)
 		e.LastSeen = formatSnapshotTime(h.lastSeen)
 		out = append(out, e)
 	}
+	out = append(out, linked...)
 	sort.Slice(out, func(i, j int) bool {
 		if out[i].Attribute != out[j].Attribute {
 			return out[i].Attribute < out[j].Attribute

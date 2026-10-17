@@ -122,7 +122,7 @@
 
 **処理の流れ（PCAP）**：`Engine` がパケットをキャプチャ時刻つきで `FlowHandler.HandlePacket` に渡す。
 
-1. L2 の処理：MAC と IP の対応づけ（ARP と Ethernet）。
+1. L2 の処理：MAC と IP の対応づけ（ARP と Ethernet）。同じ MAC のプロファイルは、名乗り（DHCP、mDNS、SSDP）を共有する。`--identity-state` で、名乗りを解析をまたいで引き継げる（D22）。
 2. UDP の処理：DHCP、mDNS、SSDP、DNS（クエリと応答）の識別、活動の記録。
 3. TCP の処理：
    - フロー状態を更新する。TLS は内容でも判定する。

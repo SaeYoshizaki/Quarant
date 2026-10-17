@@ -46,7 +46,12 @@ def main():
             pred = d.get("category_candidate") or ""
             conf = d.get("category_confidence") or ""
             rows.append((day, mac, pred, conf, outcome(truth[mac], pred)))
-    # one row per device-day (a device can appear under several IPs)
+    # one row per device-day (a device can appear under several IPs); the
+    # first row in IP order is scored, and disagreeing rows are counted
+    preds_by_day = collections.defaultdict(set)
+    for r in rows:
+        preds_by_day[(r[0], r[1])].add(r[2] or "GenericIoT")
+    split_days = sum(1 for v in preds_by_day.values() if len(v) > 1)
     seen, uniq = set(), []
     for r in rows:
         if (r[0], r[1]) not in seen:
@@ -109,6 +114,7 @@ def main():
         L.append(f"| {tl} | " + " | ".join(str(conf_m[tl][p] or "") for p in preds) + " |")
     missing = sorted(t["name"] for m, t in truth.items() if m not in per)
     L += ["", "Devices never seen with traffic: " + (", ".join(missing) or "none")]
+    L += ["", f"Device-days whose profiles (one per IP address) disagree on the category: {split_days} of {len(preds_by_day)}"]
     open(out_md, "w").write("\n".join(L) + "\n")
     print("\n".join(L))
 

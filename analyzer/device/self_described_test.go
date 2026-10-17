@@ -28,6 +28,7 @@ func TestDescribeSelf(t *testing.T) {
 		{"standard upnp camera", [][2]string{{"ssdp_device_type", "urn:schemas-upnp-org:device:DigitalSecurityCamera:1"}}, "Camera", "protocol", false},
 		{"vendor upnp type with a generic word", [][2]string{{"ssdp_device_type", "urn:Example:device:sensor:1"}}, "Sensor", "protocol", false},
 		{"vendor upnp type without a generic word", [][2]string{{"ssdp_device_type", "urn:Example:device:controllee:1"}}, "", "", false},
+		{"known vendor upnp type", [][2]string{{"ssdp_device_type", "urn:Belkin:device:controllee:1"}}, "Controller", "protocol", false},
 		{"generic word in host name", [][2]string{{"hostname", "Little Cam"}}, "Camera", "name", false},
 		{"word must be a whole token", [][2]string{{"hostname", "camelot-01"}}, "", "", false},
 		{"conflicting names give none", [][2]string{{"hostname", "cam-plug"}}, "", "", false},
