@@ -854,7 +854,11 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 	captureClient := rules.NeedsPayloadCapture(dstPort) || tlsClient || (st.HTTPByContent && fromClient)
 	captureServer := rules.NeedsPayloadCapture(srcPort) || tlsServer || (st.HTTPByContent && !fromClient)
 	capturePayload := captureClient || captureServer
-	isHTTPClientToServer := rules.IsHTTPPort(dstPort) || (st.HTTPByContent && fromClient)
+	// HTTP recognised by content (st.HTTPByContent) is only used for the
+	// request/response pair below: running every HTTP rule on UPnP traffic
+	// turned protocol-mandated description fetches (GET /setup.xml) into
+	// ~59k setup-endpoint and ~110k plaintext-HTTP findings on UNSW 2018.
+	isHTTPClientToServer := rules.IsHTTPPort(dstPort)
 	isTelnetClientToServer := rules.IsTelnetPort(dstPort)
 	isMQTTClientToServer := rules.IsMQTTPort(dstPort)
 	isTLSClientToServer := rules.IsTLSPort(dstPort) || tlsClient

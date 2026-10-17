@@ -115,9 +115,12 @@
    "provision": "5.5-4",
    "reach": "fail_only",
    "violation_evidence": "A device function reachable over the network is served without authentication.",
-   "signals": [],
-   "status": "not_implemented",
-   "gap": "No detector for unauthenticated requests answered by the device."
+   "signals": [
+    "I3_UNAUTHENTICATED_DEVICE_CONTROL"
+   ],
+   "status": "implemented",
+   "assumption": "the function is not meant as open access inside the home network (EN 303 645 5.5-4 itself allows services made available without authentication within a restricted network, e.g. DLNA)",
+   "gap": "Authentication outside the request (earlier pairing, host allow-lists, a physical button) is not visible; whether the function was carried out is not known."
   },
   {
    "provision": "5.5-5",
@@ -226,10 +229,11 @@
    "signals": [
     "I2_TELNET_SERVICE_OBSERVED",
     "I2_TELNET_PROTOCOL_EVIDENCE",
-    "I2_FTP_SERVICE_OBSERVED"
+    "I2_FTP_SERVICE_OBSERVED",
+    "I9_UPNP_PORT_MAPPING_REQUESTED"
    ],
    "status": "candidate_only",
-   "gap": "Default vs user-enabled is not known; UPnP mappings are not parsed."
+   "gap": "Default vs user-enabled is not known (applies to listening services and to UPnP port mappings alike)."
   },
   {
    "provision": "5.13-1B",
