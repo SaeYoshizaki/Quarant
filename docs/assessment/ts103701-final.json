@@ -1,0 +1,1993 @@
+{
+ "test_cases": [
+  {
+   "test_case": "5.0-1-1",
+   "test_group": "5.0-1",
+   "type": "conceptual",
+   "summary": "Check that the ICS justifies every recommendation declared not applicable or not met.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "none",
+   "ND_pass2": "none",
+   "outside_procedure_cues": ""
+  },
+  {
+   "test_case": "5.1-1-1",
+   "test_group": "5.1-1",
+   "type": "conceptual",
+   "summary": "Assess from IXIT whether non-user-defined passwords used outside factory default are generated unique per device.",
+   "N": "fail_only",
+   "N_source": "adjudicated (P-a)",
+   "ND_pass1": "none",
+   "ND_pass2": "fail_only",
+   "outside_procedure_cues": "A cleartext credential matching a public default-password list would hint at universal defaults; the conceptual case reviews only IXIT."
+  },
+  {
+   "test_case": "5.1-1-2",
+   "test_group": "5.1-1",
+   "type": "functional",
+   "summary": "Look for undocumented password mechanisms, check user-defined passwords are enforced, and check generated passwords match the documented mechanism.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "none",
+   "ND_pass2": "none",
+   "outside_procedure_cues": "Cleartext HTTP Basic, Telnet or MQTT logins and answering login services reveal password mechanisms; IXIT completeness cannot be judged."
+  },
+  {
+   "test_case": "5.1-2-1",
+   "test_group": "5.1-2",
+   "type": "conceptual",
+   "summary": "Judge whether the documented generation of pre-installed passwords avoids regularities, common strings, links to public data, and low complexity.",
+   "N": "fail_only",
+   "N_source": "agreed",
+   "ND_pass1": "fail_only",
+   "ND_pass2": "fail_only",
+   "outside_procedure_cues": ""
+  },
+  {
+   "test_case": "5.1-2-2",
+   "test_group": "5.1-2",
+   "type": "functional",
+   "summary": "Check that actual pre-installed passwords plausibly follow the documented generation mechanism.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "none",
+   "ND_pass2": "none",
+   "outside_procedure_cues": "Pre-installed passwords sent in cleartext can be seen and checked for form; the property route is 5.1-2-1."
+  },
+  {
+   "test_case": "5.1-2A-1",
+   "test_group": "5.1-2A",
+   "type": "conceptual",
+   "summary": "Determine from IXIT whether any machine-to-machine authentication relies on passwords.",
+   "N": "fail_only",
+   "N_source": "agreed",
+   "ND_pass1": "fail_only",
+   "ND_pass2": "fail_only",
+   "outside_procedure_cues": ""
+  },
+  {
+   "test_case": "5.1-2A-2",
+   "test_group": "5.1-2A",
+   "type": "functional",
+   "summary": "Search for undocumented mechanisms and check whether M2M authentication accepts passwords.",
+   "N": "fail_only",
+   "N_source": "agreed",
+   "ND_pass1": "fail_only",
+   "ND_pass2": "fail_only",
+   "outside_procedure_cues": ""
+  },
+  {
+   "test_case": "5.1-3-1",
+   "test_group": "5.1-3",
+   "type": "conceptual",
+   "summary": "Assess documented security guarantees, mechanism fitness, best-practice status and known attacks for authentication cryptography.",
+   "N": "fail_only",
+   "N_source": "agreed",
+   "ND_pass1": "fail_only",
+   "ND_pass2": "fail_only",
+   "outside_procedure_cues": ""
+  },
+  {
+   "test_case": "5.1-3-2",
+   "test_group": "5.1-3",
+   "type": "functional",
+   "summary": "Check that the authentication cryptography actually used matches the documented cryptographic details.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "none",
+   "ND_pass2": "none",
+   "outside_procedure_cues": "TLS versions, cipher suites and certificates of authentication channels are visible in handshakes (TLS 1.3 certificates encrypted)."
+  },
+  {
+   "test_case": "5.1-4-1",
+   "test_group": "5.1-4",
+   "type": "conceptual",
+   "summary": "Assess whether user authentication values can be changed and whether user information explains how, plainly.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "pass_only",
+   "ND_pass2": "fail_only",
+   "outside_procedure_cues": ""
+  },
+  {
+   "test_case": "5.1-4-2",
+   "test_group": "5.1-4",
+   "type": "functional",
+   "summary": "Perform the documented change of user authentication values and verify old values fail and new ones work.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "none",
+   "ND_pass2": "none",
+   "outside_procedure_cues": ""
+  },
+  {
+   "test_case": "5.1-5-1",
+   "test_group": "5.1-5",
+   "type": "conceptual",
+   "summary": "Assess whether documented brute-force countermeasures on network-addressable authentication make attacks impracticable.",
+   "N": "fail_only",
+   "N_source": "adjudicated (P-a)",
+   "ND_pass1": "none",
+   "ND_pass2": "fail_only",
+   "outside_procedure_cues": "Repeated third-party login attempts reaching the device and its continued responses could hint at missing rate limiting; opportunistic and not used by the TS."
+  },
+  {
+   "test_case": "5.1-5-2",
+   "test_group": "5.1-5",
+   "type": "functional",
+   "summary": "Discover undocumented network authentication mechanisms and attempt brute force against documented ones.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "none",
+   "ND_pass2": "none",
+   "outside_procedure_cues": "Answering Telnet/HTTP admin/API services expose network authentication; third-party login floods could hint at rate-limit behaviour."
+  },
+  {
+   "test_case": "5.2-1-1",
+   "test_group": "5.2-1",
+   "type": "conceptual",
+   "summary": "Assess whether the vulnerability disclosure policy is accessible to anyone without accounts or similar barriers.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "pass_only",
+   "ND_pass2": "pass_only",
+   "outside_procedure_cues": ""
+  },
+  {
+   "test_case": "5.2-1-2",
+   "test_group": "5.2-1",
+   "type": "functional",
+   "summary": "Verify the VDP is public and contains contact details plus acknowledgement and status-update timelines.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "pass_and_fail",
+   "ND_pass2": "pass_and_fail",
+   "outside_procedure_cues": ""
+  },
+  {
+   "test_case": "5.2-2-1",
+   "test_group": "5.2-2",
+   "type": "conceptual",
+   "summary": "Assess whether documented actions and time frames ensure timely handling of disclosed vulnerabilities, plus SO confirmation.",
+   "N": "fail_only",
+   "N_source": "adjudicated (P-a)",
+   "ND_pass1": "none",
+   "ND_pass2": "fail_only",
+   "outside_procedure_cues": "Public advisory and CVE dates compared with observed firmware updates could indicate handling speed; the TS case reviews only IXIT."
+  },
+  {
+   "test_case": "5.2-3-1",
+   "test_group": "5.2-3",
+   "type": "conceptual",
+   "summary": "Assess documented processes for monitoring, identifying and rectifying vulnerabilities, plus SO confirmation.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "none",
+   "ND_pass2": "none",
+   "outside_procedure_cues": "Component version banners (SSDP SERVER, HTTP Server, TLS libraries) matched to public CVEs that persist across releases hint at weak monitoring."
+  },
+  {
+   "test_case": "5.3-1-1",
+   "test_group": "5.3-1",
+   "type": "conceptual",
+   "summary": "Assess justifications for non-updatable components and apply the update-mechanism design review of 5.3-2-1.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "none",
+   "ND_pass2": "none",
+   "outside_procedure_cues": "Observed update traffic shows some components are updatable; the conceptual case cannot use it."
+  },
+  {
+   "test_case": "5.3-1-2",
+   "test_group": "5.3-1",
+   "type": "functional",
+   "summary": "Apply the functional update-misuse attacks of 5.3-2-2 to each referenced update mechanism.",
+   "N": "none",
+   "N_source": "adjudicated (P-d)",
+   "ND_pass1": "fail_only",
+   "ND_pass2": "none",
+   "outside_procedure_cues": "Observed update traffic (transport protection, version manifests) shows the attack surface but not whether misuse succeeds."
+  },
+  {
+   "test_case": "5.3-2-1",
+   "test_group": "5.3-2",
+   "type": "conceptual",
+   "summary": "Assess whether the documented design of each update mechanism prevents attacker misuse.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "none",
+   "ND_pass2": "none",
+   "outside_procedure_cues": "Firmware fetched over plaintext HTTP or from unexpected hosts bears on misuse resistance; the design review gives no way to use it."
+  },
+  {
+   "test_case": "5.3-2-2",
+   "test_group": "5.3-2",
+   "type": "functional",
+   "summary": "Devise and execute attacks (MITM, rollback, tampered packages) to test whether update misuse is prevented.",
+   "N": "none",
+   "N_source": "adjudicated (P-d)",
+   "ND_pass1": "fail_only",
+   "ND_pass2": "none",
+   "outside_procedure_cues": "Plaintext update delivery observed on the wire would identify mechanisms where MITM testing is most relevant."
+  },
+  {
+   "test_case": "5.3-3-1",
+   "test_group": "5.3-3",
+   "type": "conceptual",
+   "summary": "Assess whether each software component has at least one update mechanism simple for users to apply.",
+   "N": "none",
+   "N_source": "adjudicated (P-c)",
+   "ND_pass1": "pass_only",
+   "ND_pass2": "pass_only",
+   "outside_procedure_cues": "Update downloads without visible user activity would suggest automatic application, i.e. simple updating; only a conceptual case exists."
+  },
+  {
+   "test_case": "5.3-4A-1",
+   "test_group": "5.3-4A",
+   "type": "conceptual",
+   "summary": "Assess from IXIT whether at least one update mechanism can be configured to run automatically.",
+   "N": "none",
+   "N_source": "adjudicated (P-c)",
+   "ND_pass1": "pass_only",
+   "ND_pass2": "pass_only",
+   "outside_procedure_cues": "Unattended update traffic suggests an automated mechanism; the conceptual case cannot use it."
+  },
+  {
+   "test_case": "5.3-4A-2",
+   "test_group": "5.3-4A",
+   "type": "functional",
+   "summary": "Check in the DUT configuration that at least one update mechanism can be automated.",
+   "N": "pass_only",
+   "N_source": "agreed",
+   "ND_pass1": "pass_only",
+   "ND_pass2": "pass_only",
+   "outside_procedure_cues": ""
+  },
+  {
+   "test_case": "5.3-4B-1",
+   "test_group": "5.3-4B",
+   "type": "conceptual",
+   "summary": "Identify automatic update mechanisms and check that consent to enable them is queried and honoured at initialisation.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "none",
+   "ND_pass2": "pass_only",
+   "outside_procedure_cues": ""
+  },
+  {
+   "test_case": "5.3-4B-2",
+   "test_group": "5.3-4B",
+   "type": "functional",
+   "summary": "During setup, verify consent is requested and the automatic update state follows the user's choice.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "none",
+   "ND_pass2": "none",
+   "outside_procedure_cues": "Update-check traffic and unattended installs after a household's onboarding show whether an automatic mechanism is active."
+  },
+  {
+   "test_case": "5.3-5-1",
+   "test_group": "5.3-5",
+   "type": "conceptual",
+   "summary": "Assess from IXIT whether update mechanisms check for security updates during or after initialisation.",
+   "N": "none",
+   "N_source": "adjudicated (P-c)",
+   "ND_pass1": "pass_only",
+   "ND_pass2": "pass_only",
+   "outside_procedure_cues": "Periodic requests to update endpoints after setup would show update checking; the provision has only a conceptual case, so this evidence is unused."
+  },
+  {
+   "test_case": "5.3-6A-1",
+   "test_group": "5.3-6A",
+   "type": "conceptual",
+   "summary": "For automatic update mechanisms, check documented user ability to enable, disable and postpone them.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "pass_only",
+   "ND_pass2": "pass_only",
+   "outside_procedure_cues": ""
+  },
+  {
+   "test_case": "5.3-6A-2",
+   "test_group": "5.3-6A",
+   "type": "functional",
+   "summary": "Verify in the DUT configuration that users can enable, disable and postpone automatic updates.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "none",
+   "ND_pass2": "none",
+   "outside_procedure_cues": "If a household disables auto-update, disappearance of unattended installs after later releases would hint the setting works."
+  },
+  {
+   "test_case": "5.3-6B-1",
+   "test_group": "5.3-6B",
+   "type": "conceptual",
+   "summary": "For mechanisms with update notifications, check documented user ability to enable and disable them.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "pass_only",
+   "ND_pass2": "pass_only",
+   "outside_procedure_cues": ""
+  },
+  {
+   "test_case": "5.3-6B-2",
+   "test_group": "5.3-6B",
+   "type": "functional",
+   "summary": "Verify in the DUT configuration that users can enable and disable update notifications.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "none",
+   "ND_pass2": "none",
+   "outside_procedure_cues": ""
+  },
+  {
+   "test_case": "5.3-7-1",
+   "test_group": "5.3-7",
+   "type": "conceptual",
+   "summary": "Assess documented guarantees, fitness, best-practice status and known attacks for update cryptography.",
+   "N": "fail_only",
+   "N_source": "agreed",
+   "ND_pass1": "fail_only",
+   "ND_pass2": "fail_only",
+   "outside_procedure_cues": "Image signature algorithms are not visible unless signature files travel in plaintext."
+  },
+  {
+   "test_case": "5.3-8-1",
+   "test_group": "5.3-8",
+   "type": "conceptual",
+   "summary": "Assess whether documented security-update procedures and time frames enable timely deployment, plus confirmation.",
+   "N": "fail_only",
+   "N_source": "adjudicated (P-a)",
+   "ND_pass1": "none",
+   "ND_pass2": "fail_only",
+   "outside_procedure_cues": "Gap between public vulnerability disclosure and observed firmware update arrival could indicate timeliness; the case reviews only procedures."
+  },
+  {
+   "test_case": "5.3-9-1",
+   "test_group": "5.3-9",
+   "type": "conceptual",
+   "summary": "Assess whether updates are checked for authenticity and integrity, and whether the DUT itself performs the checks.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "none",
+   "ND_pass2": "none",
+   "outside_procedure_cues": "Plaintext downloads may reveal accompanying signature or hash files in URLs or manifests, hinting that verification exists."
+  },
+  {
+   "test_case": "5.3-10-1",
+   "test_group": "5.3-10",
+   "type": "conceptual/functional",
+   "summary": "Mixed case: review update verification via a trust relationship and discover undocumented network update mechanisms.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "none",
+   "ND_pass2": "none",
+   "outside_procedure_cues": "Update checks and downloads over plaintext HTTP or from unexpected hosts show network update paths and unauthenticated channels; signature use stays unknown."
+  },
+  {
+   "test_case": "5.3-11-1",
+   "test_group": "5.3-11",
+   "type": "conceptual",
+   "summary": "Assess whether users are informed recognisably about required security updates, including risks mitigated.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "pass_only",
+   "ND_pass2": "pass_only",
+   "outside_procedure_cues": ""
+  },
+  {
+   "test_case": "5.3-12-1",
+   "test_group": "5.3-12",
+   "type": "conceptual",
+   "summary": "Check whether users are notified when an update will disrupt basic functioning.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "pass_only",
+   "ND_pass2": "pass_only",
+   "outside_procedure_cues": "Device offline gaps during update installs are observable, showing disruption occurs, but not whether users were told."
+  },
+  {
+   "test_case": "5.3-13-1",
+   "test_group": "5.3-13",
+   "type": "conceptual",
+   "summary": "Assess whether the published support period can be found and understood by a non-expert user.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "pass_and_fail",
+   "ND_pass2": "pass_and_fail",
+   "outside_procedure_cues": ""
+  },
+  {
+   "test_case": "5.3-13-2",
+   "test_group": "5.3-13",
+   "type": "functional",
+   "summary": "Verify the access route to the support period works as documented, is unrestricted, and actually defines the period.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "fail_only",
+   "ND_pass2": "pass_only",
+   "outside_procedure_cues": ""
+  },
+  {
+   "test_case": "5.3-14-1",
+   "test_group": "5.3-14",
+   "type": "conceptual",
+   "summary": "Checks that the published explanation of why a device receives no updates, and how hardware replacement is supported, is clear to non-experts.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "pass_and_fail",
+   "ND_pass2": "pass_and_fail",
+   "outside_procedure_cues": ""
+  },
+  {
+   "test_case": "5.3-14-2",
+   "test_group": "5.3-14",
+   "type": "functional",
+   "summary": "Verify access to rationale and replacement plan works as documented, is unrestricted, and covers period and method.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "fail_only",
+   "ND_pass2": "pass_only",
+   "outside_procedure_cues": ""
+  },
+  {
+   "test_case": "5.3-15A-1",
+   "test_group": "5.3-15A",
+   "type": "conceptual",
+   "summary": "Assess whether the documented isolation method can remove the DUT from its network or place it in a closed environment.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "pass_and_fail",
+   "ND_pass2": "pass_and_fail",
+   "outside_procedure_cues": "During internet outages, continued local LAN traffic hints whether main functions survive loss of connectivity."
+  },
+  {
+   "test_case": "5.3-15A-2",
+   "test_group": "5.3-15A",
+   "type": "functional",
+   "summary": "Isolate the DUT as documented and check that only connectivity-related functions are lost.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "none",
+   "ND_pass2": "none",
+   "outside_procedure_cues": "During internet outages traffic shows reconnect behaviour, but not whether the main function survives."
+  },
+  {
+   "test_case": "5.3-15B-1",
+   "test_group": "5.3-15B",
+   "type": "conceptual",
+   "summary": "Assess whether the documented hardware replacement method is suitable.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "pass_and_fail",
+   "ND_pass2": "pass_and_fail",
+   "outside_procedure_cues": ""
+  },
+  {
+   "test_case": "5.3-15B-2",
+   "test_group": "5.3-15B",
+   "type": "functional",
+   "summary": "Replace the hardware as documented and verify connectivity and functions are regained.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "none",
+   "ND_pass2": "none",
+   "outside_procedure_cues": "If a household replaces a unit, the new device resuming the same cloud endpoints and local patterns would be observable."
+  },
+  {
+   "test_case": "5.3-16-1",
+   "test_group": "5.3-16",
+   "type": "conceptual",
+   "summary": "Assess whether the model designation is clearly recognisable by label or user interface.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "none",
+   "ND_pass2": "none",
+   "outside_procedure_cues": "SSDP/mDNS model names reveal a network-advertised model, which is not the label/UI the provision requires."
+  },
+  {
+   "test_case": "5.3-16-2",
+   "test_group": "5.3-16",
+   "type": "functional",
+   "summary": "Obtain the model designation as documented and check it is plain text and matches IXIT.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "none",
+   "ND_pass2": "none",
+   "outside_procedure_cues": "Plaintext model strings in discovery protocols could be compared with an expected designation."
+  },
+  {
+   "test_case": "5.4-1-1",
+   "test_group": "5.4-1",
+   "type": "conceptual",
+   "summary": "Assess consistency of SSP types, adequacy of guarantees and protection schemes, and completeness of the SSP list.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "none",
+   "ND_pass2": "none",
+   "outside_procedure_cues": "TLS client certificates, tokens or keys visible in traffic reveal security parameters the device must hold, relevant to list completeness."
+  },
+  {
+   "test_case": "5.4-1-2",
+   "test_group": "5.4-1",
+   "type": "functional",
+   "summary": "Check that documented storage protection schemes for SSPs are actually implemented.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "none",
+   "ND_pass2": "none",
+   "outside_procedure_cues": "Secrets sent in cleartext would hint at weak handling, though not at storage protection."
+  },
+  {
+   "test_case": "5.4-2-1",
+   "test_group": "5.4-2",
+   "type": "conceptual",
+   "summary": "Check hard-coded identities are declared and that their documented protection provides tamper resistance.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "none",
+   "ND_pass2": "none",
+   "outside_procedure_cues": "Stable identifiers persisting across resets (client certificate subjects, device IDs in plaintext, MAC-derived names) suggest hard-coded identities."
+  },
+  {
+   "test_case": "5.4-2-2",
+   "test_group": "5.4-2",
+   "type": "functional",
+   "summary": "Check that tamper-resistance protection of hard-coded identities is implemented as documented.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "none",
+   "ND_pass2": "none",
+   "outside_procedure_cues": ""
+  },
+  {
+   "test_case": "5.4-3-1",
+   "test_group": "5.4-3",
+   "type": "conceptual",
+   "summary": "Check hard-coded CSPs are documented and that their provisioning prevents their use in operation.",
+   "N": "none",
+   "N_source": "adjudicated (P-b)",
+   "ND_pass1": "none",
+   "ND_pass2": "fail_only",
+   "outside_procedure_cues": "Identical credentials across same-model devices, or a public CVE on hard-coded keys for the identified model, would indicate hard-coded CSPs."
+  },
+  {
+   "test_case": "5.4-3-2",
+   "test_group": "5.4-3",
+   "type": "functional",
+   "summary": "Check that the documented provisioning replacing hard-coded CSPs is really applied during operation.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "none",
+   "ND_pass2": "none",
+   "outside_procedure_cues": "Credentials or certificates seen during and after onboarding could show whether a factory secret is replaced."
+  },
+  {
+   "test_case": "5.4-4-1",
+   "test_group": "5.4-4",
+   "type": "conceptual",
+   "summary": "Check CSPs for update verification and service communication are documented and generated unique per device with sound mechanisms.",
+   "N": "none",
+   "N_source": "adjudicated (P-b)",
+   "ND_pass1": "none",
+   "ND_pass2": "fail_only",
+   "outside_procedure_cues": "The same client certificate or credential seen on several devices of one model would suggest non-unique CSPs."
+  },
+  {
+   "test_case": "5.5-1-1",
+   "test_group": "5.5-1",
+   "type": "conceptual",
+   "summary": "Desk review of documented secure channels for all secure communication: guarantees, mechanism fit, best-practice crypto per catalogue, no known feasible attack.",
+   "N": "fail_only",
+   "N_source": "agreed",
+   "ND_pass1": "fail_only",
+   "ND_pass2": "fail_only",
+   "outside_procedure_cues": ""
+  },
+  {
+   "test_case": "5.5-1-2",
+   "test_group": "5.5-1",
+   "type": "functional",
+   "summary": "Check on the device that the crypto actually used on channels for all secure communication matches what the IXIT documents.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "none",
+   "ND_pass2": "none",
+   "outside_procedure_cues": "Observed handshakes (versions, suites, certificates) could be compared with IXIT if supplied; without it they only feed the conceptual catalogue check."
+  },
+  {
+   "test_case": "5.5-2-1",
+   "test_group": "5.5-2",
+   "type": "conceptual",
+   "summary": "Desk check that each listed network/security implementation was reviewed or evaluated and that the review covers its scope.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "none",
+   "ND_pass2": "none",
+   "outside_procedure_cues": "Handshake fingerprints, protocol banners or User-Agent strings may hint at the library in use, which could be looked up in public certification lists."
+  },
+  {
+   "test_case": "5.5-2-2",
+   "test_group": "5.5-2",
+   "type": "functional",
+   "summary": "Check that name and version of each reviewed implementation on the device match those in its review report.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "none",
+   "ND_pass2": "none",
+   "outside_procedure_cues": "Server banners, User-Agent strings and TLS fingerprints may reveal library names/versions, unusable without the SO report."
+  },
+  {
+   "test_case": "5.5-3-1",
+   "test_group": "5.5-3",
+   "type": "conceptual",
+   "summary": "Desk check that crypto-using components have a referenced update mechanism and that replacement side effects were considered.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "none",
+   "ND_pass2": "none",
+   "outside_procedure_cues": "Observed update traffic shows an update channel exists but says nothing about crypto replaceability."
+  },
+  {
+   "test_case": "5.5-4-1",
+   "test_group": "5.5-4",
+   "type": "conceptual",
+   "summary": "Desk review that network-reachable functions need authentication, that it distinguishes subjects, is protected, and authorization works.",
+   "N": "none",
+   "N_source": "adjudicated (P-d)",
+   "ND_pass1": "fail_only",
+   "ND_pass2": "fail_only",
+   "outside_procedure_cues": ""
+  },
+  {
+   "test_case": "5.5-4-2",
+   "test_group": "5.5-4",
+   "type": "functional",
+   "summary": "Try accessing network functions unauthenticated, with bad credentials, and with proper rights; check authentication protection against IXIT.",
+   "N": "fail_only",
+   "N_source": "agreed",
+   "ND_pass1": "fail_only",
+   "ND_pass2": "fail_only",
+   "outside_procedure_cues": "Observed certificates and handshake parameters protecting authentication are visible but the third bullet compares them with the IXIT."
+  },
+  {
+   "test_case": "5.5-5-1",
+   "test_group": "5.5-5",
+   "type": "conceptual",
+   "summary": "Same desk review as 5.5-4-1, in all device states, limited to functions permitting security-relevant configuration changes.",
+   "N": "none",
+   "N_source": "adjudicated (P-d)",
+   "ND_pass1": "fail_only",
+   "ND_pass2": "fail_only",
+   "outside_procedure_cues": ""
+  },
+  {
+   "test_case": "5.5-5-2",
+   "test_group": "5.5-5",
+   "type": "functional",
+   "summary": "Active authentication tests from 5.5-4-2 for configuration-changing functions, plus search for undocumented network logical interfaces.",
+   "N": "fail_only",
+   "N_source": "agreed",
+   "ND_pass1": "fail_only",
+   "ND_pass2": "fail_only",
+   "outside_procedure_cues": "Services seen answering inbound connections or advertised via mDNS/SSDP reveal logical interfaces, but documentation completeness needs the IXIT."
+  },
+  {
+   "test_case": "5.5-6-1",
+   "test_group": "5.5-6",
+   "type": "conceptual",
+   "summary": "Desk review of documented secure channels carrying critical security parameters: guarantees, mechanism fit, best-practice crypto per catalogue, no known feasible attack.",
+   "N": "fail_only",
+   "N_source": "agreed",
+   "ND_pass1": "fail_only",
+   "ND_pass2": "fail_only",
+   "outside_procedure_cues": "Plaintext credentials observed in traffic would contradict the provision directly."
+  },
+  {
+   "test_case": "5.5-6-2",
+   "test_group": "5.5-6",
+   "type": "functional",
+   "summary": "Check on the device that the crypto actually used on channels carrying critical security parameters matches what the IXIT documents.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "none",
+   "ND_pass2": "none",
+   "outside_procedure_cues": "Plaintext credentials or tokens in traffic would contradict the provision, but this case only compares with IXIT."
+  },
+  {
+   "test_case": "5.5-7-1",
+   "test_group": "5.5-7",
+   "type": "conceptual",
+   "summary": "Desk review of documented secure channels carrying critical security parameters over remotely accessible interfaces: guarantees, mechanism fit, best-practice crypto per catalogue, no known feasible attack.",
+   "N": "fail_only",
+   "N_source": "agreed",
+   "ND_pass1": "fail_only",
+   "ND_pass2": "fail_only",
+   "outside_procedure_cues": "Plaintext credentials to remote endpoints would contradict the provision directly."
+  },
+  {
+   "test_case": "5.5-7-2",
+   "test_group": "5.5-7",
+   "type": "functional",
+   "summary": "Check on the device that the crypto actually used on channels carrying critical security parameters over remote interfaces matches what the IXIT documents.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "none",
+   "ND_pass2": "none",
+   "outside_procedure_cues": "Plaintext credentials sent to remote endpoints would contradict the provision, but this case only compares with IXIT."
+  },
+  {
+   "test_case": "5.5-8-1",
+   "test_group": "5.5-8",
+   "type": "conceptual",
+   "summary": "Desk review that CSP management processes span the full lifecycle and that the SO confirms implementing them.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "none",
+   "ND_pass2": "none",
+   "outside_procedure_cues": "Long-term observation of certificate validity periods, rotations and revocation checks hints at parts of the key life cycle."
+  },
+  {
+   "test_case": "5.6-1-1",
+   "test_group": "5.6-1",
+   "type": "conceptual",
+   "summary": "Desk check that every enabled network interface and network-reachable logical interface has a valid documented purpose.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "none",
+   "ND_pass2": "fail_only",
+   "outside_procedure_cues": ""
+  },
+  {
+   "test_case": "5.6-1-2",
+   "test_group": "5.6-1",
+   "type": "functional",
+   "summary": "Check device interface status against documentation and look for undocumented network and logical interfaces.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "none",
+   "ND_pass2": "none",
+   "outside_procedure_cues": "Services seen answering on the LAN or WAN indicate enabled logical interfaces; completeness needs IXIT 28."
+  },
+  {
+   "test_case": "5.6-2-1",
+   "test_group": "5.6-2",
+   "type": "conceptual",
+   "summary": "Desk review of what each network logical interface reveals without authentication: correctly labelled and necessary.",
+   "N": "fail_only",
+   "N_source": "adjudicated (P-a)",
+   "ND_pass1": "none",
+   "ND_pass2": "fail_only",
+   "outside_procedure_cues": "Whether each disclosed item is documented as security-relevant is unknowable without the IXIT."
+  },
+  {
+   "test_case": "5.6-2-2",
+   "test_group": "5.6-2",
+   "type": "functional",
+   "summary": "Observe whether interfaces leak security-relevant information without authentication beyond what is documented.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "none",
+   "ND_pass2": "none",
+   "outside_procedure_cues": "Firmware or kernel versions in SSDP, mDNS, DHCP or HTTP headers are visible unauthenticated disclosures, but undocumentedness needs IXIT."
+  },
+  {
+   "test_case": "5.6-3-1",
+   "test_group": "5.6-3",
+   "type": "conceptual",
+   "summary": "Desk check that physical interfaces not needing exposure are casing-protected and disabled per documentation.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "none",
+   "ND_pass2": "none",
+   "outside_procedure_cues": ""
+  },
+  {
+   "test_case": "5.6-3-2",
+   "test_group": "5.6-3",
+   "type": "functional",
+   "summary": "Inspect device for exposed physical interfaces, casing protection and enabled status, against documentation.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "none",
+   "ND_pass2": "none",
+   "outside_procedure_cues": ""
+  },
+  {
+   "test_case": "5.6-4A-1",
+   "test_group": "5.6-4A",
+   "type": "conceptual",
+   "summary": "Desk check that debug interfaces have best-practice access control or a disable mechanism and correct default status.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "none",
+   "ND_pass2": "none",
+   "outside_procedure_cues": "Network-reachable debug services such as ADB or telnet answering connections could hint at an enabled debug path."
+  },
+  {
+   "test_case": "5.6-4A-2",
+   "test_group": "5.6-4A",
+   "type": "functional",
+   "summary": "On the device, verify debug interfaces are disabled or protected and find undeclared interfaces usable for debugging.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "none",
+   "ND_pass2": "none",
+   "outside_procedure_cues": "Unauthenticated debug-like network services observed answering connections would be indicative only."
+  },
+  {
+   "test_case": "5.6-4B-1",
+   "test_group": "5.6-4B",
+   "type": "conceptual",
+   "summary": "Desk check that physical-port debug interfaces are documented as physically protected by the device.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "none",
+   "ND_pass2": "none",
+   "outside_procedure_cues": ""
+  },
+  {
+   "test_case": "5.6-4B-2",
+   "test_group": "5.6-4B",
+   "type": "functional",
+   "summary": "Physically verify that debug ports are protected by the device.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "none",
+   "ND_pass2": "none",
+   "outside_procedure_cues": ""
+  },
+  {
+   "test_case": "5.6-5-1",
+   "test_group": "5.6-5",
+   "type": "conceptual",
+   "summary": "Desk check that each default-enabled software service is necessary for intended use per its description and justification.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "none",
+   "ND_pass2": "fail_only",
+   "outside_procedure_cues": "Observed answering services (telnet, ftp, rtsp) suggest enabled services whose necessity the conceptual case cannot test."
+  },
+  {
+   "test_case": "5.6-6-1",
+   "test_group": "5.6-6",
+   "type": "conceptual",
+   "summary": "Desk judgement of whether documented code minimization techniques suitably reduce code to needed functionality.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "none",
+   "ND_pass2": "none",
+   "outside_procedure_cues": "Banners or advertised services revealing unneeded bundled components hint at unminimized code."
+  },
+  {
+   "test_case": "5.6-7-1",
+   "test_group": "5.6-7",
+   "type": "conceptual",
+   "summary": "Desk judgement of whether documented privilege controls support separation of duty, need to know and least privilege.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "none",
+   "ND_pass2": "none",
+   "outside_procedure_cues": ""
+  },
+  {
+   "test_case": "5.6-8-1",
+   "test_group": "5.6-8",
+   "type": "conceptual",
+   "summary": "Desk check that documented memory access control mechanisms are hardware-level and actually control memory access.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "none",
+   "ND_pass2": "none",
+   "outside_procedure_cues": ""
+  },
+  {
+   "test_case": "5.6-9-1",
+   "test_group": "5.6-9",
+   "type": "conceptual",
+   "summary": "Desk review that secure development processes cover the listed lifecycle topics and that the SO confirms them.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "none",
+   "ND_pass2": "none",
+   "outside_procedure_cues": ""
+  },
+  {
+   "test_case": "5.7-1-1",
+   "test_group": "5.7-1",
+   "type": "conceptual",
+   "summary": "Desk check that secure boot provides integrity and authenticity and that its detection mechanisms suit those guarantees.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "none",
+   "ND_pass2": "none",
+   "outside_procedure_cues": ""
+  },
+  {
+   "test_case": "5.7-1-2",
+   "test_group": "5.7-1",
+   "type": "functional",
+   "summary": "Verify on the device that software verification at boot works as documented, possibly by tampering firmware.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "none",
+   "ND_pass2": "none",
+   "outside_procedure_cues": ""
+  },
+  {
+   "test_case": "5.7-2-1",
+   "test_group": "5.7-2",
+   "type": "conceptual",
+   "summary": "Desk check that the documented alert on unauthorized software change suffices and allowed communications are only those needed.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "none",
+   "ND_pass2": "none",
+   "outside_procedure_cues": ""
+  },
+  {
+   "test_case": "5.7-2-2",
+   "test_group": "5.7-2",
+   "type": "functional",
+   "summary": "After provoking an unauthorized software change, check alerting and that outbound communication is limited to alerting.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "none",
+   "ND_pass2": "none",
+   "outside_procedure_cues": "Traffic after a genuine tamper event could be checked for restriction, but the observer cannot know detection occurred."
+  },
+  {
+   "test_case": "5.8-1-1",
+   "test_group": "5.8-1",
+   "type": "conceptual",
+   "summary": "Desk review of documented secure channels carrying personal data to associated services: guarantees, mechanism fit, best-practice crypto per catalogue, no known feasible attack.",
+   "N": "fail_only",
+   "N_source": "agreed",
+   "ND_pass1": "fail_only",
+   "ND_pass2": "fail_only",
+   "outside_procedure_cues": "Plaintext personal data in traffic would contradict the provision directly."
+  },
+  {
+   "test_case": "5.8-1-2",
+   "test_group": "5.8-1",
+   "type": "functional",
+   "summary": "Check on the device that the crypto actually used on channels carrying personal data to associated services matches what the IXIT documents.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "none",
+   "ND_pass2": "none",
+   "outside_procedure_cues": "Plaintext personal data to cloud endpoints would contradict the provision, but this case only compares with IXIT."
+  },
+  {
+   "test_case": "5.8-2-1",
+   "test_group": "5.8-2",
+   "type": "conceptual",
+   "summary": "Desk review of documented secure channels carrying sensitive personal data to associated services: guarantees, mechanism fit, best-practice crypto per catalogue, no known feasible attack.",
+   "N": "fail_only",
+   "N_source": "agreed",
+   "ND_pass1": "fail_only",
+   "ND_pass2": "fail_only",
+   "outside_procedure_cues": "Plaintext sensitive personal data in traffic would contradict the provision directly."
+  },
+  {
+   "test_case": "5.8-2-2",
+   "test_group": "5.8-2",
+   "type": "functional",
+   "summary": "Check on the device that the crypto actually used on channels carrying sensitive personal data to associated services matches what the IXIT documents.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "none",
+   "ND_pass2": "none",
+   "outside_procedure_cues": "Plaintext sensitive data (e.g. unencrypted camera streams) would contradict the provision, but this case only compares with IXIT."
+  },
+  {
+   "test_case": "5.8-3-1",
+   "test_group": "5.8-3",
+   "type": "functional",
+   "summary": "Check sensor documentation is reachable and understandable for lay users, and that all obvious sensors are documented.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "fail_only",
+   "ND_pass2": "pass_and_fail",
+   "outside_procedure_cues": "Traffic patterns such as audio or video uploads can hint at sensors in use."
+  },
+  {
+   "test_case": "5.9-1-1",
+   "test_group": "5.9-1",
+   "type": "conceptual",
+   "summary": "Judge whether the SO-declared resilience mechanisms suit network and power outages and meet their stated guarantees.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "none",
+   "ND_pass2": "none",
+   "outside_procedure_cues": "Reconnection and event-replay bursts after natural WAN or power outages hint at buffering or retry mechanisms, but not their declared guarantees."
+  },
+  {
+   "test_case": "5.9-1-2",
+   "test_group": "5.9-1",
+   "type": "functional",
+   "summary": "Cut network and power to the device and check resilience behaviour matches the SO description.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "none",
+   "ND_pass2": "none",
+   "outside_procedure_cues": "After naturally occurring outages, reconnection loops, DHCP re-requests and resumed cloud sessions show how the device actually recovers."
+  },
+  {
+   "test_case": "5.9-2-1",
+   "test_group": "5.9-2",
+   "type": "conceptual",
+   "summary": "Judge declared resilience mechanisms, including continued local operation without network and clean recovery after power loss.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "none",
+   "ND_pass2": "none",
+   "outside_procedure_cues": "Post-outage traffic shows whether the device reconnects at all, which hints at recovery design but not at the declared mechanism types."
+  },
+  {
+   "test_case": "5.9-2-2",
+   "test_group": "5.9-2",
+   "type": "functional",
+   "summary": "Induce network and power loss; check the device keeps working locally and restores connectivity and function as documented.",
+   "N": "fail_only",
+   "N_source": "agreed",
+   "ND_pass1": "fail_only",
+   "ND_pass2": "fail_only",
+   "outside_procedure_cues": "Declared-behaviour comparison unusable; observed reconnect delays and replayed event uploads could only be compared with expectations, not the IXIT."
+  },
+  {
+   "test_case": "5.9-3-1",
+   "test_group": "5.9-3",
+   "type": "conceptual",
+   "summary": "Judge whether declared per-interface resilience measures give orderly connection and avoid mass reconnection.",
+   "N": "fail_only",
+   "N_source": "adjudicated (P-a)",
+   "ND_pass1": "none",
+   "ND_pass2": "fail_only",
+   "outside_procedure_cues": "Fleet-level load balancing or batched update notifications are invisible from one home."
+  },
+  {
+   "test_case": "5.9-3-2",
+   "test_group": "5.9-3",
+   "type": "functional",
+   "summary": "Verify the declared resilience measures, especially against simultaneous mass reconnection, e.g. by sniffing connection setup and teardown.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "none",
+   "ND_pass2": "none",
+   "outside_procedure_cues": "TCP setup/teardown conformance and reconnect timing (jitter, backoff, server spread) are visible in traffic, especially after outages the observer cannot cause."
+  },
+  {
+   "test_case": "5.10-1-1",
+   "test_group": "5.10-1",
+   "type": "conceptual",
+   "summary": "Check at least one security examination of telemetry is declared and that the telemetry suits detecting security anomalies.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "none",
+   "ND_pass2": "none",
+   "outside_procedure_cues": "Periodic uploads to telemetry-like endpoints suggest telemetry exists, but its examination is invisible."
+  },
+  {
+   "test_case": "5.11-1-1",
+   "test_group": "5.11-1",
+   "type": "conceptual",
+   "summary": "Judge whether a simple user-data erasure function exists, is adequate, and covers personal data, configuration and user keys.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "none",
+   "ND_pass2": "fail_only",
+   "outside_procedure_cues": "Post-reset traffic reusing user-set hostnames or account sessions would hint at incomplete erasure but is not used here."
+  },
+  {
+   "test_case": "5.11-1-2",
+   "test_group": "5.11-1",
+   "type": "functional",
+   "summary": "Create user data, run each erase function, check interaction matches and data is gone; check users cannot delete others' data.",
+   "N": "fail_only",
+   "N_source": "adjudicated (P-a)",
+   "ND_pass1": "none",
+   "ND_pass2": "fail_only",
+   "outside_procedure_cues": "Interaction-consistency bullet unusable; observed reset sequence (re-provisioning traffic) could otherwise be compared with the declared flow."
+  },
+  {
+   "test_case": "5.11-2-1",
+   "test_group": "5.11-2",
+   "type": "conceptual",
+   "summary": "Judge whether a simple function deletes personal data held by associated services and covers all such services.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "none",
+   "ND_pass2": "fail_only",
+   "outside_procedure_cues": ""
+  },
+  {
+   "test_case": "5.11-2-2",
+   "test_group": "5.11-2",
+   "type": "functional",
+   "summary": "Create personal data on associated services, run deletion, check interaction and that the service no longer holds it.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "none",
+   "ND_pass2": "none",
+   "outside_procedure_cues": "Continued encrypted sessions to the same service after a user's deletion request hint at remaining accounts but reveal nothing about stored data."
+  },
+  {
+   "test_case": "5.11-3-1",
+   "test_group": "5.11-3",
+   "type": "functional",
+   "summary": "Check the user documentation covers every deletion function concisely with all steps, by following it.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "none",
+   "ND_pass2": "fail_only",
+   "outside_procedure_cues": "Coverage bullet unusable: comparing published instructions with the declared function list needs the IXIT."
+  },
+  {
+   "test_case": "5.11-4-1",
+   "test_group": "5.11-4",
+   "type": "functional",
+   "summary": "Run each deletion function per documentation and check the user receives a clear confirmation of deletion.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "none",
+   "ND_pass2": "none",
+   "outside_procedure_cues": ""
+  },
+  {
+   "test_case": "5.12-1-1",
+   "test_group": "5.12-1",
+   "type": "conceptual",
+   "summary": "Judge whether each declared user decision during setup/maintenance is necessary and has a secure default.",
+   "N": "fail_only",
+   "N_source": "adjudicated (P-a)",
+   "ND_pass1": "none",
+   "ND_pass2": "fail_only",
+   "outside_procedure_cues": ""
+  },
+  {
+   "test_case": "5.12-1-2",
+   "test_group": "5.12-1",
+   "type": "functional",
+   "summary": "Trigger each user decision and check it is prominent, understandable, and as declared.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "none",
+   "ND_pass2": "none",
+   "outside_procedure_cues": "Setup-phase traffic (provisioning access point, pairing bursts) marks when decisions occur but not how they are presented."
+  },
+  {
+   "test_case": "5.12-2-1",
+   "test_group": "5.12-2",
+   "type": "functional",
+   "summary": "Set up the device following secure-setup documentation; check every security-relevant decision is covered with a recommendation.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "none",
+   "ND_pass2": "fail_only",
+   "outside_procedure_cues": "Coverage bullet unusable as written; observed security-relevant features (UPnP, local APIs) absent from the guide would otherwise indicate gaps."
+  },
+  {
+   "test_case": "5.12-3-1",
+   "test_group": "5.12-3",
+   "type": "conceptual",
+   "summary": "Judge whether setup-check and maintenance-check documentation covers every needed step and parameter.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "none",
+   "ND_pass2": "fail_only",
+   "outside_procedure_cues": ""
+  },
+  {
+   "test_case": "5.12-3-2",
+   "test_group": "5.12-3",
+   "type": "functional",
+   "summary": "Configure the device securely then insecurely and check the documented checks correctly tell the two apart.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "none",
+   "ND_pass2": "none",
+   "outside_procedure_cues": "Traffic can independently reveal insecure states (plaintext services, outdated firmware banners) that a correct user check should flag."
+  },
+  {
+   "test_case": "5.13-1A-1",
+   "test_group": "5.13-1A",
+   "type": "conceptual",
+   "summary": "Check each user interface has a declared input validation method and that it is effective.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "none",
+   "ND_pass2": "none",
+   "outside_procedure_cues": ""
+  },
+  {
+   "test_case": "5.13-1A-2",
+   "test_group": "5.13-1A",
+   "type": "functional",
+   "summary": "Check all user interfaces are declared and try malformed input (fuzzing, web scanning) to see validation holds.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "none",
+   "ND_pass2": "none",
+   "outside_procedure_cues": "A plaintext web UI seen in traffic reveals interfaces and error pages but not validation behaviour."
+  },
+  {
+   "test_case": "5.13-1B-1",
+   "test_group": "5.13-1B",
+   "type": "conceptual",
+   "summary": "Check each network-accessible logical interface has a declared input validation method that is effective.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "none",
+   "ND_pass2": "none",
+   "outside_procedure_cues": "Observed listening services and protocols identify which interfaces receive network input, without revealing validation."
+  },
+  {
+   "test_case": "5.13-1B-2",
+   "test_group": "5.13-1B",
+   "type": "functional",
+   "summary": "Fuzz or scan network interfaces to test validation; check all network interfaces are declared.",
+   "N": "fail_only",
+   "N_source": "adjudicated (P-a)",
+   "ND_pass1": "none",
+   "ND_pass2": "fail_only",
+   "outside_procedure_cues": "Observed listening services and protocols could reveal network interfaces missing from the public manual."
+  },
+  {
+   "test_case": "6-1-1",
+   "test_group": "6-1",
+   "type": "conceptual",
+   "summary": "Judge whether the way personal data processing is documented gives clear information on what, why, who and how long.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "fail_only",
+   "ND_pass2": "fail_only",
+   "outside_procedure_cues": ""
+  },
+  {
+   "test_case": "6-1-2",
+   "test_group": "6-1",
+   "type": "functional",
+   "summary": "Check consumer-facing information on personal data processing is clear and matches the declared data categories, purposes, parties and retention.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "fail_only",
+   "ND_pass2": "fail_only",
+   "outside_procedure_cues": "Match-with-declaration bullet unusable; observed destinations and plaintext fields could otherwise be set against the declared processing."
+  },
+  {
+   "test_case": "6-2-1",
+   "test_group": "6-2",
+   "type": "conceptual",
+   "summary": "Judge whether opt-in consent for consent-based processing is described as free, obvious and explicit.",
+   "N": "none",
+   "N_source": "adjudicated (P-e)",
+   "ND_pass1": "none",
+   "ND_pass2": "fail_only",
+   "outside_procedure_cues": ""
+  },
+  {
+   "test_case": "6-2-2",
+   "test_group": "6-2",
+   "type": "functional",
+   "summary": "Check consent is actually obtained as the SO describes for each consent-based data category.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "none",
+   "ND_pass2": "none",
+   "outside_procedure_cues": "Analytics or advertising traffic beginning before setup completes would indicate processing without opt-in, but is not usable here."
+  },
+  {
+   "test_case": "6-3A-1",
+   "test_group": "6-3A",
+   "type": "conceptual",
+   "summary": "Judge whether the SO describes how consent can be withdrawn at any time via device/service settings.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "none",
+   "ND_pass2": "fail_only",
+   "outside_procedure_cues": ""
+  },
+  {
+   "test_case": "6-3A-2",
+   "test_group": "6-3A",
+   "type": "functional",
+   "summary": "Check consent can be withdrawn as described for each consent-based data category.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "none",
+   "ND_pass2": "none",
+   "outside_procedure_cues": "Analytics flows persisting after a user withdraws consent would be a strong cue, but cannot be used."
+  },
+  {
+   "test_case": "6-3B-1",
+   "test_group": "6-3B",
+   "type": "conceptual",
+   "summary": "Judge whether the device provides a means to store consent information as declared.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "none",
+   "ND_pass2": "none",
+   "outside_procedure_cues": ""
+  },
+  {
+   "test_case": "6-3B-2",
+   "test_group": "6-3B",
+   "type": "functional",
+   "summary": "Check stored consent information is as described for each consent-based data category.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "none",
+   "ND_pass2": "none",
+   "outside_procedure_cues": ""
+  },
+  {
+   "test_case": "6-4-1",
+   "test_group": "6-4",
+   "type": "conceptual",
+   "summary": "Judge whether personal data within declared telemetry is necessary for the stated purpose.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "fail_only",
+   "ND_pass2": "fail_only",
+   "outside_procedure_cues": ""
+  },
+  {
+   "test_case": "6-5-1",
+   "test_group": "6-5",
+   "type": "conceptual",
+   "summary": "Judge whether the telemetry documentation lets consumers learn about telemetry processing.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "fail_only",
+   "ND_pass2": "fail_only",
+   "outside_procedure_cues": "Observed telemetry endpoints confirm telemetry exists, strengthening a missing-documentation finding."
+  },
+  {
+   "test_case": "6-5-2",
+   "test_group": "6-5",
+   "type": "functional",
+   "summary": "Obtain the telemetry information and check it matches the declared purposes and describes what is collected, use, recipients and purposes.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "fail_only",
+   "ND_pass2": "fail_only",
+   "outside_procedure_cues": "Bullets on matching the declaration are unusable; observed telemetry could otherwise be compared with declared purposes."
+  },
+  {
+   "test_case": "6-6-1",
+   "test_group": "6-6",
+   "type": "conceptual",
+   "summary": "Judge necessity of each personal data category, reasonableness of its retention, and suitability of its disposal process.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "fail_only",
+   "ND_pass2": "fail_only",
+   "outside_procedure_cues": "Retention and disposal (b,c) have no passive evidence."
+  },
+  {
+   "test_case": "6-6-2",
+   "test_group": "6-6",
+   "type": "functional",
+   "summary": "Create personal data, find data collected not created by the user, judge its necessity, and check deletion when no longer needed.",
+   "N": "none",
+   "N_source": "adjudicated (P-e)",
+   "ND_pass1": "fail_only",
+   "ND_pass2": "fail_only",
+   "outside_procedure_cues": ""
+  },
+  {
+   "test_case": "6-7-1",
+   "test_group": "6-7",
+   "type": "conceptual",
+   "summary": "For data used only for aggregation, judge minimal collection, early aggregation and minimal retention.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "fail_only",
+   "ND_pass2": "fail_only",
+   "outside_procedure_cues": ""
+  },
+  {
+   "test_case": "6-7-2",
+   "test_group": "6-7",
+   "type": "functional",
+   "summary": "Create data meant for aggregation and check the aggregation mechanism behaves as declared.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "none",
+   "ND_pass2": "none",
+   "outside_procedure_cues": "Plaintext uploads of raw per-event records, where public docs describe aggregation, would hint at non-minimal collection."
+  },
+  {
+   "test_case": "6-8-1",
+   "test_group": "6-8",
+   "type": "conceptual",
+   "summary": "Judge whether declared anonymization technologies are used and appropriate across collection, processing and storage.",
+   "N": "fail_only",
+   "N_source": "agreed",
+   "ND_pass1": "fail_only",
+   "ND_pass2": "fail_only",
+   "outside_procedure_cues": ""
+  },
+  {
+   "test_case": "6-8-2",
+   "test_group": "6-8",
+   "type": "functional",
+   "summary": "Create data meant for anonymization and check anonymization works as declared.",
+   "N": "none",
+   "N_source": "agreed",
+   "ND_pass1": "none",
+   "ND_pass2": "none",
+   "outside_procedure_cues": "Identifiers visible in plaintext uploads of data that public docs call anonymized would contradict the published claim."
+  }
+ ],
+ "test_groups": [
+  {
+   "test_group": "5.0-1",
+   "N": "none",
+   "ND_min": "none",
+   "ND_max": "none",
+   "cues": false
+  },
+  {
+   "test_group": "5.1-1",
+   "N": "fail_only",
+   "ND_min": "none",
+   "ND_max": "fail_only",
+   "cues": true
+  },
+  {
+   "test_group": "5.1-2",
+   "N": "fail_only",
+   "ND_min": "fail_only",
+   "ND_max": "fail_only",
+   "cues": true
+  },
+  {
+   "test_group": "5.1-2A",
+   "N": "fail_only",
+   "ND_min": "fail_only",
+   "ND_max": "fail_only",
+   "cues": false
+  },
+  {
+   "test_group": "5.1-3",
+   "N": "fail_only",
+   "ND_min": "fail_only",
+   "ND_max": "fail_only",
+   "cues": true
+  },
+  {
+   "test_group": "5.1-4",
+   "N": "none",
+   "ND_min": "pass_only",
+   "ND_max": "pass_only",
+   "cues": false
+  },
+  {
+   "test_group": "5.1-5",
+   "N": "fail_only",
+   "ND_min": "none",
+   "ND_max": "fail_only",
+   "cues": true
+  },
+  {
+   "test_group": "5.2-1",
+   "N": "none",
+   "ND_min": "pass_and_fail",
+   "ND_max": "pass_and_fail",
+   "cues": false
+  },
+  {
+   "test_group": "5.2-2",
+   "N": "fail_only",
+   "ND_min": "none",
+   "ND_max": "fail_only",
+   "cues": true
+  },
+  {
+   "test_group": "5.2-3",
+   "N": "none",
+   "ND_min": "none",
+   "ND_max": "none",
+   "cues": true
+  },
+  {
+   "test_group": "5.3-1",
+   "N": "none",
+   "ND_min": "none",
+   "ND_max": "fail_only",
+   "cues": true
+  },
+  {
+   "test_group": "5.3-2",
+   "N": "none",
+   "ND_min": "none",
+   "ND_max": "fail_only",
+   "cues": true
+  },
+  {
+   "test_group": "5.3-3",
+   "N": "none",
+   "ND_min": "pass_only",
+   "ND_max": "pass_only",
+   "cues": true
+  },
+  {
+   "test_group": "5.3-4A",
+   "N": "pass_only",
+   "ND_min": "pass_only",
+   "ND_max": "pass_only",
+   "cues": true
+  },
+  {
+   "test_group": "5.3-4B",
+   "N": "none",
+   "ND_min": "none",
+   "ND_max": "pass_only",
+   "cues": true
+  },
+  {
+   "test_group": "5.3-5",
+   "N": "none",
+   "ND_min": "pass_only",
+   "ND_max": "pass_only",
+   "cues": true
+  },
+  {
+   "test_group": "5.3-6A",
+   "N": "none",
+   "ND_min": "pass_only",
+   "ND_max": "pass_only",
+   "cues": true
+  },
+  {
+   "test_group": "5.3-6B",
+   "N": "none",
+   "ND_min": "pass_only",
+   "ND_max": "pass_only",
+   "cues": false
+  },
+  {
+   "test_group": "5.3-7",
+   "N": "fail_only",
+   "ND_min": "fail_only",
+   "ND_max": "fail_only",
+   "cues": true
+  },
+  {
+   "test_group": "5.3-8",
+   "N": "fail_only",
+   "ND_min": "none",
+   "ND_max": "fail_only",
+   "cues": true
+  },
+  {
+   "test_group": "5.3-9",
+   "N": "none",
+   "ND_min": "none",
+   "ND_max": "none",
+   "cues": true
+  },
+  {
+   "test_group": "5.3-10",
+   "N": "none",
+   "ND_min": "none",
+   "ND_max": "none",
+   "cues": true
+  },
+  {
+   "test_group": "5.3-11",
+   "N": "none",
+   "ND_min": "pass_only",
+   "ND_max": "pass_only",
+   "cues": false
+  },
+  {
+   "test_group": "5.3-12",
+   "N": "none",
+   "ND_min": "pass_only",
+   "ND_max": "pass_only",
+   "cues": true
+  },
+  {
+   "test_group": "5.3-13",
+   "N": "none",
+   "ND_min": "pass_and_fail",
+   "ND_max": "pass_and_fail",
+   "cues": false
+  },
+  {
+   "test_group": "5.3-14",
+   "N": "none",
+   "ND_min": "pass_and_fail",
+   "ND_max": "pass_and_fail",
+   "cues": false
+  },
+  {
+   "test_group": "5.3-15A",
+   "N": "none",
+   "ND_min": "pass_and_fail",
+   "ND_max": "pass_and_fail",
+   "cues": true
+  },
+  {
+   "test_group": "5.3-15B",
+   "N": "none",
+   "ND_min": "pass_and_fail",
+   "ND_max": "pass_and_fail",
+   "cues": true
+  },
+  {
+   "test_group": "5.3-16",
+   "N": "none",
+   "ND_min": "none",
+   "ND_max": "none",
+   "cues": true
+  },
+  {
+   "test_group": "5.4-1",
+   "N": "none",
+   "ND_min": "none",
+   "ND_max": "none",
+   "cues": true
+  },
+  {
+   "test_group": "5.4-2",
+   "N": "none",
+   "ND_min": "none",
+   "ND_max": "none",
+   "cues": true
+  },
+  {
+   "test_group": "5.4-3",
+   "N": "none",
+   "ND_min": "none",
+   "ND_max": "fail_only",
+   "cues": true
+  },
+  {
+   "test_group": "5.4-4",
+   "N": "none",
+   "ND_min": "none",
+   "ND_max": "fail_only",
+   "cues": true
+  },
+  {
+   "test_group": "5.5-1",
+   "N": "fail_only",
+   "ND_min": "fail_only",
+   "ND_max": "fail_only",
+   "cues": true
+  },
+  {
+   "test_group": "5.5-2",
+   "N": "none",
+   "ND_min": "none",
+   "ND_max": "none",
+   "cues": true
+  },
+  {
+   "test_group": "5.5-3",
+   "N": "none",
+   "ND_min": "none",
+   "ND_max": "none",
+   "cues": true
+  },
+  {
+   "test_group": "5.5-4",
+   "N": "fail_only",
+   "ND_min": "fail_only",
+   "ND_max": "fail_only",
+   "cues": true
+  },
+  {
+   "test_group": "5.5-5",
+   "N": "fail_only",
+   "ND_min": "fail_only",
+   "ND_max": "fail_only",
+   "cues": true
+  },
+  {
+   "test_group": "5.5-6",
+   "N": "fail_only",
+   "ND_min": "fail_only",
+   "ND_max": "fail_only",
+   "cues": true
+  },
+  {
+   "test_group": "5.5-7",
+   "N": "fail_only",
+   "ND_min": "fail_only",
+   "ND_max": "fail_only",
+   "cues": true
+  },
+  {
+   "test_group": "5.5-8",
+   "N": "none",
+   "ND_min": "none",
+   "ND_max": "none",
+   "cues": true
+  },
+  {
+   "test_group": "5.6-1",
+   "N": "none",
+   "ND_min": "none",
+   "ND_max": "fail_only",
+   "cues": true
+  },
+  {
+   "test_group": "5.6-2",
+   "N": "fail_only",
+   "ND_min": "none",
+   "ND_max": "fail_only",
+   "cues": true
+  },
+  {
+   "test_group": "5.6-3",
+   "N": "none",
+   "ND_min": "none",
+   "ND_max": "none",
+   "cues": false
+  },
+  {
+   "test_group": "5.6-4A",
+   "N": "none",
+   "ND_min": "none",
+   "ND_max": "none",
+   "cues": true
+  },
+  {
+   "test_group": "5.6-4B",
+   "N": "none",
+   "ND_min": "none",
+   "ND_max": "none",
+   "cues": false
+  },
+  {
+   "test_group": "5.6-5",
+   "N": "none",
+   "ND_min": "none",
+   "ND_max": "fail_only",
+   "cues": true
+  },
+  {
+   "test_group": "5.6-6",
+   "N": "none",
+   "ND_min": "none",
+   "ND_max": "none",
+   "cues": true
+  },
+  {
+   "test_group": "5.6-7",
+   "N": "none",
+   "ND_min": "none",
+   "ND_max": "none",
+   "cues": false
+  },
+  {
+   "test_group": "5.6-8",
+   "N": "none",
+   "ND_min": "none",
+   "ND_max": "none",
+   "cues": false
+  },
+  {
+   "test_group": "5.6-9",
+   "N": "none",
+   "ND_min": "none",
+   "ND_max": "none",
+   "cues": false
+  },
+  {
+   "test_group": "5.7-1",
+   "N": "none",
+   "ND_min": "none",
+   "ND_max": "none",
+   "cues": false
+  },
+  {
+   "test_group": "5.7-2",
+   "N": "none",
+   "ND_min": "none",
+   "ND_max": "none",
+   "cues": true
+  },
+  {
+   "test_group": "5.8-1",
+   "N": "fail_only",
+   "ND_min": "fail_only",
+   "ND_max": "fail_only",
+   "cues": true
+  },
+  {
+   "test_group": "5.8-2",
+   "N": "fail_only",
+   "ND_min": "fail_only",
+   "ND_max": "fail_only",
+   "cues": true
+  },
+  {
+   "test_group": "5.8-3",
+   "N": "none",
+   "ND_min": "fail_only",
+   "ND_max": "pass_and_fail",
+   "cues": true
+  },
+  {
+   "test_group": "5.9-1",
+   "N": "none",
+   "ND_min": "none",
+   "ND_max": "none",
+   "cues": true
+  },
+  {
+   "test_group": "5.9-2",
+   "N": "fail_only",
+   "ND_min": "fail_only",
+   "ND_max": "fail_only",
+   "cues": true
+  },
+  {
+   "test_group": "5.9-3",
+   "N": "fail_only",
+   "ND_min": "none",
+   "ND_max": "fail_only",
+   "cues": true
+  },
+  {
+   "test_group": "5.10-1",
+   "N": "none",
+   "ND_min": "none",
+   "ND_max": "none",
+   "cues": true
+  },
+  {
+   "test_group": "5.11-1",
+   "N": "fail_only",
+   "ND_min": "none",
+   "ND_max": "fail_only",
+   "cues": true
+  },
+  {
+   "test_group": "5.11-2",
+   "N": "none",
+   "ND_min": "none",
+   "ND_max": "fail_only",
+   "cues": true
+  },
+  {
+   "test_group": "5.11-3",
+   "N": "none",
+   "ND_min": "none",
+   "ND_max": "fail_only",
+   "cues": true
+  },
+  {
+   "test_group": "5.11-4",
+   "N": "none",
+   "ND_min": "none",
+   "ND_max": "none",
+   "cues": false
+  },
+  {
+   "test_group": "5.12-1",
+   "N": "fail_only",
+   "ND_min": "none",
+   "ND_max": "fail_only",
+   "cues": true
+  },
+  {
+   "test_group": "5.12-2",
+   "N": "none",
+   "ND_min": "none",
+   "ND_max": "fail_only",
+   "cues": true
+  },
+  {
+   "test_group": "5.12-3",
+   "N": "none",
+   "ND_min": "none",
+   "ND_max": "fail_only",
+   "cues": true
+  },
+  {
+   "test_group": "5.13-1A",
+   "N": "none",
+   "ND_min": "none",
+   "ND_max": "none",
+   "cues": true
+  },
+  {
+   "test_group": "5.13-1B",
+   "N": "fail_only",
+   "ND_min": "none",
+   "ND_max": "fail_only",
+   "cues": true
+  },
+  {
+   "test_group": "6-1",
+   "N": "none",
+   "ND_min": "fail_only",
+   "ND_max": "fail_only",
+   "cues": true
+  },
+  {
+   "test_group": "6-2",
+   "N": "none",
+   "ND_min": "none",
+   "ND_max": "fail_only",
+   "cues": true
+  },
+  {
+   "test_group": "6-3A",
+   "N": "none",
+   "ND_min": "none",
+   "ND_max": "fail_only",
+   "cues": true
+  },
+  {
+   "test_group": "6-3B",
+   "N": "none",
+   "ND_min": "none",
+   "ND_max": "none",
+   "cues": false
+  },
+  {
+   "test_group": "6-4",
+   "N": "none",
+   "ND_min": "fail_only",
+   "ND_max": "fail_only",
+   "cues": false
+  },
+  {
+   "test_group": "6-5",
+   "N": "none",
+   "ND_min": "fail_only",
+   "ND_max": "fail_only",
+   "cues": true
+  },
+  {
+   "test_group": "6-6",
+   "N": "none",
+   "ND_min": "fail_only",
+   "ND_max": "fail_only",
+   "cues": true
+  },
+  {
+   "test_group": "6-7",
+   "N": "none",
+   "ND_min": "fail_only",
+   "ND_max": "fail_only",
+   "cues": true
+  },
+  {
+   "test_group": "6-8",
+   "N": "fail_only",
+   "ND_min": "fail_only",
+   "ND_max": "fail_only",
+   "cues": true
+  }
+ ]
+}

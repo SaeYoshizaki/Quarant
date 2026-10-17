@@ -1,0 +1,32 @@
+{
+ "model": "N",
+ "principles": {
+  "P-a": "A verdict bullet that is a property (uniqueness, necessity, best-practice defaults, orderly reconnection) may be shown violated by observation plus third-party references, even in a conceptual case (Rule R2); PASS stays unreachable.",
+  "P-b": "A verdict bullet that refers to an IXIT field (e.g. 'Provisioning Mechanism', 'Generation Mechanism', 'documented as such') is a comparison with the IXIT (Rule R1) and contributes no reachable verdict.",
+  "P-c": "A PASS over a universal quantifier ('each/every/all components') must not be reached by assuming the observed sample is complete; that assumes the conclusion. A FAIL from one counterexample is allowed.",
+  "P-d": "Verdicts that rest on the results of the tester's own attacks are unreachable; a conceptual case whose only passive route duplicates its functional counterpart is not counted again.",
+  "P-e": "Under Model N the purpose or consent basis of processing cannot be taken from the manufacturer's documents; verdicts that need it are unreachable under N (they may be reachable under ND)."
+ },
+ "decisions": [
+  {"test_case": "5.1-1-1", "verdict_reach": "fail_only", "follows": "pass2", "principle": "P-a", "note": "Uniqueness is a property; a cleartext credential matching a published universal-default list shows violation."},
+  {"test_case": "5.1-5-1", "verdict_reach": "fail_only", "follows": "pass2", "principle": "P-a", "note": "Impracticability is a property; unthrottled third-party guessing captured in traffic shows violation (opportunistic)."},
+  {"test_case": "5.2-2-1", "verdict_reach": "fail_only", "follows": "pass2", "principle": "P-a", "note": "Public CVE left unfixed in the observed firmware version indicates untimely action; the confirmation bullet keeps PASS unreachable."},
+  {"test_case": "5.3-1-2", "verdict_reach": "none", "follows": "pass2", "principle": "P-d", "note": "Indications of misuse come from the tester's attacks; plaintext update downloads are a cue only."},
+  {"test_case": "5.3-2-2", "verdict_reach": "none", "follows": "pass2", "principle": "P-d", "note": "As 5.3-1-2."},
+  {"test_case": "5.3-3-1", "verdict_reach": "none", "follows": "pass1", "principle": "P-c", "note": "PASS needs every component covered; observing one update path cannot show that."},
+  {"test_case": "5.3-4A-1", "verdict_reach": "none", "follows": "pass1", "principle": "P-c", "note": "Observing automatic installs does not show the user-facing configurability the verdict requires."},
+  {"test_case": "5.3-5-1", "verdict_reach": "none", "follows": "pass1", "principle": "P-c", "note": "Periodic checks for one mechanism cannot show every component is covered."},
+  {"test_case": "5.3-8-1", "verdict_reach": "fail_only", "follows": "pass2", "principle": "P-a", "note": "Same reasoning as 5.2-2-1 for deployment of security updates."},
+  {"test_case": "5.4-3-1", "verdict_reach": "none", "follows": "pass1", "principle": "P-b", "note": "Both bullets are framed on IXIT fields ('documented as such', 'Provisioning Mechanism')."},
+  {"test_case": "5.4-4-1", "verdict_reach": "none", "follows": "pass1", "principle": "P-b", "note": "Bullets refer to 'Description' and 'Generation Mechanism' IXIT fields."},
+  {"test_case": "5.5-4-1", "verdict_reach": "none", "follows": "pass1", "principle": "P-d", "note": "The passive route (unauthenticated access observed) is the functional case 5.5-4-2, already fail_only."},
+  {"test_case": "5.5-5-1", "verdict_reach": "none", "follows": "pass1", "principle": "P-d", "note": "As 5.5-4-1; covered by 5.5-5-2."},
+  {"test_case": "5.6-2-1", "verdict_reach": "fail_only", "follows": "pass2", "principle": "P-a", "note": "Necessity of disclosed information can be judged against protocol specifications; versions not required by the protocol show violation."},
+  {"test_case": "5.9-3-1", "verdict_reach": "fail_only", "follows": "pass2", "principle": "P-a", "note": "Orderly, standard-conformant reconnection is a property; tight retry loops violating protocol RFCs show violation."},
+  {"test_case": "5.11-1-2", "verdict_reach": "fail_only", "follows": "pass2", "principle": "P-a", "note": "After an opportunistic user reset, user identifiers still sent show unsuccessful erasure."},
+  {"test_case": "5.12-1-1", "verdict_reach": "fail_only", "follows": "pass2", "principle": "P-a", "note": "Insecure defaults visible out of the box (e.g. UPnP mappings, plaintext services) violate best-practice defaults."},
+  {"test_case": "5.13-1B-2", "verdict_reach": "fail_only", "follows": "pass2", "principle": "P-a", "note": "Opportunistic malformed inbound input followed by a crash or error leak indicates missing validation."},
+  {"test_case": "6-2-1", "verdict_reach": "none", "follows": "pass1", "principle": "P-e", "note": "Which processing is consent-based is known only from the manufacturer; reachable under ND only."},
+  {"test_case": "6-6-2", "verdict_reach": "none", "follows": "pass2", "principle": "P-e", "note": "Necessity needs the intended purpose; inferring it from the device category is not a third-party reference."}
+ ]
+}

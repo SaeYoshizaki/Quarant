@@ -14,15 +14,23 @@
     "note": "Review justifications recorded in the ICS."
    }
   ],
-  "passive_class": "not_assessable",
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "opportunistic": false,
+  "outside_procedure_cues": "",
   "rationale": "Unit a reviews SO-supplied ICS only.",
   "quarant_capabilities": [],
   "reference_sources": [],
-  "verdict_reach": "none",
-  "uses_reference": false,
-  "assumptions": [],
-  "opportunistic": false,
-  "outside_procedure_cues": "",
   "conditional": false,
   "condition_passive": "n/a",
   "group_note": "Whole group is ICS review; nothing passive."
@@ -42,15 +50,23 @@
     "note": "Judge documented password generation for per-device uniqueness."
    }
   ],
-  "passive_class": "not_assessable",
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "opportunistic": false,
+  "outside_procedure_cues": "A cleartext credential matching a public default-password list would hint at universal defaults; the conceptual case reviews only IXIT.",
   "rationale": "Unit a is IXIT review; per-device uniqueness cannot be judged from one device's traffic.",
   "quarant_capabilities": [],
   "reference_sources": [],
-  "verdict_reach": "none",
-  "uses_reference": false,
-  "assumptions": [],
-  "opportunistic": false,
-  "outside_procedure_cues": "A cleartext credential matching a public default-password list would hint at universal defaults; the conceptual case reviews only IXIT.",
   "conditional": true,
   "condition_passive": "partly",
   "group_note": "Uniqueness per device and IXIT completeness need SO data; conceptual part impossible."
@@ -90,7 +106,20 @@
     "note": "Compare real device passwords with documented generation."
    }
   ],
-  "passive_class": "not_assessable",
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "opportunistic": false,
+  "outside_procedure_cues": "Cleartext HTTP Basic, Telnet or MQTT logins and answering login services reveal password mechanisms; IXIT completeness cannot be judged.",
   "rationale": "Verdict compares discovered mechanisms and password generation with the IXIT (a, c) and needs setup interaction (b); per v2.1 not reachable passively.",
   "quarant_capabilities": [
    "INSECURE_HTTP_AUTH",
@@ -103,11 +132,6 @@
   "reference_sources": [
    "published user documentation"
   ],
-  "verdict_reach": "none",
-  "uses_reference": false,
-  "assumptions": [],
-  "opportunistic": false,
-  "outside_procedure_cues": "Cleartext HTTP Basic, Telnet or MQTT logins and answering login services reveal password mechanisms; IXIT completeness cannot be judged.",
   "conditional": true,
   "condition_passive": "partly",
   "group_note": "Uniqueness per device and IXIT completeness need SO data; conceptual part impossible."
@@ -148,18 +172,29 @@
     "note": "Judge complexity of generated passwords."
    }
   ],
-  "passive_class": "inferred",
+  "N": {
+   "verdict_reach": "fail_only",
+   "uses_reference": true,
+   "assumptions": [
+    "observed cleartext password is the pre-installed one",
+    "one observed password reflects the generation mechanism"
+   ],
+   "passive_class": "inferred"
+  },
+  "ND": {
+   "verdict_reach": "fail_only",
+   "uses_reference": true,
+   "assumptions": [
+    "observed cleartext password is the pre-installed one",
+    "one observed password reflects the generation mechanism"
+   ],
+   "passive_class": "inferred"
+  },
+  "opportunistic": false,
+  "outside_procedure_cues": "",
   "rationale": "Substitution: a pre-installed password seen in cleartext can be checked against the MAC/SSID (b, c) and the dictionary named by the TS; FAIL only, PASS needs the IXIT mechanism.",
   "quarant_capabilities": [],
   "reference_sources": [],
-  "verdict_reach": "fail_only",
-  "uses_reference": true,
-  "assumptions": [
-   "observed cleartext password is the pre-installed one",
-   "one observed password reflects the generation mechanism"
-  ],
-  "opportunistic": false,
-  "outside_procedure_cues": "",
   "conditional": true,
   "condition_passive": "no",
   "group_note": "Generation-mechanism quality (conceptual) impossible; only cleartext-exposed passwords give indications."
@@ -181,7 +216,20 @@
     "note": "Compare real pre-installed passwords against documented format."
    }
   ],
-  "passive_class": "not_assessable",
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "opportunistic": false,
+  "outside_procedure_cues": "Pre-installed passwords sent in cleartext can be seen and checked for form; the property route is 5.1-2-1.",
   "rationale": "Verdict is deviation from the IXIT generation description (unit a); per v2.1 assuming IXIT content is not allowed.",
   "quarant_capabilities": [
    "INSECURE_HTTP_AUTH",
@@ -189,11 +237,6 @@
    "INSECURE_MQTT_CREDENTIALS"
   ],
   "reference_sources": [],
-  "verdict_reach": "none",
-  "uses_reference": false,
-  "assumptions": [],
-  "opportunistic": false,
-  "outside_procedure_cues": "Pre-installed passwords sent in cleartext can be seen and checked for form; the property route is 5.1-2-1.",
   "conditional": true,
   "condition_passive": "no",
   "group_note": "Generation-mechanism quality (conceptual) impossible; only cleartext-exposed passwords give indications."
@@ -213,18 +256,29 @@
     "note": "Inspect documented authentication factor of M2M mechanisms."
    }
   ],
-  "passive_class": "inferred",
+  "N": {
+   "verdict_reach": "fail_only",
+   "uses_reference": false,
+   "assumptions": [
+    "observed credential exchange is M2M login with a password",
+    "observed channels cover the M2M mechanisms the IXIT would list"
+   ],
+   "passive_class": "inferred"
+  },
+  "ND": {
+   "verdict_reach": "fail_only",
+   "uses_reference": false,
+   "assumptions": [
+    "observed credential exchange is M2M login with a password",
+    "observed channels cover the M2M mechanisms the IXIT would list"
+   ],
+   "passive_class": "inferred"
+  },
+  "opportunistic": false,
+  "outside_procedure_cues": "",
   "rationale": "Substitution: a cleartext M2M login carrying a password (e.g. MQTT CONNECT) shows passwords in use (unit a); PASS would need all M2M channels visible.",
   "quarant_capabilities": [],
   "reference_sources": [],
-  "verdict_reach": "fail_only",
-  "uses_reference": false,
-  "assumptions": [
-   "observed credential exchange is M2M login with a password",
-   "observed channels cover the M2M mechanisms the IXIT would list"
-  ],
-  "opportunistic": false,
-  "outside_procedure_cues": "",
   "conditional": false,
   "condition_passive": "n/a",
   "group_note": "Only cleartext M2M logins observable; encrypted M2M authentication and IXIT review impossible."
@@ -256,7 +310,24 @@
     "note": "Check if M2M login accepts passwords; examples are MITM and mode changes."
    }
   ],
-  "passive_class": "inferred",
+  "N": {
+   "verdict_reach": "fail_only",
+   "uses_reference": false,
+   "assumptions": [
+    "credential field holds a password, not a token or PSK"
+   ],
+   "passive_class": "inferred"
+  },
+  "ND": {
+   "verdict_reach": "fail_only",
+   "uses_reference": false,
+   "assumptions": [
+    "credential field holds a password, not a token or PSK"
+   ],
+   "passive_class": "inferred"
+  },
+  "opportunistic": false,
+  "outside_procedure_cues": "",
   "rationale": "Unit b: a cleartext M2M login with password (e.g. MQTT CONNECT, HTTP Basic to cloud) is observable FAIL evidence; PASS rests on absence, and encrypted M2M is invisible.",
   "quarant_capabilities": [
    "INSECURE_MQTT_CREDENTIALS",
@@ -265,13 +336,6 @@
    "I3_API_OVER_PLAINTEXT"
   ],
   "reference_sources": [],
-  "verdict_reach": "fail_only",
-  "uses_reference": false,
-  "assumptions": [
-   "credential field holds a password, not a token or PSK"
-  ],
-  "opportunistic": false,
-  "outside_procedure_cues": "",
   "conditional": false,
   "condition_passive": "n/a",
   "group_note": "Only cleartext M2M logins observable; encrypted M2M authentication and IXIT review impossible."
@@ -314,21 +378,32 @@
     "note": "Check documented crypto against cryptanalytic literature."
    }
   ],
-  "passive_class": "inferred",
+  "N": {
+   "verdict_reach": "fail_only",
+   "uses_reference": true,
+   "assumptions": [
+    "observed TLS parameters represent the documented authentication cryptography",
+    "observed channels cover all authentication mechanisms"
+   ],
+   "passive_class": "inferred"
+  },
+  "ND": {
+   "verdict_reach": "fail_only",
+   "uses_reference": true,
+   "assumptions": [
+    "observed TLS parameters represent the documented authentication cryptography",
+    "observed channels cover all authentication mechanisms"
+   ],
+   "passive_class": "inferred"
+  },
+  "opportunistic": false,
+  "outside_procedure_cues": "",
   "rationale": "Per v2 conceptual-crypto rule: observed TLS versions/suites judged against TR 103 621 or SOGIS can show non-best-practice (units c, d); units a, b and PASS need IXIT.",
   "quarant_capabilities": [],
   "reference_sources": [
    "ETSI TR 103 621",
    "SOGIS ACM"
   ],
-  "verdict_reach": "fail_only",
-  "uses_reference": true,
-  "assumptions": [
-   "observed TLS parameters represent the documented authentication cryptography",
-   "observed channels cover all authentication mechanisms"
-  ],
-  "opportunistic": false,
-  "outside_procedure_cues": "",
   "conditional": true,
   "condition_passive": "partly",
   "group_note": "Security-guarantee and holistic mechanism assessment impossible; only observed handshake parameters usable."
@@ -350,7 +425,20 @@
     "note": "Sniff handshakes/certificates and compare with IXIT; downgrade attempts optional."
    }
   ],
-  "passive_class": "not_assessable",
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "opportunistic": false,
+  "outside_procedure_cues": "TLS versions, cipher suites and certificates of authentication channels are visible in handshakes (TLS 1.3 certificates encrypted).",
   "rationale": "Verdict is deviation of used crypto from IXIT (unit a); per v2.1 not reachable. Catalogue-based judgement of observed TLS is captured in 5.1-3-1.",
   "quarant_capabilities": [
    "TLS_CLIENT_HELLO",
@@ -363,11 +451,6 @@
    "ETSI TR 103 621",
    "SOGIS ACM"
   ],
-  "verdict_reach": "none",
-  "uses_reference": false,
-  "assumptions": [],
-  "opportunistic": false,
-  "outside_procedure_cues": "TLS versions, cipher suites and certificates of authentication channels are visible in handshakes (TLS 1.3 certificates encrypted).",
   "conditional": true,
   "condition_passive": "partly",
   "group_note": "Security-guarantee and holistic mechanism assessment impossible; only observed handshake parameters usable."
@@ -395,20 +478,29 @@
     "note": "Judge user guidance on changing values; public manual may help."
    }
   ],
-  "passive_class": "inferred",
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "pass_only",
+   "uses_reference": true,
+   "assumptions": [
+    "manufacturer documentation describes what the IXIT would list",
+    "published manual covers every user authentication mechanism",
+    "documented change is actually possible"
+   ],
+   "passive_class": "inferred"
+  },
+  "opportunistic": false,
+  "outside_procedure_cues": "",
   "rationale": "Substitution: a public manual explaining value changes can support PASS for units a, b; missing public text cannot show FAIL since guidance may be in the app.",
   "quarant_capabilities": [],
   "reference_sources": [
    "published user documentation"
   ],
-  "verdict_reach": "pass_only",
-  "uses_reference": true,
-  "assumptions": [
-   "published manual covers every user authentication mechanism",
-   "documented change is actually possible"
-  ],
-  "opportunistic": false,
-  "outside_procedure_cues": "",
   "conditional": true,
   "condition_passive": "partly",
   "group_note": "Changing authentication values needs DUT interaction; entire group not passive."
@@ -436,15 +528,23 @@
     "note": "Verify change took effect."
    }
   ],
-  "passive_class": "not_assessable",
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "opportunistic": false,
+  "outside_procedure_cues": "",
   "rationale": "Units a, b require operating the DUT.",
   "quarant_capabilities": [],
   "reference_sources": [],
-  "verdict_reach": "none",
-  "uses_reference": false,
-  "assumptions": [],
-  "opportunistic": false,
-  "outside_procedure_cues": "",
   "conditional": true,
   "condition_passive": "partly",
   "group_note": "Changing authentication values needs DUT interaction; entire group not passive."
@@ -464,15 +564,23 @@
     "note": "Judge documented brute-force prevention."
    }
   ],
-  "passive_class": "not_assessable",
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "opportunistic": false,
+  "outside_procedure_cues": "Repeated third-party login attempts reaching the device and its continued responses could hint at missing rate limiting; opportunistic and not used by the TS.",
   "rationale": "Unit a is IXIT review only.",
   "quarant_capabilities": [],
   "reference_sources": [],
-  "verdict_reach": "none",
-  "uses_reference": false,
-  "assumptions": [],
-  "opportunistic": false,
-  "outside_procedure_cues": "Repeated third-party login attempts reaching the device and its continued responses could hint at missing rate limiting; opportunistic and not used by the TS.",
   "conditional": true,
   "condition_passive": "no",
   "group_note": "Brute-force testing is active; only undocumented-mechanism discovery has a passive indication."
@@ -501,7 +609,20 @@
     "note": "Attempt brute force against each mechanism."
    }
   ],
-  "passive_class": "not_assessable",
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "opportunistic": false,
+  "outside_procedure_cues": "Answering Telnet/HTTP admin/API services expose network authentication; third-party login floods could hint at rate-limit behaviour.",
   "rationale": "Verdict compares discovered network authentication with IXIT (a) and needs brute-force attempts (b); per v2.1 not reachable passively.",
   "quarant_capabilities": [
    "I2_*_SERVICE_OBSERVED",
@@ -510,11 +631,6 @@
    "I3_MANAGEMENT_API_EXPOSED"
   ],
   "reference_sources": [],
-  "verdict_reach": "none",
-  "uses_reference": false,
-  "assumptions": [],
-  "opportunistic": false,
-  "outside_procedure_cues": "Answering Telnet/HTTP admin/API services expose network authentication; third-party login floods could hint at rate-limit behaviour.",
   "conditional": true,
   "condition_passive": "no",
   "group_note": "Brute-force testing is active; only undocumented-mechanism discovery has a passive indication."
@@ -535,20 +651,28 @@
     "note": "Check open access to the published VDP, e.g. vendor website."
    }
   ],
-  "passive_class": "inferred",
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "pass_only",
+   "uses_reference": true,
+   "assumptions": [
+    "manufacturer documentation describes what the IXIT would list"
+   ],
+   "passive_class": "inferred"
+  },
+  "opportunistic": false,
+  "outside_procedure_cues": "",
   "rationale": "Substitution: unit a judged from the openly reachable vendor VDP; PASS reachable, FAIL would rest on not finding it.",
   "quarant_capabilities": [],
   "reference_sources": [
    "published VDP",
    "vendor website"
   ],
-  "verdict_reach": "pass_only",
-  "uses_reference": true,
-  "assumptions": [
-   "publicly found VDP is the publication the IXIT designates"
-  ],
-  "opportunistic": false,
-  "outside_procedure_cues": "",
   "conditional": false,
   "condition_passive": "n/a",
   "group_note": "Only checks needing IXIT location of VDP; public lookup covers the substance."
@@ -576,18 +700,28 @@
     "note": "Check VDP content for contact and timelines."
    }
   ],
-  "passive_class": "reference",
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "pass_and_fail",
+   "uses_reference": true,
+   "assumptions": [
+    "manufacturer documentation describes what the IXIT would list"
+   ],
+   "passive_class": "inferred"
+  },
+  "opportunistic": false,
+  "outside_procedure_cues": "",
   "rationale": "Units a, b are decidable from the published VDP; failing to find it is absence and needs care.",
   "quarant_capabilities": [],
   "reference_sources": [
    "published VDP",
    "ETSI TR 103 838"
   ],
-  "verdict_reach": "pass_and_fail",
-  "uses_reference": true,
-  "assumptions": [],
-  "opportunistic": false,
-  "outside_procedure_cues": "",
   "conditional": false,
   "condition_passive": "n/a",
   "group_note": "Only checks needing IXIT location of VDP; public lookup covers the substance."
@@ -614,15 +748,23 @@
     "note": "Check confirmation in IXIT."
    }
   ],
-  "passive_class": "not_assessable",
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "opportunistic": false,
+  "outside_procedure_cues": "Public advisory and CVE dates compared with observed firmware updates could indicate handling speed; the TS case reviews only IXIT.",
   "rationale": "Units a, b depend on SO process documentation.",
   "quarant_capabilities": [],
   "reference_sources": [],
-  "verdict_reach": "none",
-  "uses_reference": false,
-  "assumptions": [],
-  "opportunistic": false,
-  "outside_procedure_cues": "Public advisory and CVE dates compared with observed firmware updates could indicate handling speed; the TS case reviews only IXIT.",
   "conditional": false,
   "condition_passive": "n/a",
   "group_note": "Internal vulnerability handling process; nothing passive."
@@ -663,15 +805,23 @@
     "note": "Check confirmation."
    }
   ],
-  "passive_class": "not_assessable",
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "opportunistic": false,
+  "outside_procedure_cues": "",
   "rationale": "Units a-d review internal manufacturer processes.",
   "quarant_capabilities": [],
   "reference_sources": [],
-  "verdict_reach": "none",
-  "uses_reference": false,
-  "assumptions": [],
-  "opportunistic": false,
-  "outside_procedure_cues": "",
   "conditional": false,
   "condition_passive": "n/a",
   "group_note": "Internal monitoring process; nothing passive."
@@ -698,15 +848,23 @@
     "note": "Apply 5.3-2-1 to each referenced mechanism."
    }
   ],
-  "passive_class": "not_assessable",
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "opportunistic": false,
+  "outside_procedure_cues": "Observed update traffic shows some components are updatable; the conceptual case cannot use it.",
   "rationale": "Units a, b are IXIT reviews; component inventory is internal.",
   "quarant_capabilities": [],
   "reference_sources": [],
-  "verdict_reach": "none",
-  "uses_reference": false,
-  "assumptions": [],
-  "opportunistic": false,
-  "outside_procedure_cues": "Observed update traffic shows some components are updatable; the conceptual case cannot use it.",
   "conditional": true,
   "condition_passive": "partly",
   "group_note": "Justification of non-updatable components impossible; misuse only indicated by insecure update transport."
@@ -728,7 +886,24 @@
     "note": "Run 5.3-2-2 attacks per mechanism."
    }
   ],
-  "passive_class": "inferred",
+  "N": {
+   "verdict_reach": "fail_only",
+   "uses_reference": false,
+   "assumptions": [
+    "device does not verify update authenticity itself"
+   ],
+   "passive_class": "inferred"
+  },
+  "ND": {
+   "verdict_reach": "fail_only",
+   "uses_reference": false,
+   "assumptions": [
+    "device does not verify update authenticity itself"
+   ],
+   "passive_class": "inferred"
+  },
+  "opportunistic": true,
+  "outside_procedure_cues": "",
   "rationale": "Unit a is attack-based; passively, plaintext or unexpected-source update downloads indicate misuse potential, but on-device verification must be assumed.",
   "quarant_capabilities": [
    "I4_FIRMWARE_UPDATE_OBSERVED",
@@ -736,13 +911,6 @@
    "I4_SUSPICIOUS_UPDATE_SOURCE"
   ],
   "reference_sources": [],
-  "verdict_reach": "fail_only",
-  "uses_reference": false,
-  "assumptions": [
-   "device does not verify update authenticity itself"
-  ],
-  "opportunistic": true,
-  "outside_procedure_cues": "",
   "conditional": true,
   "condition_passive": "partly",
   "group_note": "Justification of non-updatable components impossible; misuse only indicated by insecure update transport."
@@ -762,15 +930,23 @@
     "note": "Review guarantees, description, crypto and initiation of each mechanism."
    }
   ],
-  "passive_class": "not_assessable",
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "opportunistic": false,
+  "outside_procedure_cues": "Firmware fetched over plaintext HTTP or from unexpected hosts bears on misuse resistance; the design review gives no way to use it.",
   "rationale": "Unit a is IXIT design review.",
   "quarant_capabilities": [],
   "reference_sources": [],
-  "verdict_reach": "none",
-  "uses_reference": false,
-  "assumptions": [],
-  "opportunistic": false,
-  "outside_procedure_cues": "Firmware fetched over plaintext HTTP or from unexpected hosts bears on misuse resistance; the design review gives no way to use it.",
   "conditional": true,
   "condition_passive": "partly",
   "group_note": "Design review and actual misuse attacks impossible; insecure update transport is only an indication."
@@ -798,7 +974,24 @@
     "note": "Execute attacks and judge prevention."
    }
   ],
-  "passive_class": "inferred",
+  "N": {
+   "verdict_reach": "fail_only",
+   "uses_reference": false,
+   "assumptions": [
+    "device does not verify update authenticity itself"
+   ],
+   "passive_class": "inferred"
+  },
+  "ND": {
+   "verdict_reach": "fail_only",
+   "uses_reference": false,
+   "assumptions": [
+    "device does not verify update authenticity itself"
+   ],
+   "passive_class": "inferred"
+  },
+  "opportunistic": true,
+  "outside_procedure_cues": "",
   "rationale": "Units a, b are active; NET-OBS only indicates exposure (e.g. firmware over HTTP) without showing the DUT would accept a manipulated update.",
   "quarant_capabilities": [
    "I4_INSECURE_FIRMWARE_UPDATE_HTTP",
@@ -806,13 +999,6 @@
    "I4_FIRMWARE_UPDATE_OBSERVED"
   ],
   "reference_sources": [],
-  "verdict_reach": "fail_only",
-  "uses_reference": false,
-  "assumptions": [
-   "device does not verify update authenticity itself"
-  ],
-  "opportunistic": true,
-  "outside_procedure_cues": "",
   "conditional": true,
   "condition_passive": "partly",
   "group_note": "Design review and actual misuse attacks impossible; insecure update transport is only an indication."
@@ -832,17 +1018,28 @@
     "note": "Judge documented initiation/interaction per component."
    }
   ],
-  "passive_class": "not_assessable",
-  "rationale": "Unit a is IXIT review; unattended update traffic is not part of the TS method.",
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "pass_only",
+   "uses_reference": true,
+   "assumptions": [
+    "manufacturer documentation describes what the IXIT would list",
+    "manual covers every software component's update path"
+   ],
+   "passive_class": "inferred"
+  },
+  "opportunistic": false,
+  "outside_procedure_cues": "Update downloads without visible user activity would suggest automatic application, i.e. simple updating; only a conceptual case exists.",
+  "rationale": "Unit a is IXIT review; unattended update traffic is not part of the TS method. Under ND, a public manual may stand in for the IXIT description.",
   "quarant_capabilities": [
    "I4_FIRMWARE_UPDATE_OBSERVED"
   ],
   "reference_sources": [],
-  "verdict_reach": "none",
-  "uses_reference": false,
-  "assumptions": [],
-  "opportunistic": false,
-  "outside_procedure_cues": "Update downloads without visible user activity would suggest automatic application, i.e. simple updating; only a conceptual case exists.",
   "conditional": true,
   "condition_passive": "partly",
   "group_note": "Group has only a conceptual case; passive update observations cannot be used by the TS method."
@@ -862,15 +1059,25 @@
     "note": "Check documented configuration options."
    }
   ],
-  "passive_class": "not_assessable",
-  "rationale": "Unit a is IXIT review.",
-  "quarant_capabilities": [],
-  "reference_sources": [],
-  "verdict_reach": "none",
-  "uses_reference": false,
-  "assumptions": [],
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "pass_only",
+   "uses_reference": true,
+   "assumptions": [
+    "manufacturer documentation describes what the IXIT would list"
+   ],
+   "passive_class": "inferred"
+  },
   "opportunistic": false,
   "outside_procedure_cues": "Unattended update traffic suggests an automated mechanism; the conceptual case cannot use it.",
+  "rationale": "Unit a is IXIT review. Under ND, a public manual may stand in for the IXIT description.",
+  "quarant_capabilities": [],
+  "reference_sources": [],
   "conditional": true,
   "condition_passive": "partly",
   "group_note": "Configuration options not visible; automatic behaviour only inferred from unattended update traffic."
@@ -891,20 +1098,30 @@
     "note": "Inspect DUT settings for automation option."
    }
   ],
-  "passive_class": "inferred",
+  "N": {
+   "verdict_reach": "pass_only",
+   "uses_reference": false,
+   "assumptions": [
+    "update was not user-initiated"
+   ],
+   "passive_class": "inferred"
+  },
+  "ND": {
+   "verdict_reach": "pass_only",
+   "uses_reference": false,
+   "assumptions": [
+    "update was not user-initiated"
+   ],
+   "passive_class": "inferred"
+  },
+  "opportunistic": true,
+  "outside_procedure_cues": "",
   "rationale": "Unit a needs settings; observed update downloads without user action suggest automation, but user-triggered updates cannot be excluded passively.",
   "quarant_capabilities": [
    "I4_FIRMWARE_UPDATE_OBSERVED",
    "PERIODIC_COMMUNICATION_OBSERVED"
   ],
   "reference_sources": [],
-  "verdict_reach": "pass_only",
-  "uses_reference": false,
-  "assumptions": [
-   "update was not user-initiated"
-  ],
-  "opportunistic": true,
-  "outside_procedure_cues": "",
   "conditional": true,
   "condition_passive": "partly",
   "group_note": "Configuration options not visible; automatic behaviour only inferred from unattended update traffic."
@@ -938,15 +1155,23 @@
     "note": "Check enabling after consent."
    }
   ],
-  "passive_class": "not_assessable",
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "opportunistic": false,
+  "outside_procedure_cues": "",
   "rationale": "Units a-c are IXIT reviews.",
   "quarant_capabilities": [],
   "reference_sources": [],
-  "verdict_reach": "none",
-  "uses_reference": false,
-  "assumptions": [],
-  "opportunistic": false,
-  "outside_procedure_cues": "",
   "conditional": true,
   "condition_passive": "partly",
   "group_note": "Consent query during initialisation requires DUT interaction; nothing passive."
@@ -982,15 +1207,23 @@
     "note": "Verify mechanism disabled after refusal."
    }
   ],
-  "passive_class": "not_assessable",
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "opportunistic": false,
+  "outside_procedure_cues": "",
   "rationale": "Units a-c require running initialisation and choosing consent; traffic alone cannot link update behaviour to the user's choice.",
   "quarant_capabilities": [],
   "reference_sources": [],
-  "verdict_reach": "none",
-  "uses_reference": false,
-  "assumptions": [],
-  "opportunistic": false,
-  "outside_procedure_cues": "",
   "conditional": true,
   "condition_passive": "partly",
   "group_note": "Consent query during initialisation requires DUT interaction; nothing passive."
@@ -1010,18 +1243,29 @@
     "note": "Review documented update checking."
    }
   ],
-  "passive_class": "not_assessable",
-  "rationale": "Unit a is IXIT review; periodic update-check traffic is not used by the TS.",
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "pass_only",
+   "uses_reference": true,
+   "assumptions": [
+    "manufacturer documentation describes what the IXIT would list",
+    "manual covers update checking of every component"
+   ],
+   "passive_class": "inferred"
+  },
+  "opportunistic": false,
+  "outside_procedure_cues": "Periodic requests to update endpoints after setup would show update checking; the provision has only a conceptual case, so this evidence is unused.",
+  "rationale": "Unit a is IXIT review; periodic update-check traffic is not used by the TS. Under ND, a public manual may stand in for the IXIT description.",
   "quarant_capabilities": [
    "PERIODIC_COMMUNICATION_OBSERVED",
    "I4_WEAK_UPDATE_VISIBILITY"
   ],
   "reference_sources": [],
-  "verdict_reach": "none",
-  "uses_reference": false,
-  "assumptions": [],
-  "opportunistic": false,
-  "outside_procedure_cues": "Periodic requests to update endpoints after setup would show update checking; the provision has only a conceptual case, so this evidence is unused.",
   "conditional": true,
   "condition_passive": "partly",
   "group_note": "Only conceptual case exists; periodic update-check traffic is not used by the TS method."
@@ -1048,15 +1292,26 @@
     "note": "Check documented configuration options."
    }
   ],
-  "passive_class": "not_assessable",
-  "rationale": "Units a, b are IXIT reviews.",
-  "quarant_capabilities": [],
-  "reference_sources": [],
-  "verdict_reach": "none",
-  "uses_reference": false,
-  "assumptions": [],
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "pass_only",
+   "uses_reference": true,
+   "assumptions": [
+    "manufacturer documentation describes what the IXIT would list",
+    "manual lists every automatic update mechanism"
+   ],
+   "passive_class": "inferred"
+  },
   "opportunistic": false,
   "outside_procedure_cues": "",
+  "rationale": "Units a, b are IXIT reviews. Under ND, a public manual may stand in for the IXIT description.",
+  "quarant_capabilities": [],
+  "reference_sources": [],
   "conditional": true,
   "condition_passive": "partly",
   "group_note": "User configuration options require UI access."
@@ -1076,15 +1331,23 @@
     "note": "Operate DUT settings."
    }
   ],
-  "passive_class": "not_assessable",
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "opportunistic": false,
+  "outside_procedure_cues": "",
   "rationale": "Unit a requires UI access.",
   "quarant_capabilities": [],
   "reference_sources": [],
-  "verdict_reach": "none",
-  "uses_reference": false,
-  "assumptions": [],
-  "opportunistic": false,
-  "outside_procedure_cues": "",
   "conditional": true,
   "condition_passive": "partly",
   "group_note": "User configuration options require UI access."
@@ -1104,15 +1367,26 @@
     "note": "Check documented notification settings."
    }
   ],
-  "passive_class": "not_assessable",
-  "rationale": "Unit a is IXIT review.",
-  "quarant_capabilities": [],
-  "reference_sources": [],
-  "verdict_reach": "none",
-  "uses_reference": false,
-  "assumptions": [],
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "pass_only",
+   "uses_reference": true,
+   "assumptions": [
+    "manufacturer documentation describes what the IXIT would list",
+    "manual lists every update notification mechanism"
+   ],
+   "passive_class": "inferred"
+  },
   "opportunistic": false,
   "outside_procedure_cues": "",
+  "rationale": "Unit a is IXIT review. Under ND, a public manual may stand in for the IXIT description.",
+  "quarant_capabilities": [],
+  "reference_sources": [],
   "conditional": true,
   "condition_passive": "no",
   "group_note": "Notification settings require UI access."
@@ -1132,15 +1406,23 @@
     "note": "Operate notification settings."
    }
   ],
-  "passive_class": "not_assessable",
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "opportunistic": false,
+  "outside_procedure_cues": "",
   "rationale": "Unit a requires UI access.",
   "quarant_capabilities": [],
   "reference_sources": [],
-  "verdict_reach": "none",
-  "uses_reference": false,
-  "assumptions": [],
-  "opportunistic": false,
-  "outside_procedure_cues": "",
   "conditional": true,
   "condition_passive": "no",
   "group_note": "Notification settings require UI access."
@@ -1183,21 +1465,32 @@
     "note": "Check against cryptanalytic reports."
    }
   ],
-  "passive_class": "inferred",
+  "N": {
+   "verdict_reach": "fail_only",
+   "uses_reference": true,
+   "assumptions": [
+    "observed update-channel TLS represents the documented update cryptography",
+    "package signature crypto is not judged"
+   ],
+   "passive_class": "inferred"
+  },
+  "ND": {
+   "verdict_reach": "fail_only",
+   "uses_reference": true,
+   "assumptions": [
+    "observed update-channel TLS represents the documented update cryptography",
+    "package signature crypto is not judged"
+   ],
+   "passive_class": "inferred"
+  },
+  "opportunistic": false,
+  "outside_procedure_cues": "",
   "rationale": "Per v2 conceptual-crypto rule: TLS versions/suites seen on update connections judged against TR 103 621 or SOGIS can show non-best-practice (c, d); signatures and units a, b need IXIT.",
   "quarant_capabilities": [],
   "reference_sources": [
    "ETSI TR 103 621",
    "SOGIS ACM"
   ],
-  "verdict_reach": "fail_only",
-  "uses_reference": true,
-  "assumptions": [
-   "observed update-channel TLS represents the documented update cryptography",
-   "package signature crypto is not judged"
-  ],
-  "opportunistic": false,
-  "outside_procedure_cues": "",
   "conditional": true,
   "condition_passive": "partly",
   "group_note": "Update crypto review is IXIT-based; observed update-channel TLS is not what the TS assesses."
@@ -1224,15 +1517,23 @@
     "note": "Check confirmation."
    }
   ],
-  "passive_class": "not_assessable",
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "opportunistic": false,
+  "outside_procedure_cues": "Gap between public vulnerability disclosure and observed firmware update arrival could indicate timeliness; the case reviews only procedures.",
   "rationale": "Units a, b are internal process documentation.",
   "quarant_capabilities": [],
   "reference_sources": [],
-  "verdict_reach": "none",
-  "uses_reference": false,
-  "assumptions": [],
-  "opportunistic": false,
-  "outside_procedure_cues": "Gap between public vulnerability disclosure and observed firmware update arrival could indicate timeliness; the case reviews only procedures.",
   "conditional": true,
   "condition_passive": "partly",
   "group_note": "Manufacturer procedures and time frames are internal."
@@ -1273,15 +1574,23 @@
     "note": "Confirm DUT verifies integrity."
    }
   ],
-  "passive_class": "not_assessable",
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "opportunistic": false,
+  "outside_procedure_cues": "",
   "rationale": "Units a-d review IXIT; on-device verification is internal.",
   "quarant_capabilities": [],
   "reference_sources": [],
-  "verdict_reach": "none",
-  "uses_reference": false,
-  "assumptions": [],
-  "opportunistic": false,
-  "outside_procedure_cues": "",
   "conditional": true,
   "condition_passive": "partly",
   "group_note": "On-device verification is internal; nothing passive."
@@ -1316,7 +1625,20 @@
     "note": "Find network update paths not in IXIT via traffic analysis."
    }
   ],
-  "passive_class": "not_assessable",
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "opportunistic": false,
+  "outside_procedure_cues": "Update checks and downloads over plaintext HTTP or from unexpected hosts show network update paths and unauthenticated channels; signature use stays unknown.",
   "rationale": "TS labels it conceptual/functional. Bullets on verification and trust relationship review IXIT design (a, b); unit c compares discovered update paths with IXIT; per v2.1 none reachable.",
   "quarant_capabilities": [
    "I4_FIRMWARE_UPDATE_OBSERVED",
@@ -1324,11 +1646,6 @@
    "I4_SUSPICIOUS_UPDATE_SOURCE"
   ],
   "reference_sources": [],
-  "verdict_reach": "none",
-  "uses_reference": false,
-  "assumptions": [],
-  "opportunistic": false,
-  "outside_procedure_cues": "Update checks and downloads over plaintext HTTP or from unexpected hosts show network update paths and unauthenticated channels; signature use stays unknown.",
   "conditional": true,
   "condition_passive": "partly",
   "group_note": "Trust-relationship design review impossible; only discovery of undocumented network update paths is passive."
@@ -1355,15 +1672,26 @@
     "note": "Check notification content on risks."
    }
   ],
-  "passive_class": "not_assessable",
-  "rationale": "Units a, b are IXIT reviews of user notifications.",
-  "quarant_capabilities": [],
-  "reference_sources": [],
-  "verdict_reach": "none",
-  "uses_reference": false,
-  "assumptions": [],
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "pass_only",
+   "uses_reference": true,
+   "assumptions": [
+    "manufacturer documentation describes what the IXIT would list",
+    "manual lists every update mechanism checking for security updates"
+   ],
+   "passive_class": "inferred"
+  },
   "opportunistic": false,
   "outside_procedure_cues": "",
+  "rationale": "Units a, b are IXIT reviews of user notifications. Under ND, a public manual may stand in for the IXIT description.",
+  "quarant_capabilities": [],
+  "reference_sources": [],
   "conditional": true,
   "condition_passive": "partly",
   "group_note": "User notification content requires UI/IXIT."
@@ -1383,15 +1711,26 @@
     "note": "Check documented disruption notification."
    }
   ],
-  "passive_class": "not_assessable",
-  "rationale": "Unit a is IXIT review.",
-  "quarant_capabilities": [],
-  "reference_sources": [],
-  "verdict_reach": "none",
-  "uses_reference": false,
-  "assumptions": [],
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "pass_only",
+   "uses_reference": true,
+   "assumptions": [
+    "manufacturer documentation describes what the IXIT would list",
+    "manual lists every update mechanism"
+   ],
+   "passive_class": "inferred"
+  },
   "opportunistic": false,
   "outside_procedure_cues": "",
+  "rationale": "Unit a is IXIT review. Under ND, a public manual may stand in for the IXIT description.",
+  "quarant_capabilities": [],
+  "reference_sources": [],
   "conditional": true,
   "condition_passive": "partly",
   "group_note": "Disruption notifications require UI/IXIT."
@@ -1412,7 +1751,23 @@
     "note": "Judge findability/clarity of published support period."
    }
   ],
-  "passive_class": "inferred",
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "pass_and_fail",
+   "uses_reference": true,
+   "assumptions": [
+    "manufacturer documentation describes what the IXIT would list",
+    "model inferred from network identity is correct"
+   ],
+   "passive_class": "inferred"
+  },
+  "opportunistic": false,
+  "outside_procedure_cues": "",
   "rationale": "Substitution: unit a judged from the vendor's public support-period page; findable and clear gives PASS, findable but unclear gives FAIL; not finding it proves nothing.",
   "quarant_capabilities": [
    "mdns_*",
@@ -1422,14 +1777,6 @@
   "reference_sources": [
    "vendor website"
   ],
-  "verdict_reach": "pass_and_fail",
-  "uses_reference": true,
-  "assumptions": [
-   "publicly found page is the publication the IXIT designates",
-   "model inferred from network identity is correct"
-  ],
-  "opportunistic": false,
-  "outside_procedure_cues": "",
   "conditional": false,
   "condition_passive": "n/a",
   "group_note": "Checking access route as described in IXIT and IXIT support period remains impossible."
@@ -1465,7 +1812,22 @@
     "note": "Check published period matches IXIT support period."
    }
   ],
-  "passive_class": "reference",
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "fail_only",
+   "uses_reference": true,
+   "assumptions": [
+    "manufacturer documentation describes what the IXIT would list"
+   ],
+   "passive_class": "inferred"
+  },
+  "opportunistic": false,
+  "outside_procedure_cues": "",
   "rationale": "Unit b and publication existence decidable from PUBLIC; units a, c compare with IXIT and remain open.",
   "quarant_capabilities": [
    "mdns_*",
@@ -1474,11 +1836,6 @@
   "reference_sources": [
    "vendor website"
   ],
-  "verdict_reach": "fail_only",
-  "uses_reference": true,
-  "assumptions": [],
-  "opportunistic": false,
-  "outside_procedure_cues": "",
   "conditional": false,
   "condition_passive": "n/a",
   "group_note": "Checking access route as described in IXIT and IXIT support period remains impossible."
@@ -1499,19 +1856,27 @@
     "note": "Judge clarity of published rationale and replacement info."
    }
   ],
-  "passive_class": "inferred",
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "pass_and_fail",
+   "uses_reference": true,
+   "assumptions": [
+    "manufacturer documentation describes what the IXIT would list"
+   ],
+   "passive_class": "inferred"
+  },
+  "opportunistic": false,
+  "outside_procedure_cues": "",
   "rationale": "Substitution: unit a judged from public rationale and replacement pages; clarity decides PASS or FAIL once found. Applicability (not updatable) cannot be shown passively.",
   "quarant_capabilities": [],
   "reference_sources": [
    "vendor website"
   ],
-  "verdict_reach": "pass_and_fail",
-  "uses_reference": true,
-  "assumptions": [
-   "publicly found pages are the publications the IXIT designates"
-  ],
-  "opportunistic": false,
-  "outside_procedure_cues": "",
   "conditional": true,
   "condition_passive": "partly",
   "group_note": "IXIT-described access route impossible; condition itself not passively decidable."
@@ -1553,17 +1918,27 @@
     "note": "Check replacement period/method published."
    }
   ],
-  "passive_class": "reference",
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "fail_only",
+   "uses_reference": true,
+   "assumptions": [
+    "manufacturer documentation describes what the IXIT would list"
+   ],
+   "passive_class": "inferred"
+  },
+  "opportunistic": false,
+  "outside_procedure_cues": "",
   "rationale": "Units b-d decidable from PUBLIC; unit a needs IXIT.",
   "quarant_capabilities": [],
   "reference_sources": [
    "vendor website"
   ],
-  "verdict_reach": "fail_only",
-  "uses_reference": true,
-  "assumptions": [],
-  "opportunistic": false,
-  "outside_procedure_cues": "",
   "conditional": true,
   "condition_passive": "partly",
   "group_note": "IXIT-described access route impossible; condition itself not passively decidable."
@@ -1583,15 +1958,25 @@
     "note": "Judge documented isolation method."
    }
   ],
-  "passive_class": "not_assessable",
-  "rationale": "Unit a is IXIT review.",
-  "quarant_capabilities": [],
-  "reference_sources": [],
-  "verdict_reach": "none",
-  "uses_reference": false,
-  "assumptions": [],
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "pass_and_fail",
+   "uses_reference": true,
+   "assumptions": [
+    "manufacturer documentation describes what the IXIT would list"
+   ],
+   "passive_class": "inferred"
+  },
   "opportunistic": false,
   "outside_procedure_cues": "",
+  "rationale": "Unit a is IXIT review. Under ND, a public manual may stand in for the IXIT description.",
+  "quarant_capabilities": [],
+  "reference_sources": [],
   "conditional": true,
   "condition_passive": "partly",
   "group_note": "Isolation must be performed on the DUT."
@@ -1626,17 +2011,25 @@
     "note": "Check main function survives."
    }
   ],
-  "passive_class": "not_assessable",
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "opportunistic": false,
+  "outside_procedure_cues": "During internet outages traffic shows reconnect behaviour, but not whether the main function survives.",
   "rationale": "Units a-c require performing isolation and checking device function; reconnect loops after outages say nothing about main function.",
   "quarant_capabilities": [
    "PERSISTENT_CONNECTION_ATTEMPTS"
   ],
   "reference_sources": [],
-  "verdict_reach": "none",
-  "uses_reference": false,
-  "assumptions": [],
-  "opportunistic": false,
-  "outside_procedure_cues": "During internet outages traffic shows reconnect behaviour, but not whether the main function survives.",
   "conditional": true,
   "condition_passive": "partly",
   "group_note": "Isolation must be performed on the DUT."
@@ -1656,15 +2049,25 @@
     "note": "Judge documented replacement method."
    }
   ],
-  "passive_class": "not_assessable",
-  "rationale": "Unit a is IXIT review.",
-  "quarant_capabilities": [],
-  "reference_sources": [],
-  "verdict_reach": "none",
-  "uses_reference": false,
-  "assumptions": [],
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "pass_and_fail",
+   "uses_reference": true,
+   "assumptions": [
+    "manufacturer documentation describes what the IXIT would list"
+   ],
+   "passive_class": "inferred"
+  },
   "opportunistic": false,
   "outside_procedure_cues": "",
+  "rationale": "Unit a is IXIT review. Under ND, a public manual may stand in for the IXIT description.",
+  "quarant_capabilities": [],
+  "reference_sources": [],
   "conditional": true,
   "condition_passive": "partly",
   "group_note": "Hardware replacement must be performed physically."
@@ -1692,15 +2095,23 @@
     "note": "Verify regained connectivity/function."
    }
   ],
-  "passive_class": "not_assessable",
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "opportunistic": false,
+  "outside_procedure_cues": "",
   "rationale": "Units a, b need physical action.",
   "quarant_capabilities": [],
   "reference_sources": [],
-  "verdict_reach": "none",
-  "uses_reference": false,
-  "assumptions": [],
-  "opportunistic": false,
-  "outside_procedure_cues": "",
   "conditional": true,
   "condition_passive": "partly",
   "group_note": "Hardware replacement must be performed physically."
@@ -1721,18 +2132,26 @@
     "note": "Check label/UI per documented location."
    }
   ],
-  "passive_class": "not_assessable",
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "opportunistic": false,
+  "outside_procedure_cues": "SSDP/mDNS model names reveal a network-advertised model, which is not the label/UI the provision requires.",
   "rationale": "Unit a concerns label or UI; network-advertised model names are not label/UI.",
   "quarant_capabilities": [
    "ssdp_server/location",
    "mdns_*"
   ],
   "reference_sources": [],
-  "verdict_reach": "none",
-  "uses_reference": false,
-  "assumptions": [],
-  "opportunistic": false,
-  "outside_procedure_cues": "SSDP/mDNS model names reveal a network-advertised model, which is not the label/UI the provision requires.",
   "conditional": false,
   "condition_passive": "n/a",
   "group_note": "Label/UI inspection needs physical or UI access."
@@ -1761,15 +2180,23 @@
     "note": "Compare with expected designation."
    }
   ],
-  "passive_class": "not_assessable",
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "opportunistic": false,
+  "outside_procedure_cues": "",
   "rationale": "Units a, b require physical/UI access and IXIT.",
   "quarant_capabilities": [],
   "reference_sources": [],
-  "verdict_reach": "none",
-  "uses_reference": false,
-  "assumptions": [],
-  "opportunistic": false,
-  "outside_procedure_cues": "",
   "conditional": false,
   "condition_passive": "n/a",
   "group_note": "Label/UI inspection needs physical or UI access."
@@ -1810,15 +2237,23 @@
     "note": "Cross-check completeness with other IXIT."
    }
   ],
-  "passive_class": "not_assessable",
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "opportunistic": false,
+  "outside_procedure_cues": "",
   "rationale": "Units a-d are IXIT reviews.",
   "quarant_capabilities": [],
   "reference_sources": [],
-  "verdict_reach": "none",
-  "uses_reference": false,
-  "assumptions": [],
-  "opportunistic": false,
-  "outside_procedure_cues": "",
   "conditional": true,
   "condition_passive": "no",
   "group_note": "Storage protection is internal."
@@ -1840,15 +2275,23 @@
     "note": "Probe storage protection, e.g. unprivileged access attempts."
    }
   ],
-  "passive_class": "not_assessable",
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "opportunistic": false,
+  "outside_procedure_cues": "",
   "rationale": "Unit a requires internal access or active probing.",
   "quarant_capabilities": [],
   "reference_sources": [],
-  "verdict_reach": "none",
-  "uses_reference": false,
-  "assumptions": [],
-  "opportunistic": false,
-  "outside_procedure_cues": "",
   "conditional": true,
   "condition_passive": "no",
   "group_note": "Storage protection is internal."
@@ -1882,15 +2325,23 @@
     "note": "Scheme provides tamper resistance."
    }
   ],
-  "passive_class": "not_assessable",
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "opportunistic": false,
+  "outside_procedure_cues": "",
   "rationale": "Units a-c are IXIT reviews; identifiers seen on the wire cannot be shown to be hard-coded security identities.",
   "quarant_capabilities": [],
   "reference_sources": [],
-  "verdict_reach": "none",
-  "uses_reference": false,
-  "assumptions": [],
-  "opportunistic": false,
-  "outside_procedure_cues": "",
   "conditional": true,
   "condition_passive": "no",
   "group_note": "Tamper resistance is internal/physical."
@@ -1912,15 +2363,23 @@
     "note": "Inspect e.g. secure element integration."
    }
   ],
-  "passive_class": "not_assessable",
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "opportunistic": false,
+  "outside_procedure_cues": "",
   "rationale": "Unit a is physical/internal inspection.",
   "quarant_capabilities": [],
   "reference_sources": [],
-  "verdict_reach": "none",
-  "uses_reference": false,
-  "assumptions": [],
-  "opportunistic": false,
-  "outside_procedure_cues": "",
   "conditional": true,
   "condition_passive": "no",
   "group_note": "Tamper resistance is internal/physical."
@@ -1947,17 +2406,25 @@
     "note": "Judge provisioning mechanism."
    }
   ],
-  "passive_class": "not_assessable",
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "opportunistic": false,
+  "outside_procedure_cues": "Identical credentials across same-model devices, or a public CVE on hard-coded keys for the identified model, would indicate hard-coded CSPs.",
   "rationale": "Units a, b are IXIT reviews; public hard-coded-credential CVEs are not part of the TS method.",
   "quarant_capabilities": [],
   "reference_sources": [
    "CVE/NVD (outside TS method)"
   ],
-  "verdict_reach": "none",
-  "uses_reference": false,
-  "assumptions": [],
-  "opportunistic": false,
-  "outside_procedure_cues": "Identical credentials across same-model devices, or a public CVE on hard-coded keys for the identified model, would indicate hard-coded CSPs.",
   "conditional": false,
   "condition_passive": "n/a",
   "group_note": "Source code and provisioning internal; public hard-coded-credential CVEs are outside the TS method."
@@ -1978,17 +2445,25 @@
     "note": "Observe provisioning, e.g. user prompted for individual data."
    }
   ],
-  "passive_class": "not_assessable",
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "opportunistic": false,
+  "outside_procedure_cues": "",
   "rationale": "Unit a needs operating setup; traffic cannot reveal that a credential is hard-coded.",
   "quarant_capabilities": [
    "I5_KNOWN_VULNERABLE_COMPONENT"
   ],
   "reference_sources": [],
-  "verdict_reach": "none",
-  "uses_reference": false,
-  "assumptions": [],
-  "opportunistic": false,
-  "outside_procedure_cues": "",
   "conditional": false,
   "condition_passive": "n/a",
   "group_note": "Source code and provisioning internal; public hard-coded-credential CVEs are outside the TS method."
@@ -2016,7 +2491,20 @@
     "note": "Judge generation mechanism using public standards."
    }
   ],
-  "passive_class": "not_assessable",
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "opportunistic": false,
+  "outside_procedure_cues": "The same client certificate or credential seen on several devices of one model would suggest non-unique CSPs.",
   "rationale": "Unit a is IXIT only; unit b judges IXIT generation description, public catalogues are only aids.",
   "quarant_capabilities": [],
   "reference_sources": [
@@ -2024,11 +2512,6 @@
    "Mozilla TLS profiles",
    "KeyLength"
   ],
-  "verdict_reach": "none",
-  "uses_reference": false,
-  "assumptions": [],
-  "opportunistic": false,
-  "outside_procedure_cues": "The same client certificate or credential seen on several devices of one model would suggest non-unique CSPs.",
   "conditional": true,
   "condition_passive": "partly",
   "group_note": "Generation mechanisms are documented only in IXIT."

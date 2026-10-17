@@ -1,0 +1,1589 @@
+[
+ {
+  "test_case": "5.5-1-1",
+  "test_group": "5.5-1",
+  "provision": "5.5-1",
+  "type": "conceptual",
+  "summary": "Judge whether each documented secure channel has fitting guarantees, an adequate design, catalogue-grade cryptography, and no known feasible attack.",
+  "units": [
+   {
+    "id": "a",
+    "needs": [
+     "IXIT"
+    ],
+    "note": "Guarantees listed per mechanism judged against the use case."
+   },
+   {
+    "id": "b",
+    "needs": [
+     "IXIT"
+    ],
+    "note": "Documented mechanism design judged able to deliver its guarantees."
+   },
+   {
+    "id": "c",
+    "needs": [
+     "IXIT",
+     "PUBLIC"
+    ],
+    "note": "Documented crypto details checked against a reference catalogue; substitutable by observed handshake parameters."
+   },
+   {
+    "id": "d",
+    "needs": [
+     "IXIT",
+     "PUBLIC"
+    ],
+    "note": "Crypto details checked against cryptanalytic literature for feasible attacks."
+   }
+  ],
+  "N": {
+   "verdict_reach": "fail_only",
+   "uses_reference": true,
+   "assumptions": [
+    "observed channels cover all mechanisms the IXIT would list",
+    "use case of each observed channel inferred from endpoints and protocol"
+   ],
+   "passive_class": "inferred"
+  },
+  "ND": {
+   "verdict_reach": "fail_only",
+   "uses_reference": true,
+   "assumptions": [
+    "observed channels cover all mechanisms the IXIT would list",
+    "use case of each observed channel inferred from endpoints and protocol"
+   ],
+   "passive_class": "inferred"
+  },
+  "opportunistic": false,
+  "outside_procedure_cues": "",
+  "rationale": "Criteria are properties (catalogue, known attacks, plaintext). Observed versions, suites and certificate algorithms can expose a deprecated or absent protection, but unseen mechanisms prevent concluding PASS.",
+  "conditional": false,
+  "condition_passive": "n/a"
+ },
+ {
+  "test_case": "5.5-1-2",
+  "test_group": "5.5-1",
+  "provision": "5.5-1",
+  "type": "functional",
+  "summary": "Check functionally, e.g. by sniffing handshakes or trying downgrades, that the device actually uses the documented cryptographic settings.",
+  "units": [
+   {
+    "id": "a",
+    "needs": [
+     "IXIT",
+     "NET-OBS",
+     "DUT-INTERACT"
+    ],
+    "note": "Compare used crypto with IXIT; sniffing suffices, downgrade attempts are active."
+   }
+  ],
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "opportunistic": false,
+  "outside_procedure_cues": "Negotiated TLS versions, cipher suites, certificate key types and plaintext flows are visible at the gateway but cannot be set against the IXIT.",
+  "rationale": "Only verdict bullet compares observed settings with IXIT documentation; under R1 nothing is reachable.",
+  "conditional": false,
+  "condition_passive": "n/a"
+ },
+ {
+  "test_case": "5.5-2-1",
+  "test_group": "5.5-2",
+  "provision": "5.5-2",
+  "type": "conceptual",
+  "summary": "Check that every documented network and security implementation was reviewed or evaluated and that the review covers its scope.",
+  "units": [
+   {
+    "id": "a",
+    "needs": [
+     "IXIT"
+    ],
+    "note": "Implementation list and review method come from the supplier."
+   },
+   {
+    "id": "b",
+    "needs": [
+     "IXIT"
+    ],
+    "note": "Report scope compared with the implementation description."
+   }
+  ],
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "opportunistic": false,
+  "outside_procedure_cues": "Handshake fingerprints, protocol banners or User-Agent strings may hint at the library in use, which could be looked up in public certification lists.",
+  "rationale": "Showing that an implementation lacks any review needs supplier reports; public sources cannot prove absence of review, and coverage of all implementations is unknowable passively.",
+  "conditional": false,
+  "condition_passive": "n/a"
+ },
+ {
+  "test_case": "5.5-2-2",
+  "test_group": "5.5-2",
+  "provision": "5.5-2",
+  "type": "functional",
+  "summary": "Check that name and version of each reviewed implementation on the device match those in its review report.",
+  "units": [
+   {
+    "id": "a",
+    "needs": [
+     "IXIT",
+     "DUT-INTERACT"
+    ],
+    "note": "Read implementation identity from the device and compare with supplied report."
+   }
+  ],
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "opportunistic": false,
+  "outside_procedure_cues": "Version strings in banners, User-Agent headers or update requests may reveal implementation identity, but the supplier report to compare against is unavailable.",
+  "rationale": "First bullet compares with supplier-provided reports (R1). The alternative PASS bullet needs proof the device exposes no identification, which passive absence cannot establish.",
+  "conditional": false,
+  "condition_passive": "n/a"
+ },
+ {
+  "test_case": "5.5-3-1",
+  "test_group": "5.5-3",
+  "provision": "5.5-3",
+  "type": "conceptual",
+  "summary": "Check that every component using cryptography has a referenced update mechanism and that replacement side effects were considered.",
+  "units": [
+   {
+    "id": "a",
+    "needs": [
+     "IXIT"
+    ],
+    "note": "Software component list and update references from supplier."
+   },
+   {
+    "id": "b",
+    "needs": [
+     "IXIT"
+    ],
+    "note": "Manufacturer consideration of side effects of replacing algorithms."
+   }
+  ],
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "opportunistic": false,
+  "outside_procedure_cues": "Observed firmware update downloads show an update channel exists; a change of offered suites after an update would hint at replaceable cryptography.",
+  "rationale": "Both criteria concern supplier documentation and manufacturer reasoning; no network-observable property decides them.",
+  "conditional": false,
+  "condition_passive": "n/a"
+ },
+ {
+  "test_case": "5.5-4-1",
+  "test_group": "5.5-4",
+  "provision": "5.5-4",
+  "type": "conceptual",
+  "summary": "Assess whether each network-reachable function in initialized state has authentication that discriminates subjects, is well protected, and authorizes correctly.",
+  "units": [
+   {
+    "id": "a",
+    "needs": [
+     "IXIT"
+    ],
+    "note": "Functionality list with referenced authentication mechanisms."
+   },
+   {
+    "id": "b",
+    "needs": [
+     "IXIT"
+    ],
+    "note": "Mechanism description judged for subject discrimination and rejection."
+   },
+   {
+    "id": "c",
+    "needs": [
+     "IXIT"
+    ],
+    "note": "Protection of the mechanism judged against guarantees and attacks."
+   },
+   {
+    "id": "d",
+    "needs": [
+     "IXIT"
+    ],
+    "note": "Authorization process judged for grant and deny behaviour."
+   }
+  ],
+  "N": {
+   "verdict_reach": "fail_only",
+   "uses_reference": false,
+   "assumptions": [
+    "observed unauthenticated exchange invokes device functionality, not intended open data",
+    "LAN or inbound flows to the device are visible at the gateway"
+   ],
+   "passive_class": "inferred"
+  },
+  "ND": {
+   "verdict_reach": "fail_only",
+   "uses_reference": false,
+   "assumptions": [
+    "observed unauthenticated exchange invokes device functionality, not intended open data",
+    "LAN or inbound flows to the device are visible at the gateway"
+   ],
+   "passive_class": "inferred"
+  },
+  "opportunistic": false,
+  "outside_procedure_cues": "",
+  "rationale": "Substituting observed sessions: a cleartext request without credentials served by the device, or credentials sent in plaintext, would show a violation. Absence of such flows proves nothing.",
+  "conditional": false,
+  "condition_passive": "n/a"
+ },
+ {
+  "test_case": "5.5-4-2",
+  "test_group": "5.5-4",
+  "provision": "5.5-4",
+  "type": "functional",
+  "summary": "Try unauthenticated, invalid and under-privileged access, confirm legitimate access, and compare authentication protection with documentation.",
+  "units": [
+   {
+    "id": "a",
+    "needs": [
+     "IXIT",
+     "DUT-INTERACT"
+    ],
+    "note": "Tester attempts access without valid credentials or rights."
+   },
+   {
+    "id": "b",
+    "needs": [
+     "IXIT",
+     "DUT-INTERACT"
+    ],
+    "note": "Tester confirms access with proper credentials."
+   },
+   {
+    "id": "c",
+    "needs": [
+     "IXIT",
+     "NET-OBS"
+    ],
+    "note": "Sniffed certificates or handshakes compared with documented protection."
+   }
+  ],
+  "N": {
+   "verdict_reach": "fail_only",
+   "uses_reference": false,
+   "assumptions": [
+    "observed unauthenticated exchange invokes device functionality, not intended open data",
+    "LAN or inbound flows to the device are visible at the gateway"
+   ],
+   "passive_class": "inferred"
+  },
+  "ND": {
+   "verdict_reach": "fail_only",
+   "uses_reference": false,
+   "assumptions": [
+    "observed unauthenticated exchange invokes device functionality, not intended open data",
+    "LAN or inbound flows to the device are visible at the gateway"
+   ],
+   "passive_class": "inferred"
+  },
+  "opportunistic": false,
+  "outside_procedure_cues": "Observed certificates and handshake parameters protecting authentication are visible but the third bullet compares them with the IXIT.",
+  "rationale": "Third bullet excluded by R1. First bullet can be violated by an observed credential-free request the device serves; proving denial for all subjects needs active probing.",
+  "conditional": false,
+  "condition_passive": "n/a"
+ },
+ {
+  "test_case": "5.5-5-1",
+  "test_group": "5.5-5",
+  "provision": "5.5-5",
+  "type": "conceptual",
+  "summary": "Apply the 5.5-4-1 assessment in all states to functions permitting security-relevant configuration changes, excluding infrastructure protocols like DHCP.",
+  "units": [
+   {
+    "id": "a",
+    "needs": [
+     "IXIT"
+    ],
+    "note": "Reuses 5.5-4-1 units restricted to configuration-capable functions."
+   }
+  ],
+  "N": {
+   "verdict_reach": "fail_only",
+   "uses_reference": false,
+   "assumptions": [
+    "observed plaintext request performs a security-relevant configuration change",
+    "excluded infrastructure protocols are correctly set aside",
+    "LAN or inbound flows to the device are visible at the gateway"
+   ],
+   "passive_class": "inferred"
+  },
+  "ND": {
+   "verdict_reach": "fail_only",
+   "uses_reference": false,
+   "assumptions": [
+    "observed plaintext request performs a security-relevant configuration change",
+    "excluded infrastructure protocols are correctly set aside",
+    "LAN or inbound flows to the device are visible at the gateway"
+   ],
+   "passive_class": "inferred"
+  },
+  "opportunistic": true,
+  "outside_procedure_cues": "",
+  "rationale": "A configuration change carried in cleartext without credentials, or with plaintext credentials, would show a violation; such changes occur only when someone performs them, including factory-default setup.",
+  "conditional": true,
+  "condition_passive": "partly"
+ },
+ {
+  "test_case": "5.5-5-2",
+  "test_group": "5.5-5",
+  "provision": "5.5-5",
+  "type": "functional",
+  "summary": "Apply 5.5-4-2 tests to configuration-capable functions in all states, and look for undocumented network-reachable logical interfaces.",
+  "units": [
+   {
+    "id": "a",
+    "needs": [
+     "IXIT",
+     "DUT-INTERACT",
+     "NET-OBS"
+    ],
+    "note": "Reuses 5.5-4-2 active access tests and sniffing."
+   },
+   {
+    "id": "b",
+    "needs": [
+     "IXIT",
+     "DUT-INTERACT"
+    ],
+    "note": "Scanning for logical interfaces missing from documentation."
+   }
+  ],
+  "N": {
+   "verdict_reach": "fail_only",
+   "uses_reference": false,
+   "assumptions": [
+    "observed plaintext request performs a security-relevant configuration change",
+    "excluded infrastructure protocols are correctly set aside",
+    "LAN or inbound flows to the device are visible at the gateway"
+   ],
+   "passive_class": "inferred"
+  },
+  "ND": {
+   "verdict_reach": "fail_only",
+   "uses_reference": false,
+   "assumptions": [
+    "observed plaintext request performs a security-relevant configuration change",
+    "excluded infrastructure protocols are correctly set aside",
+    "LAN or inbound flows to the device are visible at the gateway"
+   ],
+   "passive_class": "inferred"
+  },
+  "opportunistic": true,
+  "outside_procedure_cues": "Services seen answering inbound connections or advertised via mDNS/SSDP reveal logical interfaces, but documentation completeness needs the IXIT.",
+  "rationale": "Bullets three and four compare with the IXIT (R1). Bullet one can be violated by an observed credential-free configuration change; full denial cannot be shown passively.",
+  "conditional": true,
+  "condition_passive": "partly"
+ },
+ {
+  "test_case": "5.5-6-1",
+  "test_group": "5.5-6",
+  "provision": "5.5-6",
+  "type": "conceptual",
+  "summary": "Apply 5.5-1-1 to channels carrying critical security parameters, requiring at least confidentiality.",
+  "units": [
+   {
+    "id": "a",
+    "needs": [
+     "IXIT",
+     "PUBLIC"
+    ],
+    "note": "Reuses 5.5-1-1 units on CSP-carrying mechanisms; catalogue needed."
+   }
+  ],
+  "N": {
+   "verdict_reach": "fail_only",
+   "uses_reference": true,
+   "assumptions": [
+    "observed channels cover all mechanisms the IXIT would list",
+    "channel identified as carrying critical security parameters from protocol semantics"
+   ],
+   "passive_class": "inferred"
+  },
+  "ND": {
+   "verdict_reach": "fail_only",
+   "uses_reference": true,
+   "assumptions": [
+    "observed channels cover all mechanisms the IXIT would list",
+    "channel identified as carrying critical security parameters from protocol semantics"
+   ],
+   "passive_class": "inferred"
+  },
+  "opportunistic": false,
+  "outside_procedure_cues": "",
+  "rationale": "Plaintext credentials or keys, or a deprecated suite on a CSP channel, would show a violation by substitution; unseen channels block PASS.",
+  "conditional": true,
+  "condition_passive": "partly"
+ },
+ {
+  "test_case": "5.5-6-2",
+  "test_group": "5.5-6",
+  "provision": "5.5-6",
+  "type": "functional",
+  "summary": "Apply 5.5-1-2 functional crypto checks to channels carrying critical security parameters.",
+  "units": [
+   {
+    "id": "a",
+    "needs": [
+     "IXIT",
+     "NET-OBS",
+     "DUT-INTERACT"
+    ],
+    "note": "Reuses 5.5-1-2 comparison with documented settings."
+   }
+  ],
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "opportunistic": false,
+  "outside_procedure_cues": "Negotiated parameters and any cleartext secrets on CSP channels are observable but cannot be compared with IXIT documentation.",
+  "rationale": "Only verdict bullet compares observed settings with IXIT documentation; under R1 nothing is reachable.",
+  "conditional": true,
+  "condition_passive": "partly"
+ },
+ {
+  "test_case": "5.5-7-1",
+  "test_group": "5.5-7",
+  "provision": "5.5-7",
+  "type": "conceptual",
+  "summary": "Apply 5.5-1-1 to remotely accessible channels carrying critical security parameters, requiring at least confidentiality.",
+  "units": [
+   {
+    "id": "a",
+    "needs": [
+     "IXIT",
+     "PUBLIC"
+    ],
+    "note": "Reuses 5.5-1-1 units on remotely accessible CSP channels."
+   }
+  ],
+  "N": {
+   "verdict_reach": "fail_only",
+   "uses_reference": true,
+   "assumptions": [
+    "observed channels cover all mechanisms the IXIT would list",
+    "channel identified as carrying critical security parameters from protocol semantics",
+    "remote accessibility inferred from WAN endpoints"
+   ],
+   "passive_class": "inferred"
+  },
+  "ND": {
+   "verdict_reach": "fail_only",
+   "uses_reference": true,
+   "assumptions": [
+    "observed channels cover all mechanisms the IXIT would list",
+    "channel identified as carrying critical security parameters from protocol semantics",
+    "remote accessibility inferred from WAN endpoints"
+   ],
+   "passive_class": "inferred"
+  },
+  "opportunistic": false,
+  "outside_procedure_cues": "",
+  "rationale": "WAN traffic is fully visible at the gateway; cleartext secrets or deprecated crypto there would show a violation, while completeness remains unknowable.",
+  "conditional": true,
+  "condition_passive": "partly"
+ },
+ {
+  "test_case": "5.5-7-2",
+  "test_group": "5.5-7",
+  "provision": "5.5-7",
+  "type": "functional",
+  "summary": "Apply 5.5-1-2 functional crypto checks to remotely accessible channels carrying critical security parameters.",
+  "units": [
+   {
+    "id": "a",
+    "needs": [
+     "IXIT",
+     "NET-OBS",
+     "DUT-INTERACT"
+    ],
+    "note": "Reuses 5.5-1-2 comparison with documented settings."
+   }
+  ],
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "opportunistic": false,
+  "outside_procedure_cues": "Remote-channel handshake parameters are observable at the gateway but cannot be compared with the IXIT.",
+  "rationale": "Only verdict bullet compares observed settings with IXIT documentation; under R1 nothing is reachable.",
+  "conditional": true,
+  "condition_passive": "partly"
+ },
+ {
+  "test_case": "5.5-8-1",
+  "test_group": "5.5-8",
+  "provision": "5.5-8",
+  "type": "conceptual",
+  "summary": "Assess whether documented CSP management processes cover the whole life cycle and whether implementation is confirmed.",
+  "units": [
+   {
+    "id": "a",
+    "needs": [
+     "IXIT"
+    ],
+    "note": "Life-cycle processes from supplier documentation."
+   },
+   {
+    "id": "b",
+    "needs": [
+     "IXIT"
+    ],
+    "note": "Supplier confirmation statement."
+   }
+  ],
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "opportunistic": false,
+  "outside_procedure_cues": "Long-term observation of certificate validity periods, rotations and revocation checks hints at parts of the key life cycle.",
+  "rationale": "Criteria concern manufacturer processes and confirmations; traffic shows at most fragments of key renewal.",
+  "conditional": true,
+  "condition_passive": "partly"
+ },
+ {
+  "test_case": "5.6-1-1",
+  "test_group": "5.6-1",
+  "provision": "5.6-1",
+  "type": "conceptual",
+  "summary": "Assess whether each enabled network interface and network-reachable logical interface has a purpose justifying it being enabled.",
+  "units": [
+   {
+    "id": "a",
+    "needs": [
+     "IXIT"
+    ],
+    "note": "Enabled physical network interfaces and their purpose."
+   },
+   {
+    "id": "b",
+    "needs": [
+     "IXIT"
+    ],
+    "note": "Enabled network-reachable logical interfaces and their purpose."
+   }
+  ],
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "fail_only",
+   "uses_reference": true,
+   "assumptions": [
+    "observed advertised or answering services are enabled logical interfaces",
+    "public documentation describes all intended device functions",
+    "manufacturer public documentation substitutes the IXIT interface purposes"
+   ],
+   "passive_class": "inferred"
+  },
+  "opportunistic": false,
+  "outside_procedure_cues": "",
+  "rationale": "N: no third-party source states interface purpose, so none. ND: observed services set against manufacturer documentation can suggest an unjustified interface; justification is manufacturer knowledge, so no PASS.",
+  "conditional": true,
+  "condition_passive": "no"
+ },
+ {
+  "test_case": "5.6-1-2",
+  "test_group": "5.6-1",
+  "provision": "5.6-1",
+  "type": "functional",
+  "summary": "Check that interface status matches documentation, and search for undocumented network and logical interfaces.",
+  "units": [
+   {
+    "id": "a",
+    "needs": [
+     "IXIT",
+     "DUT-INTERACT"
+    ],
+    "note": "Probe interfaces and compare status with IXIT."
+   },
+   {
+    "id": "b",
+    "needs": [
+     "IXIT",
+     "DUT-INTERACT"
+    ],
+    "note": "Physical inspection or radio scanning for undocumented interfaces."
+   },
+   {
+    "id": "c",
+    "needs": [
+     "IXIT",
+     "DUT-INTERACT"
+    ],
+    "note": "Network scanning for undocumented logical interfaces."
+   }
+  ],
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "opportunistic": false,
+  "outside_procedure_cues": "mDNS/SSDP advertisements, UPnP port mappings and services answering inbound connections reveal active interfaces, without documentation to compare.",
+  "rationale": "Both verdict bullets compare observed status or discoveries with IXIT documentation, so R1 leaves nothing reachable.",
+  "conditional": true,
+  "condition_passive": "no"
+ },
+ {
+  "test_case": "5.6-2-1",
+  "test_group": "5.6-2",
+  "provision": "5.6-2",
+  "type": "conceptual",
+  "summary": "Assess whether unauthenticated disclosures are correctly classed as security-relevant and whether those disclosed are necessary for operation.",
+  "units": [
+   {
+    "id": "a",
+    "needs": [
+     "IXIT"
+    ],
+    "note": "Disclosed items marked non-relevant reassessed for relevance."
+   },
+   {
+    "id": "b",
+    "needs": [
+     "IXIT"
+    ],
+    "note": "Security-relevant disclosed items judged for necessity."
+   }
+  ],
+  "N": {
+   "verdict_reach": "fail_only",
+   "uses_reference": true,
+   "assumptions": [
+    "observed disclosure occurs in initialized state",
+    "necessity judged without the vendor's operational rationale"
+   ],
+   "passive_class": "inferred"
+  },
+  "ND": {
+   "verdict_reach": "fail_only",
+   "uses_reference": true,
+   "assumptions": [
+    "observed disclosure occurs in initialized state",
+    "necessity judged without the vendor's operational rationale"
+   ],
+   "passive_class": "inferred"
+  },
+  "opportunistic": false,
+  "outside_procedure_cues": "Whether each disclosed item is documented as security-relevant is unknowable without the IXIT.",
+  "rationale": "Bullet one compares with IXIT (R1). Bullet two by substitution: versions in SSDP, mDNS, DHCP or cleartext headers not required by protocol specifications indicate failure.",
+  "conditional": false,
+  "condition_passive": "n/a"
+ },
+ {
+  "test_case": "5.6-2-2",
+  "test_group": "5.6-2",
+  "provision": "5.6-2",
+  "type": "functional",
+  "summary": "Check functionally whether interfaces disclose security-relevant information without authentication beyond what is documented.",
+  "units": [
+   {
+    "id": "a",
+    "needs": [
+     "IXIT",
+     "NET-OBS",
+     "DUT-INTERACT"
+    ],
+    "note": "Observe or query interfaces and compare disclosures with IXIT."
+   }
+  ],
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "opportunistic": false,
+  "outside_procedure_cues": "Firmware versions, model strings and hostnames in multicast announcements, DHCP options or cleartext headers are observable but cannot be compared with the IXIT.",
+  "rationale": "Sole verdict bullet compares observed disclosures with IXIT documentation; R1 removes it.",
+  "conditional": false,
+  "condition_passive": "n/a"
+ },
+ {
+  "test_case": "5.6-3-1",
+  "test_group": "5.6-3",
+  "provision": "5.6-3",
+  "type": "conceptual",
+  "summary": "Assess whether physical interfaces not needing exposure are protected by the casing and disabled per documentation.",
+  "units": [
+   {
+    "id": "a",
+    "needs": [
+     "IXIT"
+    ],
+    "note": "Protection means of non-exposed interfaces from supplier."
+   },
+   {
+    "id": "b",
+    "needs": [
+     "IXIT"
+    ],
+    "note": "Documented status of non-exposed interfaces."
+   }
+  ],
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "opportunistic": false,
+  "outside_procedure_cues": "",
+  "rationale": "Concerns documented physical protection and status of hardware interfaces; network traffic carries no evidence.",
+  "conditional": false,
+  "condition_passive": "n/a"
+ },
+ {
+  "test_case": "5.6-3-2",
+  "test_group": "5.6-3",
+  "provision": "5.6-3",
+  "type": "functional",
+  "summary": "Inspect the device for exposed physical interfaces, casing protection, and enabled status versus documentation.",
+  "units": [
+   {
+    "id": "a",
+    "needs": [
+     "IXIT",
+     "DUT-INTERACT"
+    ],
+    "note": "Physical inspection compared with documented requirement."
+   },
+   {
+    "id": "b",
+    "needs": [
+     "IXIT",
+     "DUT-INTERACT"
+    ],
+    "note": "Physical check of casing protection."
+   },
+   {
+    "id": "c",
+    "needs": [
+     "IXIT",
+     "DUT-INTERACT"
+    ],
+    "note": "Check enabled status of each physical interface."
+   }
+  ],
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "opportunistic": false,
+  "outside_procedure_cues": "",
+  "rationale": "Bullets one and three compare with IXIT (R1); bullet two needs physical access to the device.",
+  "conditional": false,
+  "condition_passive": "n/a"
+ },
+ {
+  "test_case": "5.6-4A-1",
+  "test_group": "5.6-4A",
+  "provision": "5.6-4A",
+  "type": "conceptual",
+  "summary": "Assess whether documented debug interfaces have best-practice access control or a disabling mechanism, and are disabled as required.",
+  "units": [
+   {
+    "id": "a",
+    "needs": [
+     "IXIT"
+    ],
+    "note": "Documented protection includes authentication or access control."
+   },
+   {
+    "id": "b",
+    "needs": [
+     "IXIT"
+    ],
+    "note": "Documented protection includes a disabling mechanism."
+   },
+   {
+    "id": "c",
+    "needs": [
+     "IXIT"
+    ],
+    "note": "Status of non-intermittent debug interfaces permanently disabled."
+   },
+   {
+    "id": "d",
+    "needs": [
+     "IXIT"
+    ],
+    "note": "Status of intermittent debug interfaces disabled by default."
+   }
+  ],
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "opportunistic": false,
+  "outside_procedure_cues": "Network-reachable debug services such as ADB or telnet answering connections could hint at an enabled debug path.",
+  "rationale": "Physical debug interfaces and their documented protection cannot be seen in IP traffic.",
+  "conditional": true,
+  "condition_passive": "no"
+ },
+ {
+  "test_case": "5.6-4A-2",
+  "test_group": "5.6-4A",
+  "provision": "5.6-4A",
+  "type": "functional",
+  "summary": "Check debug interfaces are disabled or protected in default state, and attempt debug use of undocumented interfaces.",
+  "units": [
+   {
+    "id": "a",
+    "needs": [
+     "IXIT",
+     "DUT-INTERACT"
+    ],
+    "note": "Hands-on check of debug interface in default state."
+   },
+   {
+    "id": "b",
+    "needs": [
+     "IXIT",
+     "DUT-INTERACT"
+    ],
+    "note": "Tester attempts debugging on each physical interface."
+   }
+  ],
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "opportunistic": false,
+  "outside_procedure_cues": "Unauthenticated debug-like network services observed answering connections would be indicative only.",
+  "rationale": "Bullet two compares with IXIT (R1); bullet one requires operating physical interfaces.",
+  "conditional": true,
+  "condition_passive": "no"
+ },
+ {
+  "test_case": "5.6-4B-1",
+  "test_group": "5.6-4B",
+  "provision": "5.6-4B",
+  "type": "conceptual",
+  "summary": "Assess whether documented debug physical ports are physically protected by the device.",
+  "units": [
+   {
+    "id": "a",
+    "needs": [
+     "IXIT"
+    ],
+    "note": "Documented physical protection of debug ports."
+   }
+  ],
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "opportunistic": false,
+  "outside_procedure_cues": "",
+  "rationale": "Physical protection of ports is invisible to a network observer.",
+  "conditional": true,
+  "condition_passive": "no"
+ },
+ {
+  "test_case": "5.6-4B-2",
+  "test_group": "5.6-4B",
+  "provision": "5.6-4B",
+  "type": "functional",
+  "summary": "Check physically that debug ports are protected by the device.",
+  "units": [
+   {
+    "id": "a",
+    "needs": [
+     "IXIT",
+     "DUT-INTERACT"
+    ],
+    "note": "Physical inspection of debug ports."
+   }
+  ],
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "opportunistic": false,
+  "outside_procedure_cues": "",
+  "rationale": "Requires physical access; no network evidence relates.",
+  "conditional": true,
+  "condition_passive": "no"
+ },
+ {
+  "test_case": "5.6-5-1",
+  "test_group": "5.6-5",
+  "provision": "5.6-5",
+  "type": "conceptual",
+  "summary": "Assess whether each software service enabled by default is necessary for the device's intended use or operation.",
+  "units": [
+   {
+    "id": "a",
+    "needs": [
+     "IXIT"
+    ],
+    "note": "Default-enabled services with purpose and justification."
+   }
+  ],
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "fail_only",
+   "uses_reference": true,
+   "assumptions": [
+    "observed service was enabled by default, not by the user",
+    "public documentation reflects the intended use",
+    "manufacturer public documentation substitutes the IXIT service justifications"
+   ],
+   "passive_class": "inferred"
+  },
+  "opportunistic": false,
+  "outside_procedure_cues": "",
+  "rationale": "N: necessity cannot be judged without manufacturer documentation, so none. ND: a running service unrelated to any documented function indicates failure; necessity of all services stays unconfirmable.",
+  "conditional": false,
+  "condition_passive": "n/a"
+ },
+ {
+  "test_case": "5.6-6-1",
+  "test_group": "5.6-6",
+  "provision": "5.6-6",
+  "type": "conceptual",
+  "summary": "Reviews whether the techniques documented for keeping the software small are suitable for removing unneeded code.",
+  "units": [
+   {
+    "id": "a",
+    "needs": [
+     "IXIT"
+    ],
+    "note": "Code minimization techniques from supplier."
+   }
+  ],
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "opportunistic": false,
+  "outside_procedure_cues": "Banners or advertised services revealing unneeded bundled components hint at unminimized code.",
+  "rationale": "Criterion concerns development techniques; traffic offers at most indirect hints.",
+  "conditional": false,
+  "condition_passive": "n/a"
+ },
+ {
+  "test_case": "5.6-7-1",
+  "test_group": "5.6-7",
+  "provision": "5.6-7",
+  "type": "conceptual",
+  "summary": "Assess whether documented privilege control mechanisms together support separation of duty, need to know and least privilege.",
+  "units": [
+   {
+    "id": "a",
+    "needs": [
+     "IXIT"
+    ],
+    "note": "Privilege control mechanisms from supplier."
+   }
+  ],
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "opportunistic": false,
+  "outside_procedure_cues": "",
+  "rationale": "Internal privilege separation leaves no trace in network traffic.",
+  "conditional": false,
+  "condition_passive": "n/a"
+ },
+ {
+  "test_case": "5.6-8-1",
+  "test_group": "5.6-8",
+  "provision": "5.6-8",
+  "type": "conceptual",
+  "summary": "Assess whether documented hardware memory access control mechanisms are hardware-level and actually control memory access.",
+  "units": [
+   {
+    "id": "a",
+    "needs": [
+     "IXIT"
+    ],
+    "note": "Mechanism implemented in hardware."
+   },
+   {
+    "id": "b",
+    "needs": [
+     "IXIT"
+    ],
+    "note": "Mechanism controls access to memory."
+   }
+  ],
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "opportunistic": false,
+  "outside_procedure_cues": "",
+  "rationale": "Hardware memory protection is internal and unobservable on the network.",
+  "conditional": false,
+  "condition_passive": "n/a"
+ },
+ {
+  "test_case": "5.6-9-1",
+  "test_group": "5.6-9",
+  "provision": "5.6-9",
+  "type": "conceptual",
+  "summary": "Assess whether documented secure development processes cover the listed phases and whether implementation is confirmed.",
+  "units": [
+   {
+    "id": "a",
+    "needs": [
+     "IXIT"
+    ],
+    "note": "Development process coverage from supplier."
+   },
+   {
+    "id": "b",
+    "needs": [
+     "IXIT"
+    ],
+    "note": "Supplier confirmation statement."
+   }
+  ],
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "opportunistic": false,
+  "outside_procedure_cues": "",
+  "rationale": "Manufacturer processes are not reflected in device traffic.",
+  "conditional": false,
+  "condition_passive": "n/a"
+ },
+ {
+  "test_case": "5.7-1-1",
+  "test_group": "5.7-1",
+  "provision": "5.7-1",
+  "type": "conceptual",
+  "summary": "Assess whether documented secure boot mechanisms guarantee integrity and authenticity and whether their design achieves this.",
+  "units": [
+   {
+    "id": "a",
+    "needs": [
+     "IXIT"
+    ],
+    "note": "Documented guarantees cover integrity and authenticity."
+   },
+   {
+    "id": "b",
+    "needs": [
+     "IXIT"
+    ],
+    "note": "Description and detection mechanisms suit the guarantees."
+   }
+  ],
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "opportunistic": false,
+  "outside_procedure_cues": "",
+  "rationale": "Boot-time verification is internal to the device.",
+  "conditional": false,
+  "condition_passive": "n/a"
+ },
+ {
+  "test_case": "5.7-1-2",
+  "test_group": "5.7-1",
+  "provision": "5.7-1",
+  "type": "functional",
+  "summary": "Check functionally, possibly by manipulating firmware, that software verification works as documented.",
+  "units": [
+   {
+    "id": "a",
+    "needs": [
+     "IXIT",
+     "DUT-INTERACT",
+     "INTERNAL"
+    ],
+    "note": "Firmware manipulation and comparison with documentation."
+   }
+  ],
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "opportunistic": false,
+  "outside_procedure_cues": "",
+  "rationale": "Sole bullet compares implementation with IXIT (R1); also needs firmware access.",
+  "conditional": false,
+  "condition_passive": "n/a"
+ },
+ {
+  "test_case": "5.7-2-1",
+  "test_group": "5.7-2",
+  "provision": "5.7-2",
+  "type": "conceptual",
+  "summary": "Assess whether the documented user alert on unauthorized software change is sufficient and each notification functionality necessary.",
+  "units": [
+   {
+    "id": "a",
+    "needs": [
+     "IXIT"
+    ],
+    "note": "Notification method judged sufficient."
+   },
+   {
+    "id": "b",
+    "needs": [
+     "IXIT"
+    ],
+    "note": "Each notification functionality judged necessary."
+   }
+  ],
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "opportunistic": false,
+  "outside_procedure_cues": "",
+  "rationale": "Criteria concern the documented alerting design only.",
+  "conditional": true,
+  "condition_passive": "partly"
+ },
+ {
+  "test_case": "5.7-2-2",
+  "test_group": "5.7-2",
+  "provision": "5.7-2",
+  "type": "functional",
+  "summary": "After an unauthorized software change, check alerting matches documentation and wider-network communication is limited to described needs.",
+  "units": [
+   {
+    "id": "a",
+    "needs": [
+     "IXIT",
+     "DUT-INTERACT"
+    ],
+    "note": "Trigger tamper detection and compare alerting with IXIT."
+   },
+   {
+    "id": "b",
+    "needs": [
+     "IXIT",
+     "NET-OBS",
+     "DUT-INTERACT"
+    ],
+    "note": "Observe post-detection traffic against documented notification functionality."
+   }
+  ],
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "opportunistic": false,
+  "outside_procedure_cues": "If tampering were ever detected, a shrinking set of outbound destinations would be visible, but not what is described as necessary.",
+  "rationale": "Both bullets compare with the IXIT (alerting description, described necessary communication); triggering detection is also active.",
+  "conditional": true,
+  "condition_passive": "partly"
+ },
+ {
+  "test_case": "5.8-1-1",
+  "test_group": "5.8-1",
+  "provision": "5.8-1",
+  "type": "conceptual",
+  "summary": "Apply 5.5-1-1 to channels carrying personal data to associated services, requiring at least confidentiality.",
+  "units": [
+   {
+    "id": "a",
+    "needs": [
+     "IXIT",
+     "PUBLIC"
+    ],
+    "note": "Reuses 5.5-1-1 units on personal-data channels."
+   }
+  ],
+  "N": {
+   "verdict_reach": "fail_only",
+   "uses_reference": true,
+   "assumptions": [
+    "observed channels cover all mechanisms the IXIT would list",
+    "observed flow carries personal data",
+    "endpoint is an associated service of the manufacturer"
+   ],
+   "passive_class": "inferred"
+  },
+  "ND": {
+   "verdict_reach": "fail_only",
+   "uses_reference": true,
+   "assumptions": [
+    "observed channels cover all mechanisms the IXIT would list",
+    "observed flow carries personal data",
+    "endpoint is an associated service of the manufacturer"
+   ],
+   "passive_class": "inferred"
+  },
+  "opportunistic": false,
+  "outside_procedure_cues": "",
+  "rationale": "Cleartext personal data or deprecated crypto toward vendor cloud endpoints would show a violation by substitution; unseen channels prevent PASS.",
+  "conditional": true,
+  "condition_passive": "partly"
+ },
+ {
+  "test_case": "5.8-1-2",
+  "test_group": "5.8-1",
+  "provision": "5.8-1",
+  "type": "functional",
+  "summary": "Apply 5.5-1-2 functional crypto checks to channels carrying personal data.",
+  "units": [
+   {
+    "id": "a",
+    "needs": [
+     "IXIT",
+     "NET-OBS",
+     "DUT-INTERACT"
+    ],
+    "note": "Reuses 5.5-1-2 comparison with documented settings."
+   }
+  ],
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "opportunistic": false,
+  "outside_procedure_cues": "Handshake parameters and any cleartext payloads toward vendor services are observable but not comparable with the IXIT.",
+  "rationale": "Only verdict bullet compares observed settings with IXIT documentation; under R1 nothing is reachable.",
+  "conditional": true,
+  "condition_passive": "partly"
+ },
+ {
+  "test_case": "5.8-2-1",
+  "test_group": "5.8-2",
+  "provision": "5.8-2",
+  "type": "conceptual",
+  "summary": "Apply 5.5-1-1 to channels carrying sensitive personal data to associated services, requiring at least confidentiality.",
+  "units": [
+   {
+    "id": "a",
+    "needs": [
+     "IXIT",
+     "PUBLIC"
+    ],
+    "note": "Reuses 5.5-1-1 units on sensitive-data channels."
+   }
+  ],
+  "N": {
+   "verdict_reach": "fail_only",
+   "uses_reference": true,
+   "assumptions": [
+    "observed channels cover all mechanisms the IXIT would list",
+    "data classed as sensitive, e.g. camera video, from traffic semantics",
+    "endpoint is an associated service of the manufacturer"
+   ],
+   "passive_class": "inferred"
+  },
+  "ND": {
+   "verdict_reach": "fail_only",
+   "uses_reference": true,
+   "assumptions": [
+    "observed channels cover all mechanisms the IXIT would list",
+    "data classed as sensitive, e.g. camera video, from traffic semantics",
+    "endpoint is an associated service of the manufacturer"
+   ],
+   "passive_class": "inferred"
+  },
+  "opportunistic": false,
+  "outside_procedure_cues": "",
+  "rationale": "Unencrypted video or similar sensitive streams to vendor services would show a violation; sensitivity and completeness rest on assumptions.",
+  "conditional": true,
+  "condition_passive": "partly"
+ },
+ {
+  "test_case": "5.8-2-2",
+  "test_group": "5.8-2",
+  "provision": "5.8-2",
+  "type": "functional",
+  "summary": "Apply 5.5-1-2 functional crypto checks to channels carrying sensitive personal data.",
+  "units": [
+   {
+    "id": "a",
+    "needs": [
+     "IXIT",
+     "NET-OBS",
+     "DUT-INTERACT"
+    ],
+    "note": "Reuses 5.5-1-2 comparison with documented settings."
+   }
+  ],
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "opportunistic": false,
+  "outside_procedure_cues": "Encryption status of streams to vendor services is visible but cannot be compared with IXIT documentation.",
+  "rationale": "Only verdict bullet compares observed settings with IXIT documentation; under R1 nothing is reachable.",
+  "conditional": true,
+  "condition_passive": "partly"
+ },
+ {
+  "test_case": "5.8-3-1",
+  "test_group": "5.8-3",
+  "provision": "5.8-3",
+  "type": "functional",
+  "summary": "Check sensor documentation is accessible as stated, understandable to non-experts, and covers every obvious sensing capability.",
+  "units": [
+   {
+    "id": "a",
+    "needs": [
+     "IXIT",
+     "PUBLIC"
+    ],
+    "note": "Locate sensor documentation where the IXIT says it is."
+   },
+   {
+    "id": "b",
+    "needs": [
+     "IXIT",
+     "PUBLIC"
+    ],
+    "note": "Judge clarity of the sensor documentation for lay users."
+   },
+   {
+    "id": "c",
+    "needs": [
+     "IXIT",
+     "DUT-INTERACT"
+    ],
+    "note": "Visual or physical inspection for undocumented sensors."
+   }
+  ],
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "pass_and_fail",
+   "uses_reference": true,
+   "assumptions": [
+    "published user documentation is the documentation the IXIT refers to",
+    "public product information reveals all obvious sensing capabilities"
+   ],
+   "passive_class": "inferred"
+  },
+  "opportunistic": false,
+  "outside_procedure_cues": "Traffic patterns such as audio or video uploads can hint at sensors in use.",
+  "rationale": "Bullet one compares with IXIT (R1). N: no way to see documentation, so none. ND: clarity of published docs and sensor coverage versus manufacturer product information judged either way, under assumptions.",
+  "conditional": true,
+  "condition_passive": "partly"
+ }
+]

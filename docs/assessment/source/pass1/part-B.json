@@ -39,7 +39,6 @@
     "note": "Known feasible attacks per public cryptanalysis; applicable to observed parameters."
    }
   ],
-  "passive_class": "inferred",
   "rationale": "Substituting observed TLS parameters for IXIT crypto details and judging them against TR 103 621/SOGIS can show FAIL; guarantee/mechanism fit and full PASS need IXIT.",
   "quarant_capabilities": [
    "TLS_CLIENT_HELLO",
@@ -55,16 +54,27 @@
    "SOGIS ACM",
    "public cryptanalytic literature"
   ],
-  "verdict_reach": "fail_only",
-  "uses_reference": true,
-  "assumptions": [
-   "observed TLS channels cover all mechanisms the IXIT would list"
-  ],
   "opportunistic": false,
   "outside_procedure_cues": "",
   "conditional": false,
   "condition_passive": "n/a",
-  "group_note": "Catalogue judgement of visible TLS gives a fail-only route in the conceptual case; the IXIT comparison in the functional case is unreachable."
+  "group_note": "Catalogue judgement of visible TLS gives a fail-only route in the conceptual case; the IXIT comparison in the functional case is unreachable.",
+  "N": {
+   "verdict_reach": "fail_only",
+   "uses_reference": true,
+   "assumptions": [
+    "observed TLS channels cover all mechanisms the IXIT would list"
+   ],
+   "passive_class": "inferred"
+  },
+  "ND": {
+   "verdict_reach": "fail_only",
+   "uses_reference": true,
+   "assumptions": [
+    "observed TLS channels cover all mechanisms the IXIT would list"
+   ],
+   "passive_class": "inferred"
+  }
  },
  {
   "test_case": "5.5-1-2",
@@ -83,7 +93,6 @@
     "note": "Sniff handshakes and compare to IXIT; downgrade attempts suggested are active."
    }
   ],
-  "passive_class": "not_assessable",
   "rationale": "Unit a: handshakes are observable, but FAIL means a difference from IXIT, which cannot be established without IXIT; reach none.",
   "quarant_capabilities": [
    "TLS_CLIENT_HELLO",
@@ -95,14 +104,23 @@
    "I7_TLS_CERTIFICATE_ANOMALY_OBSERVED"
   ],
   "reference_sources": [],
-  "verdict_reach": "none",
-  "uses_reference": false,
-  "assumptions": [],
   "opportunistic": false,
   "outside_procedure_cues": "Observed handshakes (versions, suites, certificates) could be compared with IXIT if supplied; without it they only feed the conceptual catalogue check.",
   "conditional": false,
   "condition_passive": "n/a",
-  "group_note": "Catalogue judgement of visible TLS gives a fail-only route in the conceptual case; the IXIT comparison in the functional case is unreachable."
+  "group_note": "Catalogue judgement of visible TLS gives a fail-only route in the conceptual case; the IXIT comparison in the functional case is unreachable.",
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  }
  },
  {
   "test_case": "5.5-2-1",
@@ -126,18 +144,26 @@
     "note": "Scope coverage of reports versus implementation description."
    }
   ],
-  "passive_class": "not_assessable",
   "rationale": "Units a,b operate on IXIT 12 and SO reports; even if a certificate is public, knowing which implementations exist requires IXIT.",
   "quarant_capabilities": [],
   "reference_sources": [],
-  "verdict_reach": "none",
-  "uses_reference": false,
-  "assumptions": [],
   "opportunistic": false,
   "outside_procedure_cues": "",
   "conditional": false,
   "condition_passive": "n/a",
-  "group_note": "Implementation list and review reports are SO-supplied; leaked banners/fingerprints cannot be used by the TS verdicts."
+  "group_note": "Implementation list and review reports are SO-supplied; leaked banners/fingerprints cannot be used by the TS verdicts.",
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  }
  },
  {
   "test_case": "5.5-2-2",
@@ -155,7 +181,6 @@
     "note": "Version strings or TLS fingerprints may leak library identity; report is SO-supplied."
    }
   ],
-  "passive_class": "not_assessable",
   "rationale": "Unit a: the comparison target is the SO report (IXIT); the no-information PASS branch needs interaction to establish. Reach none.",
   "quarant_capabilities": [
    "TLS_CLIENT_HELLO",
@@ -164,14 +189,23 @@
    "observed_ports/protocols"
   ],
   "reference_sources": [],
-  "verdict_reach": "none",
-  "uses_reference": false,
-  "assumptions": [],
   "opportunistic": false,
   "outside_procedure_cues": "Server banners, User-Agent strings and TLS fingerprints may reveal library names/versions, unusable without the SO report.",
   "conditional": false,
   "condition_passive": "n/a",
-  "group_note": "Implementation list and review reports are SO-supplied; leaked banners/fingerprints cannot be used by the TS verdicts."
+  "group_note": "Implementation list and review reports are SO-supplied; leaked banners/fingerprints cannot be used by the TS verdicts.",
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  }
  },
  {
   "test_case": "5.5-3-1",
@@ -195,18 +229,26 @@
     "note": "Manufacturer consideration of replacement side effects."
    }
   ],
-  "passive_class": "not_assessable",
   "rationale": "Units a,b are purely about SO documentation (IXIT 6); observed update traffic does not show crypto replaceability.",
   "quarant_capabilities": [],
   "reference_sources": [],
-  "verdict_reach": "none",
-  "uses_reference": false,
-  "assumptions": [],
   "opportunistic": false,
   "outside_procedure_cues": "Observed update traffic shows an update channel exists but says nothing about crypto replaceability.",
   "conditional": false,
   "condition_passive": "n/a",
-  "group_note": "Purely documentation-based; no passive route."
+  "group_note": "Purely documentation-based; no passive route.",
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  }
  },
  {
   "test_case": "5.5-4-1",
@@ -244,18 +286,29 @@
     "note": "Authorization grants and denies correctly as described."
    }
   ],
-  "passive_class": "not_assessable",
-  "rationale": "All units a-d assess IXIT 13/IXIT 1 descriptions; nothing is decidable from public sources.",
+  "rationale": "All units a-d assess IXIT 13/IXIT 1 descriptions; nothing is decidable from public sources. ND: a published manual documenting an unauthenticated function shows FAIL.",
   "quarant_capabilities": [],
   "reference_sources": [],
-  "verdict_reach": "none",
-  "uses_reference": false,
-  "assumptions": [],
   "opportunistic": false,
   "outside_procedure_cues": "",
   "conditional": false,
   "condition_passive": "n/a",
-  "group_note": "Only an opportunistic fail-only route: observed unauthenticated plaintext access served by the device."
+  "group_note": "Only an opportunistic fail-only route: observed unauthenticated plaintext access served by the device.",
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "fail_only",
+   "uses_reference": true,
+   "assumptions": [
+    "manufacturer's public documentation describes the subject as the IXIT would",
+    "documented unauthenticated network function is not intended public open data"
+   ],
+   "passive_class": "inferred"
+  }
  },
  {
   "test_case": "5.5-4-2",
@@ -289,7 +342,6 @@
     "note": "Sniff certificates/handshakes and compare to IXIT crypto description."
    }
   ],
-  "passive_class": "inferred",
   "rationale": "Units a,b active; an opportunistically observed unauthenticated plaintext request served by the device establishes FAIL under stated assumptions; PASS needs interaction.",
   "quarant_capabilities": [
    "INSECURE_HTTP",
@@ -306,17 +358,29 @@
    "I7_TLS_CERTIFICATE_ANOMALY_OBSERVED"
   ],
   "reference_sources": [],
-  "verdict_reach": "fail_only",
-  "uses_reference": false,
-  "assumptions": [
-   "observed unauthenticated request reached protected device functionality",
-   "accessed endpoint is not intentionally public open data"
-  ],
   "opportunistic": true,
   "outside_procedure_cues": "",
   "conditional": false,
   "condition_passive": "n/a",
-  "group_note": "Only an opportunistic fail-only route: observed unauthenticated plaintext access served by the device."
+  "group_note": "Only an opportunistic fail-only route: observed unauthenticated plaintext access served by the device.",
+  "N": {
+   "verdict_reach": "fail_only",
+   "uses_reference": false,
+   "assumptions": [
+    "observed unauthenticated request reached protected device functionality",
+    "accessed endpoint is not intentionally public open data"
+   ],
+   "passive_class": "inferred"
+  },
+  "ND": {
+   "verdict_reach": "fail_only",
+   "uses_reference": false,
+   "assumptions": [
+    "observed unauthenticated request reached protected device functionality",
+    "accessed endpoint is not intentionally public open data"
+   ],
+   "passive_class": "inferred"
+  }
  },
  {
   "test_case": "5.5-5-1",
@@ -333,18 +397,29 @@
     "note": "Reapplies 5.5-4-1 units to IXIT functions flagged as allowing configuration."
    }
   ],
-  "passive_class": "not_assessable",
-  "rationale": "Unit a inherits the IXIT-only units of 5.5-4-1.",
+  "rationale": "Unit a inherits the IXIT-only units of 5.5-4-1. ND: a published manual documenting an unauthenticated function shows FAIL.",
   "quarant_capabilities": [],
   "reference_sources": [],
-  "verdict_reach": "none",
-  "uses_reference": false,
-  "assumptions": [],
   "opportunistic": false,
   "outside_procedure_cues": "",
   "conditional": true,
   "condition_passive": "partly",
-  "group_note": "As 5.5-4, restricted to configuration-changing functions; undocumented-interface check needs IXIT."
+  "group_note": "As 5.5-4, restricted to configuration-changing functions; undocumented-interface check needs IXIT.",
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "fail_only",
+   "uses_reference": true,
+   "assumptions": [
+    "manufacturer's public documentation describes the subject as the IXIT would",
+    "documented unauthenticated function allows security-relevant configuration changes"
+   ],
+   "passive_class": "inferred"
+  }
  },
  {
   "test_case": "5.5-5-2",
@@ -372,7 +447,6 @@
     "note": "Scanning suggested; passively seen answering services can be compared to IXIT 28."
    }
   ],
-  "passive_class": "inferred",
   "rationale": "Unit a as 5.5-4-2: observed unauthenticated configuration change gives FAIL under assumptions; unit b needs IXIT; PASS unreachable.",
   "quarant_capabilities": [
    "I2_*_SERVICE_OBSERVED",
@@ -383,17 +457,29 @@
    "observed_ports/protocols"
   ],
   "reference_sources": [],
-  "verdict_reach": "fail_only",
-  "uses_reference": false,
-  "assumptions": [
-   "observed unauthenticated request performed a security-relevant configuration change",
-   "protocol is not an excepted network service protocol"
-  ],
   "opportunistic": true,
   "outside_procedure_cues": "",
   "conditional": true,
   "condition_passive": "partly",
-  "group_note": "As 5.5-4, restricted to configuration-changing functions; undocumented-interface check needs IXIT."
+  "group_note": "As 5.5-4, restricted to configuration-changing functions; undocumented-interface check needs IXIT.",
+  "N": {
+   "verdict_reach": "fail_only",
+   "uses_reference": false,
+   "assumptions": [
+    "observed unauthenticated request performed a security-relevant configuration change",
+    "protocol is not an excepted network service protocol"
+   ],
+   "passive_class": "inferred"
+  },
+  "ND": {
+   "verdict_reach": "fail_only",
+   "uses_reference": false,
+   "assumptions": [
+    "observed unauthenticated request performed a security-relevant configuration change",
+    "protocol is not an excepted network service protocol"
+   ],
+   "passive_class": "inferred"
+  }
  },
  {
   "test_case": "5.5-6-1",
@@ -412,7 +498,6 @@
     "note": "Applies 5.5-1-1 units to channels the IXIT links to carrying critical security parameters; confidentiality required."
    }
   ],
-  "passive_class": "inferred",
   "rationale": "Substituting observed TLS parameters for IXIT crypto details and judging them against TR 103 621/SOGIS can show FAIL; guarantee/mechanism fit and full PASS need IXIT.",
   "quarant_capabilities": [
    "TLS_CLIENT_HELLO",
@@ -433,17 +518,29 @@
    "SOGIS ACM",
    "public cryptanalytic literature"
   ],
-  "verdict_reach": "fail_only",
-  "uses_reference": true,
-  "assumptions": [
-   "observed TLS channels cover all mechanisms the IXIT would list",
-   "observed channels carry critical security parameters as IXIT would state"
-  ],
   "opportunistic": false,
   "outside_procedure_cues": "Plaintext credentials observed in traffic would contradict the provision directly.",
   "conditional": true,
   "condition_passive": "partly",
-  "group_note": "Fail-only catalogue route on visible TLS, assuming those channels carry CSPs; functional IXIT comparison unreachable."
+  "group_note": "Fail-only catalogue route on visible TLS, assuming those channels carry CSPs; functional IXIT comparison unreachable.",
+  "N": {
+   "verdict_reach": "fail_only",
+   "uses_reference": true,
+   "assumptions": [
+    "observed TLS channels cover all mechanisms the IXIT would list",
+    "observed channels carry critical security parameters as IXIT would state"
+   ],
+   "passive_class": "inferred"
+  },
+  "ND": {
+   "verdict_reach": "fail_only",
+   "uses_reference": true,
+   "assumptions": [
+    "observed TLS channels cover all mechanisms the IXIT would list",
+    "observed channels carry critical security parameters as IXIT would state"
+   ],
+   "passive_class": "inferred"
+  }
  },
  {
   "test_case": "5.5-6-2",
@@ -462,7 +559,6 @@
     "note": "Sniff handshakes and compare to IXIT; downgrade attempts suggested are active."
    }
   ],
-  "passive_class": "not_assessable",
   "rationale": "Inherits 5.5-1-2: verdict is a difference from IXIT, unreachable without IXIT.",
   "quarant_capabilities": [
    "TLS_CLIENT_HELLO",
@@ -474,14 +570,23 @@
    "I7_TLS_CERTIFICATE_ANOMALY_OBSERVED"
   ],
   "reference_sources": [],
-  "verdict_reach": "none",
-  "uses_reference": false,
-  "assumptions": [],
   "opportunistic": false,
   "outside_procedure_cues": "Plaintext credentials or tokens in traffic would contradict the provision, but this case only compares with IXIT.",
   "conditional": true,
   "condition_passive": "partly",
-  "group_note": "Fail-only catalogue route on visible TLS, assuming those channels carry CSPs; functional IXIT comparison unreachable."
+  "group_note": "Fail-only catalogue route on visible TLS, assuming those channels carry CSPs; functional IXIT comparison unreachable.",
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  }
  },
  {
   "test_case": "5.5-7-1",
@@ -500,7 +605,6 @@
     "note": "Applies 5.5-1-1 units to channels the IXIT links to carrying critical security parameters over remotely accessible interfaces; confidentiality required."
    }
   ],
-  "passive_class": "inferred",
   "rationale": "Substituting observed TLS parameters for IXIT crypto details and judging them against TR 103 621/SOGIS can show FAIL; guarantee/mechanism fit and full PASS need IXIT.",
   "quarant_capabilities": [
    "TLS_CLIENT_HELLO",
@@ -521,17 +625,29 @@
    "SOGIS ACM",
    "public cryptanalytic literature"
   ],
-  "verdict_reach": "fail_only",
-  "uses_reference": true,
-  "assumptions": [
-   "observed TLS channels cover all mechanisms the IXIT would list",
-   "observed channels carry CSPs over remotely accessible interfaces"
-  ],
   "opportunistic": false,
   "outside_procedure_cues": "Plaintext credentials to remote endpoints would contradict the provision directly.",
   "conditional": true,
   "condition_passive": "partly",
-  "group_note": "As 5.5-6, additionally assuming remote accessibility of the observed channels."
+  "group_note": "As 5.5-6, additionally assuming remote accessibility of the observed channels.",
+  "N": {
+   "verdict_reach": "fail_only",
+   "uses_reference": true,
+   "assumptions": [
+    "observed TLS channels cover all mechanisms the IXIT would list",
+    "observed channels carry CSPs over remotely accessible interfaces"
+   ],
+   "passive_class": "inferred"
+  },
+  "ND": {
+   "verdict_reach": "fail_only",
+   "uses_reference": true,
+   "assumptions": [
+    "observed TLS channels cover all mechanisms the IXIT would list",
+    "observed channels carry CSPs over remotely accessible interfaces"
+   ],
+   "passive_class": "inferred"
+  }
  },
  {
   "test_case": "5.5-7-2",
@@ -550,7 +666,6 @@
     "note": "Sniff handshakes and compare to IXIT; downgrade attempts suggested are active."
    }
   ],
-  "passive_class": "not_assessable",
   "rationale": "Inherits 5.5-1-2: verdict is a difference from IXIT, unreachable without IXIT.",
   "quarant_capabilities": [
    "TLS_CLIENT_HELLO",
@@ -562,14 +677,23 @@
    "I7_TLS_CERTIFICATE_ANOMALY_OBSERVED"
   ],
   "reference_sources": [],
-  "verdict_reach": "none",
-  "uses_reference": false,
-  "assumptions": [],
   "opportunistic": false,
   "outside_procedure_cues": "Plaintext credentials sent to remote endpoints would contradict the provision, but this case only compares with IXIT.",
   "conditional": true,
   "condition_passive": "partly",
-  "group_note": "As 5.5-6, additionally assuming remote accessibility of the observed channels."
+  "group_note": "As 5.5-6, additionally assuming remote accessibility of the observed channels.",
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  }
  },
  {
   "test_case": "5.5-8-1",
@@ -593,18 +717,26 @@
     "note": "Presence of SO confirmation statement."
    }
   ],
-  "passive_class": "not_assessable",
   "rationale": "Units a,b concern manufacturer processes and a confirmation in IXIT; no traffic or public route.",
   "quarant_capabilities": [],
   "reference_sources": [],
-  "verdict_reach": "none",
-  "uses_reference": false,
-  "assumptions": [],
   "opportunistic": false,
   "outside_procedure_cues": "",
   "conditional": true,
   "condition_passive": "partly",
-  "group_note": "Purely process documentation; no passive route."
+  "group_note": "Purely process documentation; no passive route.",
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  }
  },
  {
   "test_case": "5.6-1-1",
@@ -628,18 +760,26 @@
     "note": "Justification of enabled network-reachable logical interfaces."
    }
   ],
-  "passive_class": "not_assessable",
   "rationale": "Units a,b judge IXIT 15/28 justifications.",
   "quarant_capabilities": [],
   "reference_sources": [],
-  "verdict_reach": "none",
-  "uses_reference": false,
-  "assumptions": [],
   "opportunistic": false,
   "outside_procedure_cues": "",
   "conditional": true,
   "condition_passive": "no",
-  "group_note": "Both verdicts are relative to IXIT interface lists; observed services are only outside-procedure cues."
+  "group_note": "Both verdicts are relative to IXIT interface lists; observed services are only outside-procedure cues.",
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  }
  },
  {
   "test_case": "5.6-1-2",
@@ -674,7 +814,6 @@
     "note": "Undocumented logical interfaces; passively seen services are a partial view."
    }
   ],
-  "passive_class": "not_assessable",
   "rationale": "Units a,b active/physical; unit c FAIL means an interface absent from IXIT 28, unprovable without IXIT. Reach none.",
   "quarant_capabilities": [
    "I2_*_SERVICE_OBSERVED",
@@ -684,14 +823,23 @@
    "observed_ports/protocols"
   ],
   "reference_sources": [],
-  "verdict_reach": "none",
-  "uses_reference": false,
-  "assumptions": [],
   "opportunistic": false,
   "outside_procedure_cues": "Services seen answering on the LAN or WAN indicate enabled logical interfaces; completeness needs IXIT 28.",
   "conditional": true,
   "condition_passive": "no",
-  "group_note": "Both verdicts are relative to IXIT interface lists; observed services are only outside-procedure cues."
+  "group_note": "Both verdicts are relative to IXIT interface lists; observed services are only outside-procedure cues.",
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  }
  },
  {
   "test_case": "5.6-2-1",
@@ -715,18 +863,26 @@
     "note": "Security-relevant disclosures are necessary for operation?"
    }
   ],
-  "passive_class": "not_assessable",
   "rationale": "Units a,b judge IXIT 28 'Disclosed Information'.",
   "quarant_capabilities": [],
   "reference_sources": [],
-  "verdict_reach": "none",
-  "uses_reference": false,
-  "assumptions": [],
   "opportunistic": false,
   "outside_procedure_cues": "",
   "conditional": false,
   "condition_passive": "n/a",
-  "group_note": "Disclosures are visible in traffic, but verdicts compare with IXIT 'Disclosed Information'."
+  "group_note": "Disclosures are visible in traffic, but verdicts compare with IXIT 'Disclosed Information'.",
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  }
  },
  {
   "test_case": "5.6-2-2",
@@ -745,7 +901,6 @@
     "note": "Banners, versions in SSDP/mDNS/DHCP/HTTP are observable; undocumented status needs IXIT."
    }
   ],
-  "passive_class": "not_assessable",
   "rationale": "Unit a: disclosures are visible, but FAIL means not described in IXIT; unreachable without IXIT. Reach none.",
   "quarant_capabilities": [
    "ssdp_server/location",
@@ -756,14 +911,23 @@
    "I2_HTTP_ADMIN_INTERFACE_SUSPECTED"
   ],
   "reference_sources": [],
-  "verdict_reach": "none",
-  "uses_reference": false,
-  "assumptions": [],
   "opportunistic": false,
   "outside_procedure_cues": "Firmware or kernel versions in SSDP, mDNS, DHCP or HTTP headers are visible unauthenticated disclosures, but undocumentedness needs IXIT.",
   "conditional": false,
   "condition_passive": "n/a",
-  "group_note": "Disclosures are visible in traffic, but verdicts compare with IXIT 'Disclosed Information'."
+  "group_note": "Disclosures are visible in traffic, but verdicts compare with IXIT 'Disclosed Information'.",
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  }
  },
  {
   "test_case": "5.6-3-1",
@@ -787,18 +951,26 @@
     "note": "Documented status is disabled."
    }
   ],
-  "passive_class": "not_assessable",
   "rationale": "Units a,b read IXIT 15 only.",
   "quarant_capabilities": [],
   "reference_sources": [],
-  "verdict_reach": "none",
-  "uses_reference": false,
-  "assumptions": [],
   "opportunistic": false,
   "outside_procedure_cues": "",
   "conditional": false,
   "condition_passive": "n/a",
-  "group_note": "Physical inspection required."
+  "group_note": "Physical inspection required.",
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  }
  },
  {
   "test_case": "5.6-3-2",
@@ -832,18 +1004,26 @@
     "note": "Enabled/disabled status check per interface."
    }
   ],
-  "passive_class": "not_assessable",
   "rationale": "Units a-c need physical inspection; a gateway observer cannot see non-IP air or wired ports.",
   "quarant_capabilities": [],
   "reference_sources": [],
-  "verdict_reach": "none",
-  "uses_reference": false,
-  "assumptions": [],
   "opportunistic": false,
   "outside_procedure_cues": "",
   "conditional": false,
   "condition_passive": "n/a",
-  "group_note": "Physical inspection required."
+  "group_note": "Physical inspection required.",
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  }
  },
  {
   "test_case": "5.6-4A-1",
@@ -881,18 +1061,26 @@
     "note": "Disabled by default when intermittently needed."
    }
   ],
-  "passive_class": "not_assessable",
   "rationale": "Units a-d read IXIT 15 only.",
   "quarant_capabilities": [],
   "reference_sources": [],
-  "verdict_reach": "none",
-  "uses_reference": false,
-  "assumptions": [],
   "opportunistic": false,
   "outside_procedure_cues": "",
   "conditional": true,
   "condition_passive": "no",
-  "group_note": "Physical debug interfaces require device access."
+  "group_note": "Physical debug interfaces require device access.",
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  }
  },
  {
   "test_case": "5.6-4A-2",
@@ -918,18 +1106,26 @@
     "note": "Attempt debug use of other physical interfaces."
    }
   ],
-  "passive_class": "not_assessable",
   "rationale": "Units a,b require attempting to use physical interfaces; an observed Telnet service is not evidence about physical debug ports.",
   "quarant_capabilities": [],
   "reference_sources": [],
-  "verdict_reach": "none",
-  "uses_reference": false,
-  "assumptions": [],
   "opportunistic": false,
   "outside_procedure_cues": "",
   "conditional": true,
   "condition_passive": "no",
-  "group_note": "Physical debug interfaces require device access."
+  "group_note": "Physical debug interfaces require device access.",
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  }
  },
  {
   "test_case": "5.6-4B-1",
@@ -946,18 +1142,26 @@
     "note": "Documented physical protection of debug ports."
    }
   ],
-  "passive_class": "not_assessable",
   "rationale": "Unit a reads IXIT 15 only.",
   "quarant_capabilities": [],
   "reference_sources": [],
-  "verdict_reach": "none",
-  "uses_reference": false,
-  "assumptions": [],
   "opportunistic": false,
   "outside_procedure_cues": "",
   "conditional": true,
   "condition_passive": "no",
-  "group_note": "Physical inspection required."
+  "group_note": "Physical inspection required.",
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  }
  },
  {
   "test_case": "5.6-4B-2",
@@ -975,18 +1179,26 @@
     "note": "Physical inspection of debug ports."
    }
   ],
-  "passive_class": "not_assessable",
   "rationale": "Unit a needs physical access.",
   "quarant_capabilities": [],
   "reference_sources": [],
-  "verdict_reach": "none",
-  "uses_reference": false,
-  "assumptions": [],
   "opportunistic": false,
   "outside_procedure_cues": "",
   "conditional": true,
   "condition_passive": "no",
-  "group_note": "Physical inspection required."
+  "group_note": "Physical inspection required.",
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  }
  },
  {
   "test_case": "5.6-5-1",
@@ -1003,20 +1215,28 @@
     "note": "Necessity of documented default-enabled services."
    }
   ],
-  "passive_class": "not_assessable",
   "rationale": "Unit a judges IXIT 13 justifications; observed services could hint at extra services but the case defines no such route.",
   "quarant_capabilities": [
    "I2_*_SERVICE_OBSERVED"
   ],
   "reference_sources": [],
-  "verdict_reach": "none",
-  "uses_reference": false,
-  "assumptions": [],
   "opportunistic": false,
   "outside_procedure_cues": "Observed answering services (telnet, ftp, rtsp) suggest enabled services whose necessity the conceptual case cannot test.",
   "conditional": false,
   "condition_passive": "n/a",
-  "group_note": "Only a conceptual case; observed services cannot be used by it."
+  "group_note": "Only a conceptual case; observed services cannot be used by it.",
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  }
  },
  {
   "test_case": "5.6-6-1",
@@ -1033,18 +1253,26 @@
     "note": "Appropriateness of IXIT 16 techniques."
    }
   ],
-  "passive_class": "not_assessable",
   "rationale": "Unit a is IXIT-only.",
   "quarant_capabilities": [],
   "reference_sources": [],
-  "verdict_reach": "none",
-  "uses_reference": false,
-  "assumptions": [],
   "opportunistic": false,
   "outside_procedure_cues": "",
   "conditional": false,
   "condition_passive": "n/a",
-  "group_note": "Internal/documentation only."
+  "group_note": "Internal/documentation only.",
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  }
  },
  {
   "test_case": "5.6-7-1",
@@ -1061,18 +1289,26 @@
     "note": "Adequacy of IXIT 17 mechanisms."
    }
   ],
-  "passive_class": "not_assessable",
   "rationale": "Unit a is IXIT-only.",
   "quarant_capabilities": [],
   "reference_sources": [],
-  "verdict_reach": "none",
-  "uses_reference": false,
-  "assumptions": [],
   "opportunistic": false,
   "outside_procedure_cues": "",
   "conditional": false,
   "condition_passive": "n/a",
-  "group_note": "Internal/documentation only."
+  "group_note": "Internal/documentation only.",
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  }
  },
  {
   "test_case": "5.6-8-1",
@@ -1096,18 +1332,26 @@
     "note": "Mechanism controls memory access."
    }
   ],
-  "passive_class": "not_assessable",
   "rationale": "Units a,b are IXIT-only (possibly board inspection).",
   "quarant_capabilities": [],
   "reference_sources": [],
-  "verdict_reach": "none",
-  "uses_reference": false,
-  "assumptions": [],
   "opportunistic": false,
   "outside_procedure_cues": "",
   "conditional": false,
   "condition_passive": "n/a",
-  "group_note": "Internal/documentation only."
+  "group_note": "Internal/documentation only.",
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  }
  },
  {
   "test_case": "5.6-9-1",
@@ -1131,18 +1375,26 @@
     "note": "SO confirmation present."
    }
   ],
-  "passive_class": "not_assessable",
   "rationale": "Units a,b concern SO processes and confirmation.",
   "quarant_capabilities": [],
   "reference_sources": [],
-  "verdict_reach": "none",
-  "uses_reference": false,
-  "assumptions": [],
   "opportunistic": false,
   "outside_procedure_cues": "",
   "conditional": false,
   "condition_passive": "n/a",
-  "group_note": "Process documentation only."
+  "group_note": "Process documentation only.",
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  }
  },
  {
   "test_case": "5.7-1-1",
@@ -1166,18 +1418,26 @@
     "note": "Description and detection suit guarantees."
    }
   ],
-  "passive_class": "not_assessable",
   "rationale": "Units a,b read IXIT 20.",
   "quarant_capabilities": [],
   "reference_sources": [],
-  "verdict_reach": "none",
-  "uses_reference": false,
-  "assumptions": [],
   "opportunistic": false,
   "outside_procedure_cues": "",
   "conditional": false,
   "condition_passive": "n/a",
-  "group_note": "Firmware access and manipulation required."
+  "group_note": "Firmware access and manipulation required.",
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  }
  },
  {
   "test_case": "5.7-1-2",
@@ -1196,18 +1456,26 @@
     "note": "Firmware manipulation and boot observation."
    }
   ],
-  "passive_class": "not_assessable",
   "rationale": "Unit a needs firmware access and manipulation; boot-time checks are not visible in traffic.",
   "quarant_capabilities": [],
   "reference_sources": [],
-  "verdict_reach": "none",
-  "uses_reference": false,
-  "assumptions": [],
   "opportunistic": false,
   "outside_procedure_cues": "",
   "conditional": false,
   "condition_passive": "n/a",
-  "group_note": "Firmware access and manipulation required."
+  "group_note": "Firmware access and manipulation required.",
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  }
  },
  {
   "test_case": "5.7-2-1",
@@ -1231,18 +1499,26 @@
     "note": "Necessity of each documented notification functionality."
    }
   ],
-  "passive_class": "not_assessable",
   "rationale": "Units a,b read IXIT 20.",
   "quarant_capabilities": [],
   "reference_sources": [],
-  "verdict_reach": "none",
-  "uses_reference": false,
-  "assumptions": [],
   "opportunistic": false,
   "outside_procedure_cues": "",
   "conditional": true,
   "condition_passive": "no",
-  "group_note": "Post-tamper traffic could be measured passively, but the tamper trigger is active."
+  "group_note": "Post-tamper traffic could be measured passively, but the tamper trigger is active.",
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  }
  },
  {
   "test_case": "5.7-2-2",
@@ -1271,21 +1547,29 @@
     "note": "Traffic after tampering vs documented notification functions; measuring is passive, trigger is not."
    }
   ],
-  "passive_class": "not_assessable",
   "rationale": "Unit b's measurement is passive traffic inspection, but both units require the TL to induce the tamper event; a passive observer cannot know detection occurred.",
   "quarant_capabilities": [
    "PERIODIC_COMMUNICATION_OBSERVED",
    "dns_queries"
   ],
   "reference_sources": [],
-  "verdict_reach": "none",
-  "uses_reference": false,
-  "assumptions": [],
   "opportunistic": false,
   "outside_procedure_cues": "Traffic after a genuine tamper event could be checked for restriction, but the observer cannot know detection occurred.",
   "conditional": true,
   "condition_passive": "no",
-  "group_note": "Post-tamper traffic could be measured passively, but the tamper trigger is active."
+  "group_note": "Post-tamper traffic could be measured passively, but the tamper trigger is active.",
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  }
  },
  {
   "test_case": "5.8-1-1",
@@ -1304,7 +1588,6 @@
     "note": "Applies 5.5-1-1 units to channels the IXIT links to carrying personal data to associated services; confidentiality required."
    }
   ],
-  "passive_class": "inferred",
   "rationale": "Substituting observed TLS parameters for IXIT crypto details and judging them against TR 103 621/SOGIS can show FAIL; guarantee/mechanism fit and full PASS need IXIT.",
   "quarant_capabilities": [
    "TLS_CLIENT_HELLO",
@@ -1321,17 +1604,29 @@
    "SOGIS ACM",
    "public cryptanalytic literature"
   ],
-  "verdict_reach": "fail_only",
-  "uses_reference": true,
-  "assumptions": [
-   "observed TLS channels cover all mechanisms the IXIT would list",
-   "observed channels carry personal data to associated services"
-  ],
   "opportunistic": false,
   "outside_procedure_cues": "Plaintext personal data in traffic would contradict the provision directly.",
   "conditional": true,
   "condition_passive": "partly",
-  "group_note": "Fail-only catalogue route on visible TLS, assuming those channels carry personal data; IXIT comparison unreachable."
+  "group_note": "Fail-only catalogue route on visible TLS, assuming those channels carry personal data; IXIT comparison unreachable.",
+  "N": {
+   "verdict_reach": "fail_only",
+   "uses_reference": true,
+   "assumptions": [
+    "observed TLS channels cover all mechanisms the IXIT would list",
+    "observed channels carry personal data to associated services"
+   ],
+   "passive_class": "inferred"
+  },
+  "ND": {
+   "verdict_reach": "fail_only",
+   "uses_reference": true,
+   "assumptions": [
+    "observed TLS channels cover all mechanisms the IXIT would list",
+    "observed channels carry personal data to associated services"
+   ],
+   "passive_class": "inferred"
+  }
  },
  {
   "test_case": "5.8-1-2",
@@ -1350,7 +1645,6 @@
     "note": "Sniff handshakes and compare to IXIT; downgrade attempts suggested are active."
    }
   ],
-  "passive_class": "not_assessable",
   "rationale": "Inherits 5.5-1-2: verdict is a difference from IXIT, unreachable without IXIT.",
   "quarant_capabilities": [
    "TLS_CLIENT_HELLO",
@@ -1363,14 +1657,23 @@
    "I6_*"
   ],
   "reference_sources": [],
-  "verdict_reach": "none",
-  "uses_reference": false,
-  "assumptions": [],
   "opportunistic": false,
   "outside_procedure_cues": "Plaintext personal data to cloud endpoints would contradict the provision, but this case only compares with IXIT.",
   "conditional": true,
   "condition_passive": "partly",
-  "group_note": "Fail-only catalogue route on visible TLS, assuming those channels carry personal data; IXIT comparison unreachable."
+  "group_note": "Fail-only catalogue route on visible TLS, assuming those channels carry personal data; IXIT comparison unreachable.",
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  }
  },
  {
   "test_case": "5.8-2-1",
@@ -1389,7 +1692,6 @@
     "note": "Applies 5.5-1-1 units to channels the IXIT links to carrying sensitive personal data to associated services; confidentiality required."
    }
   ],
-  "passive_class": "inferred",
   "rationale": "Substituting observed TLS parameters for IXIT crypto details and judging them against TR 103 621/SOGIS can show FAIL; guarantee/mechanism fit and full PASS need IXIT.",
   "quarant_capabilities": [
    "TLS_CLIENT_HELLO",
@@ -1406,17 +1708,29 @@
    "SOGIS ACM",
    "public cryptanalytic literature"
   ],
-  "verdict_reach": "fail_only",
-  "uses_reference": true,
-  "assumptions": [
-   "observed TLS channels cover all mechanisms the IXIT would list",
-   "observed channels carry sensitive personal data to associated services"
-  ],
   "opportunistic": false,
   "outside_procedure_cues": "Plaintext sensitive personal data in traffic would contradict the provision directly.",
   "conditional": true,
   "condition_passive": "partly",
-  "group_note": "As 5.8-1 for sensitive personal data; sensitivity mapping is an assumption."
+  "group_note": "As 5.8-1 for sensitive personal data; sensitivity mapping is an assumption.",
+  "N": {
+   "verdict_reach": "fail_only",
+   "uses_reference": true,
+   "assumptions": [
+    "observed TLS channels cover all mechanisms the IXIT would list",
+    "observed channels carry sensitive personal data to associated services"
+   ],
+   "passive_class": "inferred"
+  },
+  "ND": {
+   "verdict_reach": "fail_only",
+   "uses_reference": true,
+   "assumptions": [
+    "observed TLS channels cover all mechanisms the IXIT would list",
+    "observed channels carry sensitive personal data to associated services"
+   ],
+   "passive_class": "inferred"
+  }
  },
  {
   "test_case": "5.8-2-2",
@@ -1435,7 +1749,6 @@
     "note": "Sniff handshakes and compare to IXIT; downgrade attempts suggested are active."
    }
   ],
-  "passive_class": "not_assessable",
   "rationale": "Inherits 5.5-1-2: verdict is a difference from IXIT, unreachable without IXIT.",
   "quarant_capabilities": [
    "TLS_CLIENT_HELLO",
@@ -1448,14 +1761,23 @@
    "I6_*"
   ],
   "reference_sources": [],
-  "verdict_reach": "none",
-  "uses_reference": false,
-  "assumptions": [],
   "opportunistic": false,
   "outside_procedure_cues": "Plaintext sensitive data (e.g. unencrypted camera streams) would contradict the provision, but this case only compares with IXIT.",
   "conditional": true,
   "condition_passive": "partly",
-  "group_note": "As 5.8-1 for sensitive personal data; sensitivity mapping is an assumption."
+  "group_note": "As 5.8-1 for sensitive personal data; sensitivity mapping is an assumption.",
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  }
  },
  {
   "test_case": "5.8-3-1",
@@ -1489,23 +1811,31 @@
     "note": "Visual inspection of casing; public product images give only partial view."
    }
   ],
-  "passive_class": "inferred",
-  "rationale": "Units a,b: published documentation can show FAIL (missing or unclear); unit c needs inspection, so PASS is unreachable; substitutions are assumptions.",
+  "rationale": "N: the subject is the manufacturer's documentation, not allowed under N. ND: published docs can show FAIL (missing/unclear sensor info); unit c needs inspection, so PASS unreachable.",
   "quarant_capabilities": [],
   "reference_sources": [
    "published user documentation",
    "vendor website"
   ],
-  "verdict_reach": "fail_only",
-  "uses_reference": true,
-  "assumptions": [
-   "published documentation is the one the IXIT would point to",
-   "public product images reveal obvious sensors like visual inspection"
-  ],
   "opportunistic": false,
   "outside_procedure_cues": "",
   "conditional": true,
   "condition_passive": "partly",
-  "group_note": "Published documentation allows a fail-only judgement; full PASS needs device inspection and the IXIT pointer."
+  "group_note": "Published documentation allows a fail-only judgement; full PASS needs device inspection and the IXIT pointer.",
+  "N": {
+   "verdict_reach": "none",
+   "uses_reference": false,
+   "assumptions": [],
+   "passive_class": "not_assessable"
+  },
+  "ND": {
+   "verdict_reach": "fail_only",
+   "uses_reference": true,
+   "assumptions": [
+    "published documentation is the one the IXIT would point to",
+    "public product images reveal obvious sensors like visual inspection"
+   ],
+   "passive_class": "inferred"
+  }
  }
 ]
