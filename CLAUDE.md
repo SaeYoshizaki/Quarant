@@ -5,10 +5,11 @@ Quarant：家庭内 IoT 機器の通信を**パッシブに**監視し、何が�
 ## 最初に読むもの
 
 - [docs/STATUS.md](docs/STATUS.md)：現状、既知の問題、次の作業
+- [docs/RESEARCH.md](docs/RESEARCH.md)：研究の問い、貢献、可観測性マトリクス、評価計画（草案）
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)：設計原則と構成
-- [docs/ROADMAP.md](docs/ROADMAP.md)：Phase 1〜3
+- [docs/ROADMAP.md](docs/ROADMAP.md)：研究として進める順序（Step 0〜5）
 - [docs/DECISIONS.md](docs/DECISIONS.md)：設計判断の記録（判断を変えたら追記する）
-- [docs/DETECTION.md](docs/DETECTION.md)、[docs/EVALUATION.md](docs/EVALUATION.md)、[docs/TESTING.md](docs/TESTING.md)
+- [docs/DETECTION.md](docs/DETECTION.md)、[docs/EVALUATION.md](docs/EVALUATION.md)、[docs/TESTING.md](docs/TESTING.md)、[docs/EXPERIMENTS.md](docs/EXPERIMENTS.md)、[docs/DATASETS.md](docs/DATASETS.md)
 
 ## 恒久ルール
 

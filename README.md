@@ -55,6 +55,7 @@ go run ./cmd/quarant label-eval --events runs/demo/events.jsonl \
 
 - [docs/STATUS.md](docs/STATUS.md)
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+- [docs/RESEARCH.md](docs/RESEARCH.md)
 - [docs/ROADMAP.md](docs/ROADMAP.md)
 - [docs/AUDIT-2026-10.md](docs/AUDIT-2026-10.md)
 

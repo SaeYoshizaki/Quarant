@@ -54,10 +54,10 @@
 5. **合成 PCAP の再現性**：TLS 部分のバイト列は実行のたびに変わる（解析結果は同じ）。
 6. **巨大ファイル**：`precision.go`、`mitigation.go`、`web/app/page.tsx`。分割は Phase 2 で行う。
 
-## 次に行う作業（優先順）
+## 次に行う作業
 
-1. フラッド（SYN、UDP、ICMP）とリフレクションの検出器。UNSW の攻撃データに 135 窓あり、評価の準備はできている。
-2. 少量の C2 への対策として、脅威情報フィードとのローカル照合（Torii を見逃した）。
-3. 相関エンジンの設計（Phase 2-1）と SQLite スキーマ。
-4. Suricata と Zeek を実際に動かし、合成 PCAP と実 PCAP で比較する基盤。
-5. Web UI に basis、識別の根拠、visibility limits を表示する。
+[ROADMAP.md](ROADMAP.md) の Step 0〜5 の順に進める。直近の作業は次のとおり。
+
+1. **Step 0**：[RESEARCH.md](RESEARCH.md)（草案）について、教授と議論して確定させる。関連研究を一次資料で調べる。
+2. **Step 1**：既存ルールの精度監査。カテゴリ推定の正解率を出す。実験をスクリプト化する。
+3. **Step 2**：Zeek、Suricata との比較。
