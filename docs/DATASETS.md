@@ -80,7 +80,11 @@
 - **引用**：Dadkhah et al., PST 2022
 - **URL**：https://www.unb.ca/cic/datasets/iotdataset-2022.html
 - **ライセンス**：CIC 共通の条件 ✔ ── "You may redistribute, republish, and mirror our datasets in any form; however, any use or redistribution of the data must include a citation to the dataset and the research paper listed."
-- **形式**：PCAP。起動時、待機時、操作時などの種類別に分かれている（未確認）。登録フォームが必要。
+- **形式**：PCAP。種類別のアーカイブに分かれている。登録フォームが必要。
+  - 1-Power（起動時）、2-Idle（待機時）、3-Interactions（操作時）、4-Scenarios、5-Active、6-Attacks
+  - CSV（特徴量）、Z-Wave と Zigbee の実験
+  - 1-Power は確認済み（2026-10-17）。機器ごと、試行ごとに 1 つの PCAP（40 台 × 3 回 = 120 個）で、中身は機器とゲートウェイだけ。ゲートウェイは 192.168.137.1（Windows のインターネット共有、MAC 3c:18:a0:45:da:85）。
+  - 保存先は USB ドライブ（`/Volumes/Untitled/CIC_IOT_Dataset2022`。展開先は `quarant-datasets/cic-iot-2022/`）。解析は `~/datasets/scripts/run-cic.sh <part>`。
 - **検証できること**：新しい機器での識別（起動時の DHCP）、TLS の実態、RTSP のブルートフォース。
 - **限界**：攻撃は少ない。ハブを経由する Zigbee や Z-Wave の機器はハブの MAC にまとめられてしまう。
 

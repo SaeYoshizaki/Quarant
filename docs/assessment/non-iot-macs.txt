@@ -8,3 +8,5 @@ b4:ce:f6:a7:a3:c2
 d0:a6:37:df:a1:e1
 f4:5c:89:93:cc:85
 14:cc:20:51:33:ea
+# CIC IoT 2022: the capture gateway (Windows host sharing its connection, 192.168.137.1)
+3c:18:a0:45:da:85

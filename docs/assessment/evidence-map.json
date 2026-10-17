@@ -52,7 +52,7 @@
    "status": "implemented",
    "assumption": "the weak channel carries authentication",
    "require_pattern": "risk_kind=deprecated_tls_version|risk_kind=(rc4|3des|des|null|export|anonymous|md5)_cipher",
-   "audit": "E4 sample: weak version 15/15 correct; all 15 'weak cipher selected' were CBC suites, which are not violation evidence by themselves, so only broken suites count."
+   "audit": "E4 sample: weak version 15/15 correct; all 15 'weak cipher selected' were CBC suites, which are not violation evidence by themselves, so only broken suites count. E6 (CIC 2022 power-on): 4/4 devices correct (Echo Spot, Nest Cam, Netatmo camera, Hue bridge: servers selected TLS 1.0)."
   },
   {
    "provision": "5.1-5",
@@ -109,7 +109,7 @@
    ],
    "status": "implemented",
    "require_pattern": "risk_kind=deprecated_tls_version|risk_kind=(rc4|3des|des|null|export|anonymous|md5)_cipher",
-   "audit": "E4 sample: weak version 15/15 correct; all 15 'weak cipher selected' were CBC suites, which are not violation evidence by themselves, so only broken suites count."
+   "audit": "E4 sample: weak version 15/15 correct; all 15 'weak cipher selected' were CBC suites, which are not violation evidence by themselves, so only broken suites count. E6 (CIC 2022 power-on): 4/4 devices correct (Echo Spot, Nest Cam, Netatmo camera, Hue bridge: servers selected TLS 1.0)."
   },
   {
    "provision": "5.5-4",
@@ -121,7 +121,8 @@
    "status": "implemented",
    "assumption": "the function is not meant as open access inside the home network (EN 303 645 5.5-4 itself allows services made available without authentication within a restricted network, e.g. DLNA)",
    "gap": "Authentication outside the request (earlier pairing, host allow-lists, a physical button) is not visible; whether the function was carried out is not known.",
-   "audit": "E5: IoT devices with evidence: 2016 HP printer (status queries on 3910/3911 and IPP printing from a PC answered without credentials; one unauthenticated PUT of /DevMgmt/ProductConfigDyn.xml), 2018 Belkin WeMo (GetHomeInfo SOAP answered 200 without credentials). Printer status and printing may fall under the restricted-network exception; the configuration write and the WeMo call do not obviously. Most matches overall were the gateway's UPnP IGD (non-IoT, excluded)."
+   "audit": "E5: IoT devices with evidence: 2016 HP printer (status queries on 3910/3911 and IPP printing from a PC answered without credentials; one unauthenticated PUT of /DevMgmt/ProductConfigDyn.xml), 2018 Belkin WeMo (GetHomeInfo SOAP answered 200 without credentials). Printer status and printing may fall under the restricted-network exception; the configuration write and the WeMo call do not obviously. Most matches overall were the gateway's UPnP IGD (non-IoT, excluded). E6 (CIC 2022 power-on): the only match was a DLNA GetProtocolInfo to a Sonos MediaRenderer, which EN 303 645 5.5-4 itself cites as an allowed restricted-network service; DLNA/UPnP AV services are excluded.",
+   "exclude_pattern": "/(MediaRenderer|MediaServer)/|soap_action=(GetProtocolInfo|Browse|Search|GetCurrentConnectionInfo|GetTransportInfo|GetPositionInfo|GetVolume|GetMute)\\b"
   },
   {
    "provision": "5.5-5",
@@ -144,7 +145,7 @@
    ],
    "status": "implemented",
    "exclude_pattern": "^(serial|device_id)=",
-   "audit": "E4 sample: HTTP auth/token headers 15/15 and session IDs in URLs 4/4 correct; 4/4 'token' events were device serial numbers (identifiers, not CSPs) and are excluded; cookies may be non-session (probable). IoT-23: a Philips Hue sent Authorization headers and auth= URL parameters in cleartext to its cloud (correct)."
+   "audit": "E4 sample: HTTP auth/token headers 15/15 and session IDs in URLs 4/4 correct; 4/4 'token' events were device serial numbers (identifiers, not CSPs) and are excluded; cookies may be non-session (probable). IoT-23: a Philips Hue sent Authorization headers and auth= URL parameters in cleartext to its cloud (correct). E6 (CIC 2022 power-on): Hue bridge (Authorization headers, auth= in URL) and Home Eye camera (Authorization header) to cloud over HTTP, both correct."
   },
   {
    "provision": "5.5-7",

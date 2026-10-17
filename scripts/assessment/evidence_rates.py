@@ -8,10 +8,10 @@ of one dataset counts once. For each provision in evidence-map.json the
 script counts devices with at least one matching signal, and writes a random
 sample of matching events per signal for the precision audit.
 
-usage: evidence_rates.py EVIDENCE_MAP RUNS_DIR OUT_MD SAMPLES_JSON [EXCLUDE_MACS]
+usage: evidence_rates.py EVIDENCE_MAP RUNS_DIR[,RUNS_DIR...] OUT_MD SAMPLES_JSON [EXCLUDE_MACS]
 EXCLUDE_MACS: optional file with one MAC per line (e.g. phones, laptops and the
 gateway from a dataset's ground truth) that are not IoT devices.
-Dataset groups are derived from run directory prefixes (unsw-, unswatk-, iot23-, laptop-).
+Dataset groups are derived from run directory prefixes (see GROUPS).
 """
 import collections
 import glob
@@ -22,7 +22,9 @@ import random
 import re
 import sys
 
-GROUPS = {"unsw-": "UNSW traces 2016", "unswatk-": "UNSW attacks 2018", "iot23-": "IoT-23 2018-19", "laptop-": "Laptop 2026 (not IoT)"}
+GROUPS = {"unsw-": "UNSW traces 2016", "unswatk-": "UNSW attacks 2018", "iot23-": "IoT-23 2018-19",
+          "cic-1-power-": "CIC IoT 2022 power-on", "cic-2-idle-": "CIC IoT 2022 idle",
+          "cic-3-interactions-": "CIC IoT 2022 interactions", "laptop-": "Laptop 2026 (not IoT)"}
 VERSION_RE = re.compile(r"\d+\.\d+(\.\d+)?")
 
 
@@ -81,7 +83,8 @@ def main():
     seen = collections.defaultdict(set)            # group -> devices with traffic
     hit = collections.defaultdict(lambda: collections.defaultdict(set))  # group -> provision -> devices
     pool = collections.defaultdict(list)           # signal -> events (for samples)
-    for d in sorted(glob.glob(os.path.join(runs_dir, "*"))):
+    run_dirs = sorted(d for root in runs_dir.split(",") for d in glob.glob(os.path.join(root, "*")))
+    for d in run_dirs:
         if not os.path.isdir(d) or not os.path.exists(os.path.join(d, "events.jsonl")):
             continue
         name = os.path.basename(d)
