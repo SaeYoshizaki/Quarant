@@ -53,7 +53,7 @@
    - 対処：`findings.json`（機器 × 種類、機器 × 状態）を加えた（D19）。UNSW の正常データでは、IoT 機器のイベント 1 日 1,579〜4,593 件が、状態 49〜54 件にまとまる。
    - 残り：`events.jsonl` 自体は通信ごとのまま。時間窓をまたぐ相関（Phase 2）は未実装。
 2. **重みの根拠**：`internal/reportapi/precision.go` の加重スコアには根拠が文書化されていない。研究方針 6.4 に沿って見直しが必要。
-3. **知識ベースの出典**：`knowledge/i5_vulnerable_components.json` の 14/21 件に出典がない。CVE-2023-1389 の対応づけが誤っている。キーワード照合（`amazon` など）が広すぎる。
+3. **知識ベースの出典**：対処済み（D20、[assessment/i5-references.md](assessment/i5-references.md)）。CVE 14 件を NVD で確かめ、製品の合わない 5 件（CVE-2023-1389 など）を外した。確認済みの CVE がない 13 項目は照合しない。キーワードは単語の単位で照合し、共有クラウドの名前を外した。残り：`i4_known_vuln_candidates.json` など、ほかの知識ファイルの出典は未確認。
 4. **ルールの誤検知の可能性**（AUDIT にあるもののうち未修正）：
    - I4 の `ota` 部分一致
    - `I9_DEFAULT_HOSTNAME_PATTERN` が接続先のホスト名で判定している

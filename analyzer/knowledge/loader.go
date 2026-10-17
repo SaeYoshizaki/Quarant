@@ -116,6 +116,36 @@ type I5VulnerableComponent struct {
 	LastReviewed       string         `json:"last_reviewed,omitempty"`
 	Severity           string         `json:"severity"`
 	Recommendation     []string       `json:"recommendation"`
+	// Status is "active" when at least one reference was verified against
+	// NVD for this product family; other entries are kept but not matched.
+	Status            string               `json:"status,omitempty"`
+	References        []I5Reference        `json:"references,omitempty"`
+	RemovedReferences []I5RemovedReference `json:"removed_references,omitempty"`
+}
+
+// I5Reference is a CVE checked against NVD for the product family.
+// AttackVector is NVD's (network, adjacent, local, physical): a passive
+// observer can only ever see conditions for network-reachable ones.
+type I5Reference struct {
+	CVE          string `json:"cve"`
+	URL          string `json:"url"`
+	Affected     string `json:"affected"`
+	AttackVector string `json:"attack_vector"`
+	Verified     string `json:"verified"`
+}
+
+// I5RemovedReference records a CVE that was listed for the family but does
+// not affect it (kept for the audit trail).
+type I5RemovedReference struct {
+	CVE     string `json:"cve"`
+	Reason  string `json:"reason"`
+	Checked string `json:"checked"`
+}
+
+// Active reports whether the entry may be matched: it has a verified
+// reference and is not marked inactive.
+func (c I5VulnerableComponent) Active() bool {
+	return len(c.References) > 0 && (c.Status == "" || c.Status == "active")
 }
 
 type I5VulnerableComponents []I5VulnerableComponent

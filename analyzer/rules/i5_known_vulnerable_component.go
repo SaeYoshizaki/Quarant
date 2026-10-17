@@ -70,6 +70,11 @@ func findBestI5VulnerableComponent(db *knowledge.DB, ctx *Context) *i5ComponentM
 
 	var best *i5ComponentMatch
 	for _, component := range *db.I5Vulnerable {
+		if !component.Active() {
+			// No CVE verified for this family: a match would report a
+			// "known vulnerable" family without a source.
+			continue
+		}
 		match, ok := matchI5VulnerableComponent(ctx, component)
 		if !ok {
 			continue
@@ -311,20 +316,40 @@ func i5FirstKeywordMatch(values []string, keywords []string) (string, bool) {
 	return "", false
 }
 
+// i5AnyKeywordContains matches keywords as whole tokens (domain labels,
+// words): substring matching made "lg" match "algolia", "eve" match
+// "events" and "hue" match any name containing it. A multi-word keyword
+// ("smart life", "tp-link") matches the same tokens in sequence.
 func i5AnyKeywordContains(value string, keywords []string) bool {
-	normalizedValue := i5NormalizeValue(value)
-	if normalizedValue == "" {
+	tokens := i5Tokens(value)
+	if len(tokens) == 0 {
 		return false
 	}
-
 	for _, keyword := range keywords {
-		normalizedKeyword := i5NormalizeValue(keyword)
-		if normalizedKeyword != "" && strings.Contains(normalizedValue, normalizedKeyword) {
-			return true
+		kt := i5Tokens(keyword)
+		if len(kt) == 0 {
+			continue
+		}
+		for i := 0; i+len(kt) <= len(tokens); i++ {
+			match := true
+			for j := range kt {
+				if tokens[i+j] != kt[j] {
+					match = false
+					break
+				}
+			}
+			if match {
+				return true
+			}
 		}
 	}
-
 	return false
+}
+
+func i5Tokens(value string) []string {
+	return strings.FieldsFunc(strings.ToLower(value), func(r rune) bool {
+		return !(r >= 'a' && r <= 'z' || r >= '0' && r <= '9')
+	})
 }
 
 func i5VendorKeywordMatches(ctx *Context, keywords []string) (string, bool) {
@@ -332,6 +357,11 @@ func i5VendorKeywordMatches(ctx *Context, keywords []string) (string, bool) {
 		return "", false
 	}
 
+	// Vendor keywords describe the identified vendor, so they are matched
+	// against the vendor and family candidates only. Matching them against
+	// destinations made every device that contacts google.com or
+	// amazonaws.com a candidate for that vendor's products; destinations
+	// have their own host/SNI keyword lists.
 	for _, value := range []string{
 		ctx.VendorCandidate,
 		ctx.FamilyCandidate,
@@ -340,17 +370,6 @@ func i5VendorKeywordMatches(ctx *Context, keywords []string) (string, bool) {
 			return value, true
 		}
 	}
-
-	if value, ok := i5FirstKeywordMatch(i5HostValues(ctx), keywords); ok {
-		return value, true
-	}
-	if value, ok := i5FirstKeywordMatch(i5UserAgentValues(ctx), keywords); ok {
-		return value, true
-	}
-	if value, ok := i5FirstKeywordMatch(i5SNIValues(ctx), keywords); ok {
-		return value, true
-	}
-
 	return "", false
 }
 
@@ -389,7 +408,7 @@ func formatI5KnownVulnerableComponentMatch(
 		Severity: i5Severity(component.Severity),
 		Message:  "Traffic characteristics match a known vulnerable family or component candidate in local knowledge.",
 		Evidence: fmt.Sprintf(
-			"knowledge_id=%s matched_component_id=%s match_basis=%s match_level=%s category=%s vendor=%s family=%s context_category=%s vendor_candidate=%s family_candidate=%s matched_signals=%s known_issues=%s representative_cves=%s knowledge_severity=%s source=%s last_reviewed=%s recommendation=%s applicability=unconfirmed",
+			"knowledge_id=%s matched_component_id=%s match_basis=%s match_level=%s category=%s vendor=%s family=%s context_category=%s vendor_candidate=%s family_candidate=%s matched_signals=%s known_issues=%s representative_cves=%s attack_vectors=%s knowledge_severity=%s source=%s last_reviewed=%s recommendation=%s applicability=unconfirmed",
 			strings.TrimSpace(component.ID),
 			strings.TrimSpace(component.ID),
 			strings.Join(matchBasis, ","),
@@ -403,6 +422,7 @@ func formatI5KnownVulnerableComponentMatch(
 			strings.Join(signals, ","),
 			knownIssues,
 			strings.Join(component.RepresentativeCVEs, ","),
+			i5AttackVectors(component),
 			strings.TrimSpace(component.Severity),
 			strings.TrimSpace(component.Source),
 			strings.TrimSpace(component.LastReviewed),
@@ -412,7 +432,7 @@ func formatI5KnownVulnerableComponentMatch(
 		Confidence:     "low",
 		ObservedFact:   "Observed identification signals matched a device family or component candidate in the local vulnerability knowledge base.",
 		Inference:      "The device may belong to a family with known historical vulnerabilities, so firmware and support status should be reviewed.",
-		Limitation:     "Passive monitoring cannot confirm the exact model, firmware version, internal component list, or whether a specific CVE applies.",
+		Limitation:     i5Limitation(component),
 		Recommendation: strings.ReplaceAll(recommendation, " | ", " "),
 	}
 }
@@ -471,4 +491,24 @@ func macVendorContradicts(macVendor, familyVendor string) bool {
 		}
 	}
 	return true
+}
+
+// i5AttackVectors lists each reference as CVE:vector (NVD's attack vector).
+func i5AttackVectors(c knowledge.I5VulnerableComponent) string {
+	parts := make([]string, 0, len(c.References))
+	for _, r := range c.References {
+		parts = append(parts, r.CVE+":"+r.AttackVector)
+	}
+	return strings.Join(parts, ",")
+}
+
+func i5Limitation(c knowledge.I5VulnerableComponent) string {
+	msg := "Passive monitoring cannot confirm the exact model, firmware version, internal component list, or whether a specific CVE applies."
+	for _, r := range c.References {
+		if r.AttackVector == "physical" || r.AttackVector == "local" {
+			msg += " Some referenced CVEs need local or physical access; network observation says nothing about their exploitability."
+			break
+		}
+	}
+	return msg
 }
