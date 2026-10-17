@@ -98,3 +98,11 @@ RTSP（554 番）は暗号化されないので、カメラが認証つきの要
 - URL のパスに埋め込まれた認証情報（`user=...`、`password=...` など）は伏せる。
 
 `Authorization` ヘッダの方式名（Basic、Bearer、Digest、AWS）は、値を伏せたまま証拠に残す。Digest と AWS の署名は要求ごとの証明なので、5.5-6 の集計からは外す。
+
+## メディアの平文アップロード（`analyzer/rules/i6_media_upload.go`）
+
+| イベント | 根拠 | 条件 | 対応する要件 |
+|---|---|---|---|
+| `I6_MEDIA_UPLOAD_CLEARTEXT` | observed | 平文の HTTP で、公開のアドレスへ送る POST か PUT。Content-Type（multipart の各部分を含む）が image、video、audio であるか、本文の先頭がメディアファイルの署名である | 5.8-1 |
+
+証拠に残すのは、ホスト名、種類、大きさだけで、パスと内容は残さない。中身に人や家が写っているかは判断しない。HTTP として解析するのは、既定のポート（80、8000、8080、8888）だけである。
