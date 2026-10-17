@@ -145,7 +145,7 @@
    ],
    "status": "implemented",
    "exclude_pattern": "^(serial|device_id)=",
-   "audit": "E4 sample: HTTP auth/token headers 15/15 and session IDs in URLs 4/4 correct; 4/4 'token' events were device serial numbers (identifiers, not CSPs) and are excluded; cookies may be non-session (probable). IoT-23: a Philips Hue sent Authorization headers and auth= URL parameters in cleartext to its cloud (correct). E6 (CIC 2022 power-on): Hue bridge (Authorization headers, auth= in URL) and Home Eye camera (Authorization header) to cloud over HTTP, both correct."
+   "audit": "E4 sample: HTTP auth/token headers 15/15 and session IDs in URLs 4/4 correct; 4/4 'token' events were device serial numbers (identifiers, not CSPs) and are excluded; cookies may be non-session (probable). IoT-23: a Philips Hue sent Authorization headers and auth= URL parameters in cleartext to its cloud (correct). E6 (CIC 2022 power-on): Hue bridge (Authorization headers, auth= in URL) and Home Eye camera (Authorization header) to cloud over HTTP, both correct. E8 (CIC 2022 interactions/scenarios): Hue bridge again (correct); a Sonos One sent sid= in cleartext URLs to opml.radiotime.com (TuneIn radio session ID; whether it is a critical security parameter is unclear, undecided)."
   },
   {
    "provision": "5.5-7",

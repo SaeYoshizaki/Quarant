@@ -24,7 +24,8 @@ import sys
 
 GROUPS = {"unsw-": "UNSW traces 2016", "unswatk-": "UNSW attacks 2018", "iot23-": "IoT-23 2018-19",
           "cic-1-power-": "CIC IoT 2022 power-on", "cic-2-idle-": "CIC IoT 2022 idle",
-          "cic-3-interactions-": "CIC IoT 2022 interactions", "laptop-": "Laptop 2026 (not IoT)"}
+          "cic-3-interactions-": "CIC IoT 2022 interactions",
+          "cic-4-scenarios-": "CIC IoT 2022 scenarios", "laptop-": "Laptop 2026 (not IoT)"}
 VERSION_RE = re.compile(r"\d+\.\d+(\.\d+)?")
 
 

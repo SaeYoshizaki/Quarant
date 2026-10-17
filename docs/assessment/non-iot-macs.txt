@@ -17,3 +17,6 @@ d2:fb:a8:6e:fd:0a
 b0:7b:25:06:53:82
 b8:27:eb:0a:ec:2c
 e8:1b:69:f8:d6:e6
+# CIC IoT 2022 scenarios: non-IoT hosts (an Apple device and a randomised-MAC phone)
+06:57:6f:72:9a:50
+f0:18:98:0c:aa:af
