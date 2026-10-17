@@ -372,6 +372,14 @@ func (r *I6PrivacyRule) applyCategoryMismatch(ctx *Context) *Match {
 	if !r.db.IsKnownCategory(localCategory) || !r.db.IsKnownCategory(flowCategory) {
 		return nil
 	}
+	// The flow category comes from destination keywords. When the device
+	// described itself (HomeKit, UPnP, mDNS, its own name), that is the
+	// stronger evidence, and a destination shared across a vendor's
+	// products (tplinkcloud.com for cameras and plugs) is no anomaly: on
+	// UNSW this produced ~75 false mismatches per day for one camera.
+	if ctx.LocalInferenceSource == "self_described" {
+		return nil
+	}
 
 	host, path := observedEndpoint(ctx)
 	commType := detectI6CommunicationType(ctx)

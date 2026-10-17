@@ -210,6 +210,26 @@ func TestI6StoredDataSignalIgnoresSmallKeywordRequest(t *testing.T) {
 	}
 }
 
+// A self-described device category outranks the destination-based flow
+// category: a camera talking to its vendor's shared cloud is no mismatch.
+func TestI6CategoryMismatchSkipsSelfDescribedDevices(t *testing.T) {
+	db := &knowledge.DB{DeviceCategories: &knowledge.DeviceCategories{Categories: []string{"Camera", "Controller"}}}
+	ctx := &Context{
+		HTTP:                &HTTPInfo{Method: "GET", Path: "/", Headers: map[string]string{"host": "aps1-relay.tplinkcloud.com"}},
+		DstIP:               "203.0.113.5",
+		LocalDeviceCategory: "Camera",
+		FlowDeviceCategory:  "Controller",
+	}
+	rule := &I6PrivacyRule{db: db}
+	if rule.applyCategoryMismatch(ctx) == nil {
+		t.Fatal("baseline: a destination-inferred local category should still report the mismatch")
+	}
+	ctx.LocalInferenceSource = "self_described"
+	if m := rule.applyCategoryMismatch(ctx); m != nil {
+		t.Fatalf("self-described device reported a mismatch: %s", m.Evidence)
+	}
+}
+
 func TestI6UnexpectedCommunicationUsesSignalLanguage(t *testing.T) {
 	db := &knowledge.DB{
 		CategoryPolicy: knowledge.CategoryPolicy{
