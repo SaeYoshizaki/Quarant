@@ -308,3 +308,16 @@ func TestTLSOnNonStandardPortIsParsed(t *testing.T) {
 		t.Fatalf("TLS on port 5228 must be parsed and assessed, got %v", found)
 	}
 }
+
+func TestFindingsUseClientToServerDirection(t *testing.T) {
+	_, run := runHomeScenario(t)
+	for _, e := range run.events {
+		if e.Type == "I7_TLS_WEAK_VERSION_OBSERVED" {
+			if e.SrcIP != "192.168.50.20" || e.DstIP != "198.51.100.10" || e.DstPort != 443 {
+				t.Fatalf("finding must be reported client->server, got %s:%d -> %s:%d", e.SrcIP, e.SrcPort, e.DstIP, e.DstPort)
+			}
+			return
+		}
+	}
+	t.Fatal("weak TLS finding not found")
+}

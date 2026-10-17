@@ -1220,11 +1220,15 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 			Limitation:     m.Limitation,
 			Recommendation: m.Recommendation,
 			Debug:          m.Debug,
-			SrcIP:          srcIP,
-			SrcPort:        srcPort,
-			DstIP:          dstIP,
-			DstPort:        dstPort,
-			Message:        m.Message,
+			// Report findings in the flow's client -> server direction. The
+			// triggering packet may be a server reply (e.g. a ServerHello
+			// selecting TLS 1.0), whose addresses are reversed; downstream
+			// consumers decide "external destination" from DstIP.
+			SrcIP:   st.SrcIP,
+			SrcPort: st.SrcPort,
+			DstIP:   st.DstIP,
+			DstPort: st.DstPort,
+			Message: m.Message,
 		}
 		affected := h.affectedDeviceIP(m.Type, st)
 		if key := deviceScopedKey(m, affected); key != "" {

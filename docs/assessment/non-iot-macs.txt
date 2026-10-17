@@ -1,0 +1,10 @@
+# Non-IoT hosts in the UNSW ground truth (List_Of_Devices.txt): phones, tablet, laptops, gateway.
+# Excluded from E4 denominators because the research question concerns IoT devices.
+08:21:ef:3b:fc:e3
+40:f3:08:ff:1e:da
+74:2f:68:81:69:42
+ac:bc:32:d4:6f:2f
+b4:ce:f6:a7:a3:c2
+d0:a6:37:df:a1:e1
+f4:5c:89:93:cc:85
+14:cc:20:51:33:ea
