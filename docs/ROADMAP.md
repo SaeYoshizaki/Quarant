@@ -80,6 +80,13 @@
 - **作業**：同じ PCAP を Zeek と Suricata（ET Open ルール）で解析し、取り込み機能を通して、同じ正解ラベルで評価する。
 - **完了条件**：「Quarant だけが検出」「Suricata だけが検出」「両方が検出」の比較表がある。
 - **判断**：フラッド系の検出器を自作するかどうかは、この結果を見て決める。既存ツールで十分なら、自作せず結果を取り込む。
+- **状況（2026-10-17）**：
+  - 済み：比較表を作った（[EXPERIMENTS.md](EXPERIMENTS.md) の S2、[assessment/tool-comparison.md](assessment/tool-comparison.md)）。
+    - 取り込み機能は Zeek の notice を扱わないので、各ツールの出力を直接読む集計スクリプト（`scripts/step2/`）で比べた。
+  - 分かったこと：
+    - ARP スプーフィングは Quarant だけが検出した。反射攻撃（SSDP、SNMP）とマルウェアの種類は、Suricata だけが特定した。
+    - フラッド系（TCP SYN、UDP、Ping、Smurf の 119 件）は、どのツールも検出しなかった。
+  - 残り：フラッド系の検出器を自作するかの判断。最近の機器のデータ（CIC IoT 2022）での比較。
 
 ## Step 3：Quarant 独自の価値を形にする（RQ1、RQ2、RQ4）
 
