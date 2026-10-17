@@ -201,6 +201,7 @@ func homeLabels() []Label {
 		{ID: "L07", DeviceIP: dvr, Kind: "periodic_beacon", Malicious: true, Visibility: "observable", Description: "DVR contacts the same external host every 60 s (C2-like beacon)."},
 		{ID: "L08", DeviceIP: dvr, Kind: "outbound_telnet_scan", Malicious: true, Visibility: "observable", Description: "DVR sends TCP SYNs to 120 external hosts on 23/2323 within 60 s (Mirai-like)."},
 		{ID: "L09", DeviceIP: cam, Kind: "known_vulnerable_firmware", Visibility: "hidden", Description: "Camera firmware 5.4.1 is assumed vulnerable in this scenario; only the version string in a User-Agent is visible, the vulnerability itself is not."},
+		{ID: "L10", DeviceIP: cam, Kind: "cleartext_media_upload", Visibility: "observable", Description: "Camera uploads a JPEG snapshot to its cloud over plain HTTP."},
 		{ID: "N01", DeviceIP: phone, Kind: "benign_modern_tls", Visibility: "observable", Description: "Negative control: phone uses TLS 1.2/1.3 to a web server; nothing should be flagged."},
 	}
 }

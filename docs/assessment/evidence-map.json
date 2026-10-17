@@ -187,10 +187,11 @@
    "signals": [
     "I6_HTTP_PRIVACY_EXPOSURE",
     "I6_HTTP_UNEXPECTED_PII",
-    "I6_PII_TO_UNEXPECTED_DESTINATION"
+    "I6_PII_TO_UNEXPECTED_DESTINATION",
+    "I6_MEDIA_UPLOAD_CLEARTEXT"
    ],
    "status": "implemented",
-   "audit": "E4 sample: 10/10 correct (user identifier in cleartext body); all from one device."
+   "audit": "E4 sample: 10/10 correct (user identifier in cleartext body); all from one device. E10 (I6_MEDIA_UPLOAD_CLEARTEXT): all matches checked. Home Eye camera PUT JPEG snapshots to Alibaba Cloud OSS (Hong Kong) over HTTP at power-on (3/3), on 14/30 idle nights and in the active day; SimCam PUT JPEGs to S3 over HTTP. Both correct. No match in UNSW 2016/2018 or IoT-23; a direct search of the raw traffic of three UNSW days found no media upload either."
   },
   {
    "provision": "5.8-2",
