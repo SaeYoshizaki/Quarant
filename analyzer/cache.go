@@ -33,6 +33,9 @@ type FlowState struct {
 	// TLSByContent: the client's first payload is a TLS ClientHello record,
 	// whatever the port.
 	TLSByContent bool
+	// HTTPByContent: the client's first payload is an HTTP request to a
+	// local server on a port outside rules.IsHTTPPort (UPnP control).
+	HTTPByContent bool
 
 	TLSClientSeen bool
 	TLSClientInfo *rules.TLSClientHelloInfo
