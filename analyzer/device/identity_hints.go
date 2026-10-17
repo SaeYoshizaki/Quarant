@@ -59,6 +59,17 @@ func (p *DeviceProfile) AddIdentityEvidence(now time.Time, attribute, value, bas
 		firstSeen: now,
 		lastSeen:  now,
 	}
+	// A new self-description can change the category; before, the category
+	// was only recomputed on HTTP/TLS observations, so devices known only
+	// from DHCP and mDNS stayed GenericIoT.
+	if selfDescribingAttributes[attribute] {
+		recomputeDeviceIdentity(p)
+	}
+}
+
+var selfDescribingAttributes = map[string]bool{
+	"hostname": true, "mdns_instance": true, "mdns_service": true, "mdns_txt": true,
+	"dhcp_vendor_class": true, "ssdp_device_type": true, "ssdp_server": true, "ssdp_search_agent": true,
 }
 
 // ObserveMAC binds a link-layer address to the device. More than one MAC for

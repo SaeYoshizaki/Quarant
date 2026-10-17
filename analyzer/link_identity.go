@@ -130,6 +130,13 @@ func (h *FlowHandler) observeDiscovery(packet gopacket.Packet, now time.Time, sr
 			d.AddIdentityEvidence(now, attr, info.Server, string(discovery.BasisObserved), "ssdp")
 			if info.Kind != "search" {
 				d.AddIdentityEvidence(now, "ssdp_location", info.Location, string(discovery.BasisObserved), "ssdp")
+				// The UPnP device type the device announces (NT or USN of a
+				// NOTIFY / search response), e.g. urn:schemas-upnp-org:device:Printer:1.
+				for _, v := range []string{info.Target, info.USN} {
+					if t := discovery.UPnPDeviceType(v); t != "" {
+						d.AddIdentityEvidence(now, "ssdp_device_type", t, string(discovery.BasisObserved), "ssdp")
+					}
+				}
 			}
 		}
 	}

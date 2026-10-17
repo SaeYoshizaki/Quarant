@@ -12,6 +12,7 @@ import (
 	"bufio"
 	"bytes"
 	"net"
+	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -254,6 +255,14 @@ func ParseSSDP(payload []byte) (SSDPInfo, bool) {
 		}
 	}
 	return info, true
+}
+
+var upnpDeviceTypeRe = regexp.MustCompile(`(?i)urn:[a-z0-9.-]+:device:[a-z0-9_-]+:\d+`)
+
+// UPnPDeviceType extracts a UPnP device type URN from an SSDP NT, ST or USN
+// value ("" when the value names a service, a UUID or the root device).
+func UPnPDeviceType(v string) string {
+	return upnpDeviceTypeRe.FindString(v)
 }
 
 // ---- helpers -------------------------------------------------------------------

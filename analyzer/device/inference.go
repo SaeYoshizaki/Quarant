@@ -13,6 +13,8 @@ const (
 	InferenceSourceKnown    InferenceSource = "known"
 	InferenceSourceInferred InferenceSource = "inferred"
 	InferenceSourceUnknown  InferenceSource = "unknown"
+	// InferenceSourceSelf: the device's own announcements (self_described.go).
+	InferenceSourceSelf InferenceSource = "self_described"
 )
 
 type Classification struct {
@@ -72,6 +74,41 @@ func normalizedKnownConfidence(score float64) float64 {
 }
 
 func resolveClassification(d *DeviceProfile, knownType string, knownScore float64) Classification {
+	// What the device says about itself comes first; destinations only
+	// decide when it says nothing (C1: destination-based categories were
+	// right 25% of the time while labelled strong).
+	self := describeSelf(d)
+	if self.NotIoT != "" {
+		return Classification{
+			Category:        "GenericIoT",
+			DeviceType:      "Not an IoT device",
+			InferenceSource: InferenceSourceSelf,
+			ConfidenceLabel: "low",
+			Reasons:         []string{"not_iot: " + self.NotIoT},
+			Scores:          map[string]float64{},
+		}
+	}
+	if self.Category != "" {
+		label := "medium"
+		if self.Level == "protocol" {
+			label = "high"
+		}
+		if self.Agree {
+			label = "strong"
+		}
+		if self.Conflict != "" {
+			label = "medium"
+		}
+		return Classification{
+			Category:        self.Category,
+			DeviceType:      "Self-described " + self.Category,
+			InferenceSource: InferenceSourceSelf,
+			ConfidenceScore: map[string]float64{"medium": 0.6, "high": 0.8, "strong": 0.9}[label],
+			ConfidenceLabel: label,
+			Reasons:         self.Reasons,
+			Scores:          map[string]float64{},
+		}
+	}
 	if known := resolveKnownClassification(d, knownType, knownScore); known != nil {
 		return *known
 	}
@@ -104,7 +141,9 @@ func resolveKnownClassification(d *DeviceProfile, deviceType string, score float
 		DeviceType:      deviceType,
 		InferenceSource: InferenceSourceKnown,
 		ConfidenceScore: normalizedKnownConfidence(score),
-		ConfidenceLabel: "strong",
+		// Destination keywords only: partner clouds and shared vendor
+		// clouds make them weak evidence of what the device is.
+		ConfidenceLabel: "low",
 		Reasons:         collectInferenceReasons(d, 4),
 		Scores:          map[string]float64{},
 	}
