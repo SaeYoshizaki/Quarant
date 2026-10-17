@@ -78,7 +78,7 @@
 1. **見逃しを測る**：済み（E11、[assessment/miss-audit.md](assessment/miss-audit.md)）。Zeek と生パケットの検索で、Quarant とは独立に正解を作って比べた。
    - 古い TLS：36 台のうち 34 台を検出。平文の秘密情報：UNSW 2016 で 9 台のうち 3 台（ほかのデータは全件）。メディアの平文送信：5 台のうち 3 台。
    - 見逃し 11 件（10 台）の原因：要件への対応づけ漏れ 5、機器の帰属 1、解析の範囲 4、検出条件の不備 1。
-2. **見つかった見逃しを直す**（次の作業）：直したら `scripts/accuracy/compare_misses.py`（判定は `docs/assessment/miss-judgments.json`。判定のない候補は unjudged と表示される）で測り直し、効果を数字で示す。正解（`~/datasets/gt-e10/`）は作り直さなくてよい。
+2. **見つかった見逃しを直す**（次の作業）：直したら `scripts/accuracy/compare_misses.py`（判定は `docs/assessment/miss-judgments.json`。判定のない候補は unjudged と表示される）で測り直し、効果を数字で示す。正解（`~/datasets/gt-e10/`）は作り直さなくてよい。E11 は `abf5d92` の解析結果で測った。測り直しには、D22（名乗りの MAC ごとの共有）を含む版で全データを解析し直したものを使い、D22 だけによる変化と修正による変化を分けて示す。
    - 対応表：`INSECURE_HTTP_BODY_SECRET`（ほか MQTT、Telnet のペイロードの秘密情報）を 5.5-6 に入れるか判断する。入れる前に精度を抜き取りで確かめる（ROADMAP では誤検知の疑いがあるとしていた）。
    - 帰属：TLS のサーバー側が古い版を選んだときは、サーバー側の機器の証拠にもする。
    - TLS の中身による判定：レコードヘッダだけのパケット（5 バイト）でも TLS と認識する（`looksLikeTLSRecord`）。
