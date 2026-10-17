@@ -359,3 +359,20 @@ func TestSensitiveFieldIgnoresWebSocketHandshakeKey(t *testing.T) {
 		t.Fatal("expected api_key with a token value to be reported")
 	}
 }
+
+func TestI7HTTPAuthNamesChallengeResponseSchemes(t *testing.T) {
+	for header, want := range map[string]string{
+		"AWS4-HMAC-SHA256 Credential=AKIDEXAMPLE/20211102/us-east-2/s3/aws4_request, Signature=abc": "Authorization: AWS4-HMAC-SHA256 ***",
+		"Digest username=\"admin\", response=\"6629fae49393a053\"":                                  "Authorization: Digest ***",
+		"Basic YWRtaW46YWRtaW4=": "Authorization: Basic ***",
+		"Token abc123":           "Authorization: ***",
+	} {
+		m, ok := (&I7HTTPAuthRule{}).Apply(&Context{HTTP: &HTTPInfo{Headers: map[string]string{"authorization": header}}})
+		if !ok || m.Evidence != want {
+			t.Errorf("%q: got %q", header, m.Evidence)
+		}
+		if strings.Contains(m.Evidence, "AKIDEXAMPLE") || strings.Contains(m.Evidence, "admin") {
+			t.Errorf("value leaked: %q", m.Evidence)
+		}
+	}
+}

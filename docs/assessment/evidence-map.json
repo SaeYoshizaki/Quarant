@@ -58,8 +58,12 @@
    "provision": "5.1-5",
    "reach": "fail_only",
    "violation_evidence": "Third-party password guessing against the device is answered without delay or lockout.",
-   "signals": [],
-   "status": "not_implemented"
+   "signals": [
+    "I1_CREDENTIAL_GUESSING_OBSERVED"
+   ],
+   "status": "candidate_only",
+   "gap": "Only RTSP is examined. Continued 401 answers cannot be told apart from a lockout that also answers 401, so a run of failures is a candidate; only success_after_failures=true shows the failures did not lock the client out. Reporting marks runs beyond the NIST SP 800-63B limit of 100 consecutive failures.",
+   "audit": "E9 (CIC 2022 RTSP brute force): SimCam answered ~3,500 Hydra attempts per run (~23/s) with 401 and no refusal; Amcrest answered 36 with 401. No run ended in success, so neither is confirmed."
   },
   {
    "provision": "5.2-2",
@@ -116,7 +120,8 @@
    "reach": "fail_only",
    "violation_evidence": "A device function reachable over the network is served without authentication.",
    "signals": [
-    "I3_UNAUTHENTICATED_DEVICE_CONTROL"
+    "I3_UNAUTHENTICATED_DEVICE_CONTROL",
+    "I3_UNAUTHENTICATED_STREAM_ACCESS"
    ],
    "status": "implemented",
    "assumption": "the function is not meant as open access inside the home network (EN 303 645 5.5-4 itself allows services made available without authentication within a restricted network, e.g. DLNA)",
@@ -144,8 +149,8 @@
     "I3_AUTH_TOKEN_IN_URL"
    ],
    "status": "implemented",
-   "exclude_pattern": "^(serial|device_id)=",
-   "audit": "E4 sample: HTTP auth/token headers 15/15 and session IDs in URLs 4/4 correct; 4/4 'token' events were device serial numbers (identifiers, not CSPs) and are excluded; cookies may be non-session (probable). IoT-23: a Philips Hue sent Authorization headers and auth= URL parameters in cleartext to its cloud (correct). E6 (CIC 2022 power-on): Hue bridge (Authorization headers, auth= in URL) and Home Eye camera (Authorization header) to cloud over HTTP, both correct. E8 (CIC 2022 interactions/scenarios): Hue bridge again (correct); a Sonos One sent sid= in cleartext URLs to opml.radiotime.com (TuneIn radio session ID; whether it is a critical security parameter is unclear, undecided)."
+   "exclude_pattern": "^(serial|device_id)=|Authorization: (Digest|AWS4-HMAC-SHA256|AWS) ",
+   "audit": "E4 sample: HTTP auth/token headers 15/15 and session IDs in URLs 4/4 correct; 4/4 'token' events were device serial numbers (identifiers, not CSPs) and are excluded; cookies may be non-session (probable). IoT-23: a Philips Hue sent Authorization headers and auth= URL parameters in cleartext to its cloud (correct). E6 (CIC 2022 power-on): Hue bridge (Authorization headers, auth= in URL) and Home Eye camera (Authorization header) to cloud over HTTP, both correct. E8 (CIC 2022 interactions/scenarios): Hue bridge again (correct); a Sonos One sent sid= in cleartext URLs to opml.radiotime.com (TuneIn radio session ID; whether it is a critical security parameter is unclear, undecided). E9 (CIC 2022 active): SimCam's Authorization headers to S3 were AWS SigV4 signatures (per-request, not reusable), now named in the evidence and excluded; the same requests uploaded JPEG snapshots in cleartext, which is 5.8-1 evidence Quarant does not yet detect."
   },
   {
    "provision": "5.5-7",
@@ -159,7 +164,7 @@
    ],
    "filter": "destination is external",
    "status": "implemented",
-   "exclude_pattern": "^(serial|device_id)="
+   "exclude_pattern": "^(serial|device_id)=|Authorization: (Digest|AWS4-HMAC-SHA256|AWS) "
   },
   {
    "provision": "5.6-2",
