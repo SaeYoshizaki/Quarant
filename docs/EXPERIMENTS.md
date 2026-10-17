@@ -151,7 +151,7 @@ quarant dataset-eval unsw-attacks --run runs/unswatk-<day> --annotations annotat
   - これらは、宛先あたりのパケットレートや反射応答の比率を使えば、説明可能な方法で検出できる見込みがある。
 - 攻撃は、ラボで動かした攻撃ツールによるもの。
 
-## E2：TLS ClientHello パーサの差分ファジング（2026-10-17）
+## E2：TLS ClientHello パーサの差分ファジング（2026-10-17、測定装置の妥当性検証として補助的に実施）
 
 **目的**：監視装置が読み取った内容（Quarant のパーサ）が、標準的な実装（Go `crypto/tls`）の解釈と一致するかを確かめる。食い違いがあると、誤検知や見逃しの原因になるだけでなく、すり抜け（evasion）にも使われ得る。
 
