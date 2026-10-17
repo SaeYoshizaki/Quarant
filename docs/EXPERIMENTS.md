@@ -251,6 +251,7 @@ python3 scripts/assessment/finalize.py docs/assessment/source/pass1 docs/assessm
 
 ### 限界
 
-- 分類も裁定も言語モデル（Claude と、その分担者）が行った。人による確認（SaeYoshizaki または教授による抜き取り）は、まだしていない。
+- 分類も裁定も言語モデル（Claude と、その分担者）が行った。人による確認は、SaeYoshizaki による 10 件の抜き取りのみで、10 件すべてに納得を得た（[assessment/human-review.md](assessment/human-review.md)）。
 - 裁定は 1 人（Claude）が行った。
+- この分類が示すのは**理論上の**到達可能性。実際の通信でどれだけ証拠が現れるかは RQ2（E4 以降）で測る。例えば初期パスワード（5.1-1）は理論上「違反だけ示せる」だが、平文で流れて既定値と一致する場合に限られるので、現代の通信ではほぼ現れないと見込まれる。
 - モデル N の κ は 0.52（中程度）。結果の数字は、裁定の原則を前提とした値として扱う。
