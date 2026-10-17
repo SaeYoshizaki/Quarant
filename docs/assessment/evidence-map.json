@@ -215,7 +215,7 @@
    "status": "candidate_only",
    "gap": "Backoff and protocol conformance are not checked.",
    "require_pattern": "mostly_unanswered",
-   "audit": "E4 sample: 0/12 PERSISTENT_CONNECTION_ATTEMPTS were reconnect storms (all answered, regular sessions); only mostly-unanswered retry loops count. IoT-23: the 3 mostly-unanswered loops were malware C2/scan loops, i.e. infection behaviour rather than the product's reconnection design; traffic alone cannot separate the two."
+   "audit": "E4 sample: 0/12 PERSISTENT_CONNECTION_ATTEMPTS were reconnect storms (all answered, regular sessions); only mostly-unanswered retry loops count. IoT-23: the 3 mostly-unanswered loops were malware C2/scan loops, i.e. infection behaviour rather than the product's reconnection design; traffic alone cannot separate the two. E7 (CIC 2022 idle): Borun camera retried logreport.nvcam.net:80 about 40 times an hour, mostly unanswered, on many nights (a retry loop against an unresponsive logging server: plausible, backoff not checked); SimCam once."
   },
   {
    "provision": "5.11-1",
