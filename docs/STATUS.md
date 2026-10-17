@@ -69,6 +69,28 @@
 
 ## 次に行う作業
 
+### 最優先：論文の前に精度を上げる（2026-10-17 に利用者と合意）
+
+テーマが「パッシブでどこまで判定できるか」なので、数字の信頼性を先に固める。正しさ（誤検出）は E4〜E10 で抜き取り確認済み。網羅性（見逃し）はほとんど測れていない。次の順で進める。
+
+1. **見逃しを測る**：要件ごとに、Quarant とは独立した方法で元の通信から「正解」を作り、Quarant の結果と比べる。
+   - 平文のパスワード、トークン、画像：ポートを問わず、元の PCAP を直接探す（E10 で `tcpdump -A` を使ったやり方）。
+   - 古い TLS：Zeek の `ssl.log` と照合する（S2 の出力を使える）。
+   - 既知の弱点：HTTP は既定のポート（80、8000、8080、8888）でしか解析しない（既知の問題 8）。
+2. **見つかった見逃しを直す**：直したら 1 で測り直し、効果を数字で示す。
+3. **候補止まりを確定に近づける**：パッシブのまま判定できる範囲を広げる。例：初期パスワード（5.1-1）は、値を保存せずに、公開されている初期パスワードの一覧とメモリ上で照合し、一致したかどうかだけを記録する。
+4. **人による確認**：正しさの判定は Claude 1 人だけ。抜き取った 30〜50 件を利用者にも判定してもらう（E3 の human-review.md と同じ形）。
+
+**作業の前提（引き継ぎ用）**
+- 最新の解析結果：`~/datasets/runs-e10/`（全データ、`abf5d92` 時点）。各 run には `events.jsonl` と `device_inventory.json` だけを残す（容量のため）。
+- 元データ：USB ドライブ `/Volumes/Untitled/quarant-datasets/`（UNSW 2016・2018、IoT-23、CIC IoT 2022）。`~/datasets/<名前>` からリンクしている。解析する前に USB をつなぐ。CIC のアーカイブは `/Volumes/Untitled/CIC_IOT_Dataset2022/`。
+- 全データの再解析：`~/datasets/scripts/rerun-e10.sh`（バイナリと出力先を書き換えて使う。1 時間ほどかかる）。
+- 出現率の集計：`python3 scripts/assessment/evidence_rates.py docs/assessment/evidence-map.json $HOME/datasets/runs-e10 docs/assessment/evidence-rates.md <samples.json> docs/assessment/non-iot-macs.txt`
+- 機器の対応づけは、run ごとの `device_inventory.json` で行う。IP アドレスは日によって変わるので、run をまたいで IP で機器を特定しない（E7 で一度まちがえた）。
+- 要件と検出の対応、精度の監査の記録：`docs/assessment/evidence-map.json`、`precision-audit.md`。実験の記録：`docs/EXPERIMENTS.md` の E4〜E10。
+
+### 研究の全体（ROADMAP）
+
 [ROADMAP.md](ROADMAP.md) の Step 0〜5 の順に進める。直近の作業は次のとおり。
 
 1. **Step 0**：問いと関連研究の整理は済み。残りは教授との合意（[RESEARCH-SUMMARY.md](RESEARCH-SUMMARY.md) を使う）。
