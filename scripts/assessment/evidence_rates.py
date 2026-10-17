@@ -95,8 +95,12 @@ def main():
         if group is None:
             continue
         events, inv = load_run(d)
+        # A device counts as observed if it initiated traffic (observed
+        # protocols) or is the subject of a finding: cameras that only answer
+        # (RTSP brute force targets) have no initiated protocols.
+        keys = {e.get("device_key") for e in events}
         for ip, dev in inv.items():
-            if dev.get("observed_protocols") and device_id(inv, ip) not in exclude:
+            if (dev.get("observed_protocols") or ip in keys) and device_id(inv, ip) not in exclude:
                 seen[group].add(device_id(inv, ip))
         for e in events:
             dev_ip = e.get("device_key") or e.get("src_ip", "")
