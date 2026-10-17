@@ -140,7 +140,7 @@
    ],
    "status": "implemented",
    "exclude_pattern": "^(serial|device_id)=",
-   "audit": "E4 sample: HTTP auth/token headers 15/15 and session IDs in URLs 4/4 correct; 4/4 'token' events were device serial numbers (identifiers, not CSPs) and are excluded; cookies may be non-session (probable)."
+   "audit": "E4 sample: HTTP auth/token headers 15/15 and session IDs in URLs 4/4 correct; 4/4 'token' events were device serial numbers (identifiers, not CSPs) and are excluded; cookies may be non-session (probable). IoT-23: a Philips Hue sent Authorization headers and auth= URL parameters in cleartext to its cloud (correct)."
   },
   {
    "provision": "5.5-7",
@@ -210,7 +210,7 @@
    "status": "candidate_only",
    "gap": "Backoff and protocol conformance are not checked.",
    "require_pattern": "mostly_unanswered",
-   "audit": "E4 sample: 0/12 PERSISTENT_CONNECTION_ATTEMPTS were reconnect storms (all answered, regular sessions); only mostly-unanswered retry loops count."
+   "audit": "E4 sample: 0/12 PERSISTENT_CONNECTION_ATTEMPTS were reconnect storms (all answered, regular sessions); only mostly-unanswered retry loops count. IoT-23: the 3 mostly-unanswered loops were malware C2/scan loops, i.e. infection behaviour rather than the product's reconnection design; traffic alone cannot separate the two."
   },
   {
    "provision": "5.11-1",
