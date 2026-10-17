@@ -17,6 +17,7 @@ import (
 
 	"quarant/analyzer"
 	"quarant/analyzer/knowledge"
+	"quarant/internal/findings"
 	"quarant/internal/reportapi"
 	"quarant/internal/viewer"
 )
@@ -115,6 +116,10 @@ func main() {
 		if err := runDevices(args[1:], os.Stdout); err != nil {
 			log.Fatal(err)
 		}
+	case "findings":
+		if err := runFindings(args[1:], os.Stdout); err != nil {
+			log.Fatal(err)
+		}
 	case "label-eval":
 		if err := runLabelEval(args[1:], os.Stdout); err != nil {
 			log.Fatal(err)
@@ -210,6 +215,7 @@ func runAnalyze(args []string) error {
 		observationsHelp: "path to write passive observation JSONL (default: sibling observations.jsonl, empty to disable with --observations-out=-)",
 		inventoryHelp:    "path to write device inventory snapshot JSON (default: sibling device_inventory.json, empty to disable with --inventory-out=-)",
 	})
+	findingsOut := fs.String("findings-out", "", "path to write the per-device findings summary JSON (default: sibling findings.json, - to disable)")
 
 	if err := fs.Parse(normalizeFlagArgs(fs, args)); err != nil {
 		return fmt.Errorf("parse analyze flags: %w", err)
@@ -230,12 +236,25 @@ func runAnalyze(args []string) error {
 
 	cfg := buildAnalysisConfig(inputPath, "", flags)
 	cfg.LocalNetworks = localNets
-	return runCapture(cfg, func(engine *analyzer.Engine) error {
+	if err := runCapture(cfg, func(engine *analyzer.Engine) error {
 		if cfg.InputPath == "-" {
 			return engine.RunPCAPStream(os.Stdin)
 		}
 		return engine.RunOffline(cfg.InputPath)
-	})
+	}); err != nil {
+		return err
+	}
+	// The summary is written once the capture is fully analysed and the
+	// sinks are closed; events.jsonl stays the raw record.
+	if *findingsOut == "-" {
+		return nil
+	}
+	eventsDir := filepath.Dir(cfg.EventsOut)
+	if eventsDir == "." {
+		eventsDir = ""
+	}
+	_, err = findings.WriteFromRun(cfg.EventsOut, cfg.InventoryOut, defaultSibling(*findingsOut, eventsDir, "findings.json"), "WARNING")
+	return err
 }
 
 func runLive(args []string) error {

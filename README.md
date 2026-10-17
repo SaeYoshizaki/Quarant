@@ -38,6 +38,7 @@ Quarant は、この問いに答えるための研究用の計測基盤です（
 | 実マルウェア（IoT-23） | 再接続ループとスキャンは検出できた。少量の TLS による C2 は検出できなかった |
 | 正常データでの誤検知候補 | 1 日あたり約 0.8 件 |
 | ETSI の要件 78 件（公式の評価仕様 TS 103 701 で検証） | 通信の観測だけで適合を示せる要件は 0。違反だけ示せるものが 22、判定できないものが 55 |
+| 既存ツールとの比較（Zeek、Suricata、同じ PCAP） | ARP スプーフィングは Quarant だけが 27/27 を検出。反射攻撃とマルウェアの種類は Suricata だけが特定。フラッド系の 119 件はどのツールも検出しなかった。古い TLS の機器は 3 つのツールのログで一致したが、要件の違反として出すのは Quarant だけ |
 | 測定装置の妥当性（差分ファジング） | TLS／HTTP／MQTT パーサの読み違いを計 10 件修正。ポート番号に頼った判定では、ClientHello の 1.8〜3.7%、HTTP リクエストの 52〜84% が既定外のポートで、既存の HTTP の検出の対象外だった。届いた順の連結は、HTTP のストリームの 7〜23% で本来のバイト列と食い違っていた（TCP の組み立てを実装） |
 
 ## 使い方
@@ -48,6 +49,7 @@ go test ./...
 # 正解ラベル付きの合成 PCAP（実データを含まない）を解析する
 go run ./cmd/quarant analyze examples/pcap/synthetic-home.pcap --out runs/demo/events.jsonl
 go run ./cmd/quarant devices --in runs/demo          # 機器単位のレポート（見えなかったことも表示）
+go run ./cmd/quarant findings --in runs/demo         # 機器 × 状態の要約（findings.json）
 go run ./cmd/quarant label-eval --events runs/demo/events.jsonl \
   --labels examples/pcap/synthetic-home.labels.json  # 正解ラベルとの比較
 
@@ -321,6 +323,7 @@ Quarant の代表的な出力は次です。
 - `flows.jsonl`: 通信 flow の要約。IP、port、protocol、direction、observed destination など。
 - `observations.jsonl`: DNS、HTTP host、TLS SNI、flow snapshot などの passive observation。
 - `device_inventory.json`: DHCP lease、hostname、MAC、観測 port / protocol / host など。
+- `findings.json`: `events.jsonl` の要約。機器 × イベントの種類（finding）と、同じ観測事実を言い換えたイベントをまとめた機器 × 状態（condition）。
 - `security_events.jsonl`: OpenWrt / Suricata / Snort 由来の security evidence。
 - `attack_evidence_report.json`: scan / sweep / sensitive service probe / TCP flags などの集約 report。
 - `source_coverage_report.json`: OpenWrt only / Suricata only / Zeek only / overlap の集計。
