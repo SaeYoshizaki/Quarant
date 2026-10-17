@@ -16,7 +16,7 @@
 | 5.3-7 | candidate_only | 1 (4%) | 1 (3%) | 0 (0%) | 0 (0%) |
 | 5.3-8 | not_implemented | — | — | — | — |
 | 5.5-1 | implemented | 12 (48%) | 13 (41%) | 0 (0%) | 0 (0%) |
-| 5.5-4 | not_implemented | — | — | — | — |
+| 5.5-4 | implemented | 1 (4%) | 1 (3%) | 0 (0%) | 0 (0%) |
 | 5.5-5 | not_implemented | — | — | — | — |
 | 5.5-6 | implemented | 4 (16%) | 2 (6%) | 1 (6%) | 0 (0%) |
 | 5.5-7 | implemented | 3 (12%) | 2 (6%) | 1 (6%) | 0 (0%) |
@@ -26,6 +26,6 @@
 | 5.9-2 | not_implemented | — | — | — | — |
 | 5.9-3 | candidate_only | 1 (4%) | 0 (0%) | 3 (17%) | 0 (0%) |
 | 5.11-1 | not_implemented | — | — | — | — |
-| 5.12-1 | candidate_only | 0 (0%) | 0 (0%) | 0 (0%) | 0 (0%) |
+| 5.12-1 | candidate_only | 0 (0%) | 1 (3%) | 0 (0%) | 0 (0%) |
 | 5.13-1B | not_implemented | — | — | — | — |
 | 6-8 | candidate_only | 1 (4%) | 2 (6%) | 1 (6%) | 0 (0%) |

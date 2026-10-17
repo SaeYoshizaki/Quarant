@@ -43,6 +43,7 @@ func eventBasis(eventType string) string {
 		strings.HasPrefix(eventType, "I7_TLS_"),
 		eventType == "TLS_CLIENT_HELLO",
 		eventType == "I3_AUTH_TOKEN_IN_URL",
+		eventType == "I9_UPNP_PORT_MAPPING_REQUESTED",
 		eventType == "I8_NEW_DEVICE_OBSERVED",
 		eventType == "I8_UNREGISTERED_DEVICE_ACTIVE",
 		eventType == "IP_MAC_BINDING_CHANGED":

@@ -853,12 +853,21 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 		st.ClientAsm.isStreamStart(tcp.Seq, st.ClientBytes == int64(len(tcp.Payload))) && looksLikeTLSRecord(tcp.Payload) {
 		st.TLSByContent = true
 	}
+	if fromClient && len(tcp.Payload) > 0 && st.ClientBytes == int64(len(tcp.Payload)) && !rules.IsHTTPPort(dstPort) &&
+		h.isLocal(dstIP) && rules.LooksLikeHTTPRequest(tcp.Payload) {
+		st.HTTPByContent = true
+	}
+	httpFlow := rules.IsHTTPPort(st.DstPort) || st.HTTPByContent
 	tlsClient := st.TLSByContent && fromClient
 	tlsServer := st.TLSByContent && !fromClient
 
-	captureClient := rules.NeedsPayloadCapture(dstPort) || tlsClient
-	captureServer := rules.NeedsPayloadCapture(srcPort) || tlsServer
+	captureClient := rules.NeedsPayloadCapture(dstPort) || tlsClient || (st.HTTPByContent && fromClient)
+	captureServer := rules.NeedsPayloadCapture(srcPort) || tlsServer || (st.HTTPByContent && !fromClient)
 	capturePayload := captureClient || captureServer
+	// HTTP recognised by content (st.HTTPByContent) is only used for the
+	// request/response pair below: running every HTTP rule on UPnP traffic
+	// turned protocol-mandated description fetches (GET /setup.xml) into
+	// ~59k setup-endpoint and ~110k plaintext-HTTP findings on UNSW 2018.
 	isHTTPClientToServer := rules.IsHTTPPort(dstPort)
 	isTelnetClientToServer := rules.IsTelnetPort(dstPort)
 	isMQTTClientToServer := rules.IsMQTTPort(dstPort)
@@ -944,6 +953,22 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 	if isHTTPClientToServer && rules.LooksLikeHTTP(st.ClientData) {
 		if hi, ok := rules.ParseHTTP(st.ClientData); ok {
 			httpInfo = hi
+		}
+	}
+
+	// The outcome of a request is only known from the server's reply, so
+	// rules about accepted requests see the request/response pair on the
+	// server's packets.
+	var httpExchange *rules.HTTPExchange
+	if httpFlow && !fromClient && len(st.ServerData) > 0 {
+		req, okReq := rules.ParseHTTP(st.ClientData)
+		resp, okResp := rules.ParseHTTPResponse(st.ServerData)
+		if okReq && okResp {
+			httpExchange = &rules.HTTPExchange{
+				Request: req, Response: resp,
+				ClientIP: st.SrcIP, ServerIP: st.DstIP, ServerPort: st.DstPort,
+				ServerLocal: h.isLocal(st.DstIP),
+			}
 		}
 	}
 
@@ -1077,6 +1102,7 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 		Debug:                     h.debug,
 		UploadBytes:               estimateUploadBytes(httpInfo),
 		HTTP:                      httpInfo,
+		HTTPExchange:              httpExchange,
 		MQTT:                      mqttInfo,
 		Telnet:                    telnetInfo,
 		TLS:                       isTLSClientToServer,

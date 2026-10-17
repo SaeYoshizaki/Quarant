@@ -35,7 +35,10 @@ type Context struct {
 	PIIDestinationRepeatCount   int
 	PIIDistinctDestinationCount int
 
-	HTTP          *HTTPInfo
+	HTTP *HTTPInfo
+	// HTTPExchange is set on server packets of HTTP flows once both the
+	// first request and the first response are buffered.
+	HTTPExchange  *HTTPExchange
 	MQTT          *MQTTInfo
 	Telnet        *TelnetInfo
 	TLS           bool
