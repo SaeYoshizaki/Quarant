@@ -7,7 +7,9 @@ set -euo pipefail
 Q=$1; DAY=$2; NAME=$3; RUNS=$4; GT=$5
 here=$(cd "$(dirname "$0")" && pwd)
 # file names end in the epoch of their first packet: sort on it
-files=$(ls "$DAY" | grep -v '^\._' | sort -t. -k3,3n | sed "s|^|$DAY/|")
+# (searched recursively: the March archives nest them as 2018/03/DD/)
+files=$(find "$DAY" -type f -name 'eth*' ! -name '._*' | awk -F/ '{print $NF"\t"$0}' | sort -t. -k3,3n | cut -f2)
+[ -n "$files" ] || { echo "no capture files under $DAY" >&2; exit 1; }
 mkdir -p "$RUNS/$NAME" "$GT/$NAME"
 cat_day() { python3 -I "$here/pcapcat.py" $files; }
 ( cat_day | "$Q" analyze - --out "$RUNS/$NAME/events.jsonl" > "$RUNS/$NAME/quarant.log" 2>&1
@@ -20,5 +22,9 @@ else
 fi
 ( cat_day | python3 -I "$here/rawscan.py" /dev/stdin "$GT/$NAME/raw.jsonl" 2> "$GT/$NAME/raw.stderr" ) &
 wait
+# mark the day done only when every part produced output
+[ -s "$RUNS/$NAME/events.jsonl" ] || { echo "$NAME: Quarant produced no events" >&2; exit 1; }
+[ -s "$GT/$NAME/raw.jsonl" ] || { echo "$NAME: rawscan produced no output" >&2; exit 1; }
+if command -v zeek >/dev/null; then [ -s "$GT/$NAME/gt.log" ] || { echo "$NAME: Zeek produced no gt.log" >&2; exit 1; }; fi
 echo "$(echo "$files" | wc -l | tr -d ' ') files" > "$GT/$NAME/done"
 echo "$NAME done"

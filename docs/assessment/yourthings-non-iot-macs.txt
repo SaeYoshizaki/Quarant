@@ -1,4 +1,4 @@
-# YourThings 2018: MACs not mapped to an IoT device in yourthings.info/assets/device_mapping.csv: unknown hosts, the gateway, the Google OnHub router, and the phones, tablets and PCs the mapping lists (iPhone, iPad, AndroidTablet, UbuntuDesktop, XboxOneX).
+# YourThings 2018: MACs not mapped to an IoT device in device_mapping.csv: unmapped hosts, the gateway, the Google OnHub router, and the phones, tablets and PCs the mapping lists.
 00:01:c0:18:7d:51
 00:01:c0:18:7f:9b
 02:42:c0:a8:00:c8

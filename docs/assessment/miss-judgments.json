@@ -406,6 +406,34 @@
    "mac": "d0:73:d5:12:84:d1",
    "verdict": "not",
    "note": "LIFX: sid= in an mDNS TXT record"
+  },
+  {
+   "group": "YourThings 2018",
+   "family": "csp",
+   "mac": "00:1d:c9:23:f6:00",
+   "verdict": "real",
+   "note": "Ring Doorbell: Authorization Basic to an external server over HTTP (2018-04-11)"
+  },
+  {
+   "group": "YourThings 2018",
+   "family": "csp",
+   "mac": "cc:b8:a8:ad:4d:04",
+   "verdict": "real",
+   "note": "August Doorbell Cam: auth= in a cleartext HTTP URL to an external server (2018-04-11)"
+  },
+  {
+   "group": "YourThings 2018",
+   "family": "csp",
+   "mac": "54:4a:16:f9:54:18",
+   "verdict": "real",
+   "note": "Insteon Hub: pwd= in a cleartext HTTP URL sent to the hub on the LAN (2018-04-11)"
+  },
+  {
+   "group": "YourThings 2018",
+   "family": "csp",
+   "mac": "00:04:4b:55:f6:4f",
+   "verdict": "not",
+   "note": "nVidia Shield: 'sid' matched inside data from a CDN"
   }
  ]
 }
