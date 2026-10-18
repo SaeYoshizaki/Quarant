@@ -212,3 +212,36 @@ func TestImageInsideNonHTTPTCPToPublicAddress(t *testing.T) {
 		t.Fatalf("LAN destination reported %d times", n)
 	}
 }
+
+// TLS that starts after a plaintext XMPP preamble (STARTTLS, RFC 6120 5.4):
+// E12 found a device negotiating TLS 1.0 with 3DES this way on port 5222.
+func TestStartTLSAfterXMPPPreamble(t *testing.T) {
+	dev := synth.NewHost("00:16:6c:00:00:01", "192.168.50.82")
+	xmpp := synth.Host{MAC: reasmPhone.MAC, IP: net.ParseIP("198.51.100.40").To4()}
+	hello := synth.TLSClientHello("chat.example.test", tls.VersionTLS10, tls.VersionTLS10)
+	build := func(askUpgrade bool) func(b *synth.Builder) {
+		return func(b *synth.Builder) {
+			c := b.TCP(dev, xmpp, 34533, 5222).Handshake(reasmStart).
+				Client([]byte("<?xml version='1.0'?><stream:stream to='chat.example.test' xmlns='jabber:client' xmlns:stream='http://etherx.jabber.org/streams' version='1.0'>")).
+				Server([]byte("<stream:features><starttls xmlns='urn:ietf:params:xml:ns:xmpp-tls'><required/></starttls></stream:features>"))
+			if askUpgrade {
+				c = c.Client([]byte("<starttls xmlns='urn:ietf:params:xml:ns:xmpp-tls'/>")).
+					Server([]byte("<proceed xmlns='urn:ietf:params:xml:ns:xmpp-tls'/>"))
+			}
+			c.Client(hello).Server(serverHello(tls.VersionTLS10, 0xC012)).Close()
+		}
+	}
+	evs := runConnEvents(t, build(true))
+	if len(eventsOfType(evs, "I7_TLS_WEAK_VERSION_OBSERVED")) == 0 {
+		t.Fatal("TLS 1.0 after STARTTLS not recognised")
+	}
+	sel := eventsOfType(evs, "I7_TLS_WEAK_CIPHER_SELECTED")
+	if len(sel) == 0 || !bytes.Contains([]byte(sel[0].Evidence), []byte("risk_kind=3des_cipher")) {
+		t.Fatalf("3DES selected after STARTTLS not reported: %+v", sel)
+	}
+	// Without the client's upgrade request a handshake-looking segment in the
+	// middle of a stream is not taken for TLS.
+	if n := len(eventsOfType(runConnEvents(t, build(false)), "TLS_CLIENT_HELLO")); n != 0 {
+		t.Fatalf("mid-stream ClientHello without STARTTLS was parsed %d times", n)
+	}
+}

@@ -37,6 +37,13 @@ type FlowState struct {
 	// TLSByContent: the client's first payload is a TLS ClientHello record,
 	// whatever the port.
 	TLSByContent bool
+	// StartTLSRequested: the client asked to upgrade the plaintext session
+	// to TLS (XMPP <starttls/>, SMTP/IMAP STARTTLS, POP3 STLS, FTP AUTH TLS).
+	// A ClientHello that follows is then recognised mid-stream.
+	StartTLSRequested bool
+	// StartTLS: TLS began after a plaintext preamble; the flow buffers hold
+	// the bytes from the ClientHello on.
+	StartTLS bool
 	// HTTPByContent: the client's first payload is an HTTP request to a
 	// local server on a port outside rules.IsHTTPPort (UPnP control).
 	HTTPByContent bool

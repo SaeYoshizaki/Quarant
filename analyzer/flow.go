@@ -1,6 +1,7 @@
 package analyzer
 
 import (
+	"bytes"
 	"fmt"
 	"sort"
 	"strings"
@@ -869,6 +870,19 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 		st.ClientAsm.isStreamStart(tcp.Seq, st.ClientBytes == int64(len(tcp.Payload))) && looksLikeTLSRecord(tcp.Payload) {
 		st.TLSByContent = true
 	}
+	// STARTTLS: TLS that begins after a plaintext preamble (E12: XMPP on
+	// 5222 selecting 3DES). Only after the client asked for the upgrade, so
+	// a 0x16 byte inside other payload is not taken for a handshake.
+	if fromClient && len(tcp.Payload) > 0 && !st.TLSByContent {
+		if st.StartTLSRequested && looksLikeTLSRecord(tcp.Payload) {
+			st.TLSByContent, st.StartTLS = true, true
+			st.ClientData, st.ServerData = nil, nil
+			st.ClientAsm.restart()
+			st.ServerAsm.restart()
+		} else if len(tcp.Payload) <= 512 && isStartTLSRequest(tcp.Payload) {
+			st.StartTLSRequested = true
+		}
+	}
 	if fromClient && len(tcp.Payload) > 0 && st.ClientBytes == int64(len(tcp.Payload)) && !rules.IsHTTPPort(dstPort) &&
 		rules.LooksLikeHTTPRequest(tcp.Payload) {
 		st.HTTPContent = true
@@ -1494,16 +1508,34 @@ func (h *FlowHandler) cachedI5(deviceIP string, ctx *rules.Context, d *device.De
 	return e.i5, e.i4i5, e.i4i5ok
 }
 
-// looksLikeTLSRecord reports whether payload starts like a TLS handshake
-// record carrying a ClientHello: content type 22, version 3.x, handshake 1.
-// looksLikeTLSRecord reports whether a stream starts with a TLS handshake
-// record carrying a ClientHello. Some stacks send the 5-byte record header in
-// a segment of its own (E11: a blood-pressure meter on port 8777); the header
-// alone counts when its version and length are those of a handshake record.
 // maxRequestsPerFlow bounds how many requests of one kept-alive connection
 // are parsed for the secret and media rules.
 const maxRequestsPerFlow = 16
 
+// isStartTLSRequest reports a client command that upgrades the session to
+// TLS: XMPP <starttls xmlns='urn:ietf:params:xml:ns:xmpp-tls'/> (RFC 6120),
+// SMTP and IMAP STARTTLS (RFC 3207, 9051), POP3 STLS (RFC 2595) and FTP
+// AUTH TLS/SSL (RFC 4217).
+func isStartTLSRequest(p []byte) bool {
+	low := bytes.ToLower(bytes.TrimLeft(p, " \t\r\n"))
+	switch {
+	case bytes.Contains(low, []byte("<starttls")) && bytes.Contains(low, []byte("urn:ietf:params:xml:ns:xmpp-tls")):
+		return true
+	case bytes.HasPrefix(low, []byte("starttls")), bytes.HasPrefix(low, []byte("stls")),
+		bytes.HasPrefix(low, []byte("auth tls")), bytes.HasPrefix(low, []byte("auth ssl")):
+		return true
+	}
+	// IMAP: a tagged command, "a1 STARTTLS"
+	if sp := bytes.IndexByte(low, ' '); sp > 0 && sp < 16 && bytes.HasPrefix(low[sp+1:], []byte("starttls")) {
+		return true
+	}
+	return false
+}
+
+// looksLikeTLSRecord reports whether a stream starts with a TLS handshake
+// record carrying a ClientHello. Some stacks send the 5-byte record header in
+// a segment of its own (E11: a blood-pressure meter on port 8777); the header
+// alone counts when its version and length are those of a handshake record.
 func looksLikeTLSRecord(payload []byte) bool {
 	if len(payload) < 5 || payload[0] != 22 || payload[1] != 3 || payload[2] > 4 {
 		return false
