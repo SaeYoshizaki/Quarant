@@ -12,8 +12,12 @@ mkdir -p "$RUNS/$NAME" "$GT/$NAME"
 cat_day() { python3 -I "$here/pcapcat.py" $files; }
 ( cat_day | "$Q" analyze - --out "$RUNS/$NAME/events.jsonl" > "$RUNS/$NAME/quarant.log" 2>&1
   rm -f "$RUNS/$NAME/observations.jsonl" "$RUNS/$NAME/flows.jsonl" ) &
-( cd "$GT/$NAME" && cat_day | zeek -C -r - "$here/gt.zeek" LogAscii::use_json=T > zeek.stderr 2>&1
-  ls *.log | grep -v '^gt.log$' | xargs rm -f ) &
+if command -v zeek >/dev/null; then
+  ( cd "$GT/$NAME" && cat_day | zeek -C -r - "$here/gt.zeek" LogAscii::use_json=T > zeek.stderr 2>&1
+    ls *.log | grep -v '^gt.log$' | xargs rm -f ) &
+else
+  echo "zeek not installed: no gt.log" > "$GT/$NAME/zeek.stderr"
+fi
 ( cat_day | python3 -I "$here/rawscan.py" /dev/stdin "$GT/$NAME/raw.jsonl" 2> "$GT/$NAME/raw.stderr" ) &
 wait
 echo "$(echo "$files" | wc -l | tr -d ' ') files" > "$GT/$NAME/done"
