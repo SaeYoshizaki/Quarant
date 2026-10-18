@@ -86,12 +86,14 @@
 4. **人による確認**：正しさの判定は Claude 1 人だけ。抜き取った 30〜50 件を利用者にも判定してもらう（E3 の human-review.md と同じ形）。
    - 準備：基準を一般化した確認用シート（36 件、[assessment/human-review-accuracy.md](assessment/human-review-accuracy.md)）を作った。Claude の判定は `~/datasets/review/accuracy-review-key.json`（リポジトリの外）に伏せてある。利用者の判定待ち。
    - 当てはめの確認（E13）は済み。そこで見つけた不具合（キープアライブの本文、空のアップロード）は直した。
-   - 判断待ち：STARTTLS の認識（ブランチ `starttls`、未マージ）。影響は 5222 番の 3 台で、機器単位の数字は変わらないが、3DES を選んだ 1 台が見えるようになる。
+   - STARTTLS の認識を入れた（利用者の了承済み、E13）。正解にある IoT 機器の TLS は、すべて捉えている。
+   - 利用者による基準の判定は済み（36 件中 24 件が一致、κ 0.19）。食い違いは規格の読み方の違いなので、出現率は 2 通りの読み方で示す。人による判定はこれ以上加えない方針（2026-10-18、利用者）。
+   - 次：見たことのない機器のデータ（YourThings、2018、45 台）で、**直す前に**網羅性を測る。5.8-1 の基準を「プロトコルを問わず、暗号化されていない映像・音声」に広げる（RTSP の `RTP/AVP` など。LAN 内は外部と分けて数える）。
 
 **作業の前提（引き継ぎ用）**
-- 最新の解析結果：`~/datasets/runs-fix3/`（全データ、`978b290` 時点）。その前は `runs-fix/`（`3ae8b2c`）、 `runs-d22/`（`c357166`）、`runs-e10/`（`abf5d92`）。各 run には `events.jsonl` と `device_inventory.json` だけを残す（容量のため）。
+- 最新の解析結果：`~/datasets/runs-fix4/`（全データ、`106340f` 時点）。その前は `runs-fix3/`（`978b290`）、 `runs-fix/`（`3ae8b2c`）、 `runs-d22/`（`c357166`）、`runs-e10/`（`abf5d92`）。各 run には `events.jsonl` と `device_inventory.json` だけを残す（容量のため）。
 - 元データ：USB ドライブ `/Volumes/Untitled/quarant-datasets/`（UNSW 2016・2018、IoT-23、CIC IoT 2022）。`~/datasets/<名前>` からリンクしている。解析する前に USB をつなぐ。CIC のアーカイブは `/Volumes/Untitled/CIC_IOT_Dataset2022/`。
-- 全データの再解析：`~/datasets/scripts/rerun-fix3.sh`（バイナリと出力先を書き換えて使う。1 時間ほどかかる）。
+- 全データの再解析：`~/datasets/scripts/rerun-fix4.sh`（バイナリと出力先を書き換えて使う。1 時間ほどかかる）。
 - 出現率の集計：`python3 scripts/assessment/evidence_rates.py docs/assessment/evidence-map.json $HOME/datasets/runs-e10 docs/assessment/evidence-rates.md <samples.json> docs/assessment/non-iot-macs.txt`
 - 機器の対応づけは、run ごとの `device_inventory.json` で行う。IP アドレスは日によって変わるので、run をまたいで IP で機器を特定しない（E7 で一度まちがえた）。
 - 要件と検出の対応、精度の監査の記録：`docs/assessment/evidence-map.json`、`precision-audit.md`、見逃しの監査：`miss-audit.md`。実験の記録：`docs/EXPERIMENTS.md` の E4〜E13。
