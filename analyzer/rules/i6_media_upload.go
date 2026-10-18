@@ -41,6 +41,11 @@ func (r *I6MediaUploadCleartextRule) Apply(ctx *Context) (Match, bool) {
 	if declared == "" && sniffed == "" {
 		return Match{}, false
 	}
+	// A request that declares an image type but carries no bytes sends no
+	// media (Home Eye followed every snapshot PUT with an empty one, E12).
+	if sniffed == "" && len(req.Body) == 0 && strings.TrimSpace(req.Headers["content-length"]) == "0" {
+		return Match{}, false
+	}
 	host := strings.ToLower(strings.TrimSpace(req.Headers["host"]))
 	if host == "" {
 		host = ctx.DstIP

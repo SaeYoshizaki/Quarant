@@ -29,7 +29,7 @@ func TestMediaUploadDeclaredAndSniffed(t *testing.T) {
 }
 
 func TestMediaUploadMultipartPart(t *testing.T) {
-	ctx := mediaCtx(t, "203.0.113.7", "POST /upload HTTP/1.1\r\nHost: cam.example\r\nContent-Type: multipart/form-data; boundary=x\r\n\r\n--x\r\nContent-Disposition: form-data; name=\"file\"; filename=\"a.jpg\"\r\nContent-Type: image/jpeg\r\n\r\n\xff\xd8\xff")
+	ctx := mediaCtx(t, "203.0.113.7", "POST /upload HTTP/1.1\r\nHost: cam.example\r\nContent-Type: multipart/form-data; boundary=x\r\nContent-Length: 4096\r\n\r\n--x\r\nContent-Disposition: form-data; name=\"file\"; filename=\"a.jpg\"\r\nContent-Type: image/jpeg\r\n\r\n\xff\xd8\xff")
 	m, ok := (&I6MediaUploadCleartextRule{}).Apply(ctx)
 	if !ok || !strings.Contains(m.Evidence, "content_type=multipart:image/jpeg") {
 		t.Fatalf("got %v %q", ok, m.Evidence)
@@ -57,10 +57,18 @@ func TestMediaUploadIgnoresLocalTLSAndDownloads(t *testing.T) {
 // A camera streaming to its cloud relay sent a text part first and the video
 // part after it (E11, TP-Link camera on UNSW 2016).
 func TestMediaUploadMultipartLaterPart(t *testing.T) {
-	raw := "POST /relay HTTP/1.1\r\nHost: relay.example\r\nContent-Type: multipart/x-mixed-replace; boundary=b\r\n\r\n" +
+	raw := "POST /relay HTTP/1.1\r\nHost: relay.example\r\nContent-Type: multipart/x-mixed-replace; boundary=b\r\nContent-Length: 1073741824\r\n\r\n" +
 		"--b\r\nContent-Type: text/http-header\r\n\r\nHTTP/1.1 200 OK\r\n\r\n--b\r\nContent-Type: video/x-h264\r\n\r\n\x00\x00\x00\x01"
 	m, ok := (&I6MediaUploadCleartextRule{}).Apply(mediaCtx(t, "203.0.113.7", raw))
 	if !ok || !strings.Contains(m.Evidence, "content_type=multipart:video/x-h264") {
 		t.Fatalf("got %v %q", ok, m.Evidence)
+	}
+}
+
+// An empty PUT that only declares an image type carries no media (E12).
+func TestMediaUploadIgnoresEmptyDeclaredBody(t *testing.T) {
+	raw := "PUT /bucket/x.jpg HTTP/1.1\r\nHost: b.example\r\nContent-Type: image/jpg\r\nContent-Length: 0\r\n\r\n"
+	if _, ok := (&I6MediaUploadCleartextRule{}).Apply(mediaCtx(t, "203.0.113.7", raw)); ok {
+		t.Fatal("an empty upload must not be reported")
 	}
 }

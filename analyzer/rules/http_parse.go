@@ -3,6 +3,7 @@ package rules
 import (
 	"bytes"
 	"net/url"
+	"strconv"
 	"strings"
 )
 
@@ -105,10 +106,7 @@ func ParseHTTP(payload []byte) (*HTTPInfo, bool) {
 		}
 	}
 
-	body := payload[bodyStart:]
-	if len(body) == 0 {
-		body = nil
-	}
+	body := requestBody(payload[bodyStart:], h)
 
 	ct := ""
 	if v, ok := h["content-type"]; ok {
@@ -125,4 +123,34 @@ func ParseHTTP(payload []byte) (*HTTPInfo, bool) {
 		Body:        body,
 		ContentType: ct,
 	}, true
+}
+
+// requestBody returns the bytes of the request's own body. Without a
+// Content-Length or Transfer-Encoding a request has no body (RFC 9112 6.3);
+// the bytes after the header then belong to the next request on a kept-alive
+// connection, which E11/E12 found being read as a body (a camera web UI's
+// password cookie in the following GET reported as a body secret). With a
+// Content-Length the body ends there. A chunked body is kept as captured.
+func requestBody(rest []byte, h map[string]string) []byte {
+	if _, chunked := h["transfer-encoding"]; chunked {
+		if len(rest) == 0 {
+			return nil
+		}
+		return rest
+	}
+	v, ok := h["content-length"]
+	if !ok {
+		return nil
+	}
+	n, err := strconv.ParseInt(strings.TrimSpace(v), 10, 64)
+	if err != nil || n <= 0 {
+		return nil
+	}
+	if int64(len(rest)) > n {
+		rest = rest[:n]
+	}
+	if len(rest) == 0 {
+		return nil
+	}
+	return rest
 }

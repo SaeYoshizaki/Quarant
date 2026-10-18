@@ -379,3 +379,21 @@ func TestI7HTTPAuthNamesChallengeResponseSchemes(t *testing.T) {
 		}
 	}
 }
+
+// The bytes after a GET without Content-Length belong to the next request on
+// a kept-alive connection, not to a body (E12: a camera web UI's password
+// cookie in the following GET was reported as a body secret).
+func TestParseHTTPKeepAliveRequestHasNoBody(t *testing.T) {
+	raw := "GET / HTTP/1.1\r\nHost: cam\r\n\r\nGET /next HTTP/1.1\r\nHost: cam\r\nCookie: user=a; pwd=b\r\n\r\n"
+	h, ok := ParseHTTP([]byte(raw))
+	if !ok || h.Body != nil {
+		t.Fatalf("ok=%v body=%q", ok, h.Body)
+	}
+	if _, _, found := DetectSensitiveHTTPBody(h.ContentType, h.Body); found {
+		t.Fatal("the next request was read as a body")
+	}
+	post := "POST /a HTTP/1.1\r\nContent-Length: 5\r\n\r\nhelloGET /b HTTP/1.1\r\n\r\n"
+	if p, _ := ParseHTTP([]byte(post)); string(p.Body) != "hello" {
+		t.Fatalf("body %q", p.Body)
+	}
+}
