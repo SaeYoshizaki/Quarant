@@ -1,0 +1,221 @@
+{
+ "description": "Claude's verdicts for the criteria in docs/assessment/human-review-accuracy.md (outside the repo until the review is done). Y = counts as violation evidence, N = does not, U = cannot be decided from traffic (candidate).",
+ "items": [
+  {
+   "id": "T1",
+   "provision": "5.5-1／5.1-3",
+   "criterion": "機器が TLS 1.1 以下しか提示せず、その版で通信した",
+   "claude": "Y"
+  },
+  {
+   "id": "T2",
+   "provision": "5.5-1／5.1-3",
+   "criterion": "機器は TLS 1.2 以上を提示したが、外部のサーバーが TLS 1.1 以下を選び、機器はそのまま通信した",
+   "claude": "Y"
+  },
+  {
+   "id": "T3",
+   "provision": "5.5-1",
+   "criterion": "機器が TLS の**サーバー**で、相手が TLS 1.2 以上を提示したのに、機器が TLS 1.1 以下を選んだ",
+   "claude": "Y"
+  },
+  {
+   "id": "T4",
+   "provision": "5.5-1",
+   "criterion": "機器が TLS 1.1 以下しか提示しない ClientHello を送ったが、サーバーの応答は見えなかった",
+   "claude": "Y"
+  },
+  {
+   "id": "T5",
+   "provision": "5.5-1",
+   "criterion": "TLS 1.2 で、CBC モードの暗号スイート（例：`TLS_RSA_WITH_AES_128_CBC_SHA`）が選ばれた",
+   "claude": "N"
+  },
+  {
+   "id": "T6",
+   "provision": "5.5-1",
+   "criterion": "RC4、3DES、DES、NULL、EXPORT、匿名、MD5 の暗号スイートが選ばれた",
+   "claude": "Y"
+  },
+  {
+   "id": "S1",
+   "provision": "5.5-6",
+   "criterion": "`Authorization: Basic`（ユーザー名とパスワードを符号化しただけのもの）を、平文の HTTP で送る",
+   "claude": "Y"
+  },
+  {
+   "id": "S2",
+   "provision": "5.5-6",
+   "criterion": "ベンダー独自の方式の `Authorization` ヘッダ（中身の形式は公開されていない）を、平文の HTTP で送る",
+   "claude": "Y"
+  },
+  {
+   "id": "S3",
+   "provision": "5.5-6",
+   "criterion": "要求ごとの**署名**（AWS SigV4、Alibaba Cloud OSS、Tuya の `sign=`）を平文で送る。秘密鍵そのものは送られない",
+   "claude": "N"
+  },
+  {
+   "id": "S4",
+   "provision": "5.5-6",
+   "criterion": "**ダイジェスト**（HTTP Digest 認証、WS-Security の UsernameToken）を平文で送る。パスワードと乱数から計算した値で、パスワードそのものではない",
+   "claude": "N"
+  },
+  {
+   "id": "S5",
+   "provision": "5.5-6",
+   "criterion": "`sessionid` という名前のキー（セッション ID）を、平文で送る・受け取る",
+   "claude": "Y"
+  },
+  {
+   "id": "S6",
+   "provision": "5.5-6",
+   "criterion": "`sid` という名前の URL パラメータ（何のセッションかは分からない）を、平文で送る",
+   "claude": "U"
+  },
+  {
+   "id": "S7",
+   "provision": "5.5-6",
+   "criterion": "API キーやトークンを名乗るヘッダやキー（`X-token`、`api_key`、`auth=`）を、平文で送る",
+   "claude": "Y"
+  },
+  {
+   "id": "S8",
+   "provision": "5.5-6",
+   "criterion": "機器の**識別子**（`serial`、`device_id`、`sonosid`、`householdid`）を、平文で送る",
+   "claude": "N"
+  },
+  {
+   "id": "S9",
+   "provision": "5.5-6",
+   "criterion": "Cookie を平文の HTTP で送る（セッション用か、解析用かは分からない）",
+   "claude": "Y"
+  },
+  {
+   "id": "S10",
+   "provision": "5.5-6",
+   "criterion": "暗号化なしの MQTT（1883 番）に、パスワードつきで接続する",
+   "claude": "Y"
+  },
+  {
+   "id": "S11",
+   "provision": "5.5-6",
+   "criterion": "UDP の、印字できる `user=…&pwd=…` 形式のログイン情報",
+   "claude": "Y"
+  },
+  {
+   "id": "S12",
+   "provision": "5.5-6",
+   "criterion": "平文の秘密情報が **LAN 内だけ**を流れる（例：スマートフォンのアプリから機器へのログイン）。5.5-6 の証拠に数えるか",
+   "claude": "Y"
+  },
+  {
+   "id": "S13",
+   "provision": "5.5-6",
+   "criterion": "秘密情報が、**サーバーから機器への応答**に入っている（例：応答の本文の `sessionid`）",
+   "claude": "Y"
+  },
+  {
+   "id": "S14",
+   "provision": "5.5-6",
+   "criterion": "**攻撃者**が総当たりで推測した認証情報を、平文で送っている（機器は受け手）",
+   "claude": "N"
+  },
+  {
+   "id": "S15",
+   "provision": "5.5-7",
+   "criterion": "外部（インターネット側）の相手から、平文の秘密情報が機器に**届く**（機器が受け手）。5.5-7 の証拠に数えるか",
+   "claude": "Y"
+  },
+  {
+   "id": "P1",
+   "provision": "5.8-1",
+   "criterion": "カメラの画像、映像、音声を、平文の HTTP で外部へ送る",
+   "claude": "Y"
+  },
+  {
+   "id": "P2",
+   "provision": "5.8-1",
+   "criterion": "カメラの画像を、HTTP ではない独自のプロトコルで、暗号化せずに外部へ送る",
+   "claude": "Y"
+  },
+  {
+   "id": "P3",
+   "provision": "5.8-1",
+   "criterion": "利用者の ID（`userid`）を、平文の HTTP で外部へ送る",
+   "claude": "Y"
+  },
+  {
+   "id": "P4",
+   "provision": "5.8-1",
+   "criterion": "機器が **LAN 内**のアプリに、画像を平文で返す（カメラの静止画、アルバムの画像など）。5.8-1 の「関連するサービス」に LAN 内のアプリを含めるか",
+   "claude": "U"
+  },
+  {
+   "id": "A1",
+   "provision": "5.5-4",
+   "criterion": "LAN 内から、認証情報なしの**設定の書き込み**が受け付けられた",
+   "claude": "Y"
+  },
+  {
+   "id": "A2",
+   "provision": "5.5-4",
+   "criterion": "LAN 内から、認証情報なしの要求に、機器が**家の情報**を返した（UPnP の SOAP）",
+   "claude": "Y"
+  },
+  {
+   "id": "A3",
+   "provision": "5.5-4",
+   "criterion": "LAN 内から、認証情報なしで DLNA の再生関係の操作が受け付けられた（`GetProtocolInfo` など）。※5.5-4 自身が、DLNA を例外の例に挙げている",
+   "claude": "N"
+  },
+  {
+   "id": "A4",
+   "provision": "5.5-4",
+   "criterion": "カメラが、認証なしで映像を配信した（RTSP）",
+   "claude": "Y"
+  },
+  {
+   "id": "O1",
+   "provision": "5.6-2",
+   "criterion": "認証なしの機器探索で、プロトコルが定めるバージョンを流す（UPnP の SERVER ヘッダ、mDNS の `pv=1.0`）",
+   "claude": "N"
+  },
+  {
+   "id": "O2",
+   "provision": "5.9-3",
+   "criterion": "応答のある接続を、一定の間隔で繰り返す（例：44 分で 30 回、すべて応答あり）",
+   "claude": "N"
+  },
+  {
+   "id": "O3",
+   "provision": "5.9-3",
+   "criterion": "大半が無応答のまま、接続を繰り返す（例：毎時約 40 回）。間隔を広げているか（バックオフ）は確かめていない",
+   "claude": "U"
+  },
+  {
+   "id": "O4",
+   "provision": "5.1-5",
+   "criterion": "総当たりに 401（認証失敗）を返し続けた。遅延も拒否もなく、成功した試行はなかった",
+   "claude": "U"
+  },
+  {
+   "id": "O5",
+   "provision": "5.12-1",
+   "criterion": "機器が UPnP で、外部のポートを自分へ転送するようゲートウェイに頼み、受け付けられた",
+   "claude": "U"
+  },
+  {
+   "id": "O6",
+   "provision": "5.3-7",
+   "criterion": "ファームウェアらしいファイルを、平文の HTTP で取得した（パッケージに署名があるかは分からない）",
+   "claude": "U"
+  },
+  {
+   "id": "S16",
+   "provision": "5.5-6",
+   "criterion": "password-named key inside a Cookie sent in cleartext on every request",
+   "claude": "Y"
+  }
+ ]
+}
