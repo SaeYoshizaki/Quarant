@@ -36,6 +36,14 @@ const (
 
 func seqDiff(a, b uint32) int32 { return int32(a - b) }
 
+// restart forgets the stream position so that the next segment is taken as
+// the start, as for a capture picked up mid-connection. Used when TLS starts
+// after a plaintext preamble (STARTTLS) that was not buffered.
+func (a *streamAssembler) restart() {
+	a.started, a.synSeen, a.startSeen = false, false, false
+	a.pending = nil
+}
+
 // syn records the initial sequence number from a SYN or SYN/ACK.
 func (a *streamAssembler) syn(seq uint32) {
 	if a.started {
