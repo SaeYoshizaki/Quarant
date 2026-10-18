@@ -91,6 +91,7 @@
    - 次：見たことのない機器のデータ（YourThings、2018、45 台）で、**直す前に**網羅性を測る。5.8-1 の基準を「プロトコルを問わず、暗号化されていない映像・音声」に広げる（RTSP の `RTP/AVP` など。LAN 内は外部と分けて数える）。
 
 **作業の前提（引き継ぎ用）**
+- 解析結果の保管（非公開、研究室内の共有用）：https://github.com/SaeYoshizaki/quarant-results 。全 12 版の `runs-*` と E11 の正解を、そのまま圧縮して置いた（元の PCAP は含めない）。
 - 最新の解析結果：`~/datasets/runs-fix4/`（全データ、`106340f` 時点）。その前は `runs-fix3/`（`978b290`）、 `runs-fix/`（`3ae8b2c`）、 `runs-d22/`（`c357166`）、`runs-e10/`（`abf5d92`）。各 run には `events.jsonl` と `device_inventory.json` だけを残す（容量のため）。
 - 元データ：USB ドライブ `/Volumes/Untitled/quarant-datasets/`（UNSW 2016・2018、IoT-23、CIC IoT 2022）。`~/datasets/<名前>` からリンクしている。解析する前に USB をつなぐ。CIC のアーカイブは `/Volumes/Untitled/CIC_IOT_Dataset2022/`。
 - 全データの再解析：`~/datasets/scripts/rerun-fix4.sh`（バイナリと出力先を書き換えて使う。1 時間ほどかかる）。
