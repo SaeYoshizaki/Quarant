@@ -343,6 +343,69 @@
    "mac": "34:75:63:73:f3:36",
    "verdict": "not",
    "note": "Home Eye: Quarant counted Authorization OSS (per-request signature) as a CSP"
+  },
+  {
+   "group": "YourThings 2018",
+   "family": "csp",
+   "mac": "00:17:88:21:f7:e4",
+   "verdict": "real",
+   "note": "Philips Hue: Authorization header and auth= over HTTP"
+  },
+  {
+   "group": "YourThings 2018",
+   "family": "csp",
+   "mac": "7c:64:56:60:71:74",
+   "verdict": "real",
+   "note": "Samsung smart TV: cookies over HTTP (criterion S9); the d_visid_ver/mboxsession parameters are analytics identifiers"
+  },
+  {
+   "group": "YourThings 2018",
+   "family": "csp",
+   "mac": "08:05:81:ee:06:46",
+   "verdict": "real",
+   "note": "Roku 4: cookies to appboot.netflix.com over HTTP (S9); Netflix MSL tokens in responses are themselves encrypted and signed, not counted"
+  },
+  {
+   "group": "YourThings 2018",
+   "family": "csp",
+   "mac": "30:52:cb:a3:4f:5f",
+   "verdict": "real",
+   "note": "Roku TV: cookies to appboot.netflix.com over HTTP (S9)"
+  },
+  {
+   "group": "YourThings 2018",
+   "family": "csp",
+   "mac": "94:4a:0c:08:7e:72",
+   "verdict": "real",
+   "note": "MiCasaVerde VeraLite: FTP USER and PASS in cleartext to an external FTP server (port 21), 36 sessions"
+  },
+  {
+   "group": "YourThings 2018",
+   "family": "csp",
+   "mac": "c8:db:26:02:bb:bb",
+   "verdict": "real",
+   "note": "Logitech Harmony Hub: an API key field in the body of a cleartext HTTP response from svcs.myharmony.com (value not checked; S7 and S13)"
+  },
+  {
+   "group": "YourThings 2018",
+   "family": "csp",
+   "mac": "e4:71:85:25:ce:ec",
+   "verdict": "not",
+   "note": "Securifi Almond: 'authuser' in a Google web page"
+  },
+  {
+   "group": "YourThings 2018",
+   "family": "csp",
+   "mac": "5c:aa:fd:6c:e0:d4",
+   "verdict": "not",
+   "note": "Sonos: sonosid is an identifier"
+  },
+  {
+   "group": "YourThings 2018",
+   "family": "csp",
+   "mac": "d0:73:d5:12:84:d1",
+   "verdict": "not",
+   "note": "LIFX: sid= in an mDNS TXT record"
   }
  ]
 }

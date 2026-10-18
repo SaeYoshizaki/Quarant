@@ -1067,3 +1067,38 @@ python3 scripts/accuracy/compare_misses.py docs/assessment/evidence-map.json ~/d
 - 正解に記録のない種類（本文の識別子、利用者 ID）は、当てはめを確かめていない。
 - フラッドのデータの機器は、ほかの CIC のデータと同じ機器である。新しい機器での網羅性は、まだ確かめていない。
 
+## E14：見たことのない機器での網羅性（YourThings 2018、1 日分、2026-10-18、RQ2）
+
+**目的**：E11〜E13 の修正は、見逃しを見ながら作り、同じデータで測った。そこで、**一度も使っていないデータ**で、修正を加える前の今の Quarant が、どれだけ取りこぼすかを測る。
+
+**データ**
+- YourThings（Georgia Tech、Alrawi ほか、IEEE S&P 2019）の 2018-04-10 の 1 日分。実際の家に置いた機器の通信で、5 分ごとの PCAP が 288 個（展開して 29GB）。`iot_traffic20180410.tgz` の SHA-256 は `ba0264d2…9d8a07`。利用条件は「使ったら論文を引用すること」。
+- 機器は、配布元の対応表（`device_mapping.csv`、IP → 機器名）で決めた。この日に通信のあった IoT 機器は 45 台。対応表にない IP、ゲートウェイ、Google OnHub（ルーター）、対応表にあるスマートフォン、タブレット、PC（iPhone、iPad、AndroidTablet など）は除外した（[assessment/yourthings-non-iot-macs.txt](assessment/yourthings-non-iot-macs.txt)）。スマートテレビやストリーミングの機器は、EN 303 645 の対象なので含めた。
+- 今のデータにない機器が多い：Ring のドアベル、August のドアベルカメラ、Chamberlain の車庫の開閉器、Nest の Protect・Guard・Cam IQ、Canary、Piper、Wink、VeraLite、Harmony Hub など。
+
+**方法**
+- 5 分ごとの PCAP を時刻順につなげ（[scripts/accuracy/pcapcat.py](../scripts/accuracy/pcapcat.py)）、1 日分を 1 本の通信として、Quarant（`106340f`、修正なし）、Zeek の正解、生パケットの検索に流した（[scripts/accuracy/run_split_day.sh](../scripts/accuracy/run_split_day.sh)）。
+- E11 と同じ比較と判定、E13 と同じ当てはめの確認を行った。新しい候補は Claude が判定した（[assessment/miss-judgments.json](assessment/miss-judgments.json)）。判定は、規格の文言に沿った読み方と厳しい読み方のどちらでも同じになった。
+- **測ってから直す**：見つかった見逃しは、この記録を残すまで直していない。
+
+**結果**（IoT 機器の数。正解 → 検出）
+
+| 要件 | 正解 | 検出 | 見逃し |
+|---|---|---|---|
+| 5.5-1 古い TLS | 12 | 12 | 0 |
+| 5.5-6 平文の秘密情報 | 6 | 4 | 2 |
+| 5.8-1 メディアの平文送信 | 0 | 0 | 0 |
+
+- **見逃し 1：FTP のパスワード**。MiCasaVerde VeraLite（スマートホームのハブ）が、外部の FTP サーバー（21 番ポート）に、ユーザー名とパスワードを平文で送っていた（36 回）。Quarant は FTP のサービスは検出するが、FTP の認証情報を調べる検出がない。機器同士のパスワード認証（5.1-2A）の証拠にもなる。
+- **見逃し 2：応答の中の API キー**。Logitech Harmony Hub が、クラウド（svcs.myharmony.com）からの平文の HTTP の応答の本文で、API キーの項目を受け取っていた（値は確認していない）。Quarant は、サーバーからの応答を秘密情報の検出にかけていない。
+- 当てはめ：正解に記録のあるイベントは、2 件を除いて確かめられた。確かめられなかった 2 件は、どちらも Samsung のテレビの解析サービス（Adobe）の通信（`mboxsession` と Cookie）。このテレビは、ほかの Cookie で確かめられているので、機器単位の結果は変わらない。
+- 秘密情報に見えたが、判定で外したもの：Google のページの `authuser`、Sonos の `sonosid`、LIFX の mDNS の `sid=`、Netflix の MSL のトークン（トークン自体が暗号化・署名されたもの）。
+
+**解釈**
+- **古い TLS は、見たことのない機器でも取りこぼしがなかった**（12/12）。E12・E13 の修正が、同じデータへの合わせ込みだけではなかったことを示す。
+- **平文の秘密情報は、6 台中 2 台を取りこぼした**。どちらも、E11 にはなかった種類（FTP の認証、応答の向き）だった。見逃しの種類は、データを増やすほど見つかる。網羅性の数字は、データの範囲に依存することを、論文で明示する必要がある。
+
+**限界**
+- 1 日分だけ。YourThings には全部で 19 日分ある。
+- 正解は E11 と同じ作り方で、同じ限界がある（キー名に頼る、パケット単位の生パケット検索、判定は Claude）。
+
