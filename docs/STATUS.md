@@ -41,7 +41,7 @@
 - **UDP**：識別と活動の記録はできるが、UDP のフローは記録しない。そのため UDP のビーコンやスキャンは検出できない。中身は、印字できる `key=value` の並びの中の認証情報だけを、パケットごとに調べる（D23）。
 - **TCP の再組み立て**：方向ごとに、シーケンス番号の順に 16KB まで組み立てる。再送は捨て、並べ替えは直し、キャプチャ側の欠落は ACK から判定して数える（`capture_gaps`）。
   - 限界：SYN を観測しておらず、最初のセグメントが逆順に届いた通信は、まだ正しく組み立てられない。
-  - HTTP は最初のリクエストしか解析しない。
+  - HTTP は、秘密情報とメディアの検出だけ、キープアライブで続く要求も解析する（最大 16 件、E13）。ほかの検出は最初の要求だけ。
 - **Web UI**：Next.js の UI はあるが未ビルドで、新しい項目（basis、識別の根拠、振る舞い）は表示されない。
 
 ## 未実装
@@ -84,14 +84,17 @@
    - 解析結果：`~/datasets/runs-fix/`（`3ae8b2c`）。修正前の基準は `~/datasets/runs-d22/`（`c357166`）。
 3. **候補止まりを確定に近づける**：保留（2026-10-17 に利用者と合意）。平文のパスワードが見える機器が全データで 2〜3 台しかなく、得られるものが少ない。候補止まりであること自体を、パッシブな観測の限界として示す。以下は元の案：パッシブのまま判定できる範囲を広げる。例：初期パスワード（5.1-1）は、値を保存せずに、公開されている初期パスワードの一覧とメモリ上で照合し、一致したかどうかだけを記録する。
 4. **人による確認**：正しさの判定は Claude 1 人だけ。抜き取った 30〜50 件を利用者にも判定してもらう（E3 の human-review.md と同じ形）。
+   - 準備：基準を一般化した確認用シート（36 件、[assessment/human-review-accuracy.md](assessment/human-review-accuracy.md)）を作った。Claude の判定は `~/datasets/review/accuracy-review-key.json`（リポジトリの外）に伏せてある。利用者の判定待ち。
+   - 当てはめの確認（E13）は済み。そこで見つけた不具合（キープアライブの本文、空のアップロード）は直した。
+   - 判断待ち：STARTTLS の認識（ブランチ `starttls`、未マージ）。影響は 5222 番の 3 台で、機器単位の数字は変わらないが、3DES を選んだ 1 台が見えるようになる。
 
 **作業の前提（引き継ぎ用）**
-- 最新の解析結果：`~/datasets/runs-fix/`（全データ、`3ae8b2c` 時点）。その前は `runs-d22/`（`c357166`）、`runs-e10/`（`abf5d92`）。各 run には `events.jsonl` と `device_inventory.json` だけを残す（容量のため）。
+- 最新の解析結果：`~/datasets/runs-fix3/`（全データ、`978b290` 時点）。その前は `runs-fix/`（`3ae8b2c`）、 `runs-d22/`（`c357166`）、`runs-e10/`（`abf5d92`）。各 run には `events.jsonl` と `device_inventory.json` だけを残す（容量のため）。
 - 元データ：USB ドライブ `/Volumes/Untitled/quarant-datasets/`（UNSW 2016・2018、IoT-23、CIC IoT 2022）。`~/datasets/<名前>` からリンクしている。解析する前に USB をつなぐ。CIC のアーカイブは `/Volumes/Untitled/CIC_IOT_Dataset2022/`。
-- 全データの再解析：`~/datasets/scripts/rerun-fix.sh`（バイナリと出力先を書き換えて使う。1 時間ほどかかる）。
+- 全データの再解析：`~/datasets/scripts/rerun-fix3.sh`（バイナリと出力先を書き換えて使う。1 時間ほどかかる）。
 - 出現率の集計：`python3 scripts/assessment/evidence_rates.py docs/assessment/evidence-map.json $HOME/datasets/runs-e10 docs/assessment/evidence-rates.md <samples.json> docs/assessment/non-iot-macs.txt`
 - 機器の対応づけは、run ごとの `device_inventory.json` で行う。IP アドレスは日によって変わるので、run をまたいで IP で機器を特定しない（E7 で一度まちがえた）。
-- 要件と検出の対応、精度の監査の記録：`docs/assessment/evidence-map.json`、`precision-audit.md`、見逃しの監査：`miss-audit.md`。実験の記録：`docs/EXPERIMENTS.md` の E4〜E12。
+- 要件と検出の対応、精度の監査の記録：`docs/assessment/evidence-map.json`、`precision-audit.md`、見逃しの監査：`miss-audit.md`。実験の記録：`docs/EXPERIMENTS.md` の E4〜E13。
 - 見逃しの正解：`~/datasets/gt-e10/<run>/`（`gt.log` は Zeek、`raw.jsonl` は生パケットの検索。名前だけで値は含まない）。作り方は `scripts/accuracy/run_gt.sh`。tshark は Homebrew の Lua の不整合で起動しない。
 
 ### 研究の全体（ROADMAP）
