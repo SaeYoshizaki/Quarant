@@ -27,7 +27,8 @@ GROUPS = {"unsw-": "UNSW traces 2016", "unswatk-": "UNSW attacks 2018", "iot23-"
           "cic-3-interactions-": "CIC IoT 2022 interactions",
           "cic-4-scenarios-": "CIC IoT 2022 scenarios",
           "cic-5-active-": "CIC IoT 2022 active",
-          "cic-6-rtsp-": "CIC IoT 2022 RTSP attacks", "laptop-": "Laptop 2026 (not IoT)"}
+          "cic-6-rtsp-": "CIC IoT 2022 RTSP attacks", "yt-": "YourThings 2018",
+          "laptop-": "Laptop 2026 (not IoT)"}
 VERSION_RE = re.compile(r"\d+\.\d+(\.\d+)?")
 
 

@@ -93,7 +93,7 @@
 **作業の前提（引き継ぎ用）**
 - 解析結果の保管（非公開、研究室内の共有用）：https://github.com/SaeYoshizaki/quarant-results 。全 12 版の `runs-*` と E11 の正解を、そのまま圧縮して置いた（元の PCAP は含めない）。
 - 最新の解析結果：`~/datasets/runs-fix4/`（全データ、`106340f` 時点）。その前は `runs-fix3/`（`978b290`）、 `runs-fix/`（`3ae8b2c`）、 `runs-d22/`（`c357166`）、`runs-e10/`（`abf5d92`）。各 run には `events.jsonl` と `device_inventory.json` だけを残す（容量のため）。
-- 元データ：USB ドライブ `/Volumes/Untitled/quarant-datasets/`（UNSW 2016・2018、IoT-23、CIC IoT 2022）。`~/datasets/<名前>` からリンクしている。解析する前に USB をつなぐ。CIC のアーカイブは `/Volumes/Untitled/CIC_IOT_Dataset2022/`。
+- 元データ：2026-10-18 から Google ドライブ（利用者のアカウント）に保管している（UNSW 2016・2018、IoT-23、CIC IoT 2022）。USB ドライブからは消した。`~/datasets/<名前>` のリンクは行き先がないので、解析し直すときはドライブから戻す。解析結果（`runs-*`）の集計し直しには、元データは要らない。YourThings（2018）は `/Volumes/Untitled/iot_traffic*.tgz` に 1 日ずつ置き、解析するときに Mac に展開する。
 - 全データの再解析：`~/datasets/scripts/rerun-fix4.sh`（バイナリと出力先を書き換えて使う。1 時間ほどかかる）。
 - 出現率の集計：`python3 scripts/assessment/evidence_rates.py docs/assessment/evidence-map.json $HOME/datasets/runs-e10 docs/assessment/evidence-rates.md <samples.json> docs/assessment/non-iot-macs.txt`
 - 機器の対応づけは、run ごとの `device_inventory.json` で行う。IP アドレスは日によって変わるので、run をまたいで IP で機器を特定しない（E7 で一度まちがえた）。
