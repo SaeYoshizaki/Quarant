@@ -154,3 +154,41 @@ func requestBody(rest []byte, h map[string]string) []byte {
 	}
 	return rest
 }
+
+// ParseHTTPRequests parses up to max requests sent one after another on a
+// kept-alive connection. Each request ends where its Content-Length says;
+// a chunked body or a body cut off by the capture limit ends the walk, since
+// the next request's start is then unknown. E12: a scale sent its session ID
+// only in the second and later POSTs of a connection.
+func ParseHTTPRequests(data []byte, max int) []*HTTPInfo {
+	var out []*HTTPInfo
+	for off := 0; off < len(data) && len(out) < max; {
+		rest := bytes.TrimLeft(data[off:], "\r\n")
+		off = len(data) - len(rest)
+		if !LooksLikeHTTP(rest) {
+			break
+		}
+		h, ok := ParseHTTP(rest)
+		if !ok {
+			break
+		}
+		out = append(out, h)
+		_, bodyStart, _ := httpHeadEnd(rest)
+		if _, chunked := h.Headers["transfer-encoding"]; chunked {
+			break
+		}
+		n := 0
+		if v, ok := h.Headers["content-length"]; ok {
+			cl, err := strconv.Atoi(strings.TrimSpace(v))
+			if err != nil || cl < 0 {
+				break
+			}
+			n = cl
+		}
+		if bodyStart+n > len(rest) {
+			break
+		}
+		off += bodyStart + n
+	}
+	return out
+}

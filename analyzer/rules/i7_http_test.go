@@ -397,3 +397,17 @@ func TestParseHTTPKeepAliveRequestHasNoBody(t *testing.T) {
 		t.Fatalf("body %q", p.Body)
 	}
 }
+
+func TestParseHTTPRequestsWalksKeptAliveConnection(t *testing.T) {
+	raw := "POST /a HTTP/1.1\r\nContent-Length: 2\r\n\r\nokPOST /b HTTP/1.1\r\nContent-Type: application/x-www-form-urlencoded\r\nContent-Length: 42\r\n\r\nsessionid=3f2a9c7e1b4d8f6a0e5c2b7d9a1f4e8cGET /c HTTP/1.1\r\n\r\n"
+	reqs := ParseHTTPRequests([]byte(raw), 16)
+	if len(reqs) != 3 || reqs[1].Path != "/b" || string(reqs[1].Body) != "sessionid=3f2a9c7e1b4d8f6a0e5c2b7d9a1f4e8c" || reqs[2].Path != "/c" {
+		t.Fatalf("got %d requests", len(reqs))
+	}
+	if _, _, ok := DetectSensitiveHTTPBody(reqs[1].ContentType, reqs[1].Body); !ok {
+		t.Fatal("session ID in the second request not found")
+	}
+	if got := ParseHTTPRequests([]byte("POST /a HTTP/1.1\r\nContent-Length: 99\r\n\r\nshort"), 16); len(got) != 1 {
+		t.Fatalf("a truncated body must end the walk, got %d", len(got))
+	}
+}

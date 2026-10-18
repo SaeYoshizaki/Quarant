@@ -1259,6 +1259,16 @@ func (h *FlowHandler) HandlePacket(packet gopacket.Packet) {
 		cctx.HTTP = contentHTTP
 		matches = append(matches, rules.RunContentHTTP(&cctx)...)
 	}
+	// Later requests on a kept-alive connection reach the secret and media
+	// rules too (the other rules keep looking at the first request only).
+	if !isTLSClientToServer && (httpInfo != nil || contentHTTP != nil) {
+		reqs := rules.ParseHTTPRequests(st.ClientData, maxRequestsPerFlow)
+		for i := 1; i < len(reqs); i++ {
+			cctx := *ctx
+			cctx.HTTP = reqs[i]
+			matches = append(matches, rules.RunContentHTTP(&cctx)...)
+		}
+	}
 
 	if h.knowledge != nil {
 		i6Rule := rules.NewI6PrivacyRule(h.knowledge)
@@ -1490,6 +1500,10 @@ func (h *FlowHandler) cachedI5(deviceIP string, ctx *rules.Context, d *device.De
 // record carrying a ClientHello. Some stacks send the 5-byte record header in
 // a segment of its own (E11: a blood-pressure meter on port 8777); the header
 // alone counts when its version and length are those of a handshake record.
+// maxRequestsPerFlow bounds how many requests of one kept-alive connection
+// are parsed for the secret and media rules.
+const maxRequestsPerFlow = 16
+
 func looksLikeTLSRecord(payload []byte) bool {
 	if len(payload) < 5 || payload[0] != 22 || payload[1] != 3 || payload[2] > 4 {
 		return false
