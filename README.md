@@ -17,6 +17,7 @@ ETSI EN 303 645（消費者向け IoT のセキュリティ規格）の各要件
 
 ## 結果
 
+- 結果のまとめ：[docs/RESULTS.md](docs/RESULTS.md)
 - 解析結果：[quarant-results](https://github.com/SaeYoshizaki/quarant-results)
 - 実験の記録：[docs/EXPERIMENTS.md](docs/EXPERIMENTS.md)
 - 現状と次の作業：[docs/STATUS.md](docs/STATUS.md)
