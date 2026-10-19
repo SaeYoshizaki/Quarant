@@ -34,7 +34,7 @@ go run ./cmd/quarant devices --in runs/real
 
 ## OpenWrt と IDS の統合デモ
 
-README の「最小 demo」と `experiment run` を参照。
+[COMMANDS.md](COMMANDS.md) の「外部ログのパイプライン：最小 demo」と `experiment run` を参照。
 
 ## 公開データセットでの評価
 
