@@ -193,12 +193,6 @@ func (h *FlowHandler) DeviceInventory() []device.InventorySnapshot {
 	return h.devices.Snapshots()
 }
 
-// TCPFlowKey is the flow key Quarant uses for a TCP connection, so that
-// events from other analysers (Zeek) can be matched to the same flow.
-func TCPFlowKey(ipSrc string, srcPort uint16, ipDst string, dstPort uint16) string {
-	return flowKeyTCP(ipSrc, srcPort, ipDst, dstPort)
-}
-
 func flowKeyTCP(ipSrc string, srcPort uint16, ipDst string, dstPort uint16) string {
 	a := flowEndpoint(ipSrc, srcPort)
 	b := flowEndpoint(ipDst, dstPort)

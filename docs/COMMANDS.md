@@ -146,19 +146,6 @@ go run ./cmd/quarant zeek import \
   --out-dir runs/zeek-001
 ```
 
-Zeek に PCAP を読ませて、規格の要件の証拠を作る（D24）。出力は `events.jsonl`（`analyze` と同じ形、`source: zeek`）と `quarant_evidence.log`（名前と形だけ）。`--log` で既存の `quarant_evidence.log` や `gt.log` も読める。
-
-```bash
-go run ./cmd/quarant zeek evidence --pcap capture.pcap --out runs/zeek-evidence-001
-```
-
-Quarant 単体との比較（O1）：
-
-```bash
-python3 scripts/assessment/compare_sources.py docs/assessment/evidence-map.json \
-  RUNS_QUARANT RUNS_ZEEK EXCLUDE_MACS out.md out.json
-```
-
 ```bash
 go run ./cmd/quarant snort import \
   --alerts raw/alert.fast \

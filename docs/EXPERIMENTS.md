@@ -1169,26 +1169,3 @@ python3 scripts/accuracy/compare_misses.py docs/assessment/evidence-map.json ~/d
 
 **論文での書き方**：判定の一部は LLM（Claude）が行い、利用者が LLM の判定と理由を見たうえで全件を確認した。基準の判定（36 件）は、伏せた形で独立に判定し、一致は 24/36（κ 0.19）だった。
 
-
-## O1：Quarant 単体と Zeek 経由の比較（OSS の組み込みの手順 4 の試作、2026-10-19）
-
-**目的**：Zeek の分解から作った証拠（D24）が、Quarant 単体の証拠とどれだけ重なり、どこが違うかを見る。
-
-**方法**：
-- 元の PCAP は手元にないので、E11〜E14 の正解づくりで出した Zeek のログ（`~/datasets/gt-e10/`、`gt-yt/` の `gt.log`）を `quarant zeek evidence --log` で変換した（`~/datasets/runs-zeekev-gt/`）。`gt.zeek` の出力は `evidence.zeek` とほぼ同じ形だが、FTP の匿名ログインと空のパスワードを区別しない。
-- Quarant 側は `runs-fix4`（`106340f`）と `runs-yt5`（`682144f`）。最新の版ではない。
-- `scripts/assessment/compare_sources.py` で、要件ごとに機器（MAC）を「両方／Quarant だけ／Zeek だけ」に分けた。機器の対応づけは Quarant の `device_inventory.json` を使う。表は [assessment/zeek-vs-quarant.md](assessment/zeek-vs-quarant.md)。
-
-**結果**
-
-- **古い TLS（5.1-3、5.5-1）**：全データで完全に一致した（UNSW 2016 は 14 台、YourThings は 14 台など）。
-- **平文の認証情報（5.1-1、5.1-2、5.1-2A）**：完全に一致した。
-- **平文の秘密情報（5.5-6、5.5-7）**：Zeek だけが出した機器は、のべ 13（CIC の power-on 2、idle 4、active 1、RTSP 攻撃 4、YourThings 2）。中身は、要求の署名（`sign`）、Sonos のファームウェアの `signature`、識別子（`sonosid`）、Google のページの `authuser`、Netflix の MSL のトークン（それ自体が暗号化されている）、RTSP（554 番）を HTTP として読んだもの（攻撃者の推測したパスワード）だった。E11〜E14 の判定（miss-judgments.json）では、判定済みのものはすべて「秘密ではない」。Quarant だけが出したのは 1 台（CIC の luohe カメラ、UDP の `key=value`）で、Zeek は UDP を読まない。
-- **5.8-1**：Quarant だけが 3 台。1 台は独自プロトコル（8899 番）の中の JPEG で、Zeek は読まない。2 台（Withings、Samsung）は個人データの平文送信（`I6_HTTP_PRIVACY_EXPOSURE`）で、Zeek 経由ではまだ変換していない。Zeek だけが 1 台（Philips Hue の 720 バイトの POST を、Zeek の内容判定が音声と判定した。Quarant は出していない）。
-- **ファームウェアの更新、認証なしの操作、周期通信、UPnP など**：Zeek 経由ではまだ変換していないので、Quarant だけ。
-
-**分かったこと**：
-- Zeek 経由は、Quarant 単体が見つけた機器を、変換した範囲ではすべて見つけた。新たに見つけた本物の証拠はなかった。
-- Zeek から分かるのは名前だけなので、秘密情報は候補止まりになる。重ね合わせ（手順 2）では、Zeek の名前だけの一致を単独で証拠にせず、Quarant と両方が出したものの確度を上げる使い方にする。TLS と認証情報は、両方の分解が独立に一致するので、確かめの材料になる。
-
-**限界**：比べたのは古い版の Quarant と、正解づくりのスクリプトの出力。PCAP から `evidence.zeek` で解析し直したうえで、最新の Quarant と比べる必要がある。Zeek だけの機器の判定は、以前の判定（Claude の判定を利用者が容認したもの）に頼っている。

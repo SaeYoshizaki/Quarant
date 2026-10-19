@@ -39,9 +39,6 @@ type Event struct {
 	DeviceLabel             string       `json:"device_label,omitempty"`
 	DeviceStatus            string       `json:"device_status,omitempty"`
 	Debug                   bool         `json:"debug,omitempty"`
-	// Source names the analyser that produced the event when it is not
-	// Quarant's own parser (e.g. "zeek").
-	Source string `json:"source,omitempty"`
 
 	SrcIP   string `json:"src_ip,omitempty"`
 	SrcPort uint16 `json:"src_port,omitempty"`
