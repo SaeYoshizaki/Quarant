@@ -383,8 +383,8 @@
    "group": "YourThings 2018",
    "family": "csp",
    "mac": "c8:db:26:02:bb:bb",
-   "verdict": "real",
-   "note": "Logitech Harmony Hub: an API key field in the body of a cleartext HTTP response from svcs.myharmony.com (value not checked; S7 and S13)"
+   "verdict": "undecided",
+   "note": "Logitech Harmony Hub: a 12 KB JSON service-discovery document from svcs.myharmony.com over HTTP lists service URLs carrying ?logitech-api-key=<GUID>. The key is part of URLs handed to every hub and is likely a shared application key, so whether it is a critical security parameter cannot be told from traffic (first judged real; revised after looking at the shape of the response, values masked)."
   },
   {
    "group": "YourThings 2018",
