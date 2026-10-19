@@ -8,6 +8,12 @@ Quarant 自体はルールベースで、解析の途中で LLM を使わない�
 | [B-miss-judgments.md](B-miss-judgments.md) | 見逃しの正解の候補の判定（E11〜E14） | 41 | 大（網羅性） |
 | [C-evidence-map.md](C-evidence-map.md) | 要件と検出の対応、確定か候補止まりか | 23 | 大（出現率） |
 
-確認済み：基準の判定（[../assessment/human-review-accuracy.md](../assessment/human-review-accuracy.md)、36 件、伏せて判定）。
+## 結果（2026-10-19）
+
+- A：78 件のうち 76 件を容認。5 件（5.0-1、5.2-1、5.2-2、5.3-6A、5.3-6B）には「製造者の公開文書を LLM で読めば判定できるのでは」というメモがあり、通信だけの分類（モデル N）としては容認、公開文書を読む案はモデル ND の将来の拡張として記録した。5.3-14 と 5.8-2 は保留（印なし）。
+- B：41 件すべて容認。
+- C：23 件すべて容認。
+
+確認済み（以前）：基準の判定（[../assessment/human-review-accuracy.md](../assessment/human-review-accuracy.md)、36 件、伏せて判定）。
 
 確認のしかた：Claude の判定と理由を見たうえで、容認するか変更するかを選ぶ（判定を伏せない形）。論文には「人が全件を確認した（LLM の判定と理由を見たうえで）」と書く。チェックが終わったら Claude に伝えれば、変更を記録とデータに反映し、数字を出し直す。
