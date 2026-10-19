@@ -42,9 +42,9 @@ go run ./cmd/quarant devices --in runs/demo
 | [docs/ROADMAP.md](docs/ROADMAP.md) | 研究の進め方 |
 | [docs/DECISIONS.md](docs/DECISIONS.md) | 設計判断の記録 |
 | [docs/DATASETS.md](docs/DATASETS.md) | 使った公開データセット |
-| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | 設計と構成 |
+| [docs/DESIGN.md](docs/DESIGN.md) | 今の仕組み（処理の流れ、OSS をどこで使っているか） |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | これから作る構成 |
 | [docs/DETECTION.md](docs/DETECTION.md) | 検出の仕様 |
 | [docs/TESTING.md](docs/TESTING.md) | テスト |
 | [docs/COMMANDS.md](docs/COMMANDS.md) | コマンド |
 | [docs/PIPELINE.md](docs/PIPELINE.md) | 外部ログ（OpenWrt、Suricata、Zeek、Snort）の取り込みと緩和策の評価 |
-| [docs/review/](docs/review/) | Claude の判定の確認用シート |
