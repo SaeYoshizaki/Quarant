@@ -88,6 +88,16 @@
 - **検証できること**：新しい機器での識別（起動時の DHCP）、TLS の実態、RTSP のブルートフォース。
 - **限界**：攻撃は少ない。ハブを経由する Zigbee や Z-Wave の機器はハブの MAC にまとめられてしまう。
 
+### YourThings
+
+- **引用**：Alrawi et al., "SoK: Security Evaluation of Home-Based IoT Deployments," IEEE S&P 2019
+- **URL**：https://yourthings.info/data/
+- **利用条件**：使ったら論文を引用すること（データのページの記載）。
+- **形式**：1 日 1 つの tgz（10〜13GB）。中身は 5 分ごとの PCAP（1 日 288 個）。3 月の分は `2018/03/DD/` と 1 段深い。ファイル名の時刻は、パケットの時刻より 5 時間ずれている（並べる順番には影響しない）。機器と IP の対応表：https://yourthings.info/assets/device_mapping.csv
+- **公開されている日**：2018 年 3 月 20・21・28 日、4 月 10〜19 日（計 13 日）。使ったのは 4 月 10〜12 日（E14）。
+- **検証できること**：実際の家庭に置いた、ほかのデータにない機器（Ring、August、Nest、Wink、VeraLite など）。見たことのない機器での見逃しの確認に使った。
+- **限界**：対応表にはスマートフォンや PC も載っているので、除外が必要（[assessment/yourthings-non-iot-macs.txt](assessment/yourthings-non-iot-macs.txt)）。HTTP の多い日（3 月 20 日）は、Quarant の機器の識別の再計算が遅く、解析に何時間もかかる（STATUS の既知の問題 10）。
+
 ## 見送ったデータセットと理由
 
 | データセット | 理由 |
