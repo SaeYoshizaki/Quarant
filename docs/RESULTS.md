@@ -1,6 +1,37 @@
 # 結果のまとめ
 
-2026-10-19 時点。各実験の詳細は [EXPERIMENTS.md](EXPERIMENTS.md)、今の仕組みは [DESIGN.md](DESIGN.md)。
+2026-10-19 時点。各実験の詳細は [EXPERIMENTS.md](EXPERIMENTS.md)。
+
+## 全体の流れ
+
+```text
+PCAP（ファイル or 標準入力 or ライブ）
+  │  gopacket で読む
+  ▼
+パケットの分解（Ethernet / IP / TCP / UDP）
+  │
+  ├─ UDP ─ DHCP・mDNS・SSDP・DNS から機器を識別
+  │        印字できる key=value の認証情報を探す
+  │
+  └─ TCP ─ 接続ごとに組み立て（順番の並べ替え、再送の除去、16KB まで）
+           │
+           ▼
+         プロトコルの解析（自前）
+           HTTP（既定のポート ＋ 中身で判断）、TLS（中身で判断、STARTTLS を含む）、
+           MQTT、Telnet、FTP、RTSP
+           │
+           ▼
+         ルールで判定（約 40 個、analyzer/rules）
+           平文の認証情報やトークン、古い TLS、平文の画像、認証なしの操作 など
+           │
+           ├─ 接続をまたぐ振る舞い（スキャン、周期通信、再接続、IP と MAC の対応の変化）
+           └─ 知識ベースとの照合（カテゴリの方針、脆弱性の候補）
+           │
+           ▼
+出力：events.jsonl（検出）、device_inventory.json（機器）、findings.json（機器 × 状態の要約）
+```
+
+詳細と、OSS をどこで使っているかは [DESIGN.md](DESIGN.md)。
 
 ## 使ったデータセット
 
