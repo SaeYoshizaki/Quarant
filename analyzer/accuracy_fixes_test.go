@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"net"
 	"path/filepath"
+	"strconv"
 	"testing"
 	"time"
 
@@ -243,5 +244,33 @@ func TestStartTLSAfterXMPPPreamble(t *testing.T) {
 	// middle of a stream is not taken for TLS.
 	if n := len(eventsOfType(runConnEvents(t, build(false)), "TLS_CLIENT_HELLO")); n != 0 {
 		t.Fatalf("mid-stream ClientHello without STARTTLS was parsed %d times", n)
+	}
+}
+
+// E14 (YourThings 2018): a hub logging into an external FTP server in
+// cleartext, and a hub receiving an API key in a cleartext HTTP response.
+func TestFTPLoginAndResponseSecretInFlows(t *testing.T) {
+	hub := synth.NewHost("94:4a:0c:00:00:01", "192.168.50.83")
+	ftpd := synth.Host{MAC: reasmPhone.MAC, IP: net.ParseIP("198.51.100.50").To4()}
+	evs := runConnEvents(t, func(b *synth.Builder) {
+		b.TCP(hub, ftpd, 45443, 21).Handshake(reasmStart).
+			Server([]byte("220 ready\r\n")).Client([]byte("USER vera\r\n")).
+			Server([]byte("331 password required\r\n")).Client([]byte("PASS s3cretpw\r\n")).
+			Server([]byte("230 logged in\r\n")).Close()
+	})
+	ftp := eventsOfType(evs, "INSECURE_FTP_CREDENTIALS")
+	if len(ftp) != 1 || ftp[0].DeviceKey != hub.IP.String() || bytes.Contains([]byte(ftp[0].Evidence), []byte("s3cret")) {
+		t.Fatalf("ftp: %+v", ftp)
+	}
+	api := synth.Host{MAC: reasmPhone.MAC, IP: net.ParseIP("198.51.100.51").To4()}
+	body := `{"Logitech-API-Key":"3f2a9c7e1b4d8f6a0e5c2b7d9a1f4e8c"}`
+	evs = runConnEvents(t, func(b *synth.Builder) {
+		b.TCP(hub, api, 35392, 80).Handshake(reasmStart).
+			Client([]byte("POST /svc HTTP/1.1\r\nHost: svcs.example.test\r\nContent-Length: 2\r\n\r\n{}")).
+			Server([]byte("HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: " + strconv.Itoa(len(body)) + "\r\n\r\n" + body)).Close()
+	})
+	rs := eventsOfType(evs, "INSECURE_HTTP_RESPONSE_SECRET")
+	if len(rs) != 1 || rs[0].DeviceKey != hub.IP.String() || bytes.Contains([]byte(rs[0].Evidence), []byte("3f2a9c7e")) {
+		t.Fatalf("response secret: %+v", rs)
 	}
 }

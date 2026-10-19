@@ -70,6 +70,10 @@ def criterion(e):
         return "S10"
     if t == "INSECURE_UDP_CREDENTIALS":
         return "S11"
+    if t == "INSECURE_FTP_CREDENTIALS":
+        return "S17"
+    if t == "INSECURE_HTTP_RESPONSE_SECRET":
+        return "S13"
     if t == "I6_MEDIA_UPLOAD_CLEARTEXT":
         return "P2" if "unparsed_tcp" in ev else "P1"
     if t in ("I6_HTTP_PRIVACY_EXPOSURE", "I6_HTTP_UNEXPECTED_PII", "I6_PII_TO_UNEXPECTED_DESTINATION"):
@@ -155,6 +159,15 @@ def confirm(crit, e, eps, zeek, raw):
     if crit == "S10":
         m = [r for r in rows if r["kind"] == "mqtt"]
         return crit, (any(r.get("has_password") for r in m) if m else None)
+    if crit == "S17":
+        f = [r for r in rows if r["kind"] == "ftp"]
+        return crit, (any(r.get("has_password") for r in f) if f else None)
+    if crit == "S13":
+        if not http:
+            return crit, None
+        keys = [k.lower() for k in re.findall(r"([A-Za-z0-9_.\-]+)=\*\*\*", ev)]
+        names = {x.lower() for r in http for x in (r.get("resp_body_keys") or [])}
+        return crit, (any(k in names for k in keys) if names else None)
     if crit in ("S11", "P2"):
         pair = frozenset({e.get("src_ip"), e.get("dst_ip")})
         rr = raw.get(pair, [])
