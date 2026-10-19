@@ -1,8 +1,6 @@
 # Quarant
 
-家庭内 IoT 機器の通信を、ゲートウェイで見るだけで、セキュリティについて何が分かり、何が分からないかを調べるための研究用ツール（Go）。
-
-機器には何もしない。スキャン、認証の試行、通信の改変、TLS の復号はしない。
+家庭内 IoT 機器をパッシブに監視することで、セキュリティについて何が分かり、何が分からないかを調べるためのツール
 
 ## 研究の問い
 
@@ -19,7 +17,7 @@ ETSI EN 303 645（消費者向け IoT のセキュリティ規格）の各要件
 
 ## 結果
 
-- 解析結果：[quarant-results](https://github.com/SaeYoshizaki/quarant-results)（非公開）
+- 解析結果：[quarant-results](https://github.com/SaeYoshizaki/quarant-results)
 - 実験の記録：[docs/EXPERIMENTS.md](docs/EXPERIMENTS.md)
 - 現状と次の作業：[docs/STATUS.md](docs/STATUS.md)
 
