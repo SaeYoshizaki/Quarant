@@ -109,7 +109,8 @@
 - まだ決めていないこと：会議の日程（どこまで作るか）。
 
 **データの場所**
-- 元データ：Google ドライブ（利用者のアカウント）。YourThings の 4 日分の tgz は USB ドライブ（`/Volumes/Untitled/`）。
+- **2026-10-30 から、`~/datasets` 全体を外付けディスク QuarantData（`/Volumes/QuarantData/datasets`）に移した**。`~/datasets` はそこへのリンク。解析の前にディスクをつなぐ。YourThings の 4 日分の tgz は `/Volumes/QuarantData/usb-yourthings/`（USB にも残っている）。詳細は `~/datasets/README-storage.txt`。
+- 元データ：Google ドライブ（利用者のアカウント）にもある。
 - 解析結果：`~/datasets/runs-fix4/`（古いデータ、`106340f`）、`~/datasets/runs-yt5/`（YourThings 4/10〜12、`682144f`）、正解：`~/datasets/gt-e10/`、`~/datasets/gt-yt/`。圧縮したものは [quarant-results](https://github.com/SaeYoshizaki/quarant-results)（非公開。runs-yt5 と gt-yt はまだ入れていない）。
 - 判定の記録：`docs/assessment/miss-judgments.json`、基準の判定：`docs/assessment/human-review-accuracy.md`、2 つの読み方：`docs/assessment/evidence-map.json`（文言どおり）と `evidence-map-strict.json`（厳しい読み方、`scripts/assessment/readings.py` で生成）。
 
@@ -142,7 +143,7 @@
 **作業の前提（引き継ぎ用）**
 - 解析結果の保管（非公開、研究室内の共有用）：https://github.com/SaeYoshizaki/quarant-results 。全 12 版の `runs-*` と E11 の正解を、そのまま圧縮して置いた（元の PCAP は含めない）。
 - 最新の解析結果：`~/datasets/runs-fix4/`（全データ、`106340f` 時点）。その前は `runs-fix3/`（`978b290`）、 `runs-fix/`（`3ae8b2c`）、 `runs-d22/`（`c357166`）、`runs-e10/`（`abf5d92`）。各 run には `events.jsonl` と `device_inventory.json` だけを残す（容量のため）。
-- 元データ：2026-10-18 から Google ドライブ（利用者のアカウント）に保管している（UNSW 2016・2018、IoT-23、CIC IoT 2022）。USB ドライブからは消した。`~/datasets/<名前>` のリンクは行き先がないので、解析し直すときはドライブから戻す。解析結果（`runs-*`）の集計し直しには、元データは要らない。YourThings（2018）は `/Volumes/Untitled/iot_traffic*.tgz` に 1 日ずつ置き、解析するときに Mac に展開する。
+- 元データ：2026-10-18 から Google ドライブ（利用者のアカウント）に保管している（UNSW 2016・2018、IoT-23、CIC IoT 2022）。USB ドライブからは消した。`~/datasets/<名前>` のリンクは行き先がないので、解析し直すときはドライブから戻す。解析結果（`runs-*`）の集計し直しには、元データは要らない。YourThings（2018）は `/Volumes/QuarantData/usb-yourthings/iot_traffic*.tgz` に 1 日ずつ置き、解析するときは同じディスクの上で展開する（2026-10-30 に更新）。
 - 全データの再解析：`~/datasets/scripts/rerun-fix4.sh`（バイナリと出力先を書き換えて使う。1 時間ほどかかる）。
 - 出現率の集計：`python3 scripts/assessment/evidence_rates.py docs/assessment/evidence-map.json $HOME/datasets/runs-e10 docs/assessment/evidence-rates.md <samples.json> docs/assessment/non-iot-macs.txt`
 - 機器の対応づけは、run ごとの `device_inventory.json` で行う。IP アドレスは日によって変わるので、run をまたいで IP で機器を特定しない（E7 で一度まちがえた）。
@@ -163,5 +164,5 @@
    - E8（CIC IoT 2022 の操作時・生活場面）は済み：新しい種類の証拠は出なかった。LAN 内の操作はデータに含まれていない。
    - E9（RTSP の総当たりへの応答と、認証なしの映像アクセス）は済み：5.1-5 は候補止まり（締め出し中の 401 と区別できない）。認証なしで映像を出すカメラが 2 台あった。
    - 次：S2 を最近の機器（CIC IoT 2022）でも行う。論文の構成を決める。カメラの画像の平文アップロード（5.8-1）は E10 で検出を追加した（2022 年のカメラ 2 台）。
-   - データの置き場所：元データは USB ドライブ（/Volumes/Untitled/quarant-datasets）にあり、~/datasets からリンクしている。
+   - データの置き場所：2026-10-30 から外付けディスク QuarantData（上の「データの場所」）。
 3. **Step 2**：Zeek、Suricata との比較は済み（S2）。フラッド系の検出器は今は作らない（D19）。残りは CIC IoT 2022 での比較。
