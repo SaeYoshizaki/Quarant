@@ -1,0 +1,4629 @@
+{
+ "rows": [
+  {
+   "dataset": "unsw2016",
+   "label": "Smart Things",
+   "mac": "d0:52:a8:00:67:5e",
+   "vendor": "Samsung",
+   "product": "SmartThings Hub",
+   "model": "",
+   "model_basis": "",
+   "category": "hub",
+   "note": "",
+   "runs_seen": 20,
+   "first_seen": "2016-09-22",
+   "last_seen": "2016-10-12"
+  },
+  {
+   "dataset": "unsw2016",
+   "label": "Amazon Echo",
+   "mac": "44:65:0d:56:cc:d3",
+   "vendor": "Amazon",
+   "product": "Echo",
+   "model": "",
+   "model_basis": "",
+   "category": "voice-assistant",
+   "note": "",
+   "runs_seen": 20,
+   "first_seen": "2016-09-22",
+   "last_seen": "2016-10-12"
+  },
+  {
+   "dataset": "unsw2016",
+   "label": "Netatmo Welcome",
+   "mac": "70:ee:50:18:34:43",
+   "vendor": "Netatmo",
+   "product": "Welcome",
+   "model": "",
+   "model_basis": "",
+   "category": "camera",
+   "note": "",
+   "runs_seen": 20,
+   "first_seen": "2016-09-22",
+   "last_seen": "2016-10-12"
+  },
+  {
+   "dataset": "unsw2016",
+   "label": "TP-Link Day Night Cloud camera",
+   "mac": "f4:f2:6d:93:51:f1",
+   "vendor": "TP-Link",
+   "product": "Day/Night Cloud Camera",
+   "model": "NC220",
+   "model_basis": "mdns hostname NC220-…",
+   "category": "camera",
+   "note": "",
+   "runs_seen": 13,
+   "first_seen": "2016-09-22",
+   "last_seen": "2016-10-05"
+  },
+  {
+   "dataset": "unsw2016",
+   "label": "Samsung SmartCam",
+   "mac": "00:16:6c:ab:6b:88",
+   "vendor": "Samsung",
+   "product": "SmartCam",
+   "model": "",
+   "model_basis": "",
+   "category": "camera",
+   "note": "",
+   "runs_seen": 20,
+   "first_seen": "2016-09-22",
+   "last_seen": "2016-10-12"
+  },
+  {
+   "dataset": "unsw2016",
+   "label": "Dropcam",
+   "mac": "30:8c:fb:2f:e4:b2",
+   "vendor": "Dropcam (Nest)",
+   "product": "Dropcam",
+   "model": "",
+   "model_basis": "",
+   "category": "camera",
+   "note": "",
+   "runs_seen": 20,
+   "first_seen": "2016-09-22",
+   "last_seen": "2016-10-12"
+  },
+  {
+   "dataset": "unsw2016",
+   "label": "Insteon Camera (wired)",
+   "mac": "00:62:6e:51:27:2e",
+   "vendor": "Insteon",
+   "product": "Camera",
+   "model": "",
+   "model_basis": "",
+   "category": "camera",
+   "note": "same product as the wireless entry, other interface",
+   "runs_seen": 15,
+   "first_seen": "2016-09-28",
+   "last_seen": "2016-10-12"
+  },
+  {
+   "dataset": "unsw2016",
+   "label": "Insteon Camera (wireless)",
+   "mac": "e8:ab:fa:19:de:4f",
+   "vendor": "Insteon",
+   "product": "Camera",
+   "model": "",
+   "model_basis": "",
+   "category": "camera",
+   "note": "",
+   "runs_seen": 1,
+   "first_seen": "2016-09-28",
+   "last_seen": "2016-09-28"
+  },
+  {
+   "dataset": "unsw2016",
+   "label": "Withings Smart Baby Monitor",
+   "mac": "00:24:e4:11:18:a8",
+   "vendor": "Withings",
+   "product": "Smart Baby Monitor",
+   "model": "",
+   "model_basis": "",
+   "category": "camera",
+   "note": "",
+   "runs_seen": 15,
+   "first_seen": "2016-09-22",
+   "last_seen": "2016-10-07"
+  },
+  {
+   "dataset": "unsw2016",
+   "label": "Belkin Wemo switch",
+   "mac": "ec:1a:59:79:f4:89",
+   "vendor": "Belkin",
+   "product": "WeMo Switch",
+   "model": "",
+   "model_basis": "",
+   "category": "plug",
+   "note": "",
+   "runs_seen": 20,
+   "first_seen": "2016-09-22",
+   "last_seen": "2016-10-12"
+  },
+  {
+   "dataset": "unsw2016",
+   "label": "TP-Link Smart plug",
+   "mac": "50:c7:bf:00:56:39",
+   "vendor": "TP-Link",
+   "product": "Smart Plug",
+   "model": "HS110(US)",
+   "model_basis": "dhcp hostname",
+   "category": "plug",
+   "note": "",
+   "runs_seen": 15,
+   "first_seen": "2016-09-22",
+   "last_seen": "2016-10-07"
+  },
+  {
+   "dataset": "unsw2016",
+   "label": "iHome",
+   "mac": "74:c6:3b:29:d7:1d",
+   "vendor": "iHome",
+   "product": "Smart Plug",
+   "model": "",
+   "model_basis": "",
+   "category": "plug",
+   "note": "HomeKit (hap-) hostname; model not named",
+   "runs_seen": 9,
+   "first_seen": "2016-09-28",
+   "last_seen": "2016-10-07"
+  },
+  {
+   "dataset": "unsw2016",
+   "label": "Belkin wemo motion sensor",
+   "mac": "ec:1a:59:83:28:11",
+   "vendor": "Belkin",
+   "product": "WeMo Motion Sensor",
+   "model": "",
+   "model_basis": "",
+   "category": "sensor",
+   "note": "",
+   "runs_seen": 20,
+   "first_seen": "2016-09-22",
+   "last_seen": "2016-10-12"
+  },
+  {
+   "dataset": "unsw2016",
+   "label": "NEST Protect smoke alarm",
+   "mac": "18:b4:30:25:be:e4",
+   "vendor": "Nest (Google)",
+   "product": "Protect",
+   "model": "",
+   "model_basis": "",
+   "category": "sensor",
+   "note": "",
+   "runs_seen": 19,
+   "first_seen": "2016-09-23",
+   "last_seen": "2016-10-11"
+  },
+  {
+   "dataset": "unsw2016",
+   "label": "Netatmo weather station",
+   "mac": "70:ee:50:03:b8:ac",
+   "vendor": "Netatmo",
+   "product": "Weather Station",
+   "model": "",
+   "model_basis": "",
+   "category": "sensor",
+   "note": "",
+   "runs_seen": 20,
+   "first_seen": "2016-09-22",
+   "last_seen": "2016-10-12"
+  },
+  {
+   "dataset": "unsw2016",
+   "label": "Withings Smart scale",
+   "mac": "00:24:e4:1b:6f:96",
+   "vendor": "Withings",
+   "product": "Smart Scale",
+   "model": "",
+   "model_basis": "",
+   "category": "health",
+   "note": "",
+   "runs_seen": 20,
+   "first_seen": "2016-09-22",
+   "last_seen": "2016-10-11"
+  },
+  {
+   "dataset": "unsw2016",
+   "label": "Blipcare Blood Pressure meter",
+   "mac": "74:6a:89:00:2e:25",
+   "vendor": "BlipCare",
+   "product": "Blood Pressure Meter",
+   "model": "",
+   "model_basis": "",
+   "category": "health",
+   "note": "",
+   "runs_seen": 3,
+   "first_seen": "2016-09-23",
+   "last_seen": "2016-10-04"
+  },
+  {
+   "dataset": "unsw2016",
+   "label": "Withings Aura smart sleep sensor",
+   "mac": "00:24:e4:20:28:c6",
+   "vendor": "Withings",
+   "product": "Aura Sleep Sensor",
+   "model": "",
+   "model_basis": "",
+   "category": "health",
+   "note": "",
+   "runs_seen": 15,
+   "first_seen": "2016-09-28",
+   "last_seen": "2016-10-12"
+  },
+  {
+   "dataset": "unsw2016",
+   "label": "Light Bulbs LiFX Smart Bulb",
+   "mac": "d0:73:d5:01:83:08",
+   "vendor": "LIFX",
+   "product": "Smart Bulb",
+   "model": "",
+   "model_basis": "",
+   "category": "bulb",
+   "note": "",
+   "runs_seen": 15,
+   "first_seen": "2016-09-28",
+   "last_seen": "2016-10-12"
+  },
+  {
+   "dataset": "unsw2016",
+   "label": "Triby Speaker",
+   "mac": "18:b7:9e:02:20:44",
+   "vendor": "Invoxia",
+   "product": "Triby",
+   "model": "",
+   "model_basis": "",
+   "category": "speaker",
+   "note": "",
+   "runs_seen": 20,
+   "first_seen": "2016-09-22",
+   "last_seen": "2016-10-12"
+  },
+  {
+   "dataset": "unsw2016",
+   "label": "PIX-STAR Photo-frame",
+   "mac": "e0:76:d0:33:bb:85",
+   "vendor": "Pix-Star",
+   "product": "Photo Frame",
+   "model": "",
+   "model_basis": "",
+   "category": "photo-frame",
+   "note": "",
+   "runs_seen": 13,
+   "first_seen": "2016-09-22",
+   "last_seen": "2016-10-05"
+  },
+  {
+   "dataset": "unsw2016",
+   "label": "HP Printer",
+   "mac": "70:5a:0f:e4:9b:c0",
+   "vendor": "HP",
+   "product": "Printer (ENVY)",
+   "model": "",
+   "model_basis": "dhcp hostname hpenvyprinter1 (2018 captures)",
+   "category": "printer",
+   "note": "",
+   "runs_seen": 20,
+   "first_seen": "2016-09-22",
+   "last_seen": "2016-10-12"
+  },
+  {
+   "dataset": "unsw2016",
+   "label": "Nest Dropcam",
+   "mac": "30:8c:fb:b6:ea:45",
+   "vendor": "Dropcam (Nest)",
+   "product": "Dropcam",
+   "model": "",
+   "model_basis": "",
+   "category": "camera",
+   "note": "second unit",
+   "runs_seen": 1,
+   "first_seen": "2016-10-07",
+   "last_seen": "2016-10-07"
+  },
+  {
+   "dataset": "iotraffic",
+   "label": "AmazonEcho",
+   "mac": "44:65:0d:56:cc:d3",
+   "vendor": "Amazon",
+   "product": "Echo",
+   "model": "",
+   "model_basis": "",
+   "category": "voice-assistant",
+   "note": "",
+   "runs_seen": 3,
+   "first_seen": "2016-09-30",
+   "last_seen": "2017-03-24"
+  },
+  {
+   "dataset": "iotraffic",
+   "label": "AugustDoorBell",
+   "mac": "e0:76:d0:3f:00:ae",
+   "vendor": "August",
+   "product": "Doorbell Cam",
+   "model": "",
+   "model_basis": "",
+   "category": "doorbell",
+   "note": "",
+   "runs_seen": 1,
+   "first_seen": "2016-12-02",
+   "last_seen": "2017-04-13"
+  },
+  {
+   "dataset": "iotraffic",
+   "label": "AwairAirQuality",
+   "mac": "70:88:6b:10:0f:c6",
+   "vendor": "Awair",
+   "product": "Air Quality Monitor",
+   "model": "",
+   "model_basis": "",
+   "category": "sensor",
+   "note": "",
+   "runs_seen": 1,
+   "first_seen": "2016-11-10",
+   "last_seen": "2017-03-07"
+  },
+  {
+   "dataset": "iotraffic",
+   "label": "BelkinCamera",
+   "mac": "b4:75:0e:ec:e5:a9",
+   "vendor": "Belkin",
+   "product": "NetCam HD",
+   "model": "",
+   "model_basis": "dhcp hostname NetCamHD (2018 captures)",
+   "category": "camera",
+   "note": "",
+   "runs_seen": 6,
+   "first_seen": "2017-02-21",
+   "last_seen": "2017-03-16"
+  },
+  {
+   "dataset": "iotraffic",
+   "label": "BelkinWemoMotionSensor",
+   "mac": "ec:1a:59:83:28:11",
+   "vendor": "Belkin",
+   "product": "WeMo Motion Sensor",
+   "model": "",
+   "model_basis": "",
+   "category": "sensor",
+   "note": "",
+   "runs_seen": 5,
+   "first_seen": "2016-09-30",
+   "last_seen": "2017-03-07"
+  },
+  {
+   "dataset": "iotraffic",
+   "label": "BelkinWemoSwitch",
+   "mac": "ec:1a:59:79:f4:89",
+   "vendor": "Belkin",
+   "product": "WeMo Switch",
+   "model": "",
+   "model_basis": "",
+   "category": "plug",
+   "note": "",
+   "runs_seen": 4,
+   "first_seen": "2016-09-30",
+   "last_seen": "2017-03-23"
+  },
+  {
+   "dataset": "iotraffic",
+   "label": "BlipCareBPMeter",
+   "mac": "74:6a:89:00:2e:25",
+   "vendor": "BlipCare",
+   "product": "Blood Pressure Meter",
+   "model": "",
+   "model_basis": "",
+   "category": "health",
+   "note": "",
+   "runs_seen": 1,
+   "first_seen": "2016-10-04",
+   "last_seen": "2017-04-10"
+  },
+  {
+   "dataset": "iotraffic",
+   "label": "CanaryCamera",
+   "mac": "7c:70:bc:5d:5e:dc",
+   "vendor": "Canary",
+   "product": "Canary",
+   "model": "",
+   "model_basis": "",
+   "category": "camera",
+   "note": "",
+   "runs_seen": 1,
+   "first_seen": "2016-11-22",
+   "last_seen": "2017-03-05"
+  },
+  {
+   "dataset": "iotraffic",
+   "label": "HelloBarbie",
+   "mac": "28:c2:dd:ff:a5:2d",
+   "vendor": "Mattel",
+   "product": "Hello Barbie",
+   "model": "",
+   "model_basis": "",
+   "category": "toy",
+   "note": "",
+   "runs_seen": 1,
+   "first_seen": "2017-03-02",
+   "last_seen": "2017-04-13"
+  },
+  {
+   "dataset": "iotraffic",
+   "label": "HPPrinter",
+   "mac": "70:5a:0f:e4:9b:c0",
+   "vendor": "HP",
+   "product": "Printer (ENVY)",
+   "model": "",
+   "model_basis": "",
+   "category": "printer",
+   "note": "",
+   "runs_seen": 3,
+   "first_seen": "2016-09-30",
+   "last_seen": "2017-04-13"
+  },
+  {
+   "dataset": "iotraffic",
+   "label": "iHome",
+   "mac": "74:c6:3b:29:d7:1d",
+   "vendor": "iHome",
+   "product": "Smart Plug",
+   "model": "",
+   "model_basis": "",
+   "category": "plug",
+   "note": "",
+   "runs_seen": 1,
+   "first_seen": "2016-10-05",
+   "last_seen": "2017-02-24"
+  },
+  {
+   "dataset": "iotraffic",
+   "label": "LiFXBulb",
+   "mac": "d0:73:d5:01:83:08",
+   "vendor": "LIFX",
+   "product": "Smart Bulb",
+   "model": "",
+   "model_basis": "",
+   "category": "bulb",
+   "note": "",
+   "runs_seen": 1,
+   "first_seen": "2016-09-30",
+   "last_seen": "2017-04-13"
+  },
+  {
+   "dataset": "iotraffic",
+   "label": "NestDropCam",
+   "mac": "30:8c:fb:2f:e4:b2",
+   "vendor": "Dropcam (Nest)",
+   "product": "Dropcam",
+   "model": "",
+   "model_basis": "",
+   "category": "camera",
+   "note": "",
+   "runs_seen": 1,
+   "first_seen": "2017-01-01",
+   "last_seen": "2017-04-13"
+  },
+  {
+   "dataset": "iotraffic",
+   "label": "NestProtectSmokeAlarm",
+   "mac": "18:b4:30:25:be:e4",
+   "vendor": "Nest (Google)",
+   "product": "Protect",
+   "model": "",
+   "model_basis": "",
+   "category": "sensor",
+   "note": "",
+   "runs_seen": 1,
+   "first_seen": "2016-09-30",
+   "last_seen": "2017-04-13"
+  },
+  {
+   "dataset": "iotraffic",
+   "label": "NetatmoWeatherStation",
+   "mac": "70:ee:50:03:b8:ac",
+   "vendor": "Netatmo",
+   "product": "Weather Station",
+   "model": "",
+   "model_basis": "",
+   "category": "sensor",
+   "note": "",
+   "runs_seen": 1,
+   "first_seen": "2016-09-30",
+   "last_seen": "2017-04-13"
+  },
+  {
+   "dataset": "iotraffic",
+   "label": "NetatmoWelcome",
+   "mac": "70:ee:50:18:34:43",
+   "vendor": "Netatmo",
+   "product": "Welcome",
+   "model": "",
+   "model_basis": "",
+   "category": "camera",
+   "note": "",
+   "runs_seen": 1,
+   "first_seen": "2016-09-30",
+   "last_seen": "2017-03-26"
+  },
+  {
+   "dataset": "iotraffic",
+   "label": "PhilipsHue",
+   "mac": "00:17:88:2b:9a:25",
+   "vendor": "Philips",
+   "product": "Hue Bridge",
+   "model": "",
+   "model_basis": "",
+   "category": "hub",
+   "note": "",
+   "runs_seen": 5,
+   "first_seen": "2016-11-14",
+   "last_seen": "2017-04-13"
+  },
+  {
+   "dataset": "iotraffic",
+   "label": "PixStarPhotoFrame",
+   "mac": "e0:76:d0:33:bb:85",
+   "vendor": "Pix-Star",
+   "product": "Photo Frame",
+   "model": "",
+   "model_basis": "",
+   "category": "photo-frame",
+   "note": "",
+   "runs_seen": 4,
+   "first_seen": "2016-09-30",
+   "last_seen": "2017-04-06"
+  },
+  {
+   "dataset": "iotraffic",
+   "label": "RingDoorBell",
+   "mac": "88:4a:ea:31:66:9d",
+   "vendor": "Ring",
+   "product": "Video Doorbell",
+   "model": "",
+   "model_basis": "",
+   "category": "doorbell",
+   "note": "",
+   "runs_seen": 1,
+   "first_seen": "2017-03-07",
+   "last_seen": "2017-04-13"
+  },
+  {
+   "dataset": "iotraffic",
+   "label": "SamsungCamera",
+   "mac": "00:16:6c:ab:6b:88",
+   "vendor": "Samsung",
+   "product": "SmartCam",
+   "model": "",
+   "model_basis": "",
+   "category": "camera",
+   "note": "",
+   "runs_seen": 8,
+   "first_seen": "2016-09-30",
+   "last_seen": "2017-04-13"
+  },
+  {
+   "dataset": "iotraffic",
+   "label": "SamsungSmartThings",
+   "mac": "d0:52:a8:00:67:5e",
+   "vendor": "Samsung",
+   "product": "SmartThings Hub",
+   "model": "",
+   "model_basis": "",
+   "category": "hub",
+   "note": "",
+   "runs_seen": 1,
+   "first_seen": "2016-09-30",
+   "last_seen": "2017-04-13"
+  },
+  {
+   "dataset": "iotraffic",
+   "label": "TPLinkCamera",
+   "mac": "f4:f2:6d:93:51:f1",
+   "vendor": "TP-Link",
+   "product": "Day/Night Cloud Camera",
+   "model": "NC220",
+   "model_basis": "mdns hostname NC220-…",
+   "category": "camera",
+   "note": "",
+   "runs_seen": 2,
+   "first_seen": "2016-09-30",
+   "last_seen": "2017-04-13"
+  },
+  {
+   "dataset": "iotraffic",
+   "label": "TPLinkSmartPlug",
+   "mac": "50:c7:bf:00:56:39",
+   "vendor": "TP-Link",
+   "product": "Smart Plug",
+   "model": "HS110(US)",
+   "model_basis": "dhcp hostname",
+   "category": "plug",
+   "note": "",
+   "runs_seen": 1,
+   "first_seen": "2016-09-30",
+   "last_seen": "2017-03-07"
+  },
+  {
+   "dataset": "iotraffic",
+   "label": "TribySpeaker",
+   "mac": "18:b7:9e:02:20:44",
+   "vendor": "Invoxia",
+   "product": "Triby",
+   "model": "",
+   "model_basis": "",
+   "category": "speaker",
+   "note": "",
+   "runs_seen": 1,
+   "first_seen": "2016-09-30",
+   "last_seen": "2017-04-07"
+  },
+  {
+   "dataset": "iotraffic",
+   "label": "WithingsBabyMonitor",
+   "mac": "00:24:e4:11:18:a8",
+   "vendor": "Withings",
+   "product": "Smart Baby Monitor",
+   "model": "",
+   "model_basis": "",
+   "category": "camera",
+   "note": "",
+   "runs_seen": 1,
+   "first_seen": "2016-09-22",
+   "last_seen": "2016-10-07"
+  },
+  {
+   "dataset": "iotraffic",
+   "label": "WithingsSleepSensor",
+   "mac": "00:24:e4:20:28:c6",
+   "vendor": "Withings",
+   "product": "Aura Sleep Sensor",
+   "model": "",
+   "model_basis": "",
+   "category": "health",
+   "note": "",
+   "runs_seen": 1,
+   "first_seen": "",
+   "last_seen": "2017-03-24"
+  },
+  {
+   "dataset": "iotraffic",
+   "label": "WithingsSmartScale",
+   "mac": "00:24:e4:1b:6f:96",
+   "vendor": "Withings",
+   "product": "Smart Scale",
+   "model": "",
+   "model_basis": "",
+   "category": "health",
+   "note": "",
+   "runs_seen": 1,
+   "first_seen": "2016-09-30",
+   "last_seen": "2017-04-13"
+  },
+  {
+   "dataset": "unsw2018",
+   "label": "(no list; MAC of Samsung SmartCam)",
+   "mac": "00:16:6c:ab:6b:88",
+   "vendor": "Samsung",
+   "product": "SmartCam",
+   "model": "",
+   "model_basis": "",
+   "category": "camera",
+   "note": "label taken from the 2016 list by MAC",
+   "runs_seen": 6,
+   "first_seen": "2018-06-01",
+   "last_seen": "2018-10-25"
+  },
+  {
+   "dataset": "unsw2018",
+   "label": "(no list; MAC of Philips Hue)",
+   "mac": "00:17:88:2b:9a:25",
+   "vendor": "Philips",
+   "product": "Hue Bridge",
+   "model": "",
+   "model_basis": "",
+   "category": "hub",
+   "note": "label taken from UNSW-IoTraffic by MAC",
+   "runs_seen": 4,
+   "first_seen": "2018-10-21",
+   "last_seen": "2018-10-25"
+  },
+  {
+   "dataset": "unsw2018",
+   "label": "(no list; Withings OUI)",
+   "mac": "00:24:e4:44:68:44",
+   "vendor": "Withings",
+   "product": "unknown",
+   "model": "",
+   "model_basis": "",
+   "category": "unknown",
+   "note": "not in any list; product unknown",
+   "runs_seen": 6,
+   "first_seen": "2018-06-01",
+   "last_seen": "2018-10-24"
+  },
+  {
+   "dataset": "unsw2018",
+   "label": "(no list; MAC of Nest Protect)",
+   "mac": "18:b4:30:25:be:e4",
+   "vendor": "Nest (Google)",
+   "product": "Protect",
+   "model": "",
+   "model_basis": "",
+   "category": "sensor",
+   "note": "label taken from the 2016 list by MAC",
+   "runs_seen": 5,
+   "first_seen": "2018-06-01",
+   "last_seen": "2018-10-25"
+  },
+  {
+   "dataset": "unsw2018",
+   "label": "(no list; MAC of Triby)",
+   "mac": "18:b7:9e:02:20:44",
+   "vendor": "Invoxia",
+   "product": "Triby",
+   "model": "",
+   "model_basis": "",
+   "category": "speaker",
+   "note": "label taken from the 2016 list by MAC",
+   "runs_seen": 4,
+   "first_seen": "2018-10-21",
+   "last_seen": "2018-10-25"
+  },
+  {
+   "dataset": "unsw2018",
+   "label": "(no list; MAC of Hello Barbie)",
+   "mac": "28:c2:dd:ff:a5:2d",
+   "vendor": "Mattel",
+   "product": "Hello Barbie",
+   "model": "",
+   "model_basis": "",
+   "category": "toy",
+   "note": "label taken from UNSW-IoTraffic by MAC",
+   "runs_seen": 2,
+   "first_seen": "2018-06-01",
+   "last_seen": "2018-06-02"
+  },
+  {
+   "dataset": "unsw2018",
+   "label": "(no list; MAC of Dropcam)",
+   "mac": "30:8c:fb:2f:e4:b2",
+   "vendor": "Dropcam (Nest)",
+   "product": "Dropcam",
+   "model": "",
+   "model_basis": "",
+   "category": "camera",
+   "note": "label taken from the 2016 list by MAC",
+   "runs_seen": 6,
+   "first_seen": "2018-06-01",
+   "last_seen": "2018-10-25"
+  },
+  {
+   "dataset": "unsw2018",
+   "label": "(no list; MAC of Amazon Echo)",
+   "mac": "44:65:0d:56:cc:d3",
+   "vendor": "Amazon",
+   "product": "Echo",
+   "model": "",
+   "model_basis": "",
+   "category": "voice-assistant",
+   "note": "label taken from the 2016 list by MAC",
+   "runs_seen": 5,
+   "first_seen": "2018-06-01",
+   "last_seen": "2018-10-25"
+  },
+  {
+   "dataset": "unsw2018",
+   "label": "(no list; MAC of TP-Link plug)",
+   "mac": "50:c7:bf:00:56:39",
+   "vendor": "TP-Link",
+   "product": "Smart Plug",
+   "model": "HS110(US)",
+   "model_basis": "dhcp hostname",
+   "category": "plug",
+   "note": "label taken from the 2016 list by MAC",
+   "runs_seen": 6,
+   "first_seen": "2018-06-01",
+   "last_seen": "2018-10-25"
+  },
+  {
+   "dataset": "unsw2018",
+   "label": "(no list; MAC of HP Printer)",
+   "mac": "70:5a:0f:e4:9b:c0",
+   "vendor": "HP",
+   "product": "Printer (ENVY)",
+   "model": "",
+   "model_basis": "dhcp hostname hpenvyprinter1",
+   "category": "printer",
+   "note": "label taken from the 2016 list by MAC",
+   "runs_seen": 6,
+   "first_seen": "2018-06-01",
+   "last_seen": "2018-10-25"
+  },
+  {
+   "dataset": "unsw2018",
+   "label": "(no list; MAC of Awair)",
+   "mac": "70:88:6b:10:0f:c6",
+   "vendor": "Awair",
+   "product": "Air Quality Monitor",
+   "model": "",
+   "model_basis": "",
+   "category": "sensor",
+   "note": "label taken from UNSW-IoTraffic by MAC",
+   "runs_seen": 2,
+   "first_seen": "2018-06-01",
+   "last_seen": "2018-06-02"
+  },
+  {
+   "dataset": "unsw2018",
+   "label": "(no list; MAC of Netatmo weather station)",
+   "mac": "70:ee:50:03:b8:ac",
+   "vendor": "Netatmo",
+   "product": "Weather Station",
+   "model": "",
+   "model_basis": "",
+   "category": "sensor",
+   "note": "label taken from the 2016 list by MAC",
+   "runs_seen": 4,
+   "first_seen": "2018-10-21",
+   "last_seen": "2018-10-25"
+  },
+  {
+   "dataset": "unsw2018",
+   "label": "(no list; MAC of Netatmo Welcome)",
+   "mac": "70:ee:50:18:34:43",
+   "vendor": "Netatmo",
+   "product": "Welcome",
+   "model": "",
+   "model_basis": "",
+   "category": "camera",
+   "note": "label taken from the 2016 list by MAC",
+   "runs_seen": 2,
+   "first_seen": "2018-06-01",
+   "last_seen": "2018-06-02"
+  },
+  {
+   "dataset": "unsw2018",
+   "label": "(no list; MAC of iHome)",
+   "mac": "74:c6:3b:29:d7:1d",
+   "vendor": "iHome",
+   "product": "Smart Plug",
+   "model": "",
+   "model_basis": "",
+   "category": "plug",
+   "note": "label taken from the 2016 list by MAC",
+   "runs_seen": 6,
+   "first_seen": "2018-06-01",
+   "last_seen": "2018-10-25"
+  },
+  {
+   "dataset": "unsw2018",
+   "label": "(no list; MAC of Canary)",
+   "mac": "7c:70:bc:5d:5e:dc",
+   "vendor": "Canary",
+   "product": "Canary",
+   "model": "",
+   "model_basis": "",
+   "category": "camera",
+   "note": "label taken from UNSW-IoTraffic by MAC",
+   "runs_seen": 6,
+   "first_seen": "2018-06-01",
+   "last_seen": "2018-10-25"
+  },
+  {
+   "dataset": "unsw2018",
+   "label": "(no list; Espressif OUI)",
+   "mac": "84:f3:eb:52:42:db",
+   "vendor": "unknown",
+   "product": "unknown",
+   "model": "",
+   "model_basis": "",
+   "category": "unknown",
+   "note": "ESP_ hostname only; product unknown",
+   "runs_seen": 4,
+   "first_seen": "2018-10-21",
+   "last_seen": "2018-10-25"
+  },
+  {
+   "dataset": "unsw2018",
+   "label": "(no list; MAC of Ring doorbell)",
+   "mac": "88:4a:ea:31:66:9d",
+   "vendor": "Ring",
+   "product": "Video Doorbell",
+   "model": "",
+   "model_basis": "",
+   "category": "doorbell",
+   "note": "label taken from UNSW-IoTraffic by MAC",
+   "runs_seen": 6,
+   "first_seen": "2018-06-01",
+   "last_seen": "2018-10-25"
+  },
+  {
+   "dataset": "unsw2018",
+   "label": "(no list; MAC of Belkin camera)",
+   "mac": "b4:75:0e:ec:e5:a9",
+   "vendor": "Belkin",
+   "product": "NetCam HD",
+   "model": "",
+   "model_basis": "dhcp hostname NetCamHD",
+   "category": "camera",
+   "note": "label taken from UNSW-IoTraffic by MAC",
+   "runs_seen": 4,
+   "first_seen": "2018-10-21",
+   "last_seen": "2018-10-25"
+  },
+  {
+   "dataset": "unsw2018",
+   "label": "(no list; MAC of SmartThings)",
+   "mac": "d0:52:a8:00:67:5e",
+   "vendor": "Samsung",
+   "product": "SmartThings Hub",
+   "model": "",
+   "model_basis": "",
+   "category": "hub",
+   "note": "label taken from the 2016 list by MAC",
+   "runs_seen": 6,
+   "first_seen": "2018-06-01",
+   "last_seen": "2018-10-25"
+  },
+  {
+   "dataset": "unsw2018",
+   "label": "(no list; MAC of LIFX)",
+   "mac": "d0:73:d5:01:83:08",
+   "vendor": "LIFX",
+   "product": "Smart Bulb",
+   "model": "",
+   "model_basis": "",
+   "category": "bulb",
+   "note": "label taken from the 2016 list by MAC",
+   "runs_seen": 4,
+   "first_seen": "2018-10-21",
+   "last_seen": "2018-10-25"
+  },
+  {
+   "dataset": "unsw2018",
+   "label": "(no list; MAC of Pix-Star)",
+   "mac": "e0:76:d0:33:bb:85",
+   "vendor": "Pix-Star",
+   "product": "Photo Frame",
+   "model": "",
+   "model_basis": "",
+   "category": "photo-frame",
+   "note": "label taken from the 2016 list by MAC",
+   "runs_seen": 6,
+   "first_seen": "2018-06-01",
+   "last_seen": "2018-10-25"
+  },
+  {
+   "dataset": "unsw2018",
+   "label": "(no list; MAC of August doorbell)",
+   "mac": "e0:76:d0:3f:00:ae",
+   "vendor": "August",
+   "product": "Doorbell Cam",
+   "model": "",
+   "model_basis": "",
+   "category": "doorbell",
+   "note": "label taken from UNSW-IoTraffic by MAC",
+   "runs_seen": 6,
+   "first_seen": "2018-06-01",
+   "last_seen": "2018-10-25"
+  },
+  {
+   "dataset": "unsw2018",
+   "label": "(no list; MAC of WeMo switch)",
+   "mac": "ec:1a:59:79:f4:89",
+   "vendor": "Belkin",
+   "product": "WeMo Switch",
+   "model": "",
+   "model_basis": "",
+   "category": "plug",
+   "note": "label taken from the 2016 list by MAC",
+   "runs_seen": 2,
+   "first_seen": "2018-06-01",
+   "last_seen": "2018-06-02"
+  },
+  {
+   "dataset": "unsw2018",
+   "label": "(no list; Belkin OUI)",
+   "mac": "ec:1a:59:7a:02:c5",
+   "vendor": "Belkin",
+   "product": "unknown (WeMo?)",
+   "model": "",
+   "model_basis": "",
+   "category": "unknown",
+   "note": "not in any list; product unknown",
+   "runs_seen": 4,
+   "first_seen": "2018-10-21",
+   "last_seen": "2018-10-25"
+  },
+  {
+   "dataset": "unsw2018",
+   "label": "(no list; MAC of WeMo motion)",
+   "mac": "ec:1a:59:83:28:11",
+   "vendor": "Belkin",
+   "product": "WeMo Motion Sensor",
+   "model": "",
+   "model_basis": "",
+   "category": "sensor",
+   "note": "label taken from the 2016 list by MAC",
+   "runs_seen": 6,
+   "first_seen": "2018-06-01",
+   "last_seen": "2018-10-25"
+  },
+  {
+   "dataset": "unsw2018",
+   "label": "(no list; MAC of TP-Link camera)",
+   "mac": "f4:f2:6d:93:51:f1",
+   "vendor": "TP-Link",
+   "product": "Day/Night Cloud Camera",
+   "model": "NC220",
+   "model_basis": "dhcp hostname NC220 1.0",
+   "category": "camera",
+   "note": "label taken from the 2016 list by MAC",
+   "runs_seen": 4,
+   "first_seen": "2018-10-21",
+   "last_seen": "2018-10-25"
+  },
+  {
+   "dataset": "unsw2018",
+   "label": "(no list; Google OUI)",
+   "mac": "f4:f5:d8:8f:0a:3c",
+   "vendor": "Google",
+   "product": "Chromecast Ultra",
+   "model": "",
+   "model_basis": "dhcp hostname Chromecast-Ultra",
+   "category": "tv-streaming",
+   "note": "not in any list; identified by self-description only",
+   "runs_seen": 4,
+   "first_seen": "2018-10-21",
+   "last_seen": "2018-10-25"
+  },
+  {
+   "dataset": "unsw2018",
+   "label": "(no list; Google OUI)",
+   "mac": "f4:f5:d8:d4:eb:12",
+   "vendor": "Google",
+   "product": "Google Home",
+   "model": "",
+   "model_basis": "dhcp hostname Google-Home",
+   "category": "voice-assistant",
+   "note": "not in any list; identified by self-description only",
+   "runs_seen": 6,
+   "first_seen": "2018-06-01",
+   "last_seen": "2018-10-25"
+  },
+  {
+   "dataset": "iot23",
+   "label": "CTU-Honeypot-Capture-4-1 (Philips Hue)",
+   "mac": "00:17:88:75:b3:82",
+   "vendor": "Philips",
+   "product": "Hue Bridge",
+   "model": "",
+   "model_basis": "",
+   "category": "hub",
+   "note": "",
+   "runs_seen": 1,
+   "first_seen": "2018-10-25",
+   "last_seen": "2018-10-26"
+  },
+  {
+   "dataset": "iot23",
+   "label": "CTU-Honeypot-Capture-5-1 (Amazon Echo)",
+   "mac": "4c:ef:c0:27:56:1e",
+   "vendor": "Amazon",
+   "product": "Echo",
+   "model": "",
+   "model_basis": "",
+   "category": "voice-assistant",
+   "note": "",
+   "runs_seen": 1,
+   "first_seen": "2018-09-21",
+   "last_seen": "2018-09-21"
+  },
+  {
+   "dataset": "iot23",
+   "label": "CTU-Honeypot-Capture-7-1 (Somfy door lock)",
+   "mac": "",
+   "vendor": "Somfy",
+   "product": "Door Lock",
+   "model": "",
+   "model_basis": "",
+   "category": "lock",
+   "note": "not analysed by Quarant yet; MAC not taken",
+   "runs_seen": 0,
+   "first_seen": "",
+   "last_seen": ""
+  },
+  {
+   "dataset": "yourthings",
+   "label": "SamsungSmartThingsHub",
+   "mac": "d0:52:a8:63:47:9e",
+   "vendor": "Samsung",
+   "product": "SmartThings Hub",
+   "model": "",
+   "model_basis": "",
+   "category": "hub",
+   "note": "",
+   "runs_seen": 3,
+   "first_seen": "2018-04-10",
+   "last_seen": "2018-04-12"
+  },
+  {
+   "dataset": "yourthings",
+   "label": "PhilipsHUEHub",
+   "mac": "00:17:88:21:f7:e4",
+   "vendor": "Philips",
+   "product": "Hue Bridge",
+   "model": "",
+   "model_basis": "",
+   "category": "hub",
+   "note": "",
+   "runs_seen": 3,
+   "first_seen": "2018-04-10",
+   "last_seen": "2018-04-12"
+  },
+  {
+   "dataset": "yourthings",
+   "label": "InsteonHub",
+   "mac": "54:4a:16:f9:54:18",
+   "vendor": "Insteon",
+   "product": "Hub Pro",
+   "model": "Hub Pro",
+   "model_basis": "dhcp hostname HubPro",
+   "category": "hub",
+   "note": "",
+   "runs_seen": 3,
+   "first_seen": "2018-04-10",
+   "last_seen": "2018-04-12"
+  },
+  {
+   "dataset": "yourthings",
+   "label": "Sonos",
+   "mac": "5c:aa:fd:6c:e0:d4",
+   "vendor": "Sonos",
+   "product": "Sonos speaker",
+   "model": "ZPS1 (PLAY:1)",
+   "model_basis": "ssdp server (ZPS1)",
+   "category": "speaker",
+   "note": "ZPS1 = PLAY:1 per Sonos model code (not checked against a primary source)",
+   "runs_seen": 3,
+   "first_seen": "2018-04-10",
+   "last_seen": "2018-04-12"
+  },
+  {
+   "dataset": "yourthings",
+   "label": "SecurifiAlmond",
+   "mac": "e4:71:85:25:ce:ec",
+   "vendor": "Securifi",
+   "product": "Almond",
+   "model": "",
+   "model_basis": "",
+   "category": "hub",
+   "note": "router with smart-home hub",
+   "runs_seen": 3,
+   "first_seen": "2018-04-10",
+   "last_seen": "2018-04-12"
+  },
+  {
+   "dataset": "yourthings",
+   "label": "NestCamera",
+   "mac": "18:b4:30:58:3d:6c",
+   "vendor": "Nest (Google)",
+   "product": "Nest Cam",
+   "model": "",
+   "model_basis": "",
+   "category": "camera",
+   "note": "",
+   "runs_seen": 3,
+   "first_seen": "2018-04-10",
+   "last_seen": "2018-04-12"
+  },
+  {
+   "dataset": "yourthings",
+   "label": "BelkinWeMoMotionSensor",
+   "mac": "08:86:3b:6f:7a:15",
+   "vendor": "Belkin",
+   "product": "WeMo Motion Sensor",
+   "model": "",
+   "model_basis": "",
+   "category": "sensor",
+   "note": "",
+   "runs_seen": 3,
+   "first_seen": "2018-04-10",
+   "last_seen": "2018-04-12"
+  },
+  {
+   "dataset": "yourthings",
+   "label": "LIFXVirtualBulb",
+   "mac": "d0:73:d5:12:84:d1",
+   "vendor": "LIFX",
+   "product": "Color 1000",
+   "model": "Color 1000",
+   "model_basis": "dhcp hostname",
+   "category": "bulb",
+   "note": "",
+   "runs_seen": 3,
+   "first_seen": "2018-04-10",
+   "last_seen": "2018-04-12"
+  },
+  {
+   "dataset": "yourthings",
+   "label": "BelkinWeMoSwitch",
+   "mac": "08:86:3b:70:d7:39",
+   "vendor": "Belkin",
+   "product": "WeMo Switch",
+   "model": "",
+   "model_basis": "",
+   "category": "plug",
+   "note": "",
+   "runs_seen": 3,
+   "first_seen": "2018-04-10",
+   "last_seen": "2018-04-12"
+  },
+  {
+   "dataset": "yourthings",
+   "label": "AmazonEchoGen1",
+   "mac": "74:c2:46:1b:8e:e2",
+   "vendor": "Amazon",
+   "product": "Echo (1st gen)",
+   "model": "Echo (1st gen)",
+   "model_basis": "dataset label",
+   "category": "voice-assistant",
+   "note": "",
+   "runs_seen": 3,
+   "first_seen": "2018-04-10",
+   "last_seen": "2018-04-12"
+  },
+  {
+   "dataset": "yourthings",
+   "label": "WinkHub",
+   "mac": "-",
+   "vendor": "Wink",
+   "product": "Hub",
+   "model": "",
+   "model_basis": "",
+   "category": "hub",
+   "note": "not seen in the analysed captures",
+   "runs_seen": 0,
+   "first_seen": "",
+   "last_seen": ""
+  },
+  {
+   "dataset": "yourthings",
+   "label": "NestProtect",
+   "mac": "18:b4:30:31:04:b9",
+   "vendor": "Nest (Google)",
+   "product": "Protect",
+   "model": "",
+   "model_basis": "",
+   "category": "sensor",
+   "note": "",
+   "runs_seen": 3,
+   "first_seen": "2018-04-10",
+   "last_seen": "2018-04-12"
+  },
+  {
+   "dataset": "yourthings",
+   "label": "BelkinNetcam",
+   "mac": "c0:56:27:53:09:6d",
+   "vendor": "Belkin",
+   "product": "NetCam HD",
+   "model": "",
+   "model_basis": "dhcp hostname NetCamHD",
+   "category": "camera",
+   "note": "",
+   "runs_seen": 3,
+   "first_seen": "2018-04-10",
+   "last_seen": "2018-04-12"
+  },
+  {
+   "dataset": "yourthings",
+   "label": "RingDoorbell",
+   "mac": "00:1d:c9:23:f6:00",
+   "vendor": "Ring",
+   "product": "Video Doorbell",
+   "model": "",
+   "model_basis": "",
+   "category": "doorbell",
+   "note": "",
+   "runs_seen": 2,
+   "first_seen": "2018-04-10",
+   "last_seen": "2018-04-11"
+  },
+  {
+   "dataset": "yourthings",
+   "label": "RokuTV",
+   "mac": "30:52:cb:a3:4f:5f",
+   "vendor": "TCL / Roku",
+   "product": "Roku TV",
+   "model": "",
+   "model_basis": "",
+   "category": "tv-streaming",
+   "note": "",
+   "runs_seen": 3,
+   "first_seen": "2018-04-10",
+   "last_seen": "2018-04-12"
+  },
+  {
+   "dataset": "yourthings",
+   "label": "Roku4",
+   "mac": "08:05:81:ee:06:46",
+   "vendor": "Roku",
+   "product": "Roku 4",
+   "model": "Roku 4",
+   "model_basis": "dataset label",
+   "category": "tv-streaming",
+   "note": "",
+   "runs_seen": 3,
+   "first_seen": "2018-04-10",
+   "last_seen": "2018-04-12"
+  },
+  {
+   "dataset": "yourthings",
+   "label": "AmazonFireTV",
+   "mac": "0c:47:c9:4e:fe:5b",
+   "vendor": "Amazon",
+   "product": "Fire TV",
+   "model": "",
+   "model_basis": "",
+   "category": "tv-streaming",
+   "note": "",
+   "runs_seen": 3,
+   "first_seen": "2018-04-10",
+   "last_seen": "2018-04-12"
+  },
+  {
+   "dataset": "yourthings",
+   "label": "nVidiaShield",
+   "mac": "00:04:4b:55:f6:4f",
+   "vendor": "NVIDIA",
+   "product": "Shield TV",
+   "model": "",
+   "model_basis": "",
+   "category": "tv-streaming",
+   "note": "",
+   "runs_seen": 3,
+   "first_seen": "2018-04-10",
+   "last_seen": "2018-04-12"
+  },
+  {
+   "dataset": "yourthings",
+   "label": "AppleTV(4thGen)",
+   "mac": "d0:03:4b:39:12:e3",
+   "vendor": "Apple",
+   "product": "Apple TV (4th gen)",
+   "model": "Apple TV (4th gen)",
+   "model_basis": "dataset label",
+   "category": "tv-streaming",
+   "note": "",
+   "runs_seen": 3,
+   "first_seen": "2018-04-10",
+   "last_seen": "2018-04-12"
+  },
+  {
+   "dataset": "yourthings",
+   "label": "BelkinWeMoLink",
+   "mac": "94:10:3e:cc:67:95",
+   "vendor": "Belkin",
+   "product": "WeMo Link",
+   "model": "",
+   "model_basis": "",
+   "category": "hub",
+   "note": "",
+   "runs_seen": 3,
+   "first_seen": "2018-04-10",
+   "last_seen": "2018-04-12"
+  },
+  {
+   "dataset": "yourthings",
+   "label": "NetgearArloCamera",
+   "mac": "b0:7f:b9:a6:47:4d",
+   "vendor": "Arlo (Netgear)",
+   "product": "Arlo base station",
+   "model": "VMB3010",
+   "model_basis": "dhcp hostname",
+   "category": "camera",
+   "note": "the observed host is the base station",
+   "runs_seen": 3,
+   "first_seen": "2018-04-10",
+   "last_seen": "2018-04-12"
+  },
+  {
+   "dataset": "yourthings",
+   "label": "D-LinkDCS-5009LCamera",
+   "mac": "b0:c5:54:03:c7:09",
+   "vendor": "D-Link",
+   "product": "DCS-5009L",
+   "model": "DCS-5009L",
+   "model_basis": "dataset label, dhcp hostname",
+   "category": "camera",
+   "note": "",
+   "runs_seen": 3,
+   "first_seen": "2018-04-10",
+   "last_seen": "2018-04-12"
+  },
+  {
+   "dataset": "yourthings",
+   "label": "LogitechLogiCircle",
+   "mac": "44:73:d6:01:3d:fd",
+   "vendor": "Logitech",
+   "product": "Logi Circle",
+   "model": "",
+   "model_basis": "",
+   "category": "camera",
+   "note": "",
+   "runs_seen": 3,
+   "first_seen": "2018-04-10",
+   "last_seen": "2018-04-12"
+  },
+  {
+   "dataset": "yourthings",
+   "label": "Canary",
+   "mac": "7c:70:bc:5d:09:d1",
+   "vendor": "Canary",
+   "product": "Canary",
+   "model": "",
+   "model_basis": "",
+   "category": "camera",
+   "note": "",
+   "runs_seen": 3,
+   "first_seen": "2018-04-10",
+   "last_seen": "2018-04-12"
+  },
+  {
+   "dataset": "yourthings",
+   "label": "PiperNV",
+   "mac": "ac:3f:a4:70:4a:d6",
+   "vendor": "Piper",
+   "product": "Piper nv",
+   "model": "Piper nv",
+   "model_basis": "dataset label",
+   "category": "camera",
+   "note": "",
+   "runs_seen": 3,
+   "first_seen": "2018-04-10",
+   "last_seen": "2018-04-12"
+  },
+  {
+   "dataset": "yourthings",
+   "label": "WithingsHome",
+   "mac": "00:24:e4:2b:a5:34",
+   "vendor": "Withings",
+   "product": "Home",
+   "model": "",
+   "model_basis": "",
+   "category": "camera",
+   "note": "",
+   "runs_seen": 3,
+   "first_seen": "2018-04-10",
+   "last_seen": "2018-04-12"
+  },
+  {
+   "dataset": "yourthings",
+   "label": "BelkinWeMoCrockpot",
+   "mac": "94:10:3e:5c:2e:31",
+   "vendor": "Belkin (Crock-Pot)",
+   "product": "WeMo Crock-Pot",
+   "model": "",
+   "model_basis": "",
+   "category": "appliance",
+   "note": "",
+   "runs_seen": 3,
+   "first_seen": "2018-04-10",
+   "last_seen": "2018-04-12"
+  },
+  {
+   "dataset": "yourthings",
+   "label": "MiCasaVerdeVeraLite",
+   "mac": "94:4a:0c:08:7e:72",
+   "vendor": "MiCasaVerde",
+   "product": "VeraLite",
+   "model": "VeraLite",
+   "model_basis": "dataset label",
+   "category": "hub",
+   "note": "",
+   "runs_seen": 3,
+   "first_seen": "2018-04-10",
+   "last_seen": "2018-04-12"
+  },
+  {
+   "dataset": "yourthings",
+   "label": "ChineseWebcam",
+   "mac": "00:12:16:ab:c0:22",
+   "vendor": "unknown",
+   "product": "webcam",
+   "model": "",
+   "model_basis": "",
+   "category": "camera",
+   "note": "maker unknown; claims cannot be collected",
+   "runs_seen": 3,
+   "first_seen": "2018-04-10",
+   "last_seen": "2018-04-12"
+  },
+  {
+   "dataset": "yourthings",
+   "label": "AugustDoorbellCam",
+   "mac": "cc:b8:a8:ad:4d:04",
+   "vendor": "August",
+   "product": "Doorbell Cam",
+   "model": "",
+   "model_basis": "",
+   "category": "doorbell",
+   "note": "",
+   "runs_seen": 3,
+   "first_seen": "2018-04-10",
+   "last_seen": "2018-04-12"
+  },
+  {
+   "dataset": "yourthings",
+   "label": "TP-LinkWiFiPlug",
+   "mac": "b0:4e:26:20:15:8a",
+   "vendor": "TP-Link",
+   "product": "Smart Plug",
+   "model": "HS105",
+   "model_basis": "dhcp hostname",
+   "category": "plug",
+   "note": "",
+   "runs_seen": 3,
+   "first_seen": "2018-04-10",
+   "last_seen": "2018-04-12"
+  },
+  {
+   "dataset": "yourthings",
+   "label": "ChamberlainmyQGarageOpener",
+   "mac": "64:52:99:97:f8:40",
+   "vendor": "Chamberlain",
+   "product": "myQ Garage",
+   "model": "",
+   "model_basis": "",
+   "category": "appliance",
+   "note": "",
+   "runs_seen": 3,
+   "first_seen": "2018-04-10",
+   "last_seen": "2018-04-12"
+  },
+  {
+   "dataset": "yourthings",
+   "label": "LogitechHarmonyHub",
+   "mac": "c8:db:26:02:bb:bb",
+   "vendor": "Logitech",
+   "product": "Harmony Hub",
+   "model": "",
+   "model_basis": "",
+   "category": "hub",
+   "note": "",
+   "runs_seen": 3,
+   "first_seen": "2018-04-10",
+   "last_seen": "2018-04-12"
+  },
+  {
+   "dataset": "yourthings",
+   "label": "CasetaWirelessHub",
+   "mac": "f4:5e:ab:5e:c0:23",
+   "vendor": "Lutron",
+   "product": "Caseta Smart Bridge",
+   "model": "",
+   "model_basis": "",
+   "category": "hub",
+   "note": "",
+   "runs_seen": 3,
+   "first_seen": "2018-04-10",
+   "last_seen": "2018-04-12"
+  },
+  {
+   "dataset": "yourthings",
+   "label": "GoogleHomeMini",
+   "mac": "20:df:b9:20:87:39",
+   "vendor": "Google",
+   "product": "Google Home Mini",
+   "model": "",
+   "model_basis": "",
+   "category": "voice-assistant",
+   "note": "",
+   "runs_seen": 3,
+   "first_seen": "2018-04-10",
+   "last_seen": "2018-04-12"
+  },
+  {
+   "dataset": "yourthings",
+   "label": "GoogleHome",
+   "mac": "48:d6:d5:98:53:84",
+   "vendor": "Google",
+   "product": "Google Home",
+   "model": "",
+   "model_basis": "",
+   "category": "voice-assistant",
+   "note": "",
+   "runs_seen": 3,
+   "first_seen": "2018-04-10",
+   "last_seen": "2018-04-12"
+  },
+  {
+   "dataset": "yourthings",
+   "label": "BoseSoundTouch10",
+   "mac": "10:ce:a9:eb:5a:8a",
+   "vendor": "Bose",
+   "product": "SoundTouch 10",
+   "model": "SoundTouch 10",
+   "model_basis": "dataset label, dhcp hostname",
+   "category": "speaker",
+   "note": "",
+   "runs_seen": 3,
+   "first_seen": "2018-04-10",
+   "last_seen": "2018-04-12"
+  },
+  {
+   "dataset": "yourthings",
+   "label": "HarmonKardonInvoke",
+   "mac": "d8:f7:10:c2:29:be",
+   "vendor": "Harman Kardon",
+   "product": "Invoke",
+   "model": "Invoke",
+   "model_basis": "dataset label",
+   "category": "voice-assistant",
+   "note": "",
+   "runs_seen": 3,
+   "first_seen": "2018-04-10",
+   "last_seen": "2018-04-12"
+  },
+  {
+   "dataset": "yourthings",
+   "label": "AppleHomePod",
+   "mac": "d4:90:9c:cc:62:42",
+   "vendor": "Apple",
+   "product": "HomePod",
+   "model": "",
+   "model_basis": "",
+   "category": "speaker",
+   "note": "",
+   "runs_seen": 3,
+   "first_seen": "2018-04-10",
+   "last_seen": "2018-04-12"
+  },
+  {
+   "dataset": "yourthings",
+   "label": "Roomba",
+   "mac": "40:9f:38:92:40:13",
+   "vendor": "iRobot",
+   "product": "Roomba",
+   "model": "",
+   "model_basis": "",
+   "category": "appliance",
+   "note": "",
+   "runs_seen": 3,
+   "first_seen": "2018-04-10",
+   "last_seen": "2018-04-12"
+  },
+  {
+   "dataset": "yourthings",
+   "label": "SamsungSmartTV",
+   "mac": "7c:64:56:60:71:74",
+   "vendor": "Samsung",
+   "product": "Smart TV",
+   "model": "",
+   "model_basis": "",
+   "category": "tv-streaming",
+   "note": "",
+   "runs_seen": 3,
+   "first_seen": "2018-04-10",
+   "last_seen": "2018-04-10"
+  },
+  {
+   "dataset": "yourthings",
+   "label": "KoogeekLightbulb",
+   "mac": "00:7e:56:77:35:4d",
+   "vendor": "Koogeek",
+   "product": "Smart Bulb",
+   "model": "LB1",
+   "model_basis": "dhcp hostname Koogeek-LB1-…",
+   "category": "bulb",
+   "note": "",
+   "runs_seen": 3,
+   "first_seen": "2018-04-10",
+   "last_seen": "2018-04-12"
+  },
+  {
+   "dataset": "yourthings",
+   "label": "TP-LinkSmartWiFiLEDBulb",
+   "mac": "50:c7:bf:92:a6:4a",
+   "vendor": "TP-Link",
+   "product": "Smart Wi-Fi LED Bulb",
+   "model": "LB130",
+   "model_basis": "dhcp hostname",
+   "category": "bulb",
+   "note": "",
+   "runs_seen": 3,
+   "first_seen": "2018-04-10",
+   "last_seen": "2018-04-12"
+  },
+  {
+   "dataset": "yourthings",
+   "label": "Wink2Hub",
+   "mac": "00:21:cc:4d:59:35",
+   "vendor": "Wink",
+   "product": "Hub 2",
+   "model": "",
+   "model_basis": "",
+   "category": "hub",
+   "note": "",
+   "runs_seen": 3,
+   "first_seen": "2018-04-10",
+   "last_seen": "2018-04-12"
+  },
+  {
+   "dataset": "yourthings",
+   "label": "NestCamIQ",
+   "mac": "18:b4:30:8c:03:e4",
+   "vendor": "Nest (Google)",
+   "product": "Nest Cam IQ",
+   "model": "",
+   "model_basis": "",
+   "category": "camera",
+   "note": "",
+   "runs_seen": 3,
+   "first_seen": "2018-04-10",
+   "last_seen": "2018-04-12"
+  },
+  {
+   "dataset": "yourthings",
+   "label": "NestGuard",
+   "mac": "18:b4:30:40:1e:c5",
+   "vendor": "Nest (Google)",
+   "product": "Nest Guard (Secure)",
+   "model": "",
+   "model_basis": "",
+   "category": "hub",
+   "note": "",
+   "runs_seen": 3,
+   "first_seen": "2018-04-10",
+   "last_seen": "2018-04-12"
+  },
+  {
+   "dataset": "yourthings",
+   "label": "NestBell",
+   "mac": "-",
+   "vendor": "Nest (Google)",
+   "product": "Hello (doorbell)",
+   "model": "",
+   "model_basis": "",
+   "category": "doorbell",
+   "note": "not seen in the analysed captures",
+   "runs_seen": 0,
+   "first_seen": "",
+   "last_seen": ""
+  },
+  {
+   "dataset": "yourthings",
+   "label": "Rachio3",
+   "mac": "-",
+   "vendor": "Rachio",
+   "product": "Rachio 3",
+   "model": "",
+   "model_basis": "",
+   "category": "appliance",
+   "note": "not seen in the analysed captures",
+   "runs_seen": 0,
+   "first_seen": "",
+   "last_seen": ""
+  },
+  {
+   "dataset": "yourthings",
+   "label": "AmazonEchoDotGen3",
+   "mac": "-",
+   "vendor": "Amazon",
+   "product": "Echo Dot (3rd gen)",
+   "model": "",
+   "model_basis": "",
+   "category": "voice-assistant",
+   "note": "not seen in the analysed captures",
+   "runs_seen": 0,
+   "first_seen": "",
+   "last_seen": ""
+  },
+  {
+   "dataset": "yourthings",
+   "label": "NestThermostat",
+   "mac": "-",
+   "vendor": "Nest (Google)",
+   "product": "Thermostat",
+   "model": "",
+   "model_basis": "",
+   "category": "appliance",
+   "note": "not seen in the analysed captures",
+   "runs_seen": 0,
+   "first_seen": "",
+   "last_seen": ""
+  },
+  {
+   "dataset": "yourthings",
+   "label": "GoogleHomeHub",
+   "mac": "-",
+   "vendor": "Google",
+   "product": "Home Hub",
+   "model": "",
+   "model_basis": "",
+   "category": "voice-assistant",
+   "note": "not seen in the analysed captures",
+   "runs_seen": 0,
+   "first_seen": "",
+   "last_seen": ""
+  },
+  {
+   "dataset": "yourthings",
+   "label": "FacebookPortal",
+   "mac": "-",
+   "vendor": "Facebook",
+   "product": "Portal",
+   "model": "",
+   "model_basis": "",
+   "category": "voice-assistant",
+   "note": "not seen in the analysed captures",
+   "runs_seen": 0,
+   "first_seen": "",
+   "last_seen": ""
+  },
+  {
+   "dataset": "yourthings",
+   "label": "SonosBeam",
+   "mac": "-",
+   "vendor": "Sonos",
+   "product": "Beam",
+   "model": "",
+   "model_basis": "",
+   "category": "speaker",
+   "note": "not seen in the analysed captures",
+   "runs_seen": 0,
+   "first_seen": "",
+   "last_seen": ""
+  },
+  {
+   "dataset": "yourthings",
+   "label": "LGWebOSTV",
+   "mac": "-",
+   "vendor": "LG",
+   "product": "webOS TV",
+   "model": "",
+   "model_basis": "",
+   "category": "tv-streaming",
+   "note": "not seen in the analysed captures",
+   "runs_seen": 0,
+   "first_seen": "",
+   "last_seen": ""
+  },
+  {
+   "dataset": "yourthings",
+   "label": "MyCloudEX2Ultra",
+   "mac": "-",
+   "vendor": "Western Digital",
+   "product": "My Cloud EX2 Ultra",
+   "model": "",
+   "model_basis": "",
+   "category": "nas",
+   "note": "not seen in the analysed captures",
+   "runs_seen": 0,
+   "first_seen": "",
+   "last_seen": ""
+  },
+  {
+   "dataset": "yourthings",
+   "label": "AxisNetworkCamera",
+   "mac": "-",
+   "vendor": "Axis",
+   "product": "Network Camera",
+   "model": "",
+   "model_basis": "",
+   "category": "camera",
+   "note": "not seen in the analysed captures",
+   "runs_seen": 0,
+   "first_seen": "",
+   "last_seen": ""
+  },
+  {
+   "dataset": "yourthings",
+   "label": "AVTechIPCam",
+   "mac": "-",
+   "vendor": "AVTech",
+   "product": "IP Camera",
+   "model": "",
+   "model_basis": "",
+   "category": "camera",
+   "note": "not seen in the analysed captures",
+   "runs_seen": 0,
+   "first_seen": "",
+   "last_seen": ""
+  },
+  {
+   "dataset": "cic2022",
+   "label": "Amazon Plug",
+   "mac": "b8:5f:98:d0:76:e6",
+   "vendor": "Amazon",
+   "product": "Smart Plug",
+   "model": "",
+   "model_basis": "",
+   "category": "plug",
+   "note": "",
+   "runs_seen": 56,
+   "first_seen": "2021-09-23",
+   "last_seen": "2021-12-24"
+  },
+  {
+   "dataset": "cic2022",
+   "label": "Amcrest",
+   "mac": "9c:8e:cd:1d:ab:9f",
+   "vendor": "Amcrest",
+   "product": "camera",
+   "model": "",
+   "model_basis": "",
+   "category": "camera",
+   "note": "model not named",
+   "runs_seen": 42,
+   "first_seen": "2021-09-22",
+   "last_seen": "2021-12-24"
+  },
+  {
+   "dataset": "cic2022",
+   "label": "Arlo Basestation Camera",
+   "mac": "3c:37:86:6f:b9:51",
+   "vendor": "Arlo (Netgear)",
+   "product": "Arlo base station",
+   "model": "VMB5000",
+   "model_basis": "dhcp hostname",
+   "category": "camera",
+   "note": "the observed host is the base station",
+   "runs_seen": 51,
+   "first_seen": "2021-09-28",
+   "last_seen": "2021-12-24"
+  },
+  {
+   "dataset": "cic2022",
+   "label": "ArloQ Camera",
+   "mac": "40:5d:82:35:14:c8",
+   "vendor": "Arlo (Netgear)",
+   "product": "Arlo Q",
+   "model": "",
+   "model_basis": "",
+   "category": "camera",
+   "note": "",
+   "runs_seen": 65,
+   "first_seen": "2021-09-22",
+   "last_seen": "2021-12-24"
+  },
+  {
+   "dataset": "cic2022",
+   "label": "Atomi Coffee Maker",
+   "mac": "68:57:2d:56:ac:47",
+   "vendor": "Atomi",
+   "product": "Smart Coffee Maker",
+   "model": "",
+   "model_basis": "",
+   "category": "appliance",
+   "note": "Tuya OUI",
+   "runs_seen": 69,
+   "first_seen": "2021-09-28",
+   "last_seen": "2021-12-24"
+  },
+  {
+   "dataset": "cic2022",
+   "label": "Borun Camera",
+   "mac": "c0:e7:bf:0a:79:d1",
+   "vendor": "Borun",
+   "product": "camera",
+   "model": "",
+   "model_basis": "",
+   "category": "camera",
+   "note": "model not named",
+   "runs_seen": 51,
+   "first_seen": "2021-09-22",
+   "last_seen": "2021-12-24"
+  },
+  {
+   "dataset": "cic2022",
+   "label": "DLink Camera",
+   "mac": "b0:c5:54:59:2e:99",
+   "vendor": "D-Link",
+   "product": "DCS-8000LH",
+   "model": "DCS-8000LH",
+   "model_basis": "dhcp hostname",
+   "category": "camera",
+   "note": "",
+   "runs_seen": 42,
+   "first_seen": "2021-09-22",
+   "last_seen": "2021-12-24"
+  },
+  {
+   "dataset": "cic2022",
+   "label": "DLink Water Sensor",
+   "mac": "f0:b4:d2:f9:60:95",
+   "vendor": "D-Link",
+   "product": "Water Sensor",
+   "model": "DCH-S161",
+   "model_basis": "dhcp hostname",
+   "category": "sensor",
+   "note": "",
+   "runs_seen": 30,
+   "first_seen": "2021-09-29",
+   "last_seen": "2021-12-24"
+  },
+  {
+   "dataset": "cic2022",
+   "label": "Amazon Echo Dot 1",
+   "mac": "1c:fe:2b:98:16:dd",
+   "vendor": "Amazon",
+   "product": "Echo Dot",
+   "model": "",
+   "model_basis": "",
+   "category": "voice-assistant",
+   "note": "generation not named",
+   "runs_seen": 57,
+   "first_seen": "2021-09-28",
+   "last_seen": "2021-12-24"
+  },
+  {
+   "dataset": "cic2022",
+   "label": "Amazon Echo Dot 2",
+   "mac": "a0:d0:dc:c4:08:ff",
+   "vendor": "Amazon",
+   "product": "Echo Dot",
+   "model": "",
+   "model_basis": "",
+   "category": "voice-assistant",
+   "note": "generation not named",
+   "runs_seen": 57,
+   "first_seen": "2021-09-28",
+   "last_seen": "2021-12-24"
+  },
+  {
+   "dataset": "cic2022",
+   "label": "Amazon Echo Spot",
+   "mac": "1c:12:b0:9b:0c:ec",
+   "vendor": "Amazon",
+   "product": "Echo Spot",
+   "model": "",
+   "model_basis": "",
+   "category": "voice-assistant",
+   "note": "",
+   "runs_seen": 57,
+   "first_seen": "2021-09-28",
+   "last_seen": "2021-12-24"
+  },
+  {
+   "dataset": "cic2022",
+   "label": "Amazon Echo Studio",
+   "mac": "08:7c:39:ce:6e:2a",
+   "vendor": "Amazon",
+   "product": "Echo Studio",
+   "model": "",
+   "model_basis": "",
+   "category": "speaker",
+   "note": "",
+   "runs_seen": 66,
+   "first_seen": "2021-09-28",
+   "last_seen": "2021-12-24"
+  },
+  {
+   "dataset": "cic2022",
+   "label": "Eufy Homebase",
+   "mac": "8c:85:80:6c:b6:47",
+   "vendor": "Eufy (Anker)",
+   "product": "HomeBase",
+   "model": "",
+   "model_basis": "",
+   "category": "hub",
+   "note": "",
+   "runs_seen": 46,
+   "first_seen": "2021-09-23",
+   "last_seen": "2021-12-24"
+  },
+  {
+   "dataset": "cic2022",
+   "label": "Globe Lamp",
+   "mac": "50:02:91:b1:68:0c",
+   "vendor": "Globe",
+   "product": "Smart Lamp",
+   "model": "",
+   "model_basis": "",
+   "category": "bulb",
+   "note": "Espressif module",
+   "runs_seen": 87,
+   "first_seen": "2021-09-28",
+   "last_seen": "2021-12-24"
+  },
+  {
+   "dataset": "cic2022",
+   "label": "Gosund Plug - Center",
+   "mac": "b8:f0:09:03:9a:af",
+   "vendor": "Gosund",
+   "product": "Smart Plug",
+   "model": "",
+   "model_basis": "",
+   "category": "plug",
+   "note": "",
+   "runs_seen": 63,
+   "first_seen": "2021-09-28",
+   "last_seen": "2021-12-24"
+  },
+  {
+   "dataset": "cic2022",
+   "label": "Gosund Plug - Lower",
+   "mac": "b8:f0:09:03:29:79",
+   "vendor": "Gosund",
+   "product": "Smart Plug",
+   "model": "",
+   "model_basis": "",
+   "category": "plug",
+   "note": "",
+   "runs_seen": 62,
+   "first_seen": "2021-09-23",
+   "last_seen": "2021-12-24"
+  },
+  {
+   "dataset": "cic2022",
+   "label": "Gosund Plug - Red",
+   "mac": "50:02:91:10:09:8f",
+   "vendor": "Gosund",
+   "product": "Smart Plug",
+   "model": "",
+   "model_basis": "",
+   "category": "plug",
+   "note": "",
+   "runs_seen": 60,
+   "first_seen": "2021-09-23",
+   "last_seen": "2021-12-24"
+  },
+  {
+   "dataset": "cic2022",
+   "label": "Gosund Plug - Roomba",
+   "mac": "c4:dd:57:0c:39:94",
+   "vendor": "Gosund",
+   "product": "Smart Plug",
+   "model": "",
+   "model_basis": "",
+   "category": "plug",
+   "note": "",
+   "runs_seen": 63,
+   "first_seen": "2021-09-23",
+   "last_seen": "2021-12-24"
+  },
+  {
+   "dataset": "cic2022",
+   "label": "Gosund Plug - Silver",
+   "mac": "50:02:91:1a:ce:e1",
+   "vendor": "Gosund",
+   "product": "Smart Plug",
+   "model": "",
+   "model_basis": "",
+   "category": "plug",
+   "note": "",
+   "runs_seen": 63,
+   "first_seen": "2021-09-28",
+   "last_seen": "2021-12-24"
+  },
+  {
+   "dataset": "cic2022",
+   "label": "Gosund Plug - Smart Board",
+   "mac": "24:a1:60:14:7f:f9",
+   "vendor": "Gosund",
+   "product": "Smart Plug",
+   "model": "",
+   "model_basis": "",
+   "category": "plug",
+   "note": "",
+   "runs_seen": 62,
+   "first_seen": "2021-09-23",
+   "last_seen": "2021-12-24"
+  },
+  {
+   "dataset": "cic2022",
+   "label": "Gosund Plug - Upper",
+   "mac": "50:02:91:10:ac:d8",
+   "vendor": "Gosund",
+   "product": "Smart Plug",
+   "model": "",
+   "model_basis": "",
+   "category": "plug",
+   "note": "",
+   "runs_seen": 63,
+   "first_seen": "2021-09-23",
+   "last_seen": "2021-12-24"
+  },
+  {
+   "dataset": "cic2022",
+   "label": "HeimVision Camera",
+   "mac": "44:01:bb:ec:10:4a",
+   "vendor": "HeimVision",
+   "product": "camera",
+   "model": "",
+   "model_basis": "",
+   "category": "camera",
+   "note": "model not named",
+   "runs_seen": 53,
+   "first_seen": "2021-09-22",
+   "last_seen": "2021-12-24"
+  },
+  {
+   "dataset": "cic2022",
+   "label": "HeimVision Lamp",
+   "mac": "d4:a6:51:30:64:b7",
+   "vendor": "HeimVision",
+   "product": "Smart Lamp",
+   "model": "",
+   "model_basis": "",
+   "category": "bulb",
+   "note": "Tuya OUI",
+   "runs_seen": 93,
+   "first_seen": "2021-09-22",
+   "last_seen": "2021-12-24"
+  },
+  {
+   "dataset": "cic2022",
+   "label": "Home Eye Camera",
+   "mac": "34:75:63:73:f3:36",
+   "vendor": "Home Eye",
+   "product": "camera",
+   "model": "",
+   "model_basis": "",
+   "category": "camera",
+   "note": "model not named",
+   "runs_seen": 48,
+   "first_seen": "2021-09-22",
+   "last_seen": "2021-12-24"
+  },
+  {
+   "dataset": "cic2022",
+   "label": "LG TV",
+   "mac": "ac:f1:08:4e:00:82",
+   "vendor": "LG",
+   "product": "webOS TV",
+   "model": "",
+   "model_basis": "",
+   "category": "tv-streaming",
+   "note": "",
+   "runs_seen": 9,
+   "first_seen": "2021-09-28",
+   "last_seen": "2021-11-03"
+  },
+  {
+   "dataset": "cic2022",
+   "label": "Luohe Camera",
+   "mac": "7c:a7:b0:cd:18:32",
+   "vendor": "Luohe",
+   "product": "camera",
+   "model": "",
+   "model_basis": "",
+   "category": "camera",
+   "note": "model not named",
+   "runs_seen": 42,
+   "first_seen": "2021-09-22",
+   "last_seen": "2021-12-24"
+  },
+  {
+   "dataset": "cic2022",
+   "label": "Nest Camera",
+   "mac": "44:bb:3b:00:39:07",
+   "vendor": "Nest (Google)",
+   "product": "Nest Cam",
+   "model": "",
+   "model_basis": "",
+   "category": "camera",
+   "note": "",
+   "runs_seen": 39,
+   "first_seen": "2021-09-22",
+   "last_seen": "2021-12-24"
+  },
+  {
+   "dataset": "cic2022",
+   "label": "Google Nest Mini",
+   "mac": "cc:f4:11:9c:d0:00",
+   "vendor": "Google",
+   "product": "Nest Mini",
+   "model": "",
+   "model_basis": "",
+   "category": "voice-assistant",
+   "note": "",
+   "runs_seen": 66,
+   "first_seen": "2021-09-23",
+   "last_seen": "2021-12-24"
+  },
+  {
+   "dataset": "cic2022",
+   "label": "Netatmo Camera",
+   "mac": "70:ee:50:68:0e:32",
+   "vendor": "Netatmo",
+   "product": "Welcome",
+   "model": "",
+   "model_basis": "dhcp hostname Netatmo-Welcome",
+   "category": "camera",
+   "note": "",
+   "runs_seen": 54,
+   "first_seen": "2021-09-22",
+   "last_seen": "2021-12-24"
+  },
+  {
+   "dataset": "cic2022",
+   "label": "Netatmo Weather Station",
+   "mac": "70:ee:50:6b:a8:1a",
+   "vendor": "Netatmo",
+   "product": "Weather Station",
+   "model": "",
+   "model_basis": "",
+   "category": "sensor",
+   "note": "",
+   "runs_seen": 33,
+   "first_seen": "2021-09-22",
+   "last_seen": "2021-12-24"
+  },
+  {
+   "dataset": "cic2022",
+   "label": "Philips Hue Bridge",
+   "mac": "00:17:88:60:d6:4f",
+   "vendor": "Philips",
+   "product": "Hue Bridge",
+   "model": "",
+   "model_basis": "",
+   "category": "hub",
+   "note": "",
+   "runs_seen": 69,
+   "first_seen": "2021-09-23",
+   "last_seen": "2021-12-24"
+  },
+  {
+   "dataset": "cic2022",
+   "label": "Ring Basestation",
+   "mac": "b0:09:da:3e:82:6c",
+   "vendor": "Ring",
+   "product": "Alarm Base Station",
+   "model": "",
+   "model_basis": "",
+   "category": "hub",
+   "note": "",
+   "runs_seen": 71,
+   "first_seen": "2021-09-29",
+   "last_seen": "2021-12-24"
+  },
+  {
+   "dataset": "cic2022",
+   "label": "Roomba Vacuum",
+   "mac": "50:14:79:37:80:18",
+   "vendor": "iRobot",
+   "product": "Roomba",
+   "model": "",
+   "model_basis": "",
+   "category": "appliance",
+   "note": "",
+   "runs_seen": 69,
+   "first_seen": "2021-09-29",
+   "last_seen": "2021-12-24"
+  },
+  {
+   "dataset": "cic2022",
+   "label": "SimCam",
+   "mac": "10:2c:6b:1b:43:be",
+   "vendor": "SimCam",
+   "product": "camera",
+   "model": "",
+   "model_basis": "",
+   "category": "camera",
+   "note": "model not named",
+   "runs_seen": 42,
+   "first_seen": "2021-09-22",
+   "last_seen": "2021-12-24"
+  },
+  {
+   "dataset": "cic2022",
+   "label": "Smart Board",
+   "mac": "00:02:75:f6:e3:cb",
+   "vendor": "unknown",
+   "product": "Smart Board",
+   "model": "",
+   "model_basis": "",
+   "category": "unknown",
+   "note": "maker unknown",
+   "runs_seen": 37,
+   "first_seen": "2021-09-28",
+   "last_seen": "2021-12-24"
+  },
+  {
+   "dataset": "cic2022",
+   "label": "Sonos One Speaker",
+   "mac": "48:a6:b8:f9:1b:88",
+   "vendor": "Sonos",
+   "product": "Sonos One",
+   "model": "ZPS18",
+   "model_basis": "ssdp server (ZPS18)",
+   "category": "speaker",
+   "note": "",
+   "runs_seen": 54,
+   "first_seen": "2021-09-28",
+   "last_seen": "2021-12-24"
+  },
+  {
+   "dataset": "cic2022",
+   "label": "Tekin Plug 1",
+   "mac": "d4:a6:51:76:06:64",
+   "vendor": "Teckin",
+   "product": "Smart Plug",
+   "model": "",
+   "model_basis": "",
+   "category": "plug",
+   "note": "dataset spells Tekin; Tuya OUI",
+   "runs_seen": 63,
+   "first_seen": "2021-09-23",
+   "last_seen": "2021-12-24"
+  },
+  {
+   "dataset": "cic2022",
+   "label": "Tekin Plug 2",
+   "mac": "d4:a6:51:78:97:4e",
+   "vendor": "Teckin",
+   "product": "Smart Plug",
+   "model": "",
+   "model_basis": "",
+   "category": "plug",
+   "note": "dataset spells Tekin; Tuya OUI",
+   "runs_seen": 63,
+   "first_seen": "2021-09-23",
+   "last_seen": "2021-12-24"
+  },
+  {
+   "dataset": "cic2022",
+   "label": "Yutron Plug 1",
+   "mac": "d4:a6:51:20:91:d1",
+   "vendor": "Yutron",
+   "product": "Smart Plug",
+   "model": "",
+   "model_basis": "",
+   "category": "plug",
+   "note": "Tuya OUI",
+   "runs_seen": 63,
+   "first_seen": "2021-09-23",
+   "last_seen": "2021-12-24"
+  },
+  {
+   "dataset": "cic2022",
+   "label": "Yutron Plug 2",
+   "mac": "d4:a6:51:21:6c:29",
+   "vendor": "Yutron",
+   "product": "Smart Plug",
+   "model": "",
+   "model_basis": "",
+   "category": "plug",
+   "note": "Tuya OUI",
+   "runs_seen": 63,
+   "first_seen": "2021-09-23",
+   "last_seen": "2021-12-24"
+  },
+  {
+   "dataset": "deakin",
+   "label": "Echo Dot (4th Gen)",
+   "mac": "40:f6:bc:bc:89:7b",
+   "vendor": "Amazon",
+   "product": "Echo Dot (4th gen)",
+   "model": "Echo Dot (4th gen)",
+   "model_basis": "dataset label",
+   "category": "voice-assistant",
+   "note": "",
+   "runs_seen": 7,
+   "first_seen": "2023-07-25",
+   "last_seen": "2023-08-01"
+  },
+  {
+   "dataset": "deakin",
+   "label": "Aeotec Smart Hub",
+   "mac": "68:3a:48:0d:d4:1c",
+   "vendor": "Aeotec",
+   "product": "Smart Home Hub (SmartThings)",
+   "model": "",
+   "model_basis": "",
+   "category": "hub",
+   "note": "hubv3 hostname",
+   "runs_seen": 13,
+   "first_seen": "2024-04-08",
+   "last_seen": "2024-05-19"
+  },
+  {
+   "dataset": "deakin",
+   "label": "Netatmo Smart Indoor Security Camera",
+   "mac": "70:ee:50:57:95:29",
+   "vendor": "Netatmo",
+   "product": "Smart Indoor Camera (Welcome)",
+   "model": "",
+   "model_basis": "",
+   "category": "camera",
+   "note": "",
+   "runs_seen": 34,
+   "first_seen": "2023-07-25",
+   "last_seen": "2024-05-19"
+  },
+  {
+   "dataset": "deakin",
+   "label": "TP-Link Tapo Pan/Tilt Wi-Fi Camera",
+   "mac": "54:af:97:bb:8d:8f",
+   "vendor": "TP-Link",
+   "product": "Tapo Pan/Tilt Camera",
+   "model": "C210",
+   "model_basis": "dhcp hostname C210_…",
+   "category": "camera",
+   "note": "",
+   "runs_seen": 34,
+   "first_seen": "2023-07-25",
+   "last_seen": "2024-05-19"
+  },
+  {
+   "dataset": "deakin",
+   "label": "32' Smart Monitor M80B UHD",
+   "mac": "70:09:71:9d:ad:10",
+   "vendor": "Samsung",
+   "product": "Smart Monitor M80B",
+   "model": "M80B",
+   "model_basis": "dataset label",
+   "category": "tv-streaming",
+   "note": "",
+   "runs_seen": 29,
+   "first_seen": "2023-07-26",
+   "last_seen": "2024-05-19"
+  },
+  {
+   "dataset": "deakin",
+   "label": "SAMSUNG Pan/Tilt 1080P Wi-Fi Camera",
+   "mac": "00:16:6c:d7:d5:f9",
+   "vendor": "Samsung",
+   "product": "Pan/Tilt 1080P Wi-Fi Camera",
+   "model": "",
+   "model_basis": "",
+   "category": "camera",
+   "note": "",
+   "runs_seen": 34,
+   "first_seen": "2023-07-25",
+   "last_seen": "2024-05-19"
+  },
+  {
+   "dataset": "deakin",
+   "label": "EZVIZ Security Camera",
+   "mac": "40:ac:bf:29:04:d4",
+   "vendor": "EZVIZ",
+   "product": "Security Camera",
+   "model": "",
+   "model_basis": "",
+   "category": "camera",
+   "note": "model not named",
+   "runs_seen": 0,
+   "first_seen": "",
+   "last_seen": ""
+  },
+  {
+   "dataset": "deakin",
+   "label": "TOPERSUN Smart Plug",
+   "mac": "10:5a:17:b8:a2:0b",
+   "vendor": "TOPERSUN",
+   "product": "Smart Plug",
+   "model": "",
+   "model_basis": "",
+   "category": "plug",
+   "note": "Tuya OUI",
+   "runs_seen": 34,
+   "first_seen": "2023-07-25",
+   "last_seen": "2024-05-19"
+  },
+  {
+   "dataset": "deakin",
+   "label": "TOPERSUN Smart Plug",
+   "mac": "10:5a:17:b8:9f:70",
+   "vendor": "TOPERSUN",
+   "product": "Smart Plug",
+   "model": "",
+   "model_basis": "",
+   "category": "plug",
+   "note": "Tuya OUI",
+   "runs_seen": 34,
+   "first_seen": "2023-07-25",
+   "last_seen": "2024-05-19"
+  },
+  {
+   "dataset": "deakin",
+   "label": "Perfk Motion Sensor",
+   "mac": "fc:67:1f:53:fa:6e",
+   "vendor": "Perfk",
+   "product": "Motion Sensor",
+   "model": "",
+   "model_basis": "",
+   "category": "sensor",
+   "note": "Tuya OUI",
+   "runs_seen": 34,
+   "first_seen": "2023-07-25",
+   "last_seen": "2024-05-19"
+  },
+  {
+   "dataset": "deakin",
+   "label": "Perfk Motion Sensor",
+   "mac": "1c:90:ff:bf:89:46",
+   "vendor": "Perfk",
+   "product": "Motion Sensor",
+   "model": "",
+   "model_basis": "",
+   "category": "sensor",
+   "note": "Tuya OUI",
+   "runs_seen": 34,
+   "first_seen": "2023-07-25",
+   "last_seen": "2024-05-19"
+  },
+  {
+   "dataset": "deakin",
+   "label": "NEST Protect smoke alarm",
+   "mac": "cc:a7:c1:6a:b5:78",
+   "vendor": "Nest (Google)",
+   "product": "Protect",
+   "model": "",
+   "model_basis": "",
+   "category": "sensor",
+   "note": "",
+   "runs_seen": 0,
+   "first_seen": "",
+   "last_seen": ""
+  },
+  {
+   "dataset": "deakin",
+   "label": "Netatmo Weather Station",
+   "mac": "70:ee:50:96:bb:dc",
+   "vendor": "Netatmo",
+   "product": "Weather Station",
+   "model": "",
+   "model_basis": "",
+   "category": "sensor",
+   "note": "",
+   "runs_seen": 34,
+   "first_seen": "2023-07-25",
+   "last_seen": "2024-05-19"
+  },
+  {
+   "dataset": "deakin",
+   "label": "Withings Body+ (Scales)",
+   "mac": "00:24:e4:e3:15:6e",
+   "vendor": "Withings",
+   "product": "Body+",
+   "model": "Body+",
+   "model_basis": "dataset label",
+   "category": "health",
+   "note": "",
+   "runs_seen": 0,
+   "first_seen": "",
+   "last_seen": ""
+  },
+  {
+   "dataset": "deakin",
+   "label": "Withings Body+ (Scales)",
+   "mac": "00:24:e4:e4:55:26",
+   "vendor": "Withings",
+   "product": "Body+",
+   "model": "Body+",
+   "model_basis": "dataset label",
+   "category": "health",
+   "note": "",
+   "runs_seen": 13,
+   "first_seen": "2024-04-08",
+   "last_seen": "2024-05-18"
+  },
+  {
+   "dataset": "deakin",
+   "label": "Withings Connect (Blood Pressure)",
+   "mac": "00:24:e4:f6:91:38",
+   "vendor": "Withings",
+   "product": "BPM Connect",
+   "model": "BPM Connect",
+   "model_basis": "dataset label",
+   "category": "health",
+   "note": "",
+   "runs_seen": 0,
+   "first_seen": "",
+   "last_seen": ""
+  },
+  {
+   "dataset": "deakin",
+   "label": "Withings Connect (Blood Pressure)",
+   "mac": "00:24:e4:f7:ee:ac",
+   "vendor": "Withings",
+   "product": "BPM Connect",
+   "model": "BPM Connect",
+   "model_basis": "dataset label",
+   "category": "health",
+   "note": "",
+   "runs_seen": 7,
+   "first_seen": "2024-04-09",
+   "last_seen": "2024-05-17"
+  },
+  {
+   "dataset": "deakin",
+   "label": "TUYA Smartdoor Bell",
+   "mac": "70:3a:2d:4a:48:e2",
+   "vendor": "Tuya",
+   "product": "Smart Doorbell",
+   "model": "",
+   "model_basis": "",
+   "category": "doorbell",
+   "note": "model not named",
+   "runs_seen": 0,
+   "first_seen": "",
+   "last_seen": ""
+  },
+  {
+   "dataset": "deakin",
+   "label": "Pix-Star Easy Digital Photo Frame",
+   "mac": "b0:02:47:6f:63:37",
+   "vendor": "Pix-Star",
+   "product": "Easy Digital Photo Frame",
+   "model": "",
+   "model_basis": "",
+   "category": "photo-frame",
+   "note": "",
+   "runs_seen": 34,
+   "first_seen": "2023-07-25",
+   "last_seen": "2024-05-19"
+  },
+  {
+   "dataset": "deakin",
+   "label": "HP Envy",
+   "mac": "84:69:93:27:ad:35",
+   "vendor": "HP",
+   "product": "Printer (ENVY)",
+   "model": "",
+   "model_basis": "",
+   "category": "printer",
+   "note": "",
+   "runs_seen": 34,
+   "first_seen": "2023-07-25",
+   "last_seen": "2024-05-19"
+  },
+  {
+   "dataset": "deakin",
+   "label": "Echo Show 8",
+   "mac": "18:48:be:31:4b:49",
+   "vendor": "Amazon",
+   "product": "Echo Show 8",
+   "model": "Echo Show 8",
+   "model_basis": "dataset label",
+   "category": "voice-assistant",
+   "note": "",
+   "runs_seen": 34,
+   "first_seen": "2023-07-25",
+   "last_seen": "2024-05-19"
+  },
+  {
+   "dataset": "deakin",
+   "label": "Echo Show 8",
+   "mac": "74:d4:23:32:a2:d7",
+   "vendor": "Amazon",
+   "product": "Echo Show 8",
+   "model": "Echo Show 8",
+   "model_basis": "dataset label",
+   "category": "voice-assistant",
+   "note": "",
+   "runs_seen": 13,
+   "first_seen": "2024-04-08",
+   "last_seen": "2024-05-19"
+  },
+  {
+   "dataset": "deakin",
+   "label": "GALAXY Watch5 Pro",
+   "mac": "6e:fe:2f:5a:d7:7e",
+   "vendor": "Samsung",
+   "product": "Galaxy Watch5 Pro",
+   "model": "Galaxy Watch5 Pro",
+   "model_basis": "dataset label",
+   "category": "wearable",
+   "note": "",
+   "runs_seen": 6,
+   "first_seen": "2024-05-13",
+   "last_seen": "2024-05-19"
+  },
+  {
+   "dataset": "deakin",
+   "label": "Ring Video Doorbell",
+   "mac": "90:48:6c:08:da:8a",
+   "vendor": "Ring",
+   "product": "Video Doorbell",
+   "model": "",
+   "model_basis": "",
+   "category": "doorbell",
+   "note": "",
+   "runs_seen": 21,
+   "first_seen": "2023-07-25",
+   "last_seen": "2023-09-06"
+  }
+ ],
+ "products": [
+  {
+   "vendor": "Aeotec",
+   "product": "Smart Home Hub (SmartThings)",
+   "category": "hub",
+   "models": [],
+   "datasets": {
+    "deakin": {
+     "first_seen": "2024-04-08",
+     "last_seen": "2024-05-19",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Amazon",
+   "product": "Echo",
+   "category": "voice-assistant",
+   "models": [],
+   "datasets": {
+    "unsw2016": {
+     "first_seen": "2016-09-22",
+     "last_seen": "2016-10-12",
+     "units": 1
+    },
+    "iotraffic": {
+     "first_seen": "2016-09-30",
+     "last_seen": "2017-03-24",
+     "units": 1
+    },
+    "unsw2018": {
+     "first_seen": "2018-06-01",
+     "last_seen": "2018-10-25",
+     "units": 1
+    },
+    "iot23": {
+     "first_seen": "2018-09-21",
+     "last_seen": "2018-09-21",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Amazon",
+   "product": "Echo (1st gen)",
+   "category": "voice-assistant",
+   "models": [
+    "Echo (1st gen)"
+   ],
+   "datasets": {
+    "yourthings": {
+     "first_seen": "2018-04-10",
+     "last_seen": "2018-04-12",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Amazon",
+   "product": "Echo Dot",
+   "category": "voice-assistant",
+   "models": [],
+   "datasets": {
+    "cic2022": {
+     "first_seen": "2021-09-28",
+     "last_seen": "2021-12-24",
+     "units": 2
+    }
+   }
+  },
+  {
+   "vendor": "Amazon",
+   "product": "Echo Dot (3rd gen)",
+   "category": "voice-assistant",
+   "models": [],
+   "datasets": {}
+  },
+  {
+   "vendor": "Amazon",
+   "product": "Echo Dot (4th gen)",
+   "category": "voice-assistant",
+   "models": [
+    "Echo Dot (4th gen)"
+   ],
+   "datasets": {
+    "deakin": {
+     "first_seen": "2023-07-25",
+     "last_seen": "2023-08-01",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Amazon",
+   "product": "Echo Show 8",
+   "category": "voice-assistant",
+   "models": [
+    "Echo Show 8"
+   ],
+   "datasets": {
+    "deakin": {
+     "first_seen": "2023-07-25",
+     "last_seen": "2024-05-19",
+     "units": 2
+    }
+   }
+  },
+  {
+   "vendor": "Amazon",
+   "product": "Echo Spot",
+   "category": "voice-assistant",
+   "models": [],
+   "datasets": {
+    "cic2022": {
+     "first_seen": "2021-09-28",
+     "last_seen": "2021-12-24",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Amazon",
+   "product": "Echo Studio",
+   "category": "speaker",
+   "models": [],
+   "datasets": {
+    "cic2022": {
+     "first_seen": "2021-09-28",
+     "last_seen": "2021-12-24",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Amazon",
+   "product": "Fire TV",
+   "category": "tv-streaming",
+   "models": [],
+   "datasets": {
+    "yourthings": {
+     "first_seen": "2018-04-10",
+     "last_seen": "2018-04-12",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Amazon",
+   "product": "Smart Plug",
+   "category": "plug",
+   "models": [],
+   "datasets": {
+    "cic2022": {
+     "first_seen": "2021-09-23",
+     "last_seen": "2021-12-24",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Amcrest",
+   "product": "camera",
+   "category": "camera",
+   "models": [],
+   "datasets": {
+    "cic2022": {
+     "first_seen": "2021-09-22",
+     "last_seen": "2021-12-24",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Apple",
+   "product": "Apple TV (4th gen)",
+   "category": "tv-streaming",
+   "models": [
+    "Apple TV (4th gen)"
+   ],
+   "datasets": {
+    "yourthings": {
+     "first_seen": "2018-04-10",
+     "last_seen": "2018-04-12",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Apple",
+   "product": "HomePod",
+   "category": "speaker",
+   "models": [],
+   "datasets": {
+    "yourthings": {
+     "first_seen": "2018-04-10",
+     "last_seen": "2018-04-12",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Arlo (Netgear)",
+   "product": "Arlo base station",
+   "category": "camera",
+   "models": [
+    "VMB3010"
+   ],
+   "datasets": {
+    "yourthings": {
+     "first_seen": "2018-04-10",
+     "last_seen": "2018-04-12",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Arlo (Netgear)",
+   "product": "Arlo base station",
+   "category": "camera",
+   "models": [
+    "VMB5000"
+   ],
+   "datasets": {
+    "cic2022": {
+     "first_seen": "2021-09-28",
+     "last_seen": "2021-12-24",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Arlo (Netgear)",
+   "product": "Arlo Q",
+   "category": "camera",
+   "models": [],
+   "datasets": {
+    "cic2022": {
+     "first_seen": "2021-09-22",
+     "last_seen": "2021-12-24",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Atomi",
+   "product": "Smart Coffee Maker",
+   "category": "appliance",
+   "models": [],
+   "datasets": {
+    "cic2022": {
+     "first_seen": "2021-09-28",
+     "last_seen": "2021-12-24",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "August",
+   "product": "Doorbell Cam",
+   "category": "doorbell",
+   "models": [],
+   "datasets": {
+    "iotraffic": {
+     "first_seen": "2016-12-02",
+     "last_seen": "2017-04-13",
+     "units": 1
+    },
+    "unsw2018": {
+     "first_seen": "2018-06-01",
+     "last_seen": "2018-10-25",
+     "units": 1
+    },
+    "yourthings": {
+     "first_seen": "2018-04-10",
+     "last_seen": "2018-04-12",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "AVTech",
+   "product": "IP Camera",
+   "category": "camera",
+   "models": [],
+   "datasets": {}
+  },
+  {
+   "vendor": "Awair",
+   "product": "Air Quality Monitor",
+   "category": "sensor",
+   "models": [],
+   "datasets": {
+    "iotraffic": {
+     "first_seen": "2016-11-10",
+     "last_seen": "2017-03-07",
+     "units": 1
+    },
+    "unsw2018": {
+     "first_seen": "2018-06-01",
+     "last_seen": "2018-06-02",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Axis",
+   "product": "Network Camera",
+   "category": "camera",
+   "models": [],
+   "datasets": {}
+  },
+  {
+   "vendor": "Belkin",
+   "product": "NetCam HD",
+   "category": "camera",
+   "models": [],
+   "datasets": {
+    "iotraffic": {
+     "first_seen": "2017-02-21",
+     "last_seen": "2017-03-16",
+     "units": 1
+    },
+    "unsw2018": {
+     "first_seen": "2018-10-21",
+     "last_seen": "2018-10-25",
+     "units": 1
+    },
+    "yourthings": {
+     "first_seen": "2018-04-10",
+     "last_seen": "2018-04-12",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Belkin",
+   "product": "WeMo Link",
+   "category": "hub",
+   "models": [],
+   "datasets": {
+    "yourthings": {
+     "first_seen": "2018-04-10",
+     "last_seen": "2018-04-12",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Belkin",
+   "product": "WeMo Motion Sensor",
+   "category": "sensor",
+   "models": [],
+   "datasets": {
+    "unsw2016": {
+     "first_seen": "2016-09-22",
+     "last_seen": "2016-10-12",
+     "units": 1
+    },
+    "iotraffic": {
+     "first_seen": "2016-09-30",
+     "last_seen": "2017-03-07",
+     "units": 1
+    },
+    "unsw2018": {
+     "first_seen": "2018-06-01",
+     "last_seen": "2018-10-25",
+     "units": 1
+    },
+    "yourthings": {
+     "first_seen": "2018-04-10",
+     "last_seen": "2018-04-12",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Belkin",
+   "product": "WeMo Switch",
+   "category": "plug",
+   "models": [],
+   "datasets": {
+    "unsw2016": {
+     "first_seen": "2016-09-22",
+     "last_seen": "2016-10-12",
+     "units": 1
+    },
+    "iotraffic": {
+     "first_seen": "2016-09-30",
+     "last_seen": "2017-03-23",
+     "units": 1
+    },
+    "unsw2018": {
+     "first_seen": "2018-06-01",
+     "last_seen": "2018-06-02",
+     "units": 1
+    },
+    "yourthings": {
+     "first_seen": "2018-04-10",
+     "last_seen": "2018-04-12",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Belkin (Crock-Pot)",
+   "product": "WeMo Crock-Pot",
+   "category": "appliance",
+   "models": [],
+   "datasets": {
+    "yourthings": {
+     "first_seen": "2018-04-10",
+     "last_seen": "2018-04-12",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "BlipCare",
+   "product": "Blood Pressure Meter",
+   "category": "health",
+   "models": [],
+   "datasets": {
+    "unsw2016": {
+     "first_seen": "2016-09-23",
+     "last_seen": "2016-10-04",
+     "units": 1
+    },
+    "iotraffic": {
+     "first_seen": "2016-10-04",
+     "last_seen": "2017-04-10",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Borun",
+   "product": "camera",
+   "category": "camera",
+   "models": [],
+   "datasets": {
+    "cic2022": {
+     "first_seen": "2021-09-22",
+     "last_seen": "2021-12-24",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Bose",
+   "product": "SoundTouch 10",
+   "category": "speaker",
+   "models": [
+    "SoundTouch 10"
+   ],
+   "datasets": {
+    "yourthings": {
+     "first_seen": "2018-04-10",
+     "last_seen": "2018-04-12",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Canary",
+   "product": "Canary",
+   "category": "camera",
+   "models": [],
+   "datasets": {
+    "iotraffic": {
+     "first_seen": "2016-11-22",
+     "last_seen": "2017-03-05",
+     "units": 1
+    },
+    "unsw2018": {
+     "first_seen": "2018-06-01",
+     "last_seen": "2018-10-25",
+     "units": 1
+    },
+    "yourthings": {
+     "first_seen": "2018-04-10",
+     "last_seen": "2018-04-12",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Chamberlain",
+   "product": "myQ Garage",
+   "category": "appliance",
+   "models": [],
+   "datasets": {
+    "yourthings": {
+     "first_seen": "2018-04-10",
+     "last_seen": "2018-04-12",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "D-Link",
+   "product": "DCS-5009L",
+   "category": "camera",
+   "models": [
+    "DCS-5009L"
+   ],
+   "datasets": {
+    "yourthings": {
+     "first_seen": "2018-04-10",
+     "last_seen": "2018-04-12",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "D-Link",
+   "product": "DCS-8000LH",
+   "category": "camera",
+   "models": [
+    "DCS-8000LH"
+   ],
+   "datasets": {
+    "cic2022": {
+     "first_seen": "2021-09-22",
+     "last_seen": "2021-12-24",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "D-Link",
+   "product": "Water Sensor",
+   "category": "sensor",
+   "models": [
+    "DCH-S161"
+   ],
+   "datasets": {
+    "cic2022": {
+     "first_seen": "2021-09-29",
+     "last_seen": "2021-12-24",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Dropcam (Nest)",
+   "product": "Dropcam",
+   "category": "camera",
+   "models": [],
+   "datasets": {
+    "unsw2016": {
+     "first_seen": "2016-09-22",
+     "last_seen": "2016-10-12",
+     "units": 2
+    },
+    "iotraffic": {
+     "first_seen": "2017-01-01",
+     "last_seen": "2017-04-13",
+     "units": 1
+    },
+    "unsw2018": {
+     "first_seen": "2018-06-01",
+     "last_seen": "2018-10-25",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Eufy (Anker)",
+   "product": "HomeBase",
+   "category": "hub",
+   "models": [],
+   "datasets": {
+    "cic2022": {
+     "first_seen": "2021-09-23",
+     "last_seen": "2021-12-24",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "EZVIZ",
+   "product": "Security Camera",
+   "category": "camera",
+   "models": [],
+   "datasets": {}
+  },
+  {
+   "vendor": "Facebook",
+   "product": "Portal",
+   "category": "voice-assistant",
+   "models": [],
+   "datasets": {}
+  },
+  {
+   "vendor": "Globe",
+   "product": "Smart Lamp",
+   "category": "bulb",
+   "models": [],
+   "datasets": {
+    "cic2022": {
+     "first_seen": "2021-09-28",
+     "last_seen": "2021-12-24",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Google",
+   "product": "Chromecast Ultra",
+   "category": "tv-streaming",
+   "models": [],
+   "datasets": {
+    "unsw2018": {
+     "first_seen": "2018-10-21",
+     "last_seen": "2018-10-25",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Google",
+   "product": "Google Home",
+   "category": "voice-assistant",
+   "models": [],
+   "datasets": {
+    "unsw2018": {
+     "first_seen": "2018-06-01",
+     "last_seen": "2018-10-25",
+     "units": 1
+    },
+    "yourthings": {
+     "first_seen": "2018-04-10",
+     "last_seen": "2018-04-12",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Google",
+   "product": "Google Home Mini",
+   "category": "voice-assistant",
+   "models": [],
+   "datasets": {
+    "yourthings": {
+     "first_seen": "2018-04-10",
+     "last_seen": "2018-04-12",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Google",
+   "product": "Home Hub",
+   "category": "voice-assistant",
+   "models": [],
+   "datasets": {}
+  },
+  {
+   "vendor": "Google",
+   "product": "Nest Mini",
+   "category": "voice-assistant",
+   "models": [],
+   "datasets": {
+    "cic2022": {
+     "first_seen": "2021-09-23",
+     "last_seen": "2021-12-24",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Gosund",
+   "product": "Smart Plug",
+   "category": "plug",
+   "models": [],
+   "datasets": {
+    "cic2022": {
+     "first_seen": "2021-09-23",
+     "last_seen": "2021-12-24",
+     "units": 7
+    }
+   }
+  },
+  {
+   "vendor": "Harman Kardon",
+   "product": "Invoke",
+   "category": "voice-assistant",
+   "models": [
+    "Invoke"
+   ],
+   "datasets": {
+    "yourthings": {
+     "first_seen": "2018-04-10",
+     "last_seen": "2018-04-12",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "HeimVision",
+   "product": "camera",
+   "category": "camera",
+   "models": [],
+   "datasets": {
+    "cic2022": {
+     "first_seen": "2021-09-22",
+     "last_seen": "2021-12-24",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "HeimVision",
+   "product": "Smart Lamp",
+   "category": "bulb",
+   "models": [],
+   "datasets": {
+    "cic2022": {
+     "first_seen": "2021-09-22",
+     "last_seen": "2021-12-24",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Home Eye",
+   "product": "camera",
+   "category": "camera",
+   "models": [],
+   "datasets": {
+    "cic2022": {
+     "first_seen": "2021-09-22",
+     "last_seen": "2021-12-24",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "HP",
+   "product": "Printer (ENVY)",
+   "category": "printer",
+   "models": [],
+   "datasets": {
+    "unsw2016": {
+     "first_seen": "2016-09-22",
+     "last_seen": "2016-10-12",
+     "units": 1
+    },
+    "iotraffic": {
+     "first_seen": "2016-09-30",
+     "last_seen": "2017-04-13",
+     "units": 1
+    },
+    "unsw2018": {
+     "first_seen": "2018-06-01",
+     "last_seen": "2018-10-25",
+     "units": 1
+    },
+    "deakin": {
+     "first_seen": "2023-07-25",
+     "last_seen": "2024-05-19",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "iHome",
+   "product": "Smart Plug",
+   "category": "plug",
+   "models": [],
+   "datasets": {
+    "unsw2016": {
+     "first_seen": "2016-09-28",
+     "last_seen": "2016-10-07",
+     "units": 1
+    },
+    "iotraffic": {
+     "first_seen": "2016-10-05",
+     "last_seen": "2017-02-24",
+     "units": 1
+    },
+    "unsw2018": {
+     "first_seen": "2018-06-01",
+     "last_seen": "2018-10-25",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Insteon",
+   "product": "Camera",
+   "category": "camera",
+   "models": [],
+   "datasets": {
+    "unsw2016": {
+     "first_seen": "2016-09-28",
+     "last_seen": "2016-10-12",
+     "units": 2
+    }
+   }
+  },
+  {
+   "vendor": "Insteon",
+   "product": "Hub Pro",
+   "category": "hub",
+   "models": [
+    "Hub Pro"
+   ],
+   "datasets": {
+    "yourthings": {
+     "first_seen": "2018-04-10",
+     "last_seen": "2018-04-12",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Invoxia",
+   "product": "Triby",
+   "category": "speaker",
+   "models": [],
+   "datasets": {
+    "unsw2016": {
+     "first_seen": "2016-09-22",
+     "last_seen": "2016-10-12",
+     "units": 1
+    },
+    "iotraffic": {
+     "first_seen": "2016-09-30",
+     "last_seen": "2017-04-07",
+     "units": 1
+    },
+    "unsw2018": {
+     "first_seen": "2018-10-21",
+     "last_seen": "2018-10-25",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "iRobot",
+   "product": "Roomba",
+   "category": "appliance",
+   "models": [],
+   "datasets": {
+    "yourthings": {
+     "first_seen": "2018-04-10",
+     "last_seen": "2018-04-12",
+     "units": 1
+    },
+    "cic2022": {
+     "first_seen": "2021-09-29",
+     "last_seen": "2021-12-24",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Koogeek",
+   "product": "Smart Bulb",
+   "category": "bulb",
+   "models": [
+    "LB1"
+   ],
+   "datasets": {
+    "yourthings": {
+     "first_seen": "2018-04-10",
+     "last_seen": "2018-04-12",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "LG",
+   "product": "webOS TV",
+   "category": "tv-streaming",
+   "models": [],
+   "datasets": {
+    "cic2022": {
+     "first_seen": "2021-09-28",
+     "last_seen": "2021-11-03",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "LIFX",
+   "product": "Color 1000",
+   "category": "bulb",
+   "models": [
+    "Color 1000"
+   ],
+   "datasets": {
+    "yourthings": {
+     "first_seen": "2018-04-10",
+     "last_seen": "2018-04-12",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "LIFX",
+   "product": "Smart Bulb",
+   "category": "bulb",
+   "models": [],
+   "datasets": {
+    "unsw2016": {
+     "first_seen": "2016-09-28",
+     "last_seen": "2016-10-12",
+     "units": 1
+    },
+    "iotraffic": {
+     "first_seen": "2016-09-30",
+     "last_seen": "2017-04-13",
+     "units": 1
+    },
+    "unsw2018": {
+     "first_seen": "2018-10-21",
+     "last_seen": "2018-10-25",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Logitech",
+   "product": "Harmony Hub",
+   "category": "hub",
+   "models": [],
+   "datasets": {
+    "yourthings": {
+     "first_seen": "2018-04-10",
+     "last_seen": "2018-04-12",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Logitech",
+   "product": "Logi Circle",
+   "category": "camera",
+   "models": [],
+   "datasets": {
+    "yourthings": {
+     "first_seen": "2018-04-10",
+     "last_seen": "2018-04-12",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Luohe",
+   "product": "camera",
+   "category": "camera",
+   "models": [],
+   "datasets": {
+    "cic2022": {
+     "first_seen": "2021-09-22",
+     "last_seen": "2021-12-24",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Lutron",
+   "product": "Caseta Smart Bridge",
+   "category": "hub",
+   "models": [],
+   "datasets": {
+    "yourthings": {
+     "first_seen": "2018-04-10",
+     "last_seen": "2018-04-12",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Mattel",
+   "product": "Hello Barbie",
+   "category": "toy",
+   "models": [],
+   "datasets": {
+    "iotraffic": {
+     "first_seen": "2017-03-02",
+     "last_seen": "2017-04-13",
+     "units": 1
+    },
+    "unsw2018": {
+     "first_seen": "2018-06-01",
+     "last_seen": "2018-06-02",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "MiCasaVerde",
+   "product": "VeraLite",
+   "category": "hub",
+   "models": [
+    "VeraLite"
+   ],
+   "datasets": {
+    "yourthings": {
+     "first_seen": "2018-04-10",
+     "last_seen": "2018-04-12",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Nest (Google)",
+   "product": "Hello (doorbell)",
+   "category": "doorbell",
+   "models": [],
+   "datasets": {}
+  },
+  {
+   "vendor": "Nest (Google)",
+   "product": "Nest Cam",
+   "category": "camera",
+   "models": [],
+   "datasets": {
+    "yourthings": {
+     "first_seen": "2018-04-10",
+     "last_seen": "2018-04-12",
+     "units": 1
+    },
+    "cic2022": {
+     "first_seen": "2021-09-22",
+     "last_seen": "2021-12-24",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Nest (Google)",
+   "product": "Nest Cam IQ",
+   "category": "camera",
+   "models": [],
+   "datasets": {
+    "yourthings": {
+     "first_seen": "2018-04-10",
+     "last_seen": "2018-04-12",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Nest (Google)",
+   "product": "Nest Guard (Secure)",
+   "category": "hub",
+   "models": [],
+   "datasets": {
+    "yourthings": {
+     "first_seen": "2018-04-10",
+     "last_seen": "2018-04-12",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Nest (Google)",
+   "product": "Protect",
+   "category": "sensor",
+   "models": [],
+   "datasets": {
+    "unsw2016": {
+     "first_seen": "2016-09-23",
+     "last_seen": "2016-10-11",
+     "units": 1
+    },
+    "iotraffic": {
+     "first_seen": "2016-09-30",
+     "last_seen": "2017-04-13",
+     "units": 1
+    },
+    "unsw2018": {
+     "first_seen": "2018-06-01",
+     "last_seen": "2018-10-25",
+     "units": 1
+    },
+    "yourthings": {
+     "first_seen": "2018-04-10",
+     "last_seen": "2018-04-12",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Nest (Google)",
+   "product": "Thermostat",
+   "category": "appliance",
+   "models": [],
+   "datasets": {}
+  },
+  {
+   "vendor": "Netatmo",
+   "product": "Smart Indoor Camera (Welcome)",
+   "category": "camera",
+   "models": [],
+   "datasets": {
+    "deakin": {
+     "first_seen": "2023-07-25",
+     "last_seen": "2024-05-19",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Netatmo",
+   "product": "Weather Station",
+   "category": "sensor",
+   "models": [],
+   "datasets": {
+    "unsw2016": {
+     "first_seen": "2016-09-22",
+     "last_seen": "2016-10-12",
+     "units": 1
+    },
+    "iotraffic": {
+     "first_seen": "2016-09-30",
+     "last_seen": "2017-04-13",
+     "units": 1
+    },
+    "unsw2018": {
+     "first_seen": "2018-10-21",
+     "last_seen": "2018-10-25",
+     "units": 1
+    },
+    "cic2022": {
+     "first_seen": "2021-09-22",
+     "last_seen": "2021-12-24",
+     "units": 1
+    },
+    "deakin": {
+     "first_seen": "2023-07-25",
+     "last_seen": "2024-05-19",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Netatmo",
+   "product": "Welcome",
+   "category": "camera",
+   "models": [],
+   "datasets": {
+    "unsw2016": {
+     "first_seen": "2016-09-22",
+     "last_seen": "2016-10-12",
+     "units": 1
+    },
+    "iotraffic": {
+     "first_seen": "2016-09-30",
+     "last_seen": "2017-03-26",
+     "units": 1
+    },
+    "unsw2018": {
+     "first_seen": "2018-06-01",
+     "last_seen": "2018-06-02",
+     "units": 1
+    },
+    "cic2022": {
+     "first_seen": "2021-09-22",
+     "last_seen": "2021-12-24",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "NVIDIA",
+   "product": "Shield TV",
+   "category": "tv-streaming",
+   "models": [],
+   "datasets": {
+    "yourthings": {
+     "first_seen": "2018-04-10",
+     "last_seen": "2018-04-12",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Perfk",
+   "product": "Motion Sensor",
+   "category": "sensor",
+   "models": [],
+   "datasets": {
+    "deakin": {
+     "first_seen": "2023-07-25",
+     "last_seen": "2024-05-19",
+     "units": 2
+    }
+   }
+  },
+  {
+   "vendor": "Philips",
+   "product": "Hue Bridge",
+   "category": "hub",
+   "models": [],
+   "datasets": {
+    "iotraffic": {
+     "first_seen": "2016-11-14",
+     "last_seen": "2017-04-13",
+     "units": 1
+    },
+    "unsw2018": {
+     "first_seen": "2018-10-21",
+     "last_seen": "2018-10-25",
+     "units": 1
+    },
+    "iot23": {
+     "first_seen": "2018-10-25",
+     "last_seen": "2018-10-26",
+     "units": 1
+    },
+    "yourthings": {
+     "first_seen": "2018-04-10",
+     "last_seen": "2018-04-12",
+     "units": 1
+    },
+    "cic2022": {
+     "first_seen": "2021-09-23",
+     "last_seen": "2021-12-24",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Piper",
+   "product": "Piper nv",
+   "category": "camera",
+   "models": [
+    "Piper nv"
+   ],
+   "datasets": {
+    "yourthings": {
+     "first_seen": "2018-04-10",
+     "last_seen": "2018-04-12",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Pix-Star",
+   "product": "Easy Digital Photo Frame",
+   "category": "photo-frame",
+   "models": [],
+   "datasets": {
+    "deakin": {
+     "first_seen": "2023-07-25",
+     "last_seen": "2024-05-19",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Pix-Star",
+   "product": "Photo Frame",
+   "category": "photo-frame",
+   "models": [],
+   "datasets": {
+    "unsw2016": {
+     "first_seen": "2016-09-22",
+     "last_seen": "2016-10-05",
+     "units": 1
+    },
+    "iotraffic": {
+     "first_seen": "2016-09-30",
+     "last_seen": "2017-04-06",
+     "units": 1
+    },
+    "unsw2018": {
+     "first_seen": "2018-06-01",
+     "last_seen": "2018-10-25",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Rachio",
+   "product": "Rachio 3",
+   "category": "appliance",
+   "models": [],
+   "datasets": {}
+  },
+  {
+   "vendor": "Ring",
+   "product": "Alarm Base Station",
+   "category": "hub",
+   "models": [],
+   "datasets": {
+    "cic2022": {
+     "first_seen": "2021-09-29",
+     "last_seen": "2021-12-24",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Ring",
+   "product": "Video Doorbell",
+   "category": "doorbell",
+   "models": [],
+   "datasets": {
+    "iotraffic": {
+     "first_seen": "2017-03-07",
+     "last_seen": "2017-04-13",
+     "units": 1
+    },
+    "unsw2018": {
+     "first_seen": "2018-06-01",
+     "last_seen": "2018-10-25",
+     "units": 1
+    },
+    "yourthings": {
+     "first_seen": "2018-04-10",
+     "last_seen": "2018-04-11",
+     "units": 1
+    },
+    "deakin": {
+     "first_seen": "2023-07-25",
+     "last_seen": "2023-09-06",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Roku",
+   "product": "Roku 4",
+   "category": "tv-streaming",
+   "models": [
+    "Roku 4"
+   ],
+   "datasets": {
+    "yourthings": {
+     "first_seen": "2018-04-10",
+     "last_seen": "2018-04-12",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Samsung",
+   "product": "Galaxy Watch5 Pro",
+   "category": "wearable",
+   "models": [
+    "Galaxy Watch5 Pro"
+   ],
+   "datasets": {
+    "deakin": {
+     "first_seen": "2024-05-13",
+     "last_seen": "2024-05-19",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Samsung",
+   "product": "Pan/Tilt 1080P Wi-Fi Camera",
+   "category": "camera",
+   "models": [],
+   "datasets": {
+    "deakin": {
+     "first_seen": "2023-07-25",
+     "last_seen": "2024-05-19",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Samsung",
+   "product": "Smart Monitor M80B",
+   "category": "tv-streaming",
+   "models": [
+    "M80B"
+   ],
+   "datasets": {
+    "deakin": {
+     "first_seen": "2023-07-26",
+     "last_seen": "2024-05-19",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Samsung",
+   "product": "Smart TV",
+   "category": "tv-streaming",
+   "models": [],
+   "datasets": {
+    "yourthings": {
+     "first_seen": "2018-04-10",
+     "last_seen": "2018-04-10",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Samsung",
+   "product": "SmartCam",
+   "category": "camera",
+   "models": [],
+   "datasets": {
+    "unsw2016": {
+     "first_seen": "2016-09-22",
+     "last_seen": "2016-10-12",
+     "units": 1
+    },
+    "iotraffic": {
+     "first_seen": "2016-09-30",
+     "last_seen": "2017-04-13",
+     "units": 1
+    },
+    "unsw2018": {
+     "first_seen": "2018-06-01",
+     "last_seen": "2018-10-25",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Samsung",
+   "product": "SmartThings Hub",
+   "category": "hub",
+   "models": [],
+   "datasets": {
+    "unsw2016": {
+     "first_seen": "2016-09-22",
+     "last_seen": "2016-10-12",
+     "units": 1
+    },
+    "iotraffic": {
+     "first_seen": "2016-09-30",
+     "last_seen": "2017-04-13",
+     "units": 1
+    },
+    "unsw2018": {
+     "first_seen": "2018-06-01",
+     "last_seen": "2018-10-25",
+     "units": 1
+    },
+    "yourthings": {
+     "first_seen": "2018-04-10",
+     "last_seen": "2018-04-12",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Securifi",
+   "product": "Almond",
+   "category": "hub",
+   "models": [],
+   "datasets": {
+    "yourthings": {
+     "first_seen": "2018-04-10",
+     "last_seen": "2018-04-12",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "SimCam",
+   "product": "camera",
+   "category": "camera",
+   "models": [],
+   "datasets": {
+    "cic2022": {
+     "first_seen": "2021-09-22",
+     "last_seen": "2021-12-24",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Somfy",
+   "product": "Door Lock",
+   "category": "lock",
+   "models": [],
+   "datasets": {}
+  },
+  {
+   "vendor": "Sonos",
+   "product": "Beam",
+   "category": "speaker",
+   "models": [],
+   "datasets": {}
+  },
+  {
+   "vendor": "Sonos",
+   "product": "Sonos One",
+   "category": "speaker",
+   "models": [
+    "ZPS18"
+   ],
+   "datasets": {
+    "cic2022": {
+     "first_seen": "2021-09-28",
+     "last_seen": "2021-12-24",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Sonos",
+   "product": "Sonos speaker",
+   "category": "speaker",
+   "models": [
+    "ZPS1 (PLAY:1)"
+   ],
+   "datasets": {
+    "yourthings": {
+     "first_seen": "2018-04-10",
+     "last_seen": "2018-04-12",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "TCL / Roku",
+   "product": "Roku TV",
+   "category": "tv-streaming",
+   "models": [],
+   "datasets": {
+    "yourthings": {
+     "first_seen": "2018-04-10",
+     "last_seen": "2018-04-12",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Teckin",
+   "product": "Smart Plug",
+   "category": "plug",
+   "models": [],
+   "datasets": {
+    "cic2022": {
+     "first_seen": "2021-09-23",
+     "last_seen": "2021-12-24",
+     "units": 2
+    }
+   }
+  },
+  {
+   "vendor": "TOPERSUN",
+   "product": "Smart Plug",
+   "category": "plug",
+   "models": [],
+   "datasets": {
+    "deakin": {
+     "first_seen": "2023-07-25",
+     "last_seen": "2024-05-19",
+     "units": 2
+    }
+   }
+  },
+  {
+   "vendor": "TP-Link",
+   "product": "Day/Night Cloud Camera",
+   "category": "camera",
+   "models": [
+    "NC220"
+   ],
+   "datasets": {
+    "unsw2016": {
+     "first_seen": "2016-09-22",
+     "last_seen": "2016-10-05",
+     "units": 1
+    },
+    "iotraffic": {
+     "first_seen": "2016-09-30",
+     "last_seen": "2017-04-13",
+     "units": 1
+    },
+    "unsw2018": {
+     "first_seen": "2018-10-21",
+     "last_seen": "2018-10-25",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "TP-Link",
+   "product": "Smart Plug",
+   "category": "plug",
+   "models": [
+    "HS110(US)"
+   ],
+   "datasets": {
+    "unsw2016": {
+     "first_seen": "2016-09-22",
+     "last_seen": "2016-10-07",
+     "units": 1
+    },
+    "iotraffic": {
+     "first_seen": "2016-09-30",
+     "last_seen": "2017-03-07",
+     "units": 1
+    },
+    "unsw2018": {
+     "first_seen": "2018-06-01",
+     "last_seen": "2018-10-25",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "TP-Link",
+   "product": "Smart Plug",
+   "category": "plug",
+   "models": [
+    "HS105"
+   ],
+   "datasets": {
+    "yourthings": {
+     "first_seen": "2018-04-10",
+     "last_seen": "2018-04-12",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "TP-Link",
+   "product": "Smart Wi-Fi LED Bulb",
+   "category": "bulb",
+   "models": [
+    "LB130"
+   ],
+   "datasets": {
+    "yourthings": {
+     "first_seen": "2018-04-10",
+     "last_seen": "2018-04-12",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "TP-Link",
+   "product": "Tapo Pan/Tilt Camera",
+   "category": "camera",
+   "models": [
+    "C210"
+   ],
+   "datasets": {
+    "deakin": {
+     "first_seen": "2023-07-25",
+     "last_seen": "2024-05-19",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Tuya",
+   "product": "Smart Doorbell",
+   "category": "doorbell",
+   "models": [],
+   "datasets": {}
+  },
+  {
+   "vendor": "Western Digital",
+   "product": "My Cloud EX2 Ultra",
+   "category": "nas",
+   "models": [],
+   "datasets": {}
+  },
+  {
+   "vendor": "Wink",
+   "product": "Hub",
+   "category": "hub",
+   "models": [],
+   "datasets": {}
+  },
+  {
+   "vendor": "Wink",
+   "product": "Hub 2",
+   "category": "hub",
+   "models": [],
+   "datasets": {
+    "yourthings": {
+     "first_seen": "2018-04-10",
+     "last_seen": "2018-04-12",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Withings",
+   "product": "Aura Sleep Sensor",
+   "category": "health",
+   "models": [],
+   "datasets": {
+    "unsw2016": {
+     "first_seen": "2016-09-28",
+     "last_seen": "2016-10-12",
+     "units": 1
+    },
+    "iotraffic": {
+     "first_seen": "",
+     "last_seen": "2017-03-24",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Withings",
+   "product": "Body+",
+   "category": "health",
+   "models": [
+    "Body+"
+   ],
+   "datasets": {
+    "deakin": {
+     "first_seen": "2024-04-08",
+     "last_seen": "2024-05-18",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Withings",
+   "product": "BPM Connect",
+   "category": "health",
+   "models": [
+    "BPM Connect"
+   ],
+   "datasets": {
+    "deakin": {
+     "first_seen": "2024-04-09",
+     "last_seen": "2024-05-17",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Withings",
+   "product": "Home",
+   "category": "camera",
+   "models": [],
+   "datasets": {
+    "yourthings": {
+     "first_seen": "2018-04-10",
+     "last_seen": "2018-04-12",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Withings",
+   "product": "Smart Baby Monitor",
+   "category": "camera",
+   "models": [],
+   "datasets": {
+    "unsw2016": {
+     "first_seen": "2016-09-22",
+     "last_seen": "2016-10-07",
+     "units": 1
+    },
+    "iotraffic": {
+     "first_seen": "2016-09-22",
+     "last_seen": "2016-10-07",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Withings",
+   "product": "Smart Scale",
+   "category": "health",
+   "models": [],
+   "datasets": {
+    "unsw2016": {
+     "first_seen": "2016-09-22",
+     "last_seen": "2016-10-11",
+     "units": 1
+    },
+    "iotraffic": {
+     "first_seen": "2016-09-30",
+     "last_seen": "2017-04-13",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Yutron",
+   "product": "Smart Plug",
+   "category": "plug",
+   "models": [],
+   "datasets": {
+    "cic2022": {
+     "first_seen": "2021-09-23",
+     "last_seen": "2021-12-24",
+     "units": 2
+    }
+   }
+  }
+ ]
+}

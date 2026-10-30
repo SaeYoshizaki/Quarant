@@ -1,0 +1,203 @@
+dataset	label	mac	vendor	product	model	model_basis	category	note
+unsw2016	Smart Things	d0:52:a8:00:67:5e	Samsung	SmartThings Hub			hub	
+unsw2016	Amazon Echo	44:65:0d:56:cc:d3	Amazon	Echo			voice-assistant	
+unsw2016	Netatmo Welcome	70:ee:50:18:34:43	Netatmo	Welcome			camera	
+unsw2016	TP-Link Day Night Cloud camera	f4:f2:6d:93:51:f1	TP-Link	Day/Night Cloud Camera	NC220	mdns hostname NC220-…	camera	
+unsw2016	Samsung SmartCam	00:16:6c:ab:6b:88	Samsung	SmartCam			camera	
+unsw2016	Dropcam	30:8c:fb:2f:e4:b2	Dropcam (Nest)	Dropcam			camera	
+unsw2016	Insteon Camera (wired)	00:62:6e:51:27:2e	Insteon	Camera			camera	same product as the wireless entry, other interface
+unsw2016	Insteon Camera (wireless)	e8:ab:fa:19:de:4f	Insteon	Camera			camera	
+unsw2016	Withings Smart Baby Monitor	00:24:e4:11:18:a8	Withings	Smart Baby Monitor			camera	
+unsw2016	Belkin Wemo switch	ec:1a:59:79:f4:89	Belkin	WeMo Switch			plug	
+unsw2016	TP-Link Smart plug	50:c7:bf:00:56:39	TP-Link	Smart Plug	HS110(US)	dhcp hostname	plug	
+unsw2016	iHome	74:c6:3b:29:d7:1d	iHome	Smart Plug			plug	HomeKit (hap-) hostname; model not named
+unsw2016	Belkin wemo motion sensor	ec:1a:59:83:28:11	Belkin	WeMo Motion Sensor			sensor	
+unsw2016	NEST Protect smoke alarm	18:b4:30:25:be:e4	Nest (Google)	Protect			sensor	
+unsw2016	Netatmo weather station	70:ee:50:03:b8:ac	Netatmo	Weather Station			sensor	
+unsw2016	Withings Smart scale	00:24:e4:1b:6f:96	Withings	Smart Scale			health	
+unsw2016	Blipcare Blood Pressure meter	74:6a:89:00:2e:25	BlipCare	Blood Pressure Meter			health	
+unsw2016	Withings Aura smart sleep sensor	00:24:e4:20:28:c6	Withings	Aura Sleep Sensor			health	
+unsw2016	Light Bulbs LiFX Smart Bulb	d0:73:d5:01:83:08	LIFX	Smart Bulb			bulb	
+unsw2016	Triby Speaker	18:b7:9e:02:20:44	Invoxia	Triby			speaker	
+unsw2016	PIX-STAR Photo-frame	e0:76:d0:33:bb:85	Pix-Star	Photo Frame			photo-frame	
+unsw2016	HP Printer	70:5a:0f:e4:9b:c0	HP	Printer (ENVY)		dhcp hostname hpenvyprinter1 (2018 captures)	printer	
+unsw2016	Nest Dropcam	30:8c:fb:b6:ea:45	Dropcam (Nest)	Dropcam			camera	second unit
+iotraffic	AmazonEcho	44:65:0d:56:cc:d3	Amazon	Echo			voice-assistant	
+iotraffic	AugustDoorBell	e0:76:d0:3f:00:ae	August	Doorbell Cam			doorbell	
+iotraffic	AwairAirQuality	70:88:6b:10:0f:c6	Awair	Air Quality Monitor			sensor	
+iotraffic	BelkinCamera	b4:75:0e:ec:e5:a9	Belkin	NetCam HD		dhcp hostname NetCamHD (2018 captures)	camera	
+iotraffic	BelkinWemoMotionSensor	ec:1a:59:83:28:11	Belkin	WeMo Motion Sensor			sensor	
+iotraffic	BelkinWemoSwitch	ec:1a:59:79:f4:89	Belkin	WeMo Switch			plug	
+iotraffic	BlipCareBPMeter	74:6a:89:00:2e:25	BlipCare	Blood Pressure Meter			health	
+iotraffic	CanaryCamera	7c:70:bc:5d:5e:dc	Canary	Canary			camera	
+iotraffic	HelloBarbie	28:c2:dd:ff:a5:2d	Mattel	Hello Barbie			toy	
+iotraffic	HPPrinter	70:5a:0f:e4:9b:c0	HP	Printer (ENVY)			printer	
+iotraffic	iHome	74:c6:3b:29:d7:1d	iHome	Smart Plug			plug	
+iotraffic	LiFXBulb	d0:73:d5:01:83:08	LIFX	Smart Bulb			bulb	
+iotraffic	NestDropCam	30:8c:fb:2f:e4:b2	Dropcam (Nest)	Dropcam			camera	
+iotraffic	NestProtectSmokeAlarm	18:b4:30:25:be:e4	Nest (Google)	Protect			sensor	
+iotraffic	NetatmoWeatherStation	70:ee:50:03:b8:ac	Netatmo	Weather Station			sensor	
+iotraffic	NetatmoWelcome	70:ee:50:18:34:43	Netatmo	Welcome			camera	
+iotraffic	PhilipsHue	00:17:88:2b:9a:25	Philips	Hue Bridge			hub	
+iotraffic	PixStarPhotoFrame	e0:76:d0:33:bb:85	Pix-Star	Photo Frame			photo-frame	
+iotraffic	RingDoorBell	88:4a:ea:31:66:9d	Ring	Video Doorbell			doorbell	
+iotraffic	SamsungCamera	00:16:6c:ab:6b:88	Samsung	SmartCam			camera	
+iotraffic	SamsungSmartThings	d0:52:a8:00:67:5e	Samsung	SmartThings Hub			hub	
+iotraffic	TPLinkCamera	f4:f2:6d:93:51:f1	TP-Link	Day/Night Cloud Camera	NC220	mdns hostname NC220-…	camera	
+iotraffic	TPLinkSmartPlug	50:c7:bf:00:56:39	TP-Link	Smart Plug	HS110(US)	dhcp hostname	plug	
+iotraffic	TribySpeaker	18:b7:9e:02:20:44	Invoxia	Triby			speaker	
+iotraffic	WithingsBabyMonitor	00:24:e4:11:18:a8	Withings	Smart Baby Monitor			camera	
+iotraffic	WithingsSleepSensor	00:24:e4:20:28:c6	Withings	Aura Sleep Sensor			health	
+iotraffic	WithingsSmartScale	00:24:e4:1b:6f:96	Withings	Smart Scale			health	
+unsw2018	(no list; MAC of Samsung SmartCam)	00:16:6c:ab:6b:88	Samsung	SmartCam			camera	label taken from the 2016 list by MAC
+unsw2018	(no list; MAC of Philips Hue)	00:17:88:2b:9a:25	Philips	Hue Bridge			hub	label taken from UNSW-IoTraffic by MAC
+unsw2018	(no list; Withings OUI)	00:24:e4:44:68:44	Withings	unknown			unknown	not in any list; product unknown
+unsw2018	(no list; MAC of Nest Protect)	18:b4:30:25:be:e4	Nest (Google)	Protect			sensor	label taken from the 2016 list by MAC
+unsw2018	(no list; MAC of Triby)	18:b7:9e:02:20:44	Invoxia	Triby			speaker	label taken from the 2016 list by MAC
+unsw2018	(no list; MAC of Hello Barbie)	28:c2:dd:ff:a5:2d	Mattel	Hello Barbie			toy	label taken from UNSW-IoTraffic by MAC
+unsw2018	(no list; MAC of Dropcam)	30:8c:fb:2f:e4:b2	Dropcam (Nest)	Dropcam			camera	label taken from the 2016 list by MAC
+unsw2018	(no list; MAC of Amazon Echo)	44:65:0d:56:cc:d3	Amazon	Echo			voice-assistant	label taken from the 2016 list by MAC
+unsw2018	(no list; MAC of TP-Link plug)	50:c7:bf:00:56:39	TP-Link	Smart Plug	HS110(US)	dhcp hostname	plug	label taken from the 2016 list by MAC
+unsw2018	(no list; MAC of HP Printer)	70:5a:0f:e4:9b:c0	HP	Printer (ENVY)		dhcp hostname hpenvyprinter1	printer	label taken from the 2016 list by MAC
+unsw2018	(no list; MAC of Awair)	70:88:6b:10:0f:c6	Awair	Air Quality Monitor			sensor	label taken from UNSW-IoTraffic by MAC
+unsw2018	(no list; MAC of Netatmo weather station)	70:ee:50:03:b8:ac	Netatmo	Weather Station			sensor	label taken from the 2016 list by MAC
+unsw2018	(no list; MAC of Netatmo Welcome)	70:ee:50:18:34:43	Netatmo	Welcome			camera	label taken from the 2016 list by MAC
+unsw2018	(no list; MAC of iHome)	74:c6:3b:29:d7:1d	iHome	Smart Plug			plug	label taken from the 2016 list by MAC
+unsw2018	(no list; MAC of Canary)	7c:70:bc:5d:5e:dc	Canary	Canary			camera	label taken from UNSW-IoTraffic by MAC
+unsw2018	(no list; Espressif OUI)	84:f3:eb:52:42:db	unknown	unknown			unknown	ESP_ hostname only; product unknown
+unsw2018	(no list; MAC of Ring doorbell)	88:4a:ea:31:66:9d	Ring	Video Doorbell			doorbell	label taken from UNSW-IoTraffic by MAC
+unsw2018	(no list; MAC of Belkin camera)	b4:75:0e:ec:e5:a9	Belkin	NetCam HD		dhcp hostname NetCamHD	camera	label taken from UNSW-IoTraffic by MAC
+unsw2018	(no list; MAC of SmartThings)	d0:52:a8:00:67:5e	Samsung	SmartThings Hub			hub	label taken from the 2016 list by MAC
+unsw2018	(no list; MAC of LIFX)	d0:73:d5:01:83:08	LIFX	Smart Bulb			bulb	label taken from the 2016 list by MAC
+unsw2018	(no list; MAC of Pix-Star)	e0:76:d0:33:bb:85	Pix-Star	Photo Frame			photo-frame	label taken from the 2016 list by MAC
+unsw2018	(no list; MAC of August doorbell)	e0:76:d0:3f:00:ae	August	Doorbell Cam			doorbell	label taken from UNSW-IoTraffic by MAC
+unsw2018	(no list; MAC of WeMo switch)	ec:1a:59:79:f4:89	Belkin	WeMo Switch			plug	label taken from the 2016 list by MAC
+unsw2018	(no list; Belkin OUI)	ec:1a:59:7a:02:c5	Belkin	unknown (WeMo?)			unknown	not in any list; product unknown
+unsw2018	(no list; MAC of WeMo motion)	ec:1a:59:83:28:11	Belkin	WeMo Motion Sensor			sensor	label taken from the 2016 list by MAC
+unsw2018	(no list; MAC of TP-Link camera)	f4:f2:6d:93:51:f1	TP-Link	Day/Night Cloud Camera	NC220	dhcp hostname NC220 1.0	camera	label taken from the 2016 list by MAC
+unsw2018	(no list; Google OUI)	f4:f5:d8:8f:0a:3c	Google	Chromecast Ultra		dhcp hostname Chromecast-Ultra	tv-streaming	not in any list; identified by self-description only
+unsw2018	(no list; Google OUI)	f4:f5:d8:d4:eb:12	Google	Google Home		dhcp hostname Google-Home	voice-assistant	not in any list; identified by self-description only
+iot23	CTU-Honeypot-Capture-4-1 (Philips Hue)	00:17:88:75:b3:82	Philips	Hue Bridge			hub	
+iot23	CTU-Honeypot-Capture-5-1 (Amazon Echo)	4c:ef:c0:27:56:1e	Amazon	Echo			voice-assistant	
+iot23	CTU-Honeypot-Capture-7-1 (Somfy door lock)		Somfy	Door Lock			lock	not analysed by Quarant yet; MAC not taken
+yourthings	SamsungSmartThingsHub	d0:52:a8:63:47:9e	Samsung	SmartThings Hub			hub	
+yourthings	PhilipsHUEHub	00:17:88:21:f7:e4	Philips	Hue Bridge			hub	
+yourthings	InsteonHub	54:4a:16:f9:54:18	Insteon	Hub Pro	Hub Pro	dhcp hostname HubPro	hub	
+yourthings	Sonos	5c:aa:fd:6c:e0:d4	Sonos	Sonos speaker	ZPS1 (PLAY:1)	ssdp server (ZPS1)	speaker	ZPS1 = PLAY:1 per Sonos model code (not checked against a primary source)
+yourthings	SecurifiAlmond	e4:71:85:25:ce:ec	Securifi	Almond			hub	router with smart-home hub
+yourthings	NestCamera	18:b4:30:58:3d:6c	Nest (Google)	Nest Cam			camera	
+yourthings	BelkinWeMoMotionSensor	08:86:3b:6f:7a:15	Belkin	WeMo Motion Sensor			sensor	
+yourthings	LIFXVirtualBulb	d0:73:d5:12:84:d1	LIFX	Color 1000	Color 1000	dhcp hostname	bulb	
+yourthings	BelkinWeMoSwitch	08:86:3b:70:d7:39	Belkin	WeMo Switch			plug	
+yourthings	AmazonEchoGen1	74:c2:46:1b:8e:e2	Amazon	Echo (1st gen)	Echo (1st gen)	dataset label	voice-assistant	
+yourthings	WinkHub	-	Wink	Hub			hub	not seen in the analysed captures
+yourthings	NestProtect	18:b4:30:31:04:b9	Nest (Google)	Protect			sensor	
+yourthings	BelkinNetcam	c0:56:27:53:09:6d	Belkin	NetCam HD		dhcp hostname NetCamHD	camera	
+yourthings	RingDoorbell	00:1d:c9:23:f6:00	Ring	Video Doorbell			doorbell	
+yourthings	RokuTV	30:52:cb:a3:4f:5f	TCL / Roku	Roku TV			tv-streaming	
+yourthings	Roku4	08:05:81:ee:06:46	Roku	Roku 4	Roku 4	dataset label	tv-streaming	
+yourthings	AmazonFireTV	0c:47:c9:4e:fe:5b	Amazon	Fire TV			tv-streaming	
+yourthings	nVidiaShield	00:04:4b:55:f6:4f	NVIDIA	Shield TV			tv-streaming	
+yourthings	AppleTV(4thGen)	d0:03:4b:39:12:e3	Apple	Apple TV (4th gen)	Apple TV (4th gen)	dataset label	tv-streaming	
+yourthings	BelkinWeMoLink	94:10:3e:cc:67:95	Belkin	WeMo Link			hub	
+yourthings	NetgearArloCamera	b0:7f:b9:a6:47:4d	Arlo (Netgear)	Arlo base station	VMB3010	dhcp hostname	camera	the observed host is the base station
+yourthings	D-LinkDCS-5009LCamera	b0:c5:54:03:c7:09	D-Link	DCS-5009L	DCS-5009L	dataset label, dhcp hostname	camera	
+yourthings	LogitechLogiCircle	44:73:d6:01:3d:fd	Logitech	Logi Circle			camera	
+yourthings	Canary	7c:70:bc:5d:09:d1	Canary	Canary			camera	
+yourthings	PiperNV	ac:3f:a4:70:4a:d6	Piper	Piper nv	Piper nv	dataset label	camera	
+yourthings	WithingsHome	00:24:e4:2b:a5:34	Withings	Home			camera	
+yourthings	BelkinWeMoCrockpot	94:10:3e:5c:2e:31	Belkin (Crock-Pot)	WeMo Crock-Pot			appliance	
+yourthings	MiCasaVerdeVeraLite	94:4a:0c:08:7e:72	MiCasaVerde	VeraLite	VeraLite	dataset label	hub	
+yourthings	ChineseWebcam	00:12:16:ab:c0:22	unknown	webcam			camera	maker unknown; claims cannot be collected
+yourthings	AugustDoorbellCam	cc:b8:a8:ad:4d:04	August	Doorbell Cam			doorbell	
+yourthings	TP-LinkWiFiPlug	b0:4e:26:20:15:8a	TP-Link	Smart Plug	HS105	dhcp hostname	plug	
+yourthings	ChamberlainmyQGarageOpener	64:52:99:97:f8:40	Chamberlain	myQ Garage			appliance	
+yourthings	LogitechHarmonyHub	c8:db:26:02:bb:bb	Logitech	Harmony Hub			hub	
+yourthings	CasetaWirelessHub	f4:5e:ab:5e:c0:23	Lutron	Caseta Smart Bridge			hub	
+yourthings	GoogleHomeMini	20:df:b9:20:87:39	Google	Google Home Mini			voice-assistant	
+yourthings	GoogleHome	48:d6:d5:98:53:84	Google	Google Home			voice-assistant	
+yourthings	BoseSoundTouch10	10:ce:a9:eb:5a:8a	Bose	SoundTouch 10	SoundTouch 10	dataset label, dhcp hostname	speaker	
+yourthings	HarmonKardonInvoke	d8:f7:10:c2:29:be	Harman Kardon	Invoke	Invoke	dataset label	voice-assistant	
+yourthings	AppleHomePod	d4:90:9c:cc:62:42	Apple	HomePod			speaker	
+yourthings	Roomba	40:9f:38:92:40:13	iRobot	Roomba			appliance	
+yourthings	SamsungSmartTV	7c:64:56:60:71:74	Samsung	Smart TV			tv-streaming	
+yourthings	KoogeekLightbulb	00:7e:56:77:35:4d	Koogeek	Smart Bulb	LB1	dhcp hostname Koogeek-LB1-…	bulb	
+yourthings	TP-LinkSmartWiFiLEDBulb	50:c7:bf:92:a6:4a	TP-Link	Smart Wi-Fi LED Bulb	LB130	dhcp hostname	bulb	
+yourthings	Wink2Hub	00:21:cc:4d:59:35	Wink	Hub 2			hub	
+yourthings	NestCamIQ	18:b4:30:8c:03:e4	Nest (Google)	Nest Cam IQ			camera	
+yourthings	NestGuard	18:b4:30:40:1e:c5	Nest (Google)	Nest Guard (Secure)			hub	
+yourthings	NestBell	-	Nest (Google)	Hello (doorbell)			doorbell	not seen in the analysed captures
+yourthings	Rachio3	-	Rachio	Rachio 3			appliance	not seen in the analysed captures
+yourthings	AmazonEchoDotGen3	-	Amazon	Echo Dot (3rd gen)			voice-assistant	not seen in the analysed captures
+yourthings	NestThermostat	-	Nest (Google)	Thermostat			appliance	not seen in the analysed captures
+yourthings	GoogleHomeHub	-	Google	Home Hub			voice-assistant	not seen in the analysed captures
+yourthings	FacebookPortal	-	Facebook	Portal			voice-assistant	not seen in the analysed captures
+yourthings	SonosBeam	-	Sonos	Beam			speaker	not seen in the analysed captures
+yourthings	LGWebOSTV	-	LG	webOS TV			tv-streaming	not seen in the analysed captures
+yourthings	MyCloudEX2Ultra	-	Western Digital	My Cloud EX2 Ultra			nas	not seen in the analysed captures
+yourthings	AxisNetworkCamera	-	Axis	Network Camera			camera	not seen in the analysed captures
+yourthings	AVTechIPCam	-	AVTech	IP Camera			camera	not seen in the analysed captures
+cic2022	Amazon Plug	b8:5f:98:d0:76:e6	Amazon	Smart Plug			plug	
+cic2022	Amcrest	9c:8e:cd:1d:ab:9f	Amcrest	camera			camera	model not named
+cic2022	Arlo Basestation Camera	3c:37:86:6f:b9:51	Arlo (Netgear)	Arlo base station	VMB5000	dhcp hostname	camera	the observed host is the base station
+cic2022	ArloQ Camera	40:5d:82:35:14:c8	Arlo (Netgear)	Arlo Q			camera	
+cic2022	Atomi Coffee Maker	68:57:2d:56:ac:47	Atomi	Smart Coffee Maker			appliance	Tuya OUI
+cic2022	Borun Camera	c0:e7:bf:0a:79:d1	Borun	camera			camera	model not named
+cic2022	DLink Camera	b0:c5:54:59:2e:99	D-Link	DCS-8000LH	DCS-8000LH	dhcp hostname	camera	
+cic2022	DLink Water Sensor	f0:b4:d2:f9:60:95	D-Link	Water Sensor	DCH-S161	dhcp hostname	sensor	
+cic2022	Amazon Echo Dot 1	1c:fe:2b:98:16:dd	Amazon	Echo Dot			voice-assistant	generation not named
+cic2022	Amazon Echo Dot 2	a0:d0:dc:c4:08:ff	Amazon	Echo Dot			voice-assistant	generation not named
+cic2022	Amazon Echo Spot	1c:12:b0:9b:0c:ec	Amazon	Echo Spot			voice-assistant	
+cic2022	Amazon Echo Studio	08:7c:39:ce:6e:2a	Amazon	Echo Studio			speaker	
+cic2022	Eufy Homebase	8c:85:80:6c:b6:47	Eufy (Anker)	HomeBase			hub	
+cic2022	Globe Lamp	50:02:91:b1:68:0c	Globe	Smart Lamp			bulb	Espressif module
+cic2022	Gosund Plug - Center	b8:f0:09:03:9a:af	Gosund	Smart Plug			plug	
+cic2022	Gosund Plug - Lower	b8:f0:09:03:29:79	Gosund	Smart Plug			plug	
+cic2022	Gosund Plug - Red	50:02:91:10:09:8f	Gosund	Smart Plug			plug	
+cic2022	Gosund Plug - Roomba	c4:dd:57:0c:39:94	Gosund	Smart Plug			plug	
+cic2022	Gosund Plug - Silver	50:02:91:1a:ce:e1	Gosund	Smart Plug			plug	
+cic2022	Gosund Plug - Smart Board	24:a1:60:14:7f:f9	Gosund	Smart Plug			plug	
+cic2022	Gosund Plug - Upper	50:02:91:10:ac:d8	Gosund	Smart Plug			plug	
+cic2022	HeimVision Camera	44:01:bb:ec:10:4a	HeimVision	camera			camera	model not named
+cic2022	HeimVision Lamp	d4:a6:51:30:64:b7	HeimVision	Smart Lamp			bulb	Tuya OUI
+cic2022	Home Eye Camera	34:75:63:73:f3:36	Home Eye	camera			camera	model not named
+cic2022	LG TV	ac:f1:08:4e:00:82	LG	webOS TV			tv-streaming	
+cic2022	Luohe Camera	7c:a7:b0:cd:18:32	Luohe	camera			camera	model not named
+cic2022	Nest Camera	44:bb:3b:00:39:07	Nest (Google)	Nest Cam			camera	
+cic2022	Google Nest Mini	cc:f4:11:9c:d0:00	Google	Nest Mini			voice-assistant	
+cic2022	Netatmo Camera	70:ee:50:68:0e:32	Netatmo	Welcome		dhcp hostname Netatmo-Welcome	camera	
+cic2022	Netatmo Weather Station	70:ee:50:6b:a8:1a	Netatmo	Weather Station			sensor	
+cic2022	Philips Hue Bridge	00:17:88:60:d6:4f	Philips	Hue Bridge			hub	
+cic2022	Ring Basestation	b0:09:da:3e:82:6c	Ring	Alarm Base Station			hub	
+cic2022	Roomba Vacuum	50:14:79:37:80:18	iRobot	Roomba			appliance	
+cic2022	SimCam	10:2c:6b:1b:43:be	SimCam	camera			camera	model not named
+cic2022	Smart Board	00:02:75:f6:e3:cb	unknown	Smart Board			unknown	maker unknown
+cic2022	Sonos One Speaker	48:a6:b8:f9:1b:88	Sonos	Sonos One	ZPS18	ssdp server (ZPS18)	speaker	
+cic2022	Tekin Plug 1	d4:a6:51:76:06:64	Teckin	Smart Plug			plug	dataset spells Tekin; Tuya OUI
+cic2022	Tekin Plug 2	d4:a6:51:78:97:4e	Teckin	Smart Plug			plug	dataset spells Tekin; Tuya OUI
+cic2022	Yutron Plug 1	d4:a6:51:20:91:d1	Yutron	Smart Plug			plug	Tuya OUI
+cic2022	Yutron Plug 2	d4:a6:51:21:6c:29	Yutron	Smart Plug			plug	Tuya OUI
+deakin	Echo Dot (4th Gen)	40:f6:bc:bc:89:7b	Amazon	Echo Dot (4th gen)	Echo Dot (4th gen)	dataset label	voice-assistant	
+deakin	Aeotec Smart Hub	68:3a:48:0d:d4:1c	Aeotec	Smart Home Hub (SmartThings)			hub	hubv3 hostname
+deakin	Netatmo Smart Indoor Security Camera	70:ee:50:57:95:29	Netatmo	Smart Indoor Camera (Welcome)			camera	
+deakin	TP-Link Tapo Pan/Tilt Wi-Fi Camera	54:af:97:bb:8d:8f	TP-Link	Tapo Pan/Tilt Camera	C210	dhcp hostname C210_…	camera	
+deakin	32' Smart Monitor M80B UHD	70:09:71:9d:ad:10	Samsung	Smart Monitor M80B	M80B	dataset label	tv-streaming	
+deakin	SAMSUNG Pan/Tilt 1080P Wi-Fi Camera	00:16:6c:d7:d5:f9	Samsung	Pan/Tilt 1080P Wi-Fi Camera			camera	
+deakin	EZVIZ Security Camera	40:ac:bf:29:04:d4	EZVIZ	Security Camera			camera	model not named
+deakin	TOPERSUN Smart Plug	10:5a:17:b8:a2:0b	TOPERSUN	Smart Plug			plug	Tuya OUI
+deakin	TOPERSUN Smart Plug	10:5a:17:b8:9f:70	TOPERSUN	Smart Plug			plug	Tuya OUI
+deakin	Perfk Motion Sensor	fc:67:1f:53:fa:6e	Perfk	Motion Sensor			sensor	Tuya OUI
+deakin	Perfk Motion Sensor	1c:90:ff:bf:89:46	Perfk	Motion Sensor			sensor	Tuya OUI
+deakin	NEST Protect smoke alarm	cc:a7:c1:6a:b5:78	Nest (Google)	Protect			sensor	
+deakin	Netatmo Weather Station	70:ee:50:96:bb:dc	Netatmo	Weather Station			sensor	
+deakin	Withings Body+ (Scales)	00:24:e4:e3:15:6e	Withings	Body+	Body+	dataset label	health	
+deakin	Withings Body+ (Scales)	00:24:e4:e4:55:26	Withings	Body+	Body+	dataset label	health	
+deakin	Withings Connect (Blood Pressure)	00:24:e4:f6:91:38	Withings	BPM Connect	BPM Connect	dataset label	health	
+deakin	Withings Connect (Blood Pressure)	00:24:e4:f7:ee:ac	Withings	BPM Connect	BPM Connect	dataset label	health	
+deakin	TUYA Smartdoor Bell	70:3a:2d:4a:48:e2	Tuya	Smart Doorbell			doorbell	model not named
+deakin	Pix-Star Easy Digital Photo Frame	b0:02:47:6f:63:37	Pix-Star	Easy Digital Photo Frame			photo-frame	
+deakin	HP Envy	84:69:93:27:ad:35	HP	Printer (ENVY)			printer	
+deakin	Echo Show 8	18:48:be:31:4b:49	Amazon	Echo Show 8	Echo Show 8	dataset label	voice-assistant	
+deakin	Echo Show 8	74:d4:23:32:a2:d7	Amazon	Echo Show 8	Echo Show 8	dataset label	voice-assistant	
+deakin	GALAXY Watch5 Pro	6e:fe:2f:5a:d7:7e	Samsung	Galaxy Watch5 Pro	Galaxy Watch5 Pro	dataset label	wearable	
+deakin	Ring Video Doorbell	90:48:6c:08:da:8a	Ring	Video Doorbell			doorbell	
