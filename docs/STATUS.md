@@ -80,7 +80,7 @@
 - 進め方（案）：
   1. データセットの機器の一覧を、製造者と型番の単位で作る（UNSW、YourThings、CIC、Deakin、UNSW-IoTraffic）済み（2026-10-30、[claims/devices.md](claims/devices.md)）：7 データセット 202 行、製品 116 件（解析結果で見えたもの 102、2 つ以上のデータセットにまたがるもの 30）。型番まで分かったものは一部だけ。
   2. 機器ごとに主張を出典つきで集める（暗号化、更新、認証、データの扱いなど）。キャプチャした時期のページを優先し、URL と取得日を残す。
-     - 試し（YourThings の 5 製品）は済み（[claims/pilot-yourthings.md](claims/pilot-yourthings.md)）。進め方は [claims/method.md](claims/method.md)、先行研究は [claims/related-work.md](claims/related-work.md)、決めたことは D32。YourThings の 43 製品も済み（[claims/results-yourthings.md](claims/results-yourthings.md)）：主張 232 件、食い違いの候補は 5 製品（Ring、Sonos、Withings Home、August、Harman Kardon Invoke）、87% の主張は通信で判定できない。次：候補を人が確かめる。
+     - 試し（YourThings の 5 製品）は済み（[claims/pilot-yourthings.md](claims/pilot-yourthings.md)）。進め方は [claims/method.md](claims/method.md)、先行研究は [claims/related-work.md](claims/related-work.md)、決めたことは D32。YourThings の 44 製品は、全製品で文書 D1〜D6 を探し直した（D33、[claims/results-yourthings.md](claims/results-yourthings.md)）：主張 657 件、食い違いの候補は 6 製品（Hue、Ring、Sonos、Withings Home、August、Harman Kardon Invoke）、88% の主張は通信で判定できない。次：候補を人が確かめる。読めなかった文書 34 件（[claims/unreadable.md](claims/unreadable.md)）。
   3. 主張を ETSI の要件と、Quarant で観測できる事実に対応づける。
   4. 既存の解析結果と突き合わせて食い違いの候補を出し、人が確かめる。
 
