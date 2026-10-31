@@ -91,6 +91,13 @@ def main():
             "http": [{"scope": k[0], "method": k[1], "host": k[2], "port": k[3], "params": k[4], "body": k[5] == "body",
                       "auth_header": bool(k[6]), "count": n} for k, n in o["http"].most_common(15)],
             "http_total": sum(o["http"].values()),
+            # Totals over all plaintext HTTP requests (not just the top 15 shapes above).
+            # "content" means a body, URL parameters or an Authorization header.
+            "plaintext_http": {f"{scope}_{kind}": sum(n for k, n in o["http"].items() if k[0] == scope and
+                                                      ((k[4] != "" or k[5] == "body" or k[6] != "") == (kind == "content")))
+                               for scope in ("external", "lan") for kind in ("content", "no_content")},
+            "plaintext_http_auth": {scope: sum(n for k, n in o["http"].items() if k[0] == scope and k[6])
+                                    for scope in ("external", "lan")},
             "ftp": [{"scope": k[0], "username": bool(k[1]), "password": bool(k[2]), "count": n} for k, n in o["ftp"].items()],
             "quarant": [{"type": k[0], "claim_type": QUARANT_TYPES[k[0]], "scope": k[1], "count": n} for k, n in o["quarant"].most_common()],
         })

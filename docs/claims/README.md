@@ -11,7 +11,8 @@
 | [claims.tsv](claims.tsv) | 集めた主張。1 行が主張 1 つ |
 | [coverage.tsv](coverage.tsv) | 製品 × 文書の種類（D1〜D6）ごとに、探した結果（見つかった、アーカイブにない、読めない、製造者が出していない） |
 | [unreadable.md](unreadable.md) | アーカイブにはあるが読めなかった文書の一覧（ブラウザで開く用） |
-| [results-yourthings.md](results-yourthings.md) | 結果：YourThings 2018 の 43 製品 |
+| [results-yourthings.md](results-yourthings.md) | 結果：YourThings 2018 の 44 製品。暗号化の主張に絞った結果が中心 |
+| [encryption-yourthings.md](encryption-yourthings.md) | 暗号化の主張と観測の表、44 製品の観測した暗号化（スクリプトで作る） |
 | [pilot-yourthings.md](pilot-yourthings.md) | 試し：YourThings 2018 の 5 製品（Ring、Canary、Nest Cam、Belkin NetCam HD、Hue） |
 | [related-work.md](related-work.md) | 先行研究と、本研究の位置づけ |
 
@@ -24,6 +25,7 @@
 | `scripts/claims/check_quotes.py` | `python3 scripts/claims/check_quotes.py ~/datasets/claims/snapshots docs/claims/claims.tsv`：引用が保存した版に原文どおりあるかを確かめる |
 | `scripts/claims/observations.py` | `python3 scripts/claims/observations.py docs/claims/devices.tsv yourthings ~/datasets/gt-yt ~/datasets/runs-yt5 ~/datasets/claims/obs-yourthings.json`：機器ごとの観測（TLS、HTTP の形、FTP、Quarant の検出）をまとめる |
 | `scripts/claims/sweep.py` | `python3 scripts/claims/sweep.py ~/datasets/claims/snapshots docs/claims/claims.tsv ~/datasets/claims/sweep.tsv`：保存した文書から、セキュリティの言葉を含むのに主張の表にない文を取り出す（読み落としの確認。出力は製造者の文章なのでリポジトリの外に置く） |
+| `scripts/claims/encryption_view.py` | `python3 scripts/claims/encryption_view.py docs/claims/claims.tsv ~/datasets/claims/obs-yourthings.json yourthings docs/claims/encryption-yourthings.md`：暗号化の主張に絞った表と、製品ごとの観測した暗号化 |
 | `scripts/claims/summarize.py` | `python3 scripts/claims/summarize.py docs/claims/claims.tsv yourthings`：判定の集計 |
 | `scripts/claims/collect_hints.py` | 解析結果から型番の手がかりを集める。シリアル番号や人の名前が入るので、出力はリポジトリの外（`~/datasets/claims/`）に置く |
 
@@ -34,5 +36,5 @@
 
 ## 今の状態（2026-10-31）
 
-- YourThings の 44 製品は、全製品で D1〜D6 を探し、読み落としの確認まで済んだ（D33）。主張 657 件。結果は [results-yourthings.md](results-yourthings.md)。食い違いの候補は 6 製品（Hue、Ring、Sonos、Withings Home、August、Harman Kardon Invoke）。
+- YourThings の 44 製品は、全製品で D1〜D6 を探し、読み落としの確認まで済んだ（D33）。主張 657 件。結果は [results-yourthings.md](results-yourthings.md)。研究の範囲は暗号化（暗号の方法と、暗号化しているか）に絞った（D34）。暗号化の主張は 145 件で、食い違いの候補は 5 製品（Ring、Hue、Sonos、Withings Home、Harman Kardon Invoke）。
 - 次：候補を人が確かめる。読めなかった文書（[unreadable.md](unreadable.md)）。ほかのデータセットに広げる。
