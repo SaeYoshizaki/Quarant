@@ -1,12 +1,16 @@
 #!/usr/bin/env python3
 """Summarise, per device, what a passive observer saw that claims can be checked against.
 
-Usage: observations.py <devices.tsv> <dataset> <zeek gt dir> <quarant runs dir> <out.json>
+Usage: observations.py <devices.tsv> <dataset> <zeek gt dir> <quarant runs dir> <out.json> [<mitm.tsv>]
 
 Reads the Zeek ground-truth records (gt.log: TLS version/cipher/SNI, HTTP request
 shape without values, FTP) and the Quarant events of each run, and groups them by
 the MAC addresses listed for <dataset> in devices.tsv. Only names and counts are
 kept, never values, so the output can be shared.
+
+<mitm.tsv> (mitm_sessions.py) lists TLS sessions answered by the dataset
+authors' own test proxy; they are left out of the TLS counts (their version
+and cipher are the proxy's, not the vendor's) and counted as tls_mitm_test.
 """
 import collections
 import csv
@@ -34,13 +38,17 @@ def lan(ip):
 
 def main():
     devices_tsv, dataset, gt_dir, runs_dir, out = sys.argv[1:6]
+    mitm = set()
+    if len(sys.argv) > 6:
+        for r in csv.DictReader(open(sys.argv[6]), delimiter="\t"):
+            mitm.add((r["orig_h"], int(r["orig_p"]), r["resp_h"], int(r["resp_p"])))
     macs = {}
     for r in csv.DictReader(open(devices_tsv), delimiter="\t"):
         if r["dataset"] == dataset and r["mac"] not in ("", "-"):
             macs[r["mac"].lower()] = f"{r['vendor']} {r['product']}"
     obs = {m: {"product": p, "tls": collections.Counter(), "tls_no_handshake": 0, "sni": collections.Counter(),
                "http": collections.Counter(), "ftp": collections.Counter(), "quarant": collections.Counter(),
-               "days": set()} for m, p in macs.items()}
+               "days": set(), "tls_mitm_test": 0} for m, p in macs.items()}
 
     for log in sorted(Path(gt_dir).glob("*/gt.log")):
         day = log.parent.name
@@ -51,6 +59,9 @@ def main():
                 continue
             o["days"].add(day)
             if e["kind"] == "tls":
+                if (e["orig_h"], e["orig_p"], e["resp_h"], e["resp_p"]) in mitm:
+                    o["tls_mitm_test"] += 1
+                    continue
                 if e.get("cipher"):
                     o["tls"][(e.get("version"), e["cipher"], "pfs" if pfs(e["cipher"]) else "no-pfs")] += 1
                 else:
@@ -87,6 +98,7 @@ def main():
             "mac": mac, "product": o["product"], "days": sorted(o["days"]),
             "tls": [{"version": k[0], "cipher": k[1], "forward_secrecy": k[2] == "pfs", "count": n} for k, n in o["tls"].most_common()],
             "tls_no_handshake": o["tls_no_handshake"],
+            "tls_mitm_test": o["tls_mitm_test"],
             "sni": dict(o["sni"].most_common(10)),
             "http": [{"scope": k[0], "method": k[1], "host": k[2], "port": k[3], "params": k[4], "body": k[5] == "body",
                       "auth_header": bool(k[6]), "count": n} for k, n in o["http"].most_common(15)],

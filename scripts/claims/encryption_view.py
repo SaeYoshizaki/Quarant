@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Encryption view of the claims: what vendors said about encryption vs what the traffic showed.
 
-Usage: encryption_view.py <claims.tsv> <observations.json> <dataset> <out.md>
+Usage: encryption_view.py <claims.tsv> <observations.json> <dataset> <out.md> [<flows.json> <scorecards.tsv> [<mitm.tsv>]]
 
 Two axes:
 - method: claims that name how traffic is encrypted (algorithm, key length,
@@ -13,7 +13,11 @@ Two axes:
   that do not.
 Plaintext credentials (T3) and plaintext updates (T5) count as coverage.
 Also writes one table of the observed encryption of every product, with or
-without claims.
+without claims. With flows.json (flows_summary.py), adds every TCP/UDP flow
+by label, not only HTTP, TLS and FTP, and the server certificate keys; with
+scorecards.tsv (scorecards.py), the YourThings team's own grades; with
+mitm.tsv (mitm_sessions.py), how each device reacted to the dataset authors'
+forged certificates.
 """
 import collections
 import csv
@@ -22,8 +26,9 @@ import re
 import sys
 
 ENC = re.compile(r"(?i)encrypt|\bssl\b|\btls\b|https|\baes\b|cipher|secure socket|transport layer|forward secrecy|\brsa\b")
-METHOD = re.compile(r"(?i)\baes\b|\brsa\b|\d+[- ]?bit|forward secrecy|curve25519|\bsha|tls ?v?1\.|ecdh|hkdf|mfi-sap|station-to-|verschl")
-JA = {"contradiction candidate": "食い違いの候補", "wording-only contradiction": "文言の上で食い違い",
+METHOD = re.compile(r"(?i)\baes\b|\brsa\b|\d+[- ]?bit|forward secrecy|curve25519|\bsha|tls ?v?1\.|ecdh|hkdf|mfi-sap|station-to-|verschl|pinning")
+JA = {"consistent (as observed; encryption inferred from entropy)": "一致（見えた範囲で。暗号化はエントロピーからの推定）",
+      "contradiction candidate": "食い違いの候補", "wording-only contradiction": "文言の上で食い違い",
       "consistent (as observed)": "一致（見えた範囲で）", "not visible": "見えない", "not assessable": "判定できない"}
 ORDER = ["contradiction candidate", "wording-only contradiction", "consistent (as observed)", "not visible", "not assessable"]
 
@@ -70,7 +75,7 @@ def main():
     enc = [r for r in rows if ENC.search(r["quote"]) or r["type"] in ("T1", "T2", "T3", "T4", "T5") and ENC.search(r["quote"] + r["note"])]
     for r in enc:
         r["axis"] = "method" if METHOD.search(r["quote"]) else "coverage"
-        r["j"] = next(k for k in ORDER if r["judgment"].startswith(k))
+        r["j"] = next(k for k in ORDER if r["judgment"].startswith(k.split(" (")[0]))
     products = sorted({r["product"] for r in csv.DictReader(open(claims_tsv), delimiter="\t") if r["dataset"] == dataset})
     cat = {r["product"]: r["catalog_product"] for r in csv.DictReader(open(claims_tsv), delimiter="\t")}
 
@@ -106,7 +111,74 @@ def main():
         ph = o["plaintext_http"]
         ftp = sum(f["count"] for f in o["ftp"] if f["password"])
         w.write(f"| {p} | {has_claim[p]} | {n} | {v} | {a} | {pfs} | {ph['external_content']}／{o['plaintext_http_auth']['external']}／{ph['external_no_content']} | {ph['lan_content']} | {ftp or ''} |\n")
+    if len(sys.argv) > 6:
+        write_flows(w, products, cat, has_claim, sys.argv[5], sys.argv[6])
+    if len(sys.argv) > 7:
+        write_mitm(w, cat, sys.argv[7], sys.argv[6])
     w.close()
+
+
+NETWORK = {"dns", "mdns", "ntp", "dhcp", "netbios", "llmnr", "ssdp"}
+KIND_JA = {"high-entropy": "高エントロピー", "low-entropy-binary": "バイナリ", "text": "テキスト", "tplink-xor": "TP-Link（XOR）",
+           "lifx": "LIFX LAN", "too-short": "短すぎる", "no-payload": "中身なし"}
+
+
+def kinds(flows, scope, cls, top=4):
+    c = collections.Counter()
+    for k, n in flows.items():
+        sc, _, port, kind, cl = k.split("|")
+        if sc == scope and cl == cls and kind not in NETWORK and kind != "no-payload":
+            c[f"{KIND_JA.get(kind, kind.upper())} {port}"] += n
+    if not c:
+        return "0"
+    s = ", ".join(f"{k}: {v}" for k, v in c.most_common(top))
+    return f"{sum(c.values())}（{s}{' ほか' if len(c) > top else ''}）"
+
+
+def write_flows(w, products, cat, has_claim, flows_json, scorecards_tsv):
+    fl = {r["product"]: r for r in json.load(open(flows_json))}
+    sc = {r["catalog_product"]: r for r in csv.DictReader(open(scorecards_tsv), delimiter="\t")}
+    w.write("\n### すべての TCP・UDP の通信（HTTP・TLS・FTP 以外も）\n\n")
+    w.write("フロー（5 つ組の通信のまとまり）の数。各方向の最初の 1024 バイトから分類した（`flowscan.py`）。TLS、DTLS、QUIC、SSH は構造で、"
+            "HTTP、RTSP、MQTT、STUN、TP-Link、LIFX なども構造で決める。DNS、mDNS、NTP、DHCP、SSDP などのネットワークの仕組みの通信は除いた。"
+            "どれにも当たらないものは、中身の偏りで「高エントロピー」（暗号化か圧縮と推定。観測ではなく推定）、「テキスト」（ほぼ印字可能な文字）、「バイナリ」（どちらでもない）に分けた。"
+            "証明書は TLS 1.2 以下のサーバー証明書の鍵（TLS 1.3 では見えない）。YourThings の評価は yourthings.info の点数（多いほど悪い。機器とクラウドの間の暗号化は 0=すべて、2=一部、4=なし）。\n\n")
+    w.write("| 製品 | 暗号化の主張 | 外部：暗号化 | 外部：平文 | 外部：分からない | LAN：暗号化 | LAN：平文 | LAN：分からない | サーバー証明書の鍵 | YourThings の評価（暗号化／HTTP） |\n")
+    w.write("|---|---|---|---|---|---|---|---|---|---|\n")
+    for p in products:
+        r = fl.get(cat.get(p, ""))
+        s = sc.get(cat.get(p, ""), {})
+        grade = f"{s.get('Encryption Device-to-Cloud', '')}／{s.get('HTTP', '')}" if s else ""
+        if not r:
+            w.write(f"| {p} | {has_claim[p]} | （観測なし） | | | | | | | {grade} |\n")
+            continue
+        f = r["flows"]
+        certs = ", ".join(f"{k} {pct(v, sum(r['certs'].values()))}" for k, v in
+                          sorted(r["certs"].items(), key=lambda x: -x[1])[:3])
+        if r.get("client_certs"):
+            certs += "；機器の証明書 " + ", ".join(f"{k}: {v}" for k, v in r["client_certs"].items())
+        w.write(f"| {p} | {has_claim[p]} | {kinds(f, 'external', 'encrypted')} | {kinds(f, 'external', 'plaintext')} | "
+                f"{kinds(f, 'external', 'unknown')} | {kinds(f, 'lan', 'encrypted')} | {kinds(f, 'lan', 'plaintext')} | "
+                f"{kinds(f, 'lan', 'unknown')} | {certs} | {grade} |\n")
+
+
+def write_mitm(w, cat, mitm_tsv, scorecards_tsv):
+    label_product = {r["label"]: r["catalog_product"] for r in csv.DictReader(open(scorecards_tsv), delimiter="\t")}
+    sc = {r["catalog_product"]: r for r in csv.DictReader(open(scorecards_tsv), delimiter="\t")}
+    name = {v: k for k, v in cat.items()}
+    c = collections.defaultdict(collections.Counter)
+    for r in csv.DictReader(open(mitm_tsv), delimiter="\t"):
+        c[label_product.get(r["label"], r["label"])][r["outcome"]] += 1
+    w.write("\n### データセットの作成者の中間者の検査への反応\n\n")
+    w.write("YourThings の作成者は、2018-04-10〜12 に、一部の TLS 接続へ偽の証明書（発行者 thing-catcher.gtisc.gatech.edu）で応答した。"
+            "その接続で機器がどうしたかは、パッシブに見える（`mitm_sessions.py`）。「拒んだ」は握手の途中で機器が警告を送ったもの、"
+            "「握手だけ」は警告もデータもなく終わったもの、「データを送った」は握手のあとに機器がアプリケーションデータのレコードを送ったもの"
+            "（証明書を受け入れた疑い。中身は暗号化されていて分からない）。これらの接続は、上の TLS の集計から除いてある。\n\n")
+    w.write("| 製品 | 偽の証明書の接続 | 拒んだ | 握手だけ | データを送った | YourThings の評価（中間者、機器とクラウド） |\n|---|---|---|---|---|---|\n")
+    for p in sorted(c, key=lambda p: (-c[p]["data-sent"], name.get(p, p))):
+        x = c[p]
+        w.write(f"| {name.get(p, p)} | {sum(x.values())} | {x['client-alert']} | {x['handshake-only']} | {x['data-sent']} | "
+                f"{sc.get(p, {}).get('MITM Device-to-Cloud', '')} |\n")
 
 
 if __name__ == "__main__":

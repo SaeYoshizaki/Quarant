@@ -17,6 +17,12 @@ JA = {"contradiction candidate": "食い違いの候補", "wording-only contradi
       "consistent (as observed)": "一致（見えた範囲で）", "not visible": "見えない", "not assessable": "判定できない"}
 
 
+def key(j):
+    """The ORDER entry a judgment belongs to; qualifiers after it (such as
+    "T2: certificate validation" or "encryption inferred from entropy") are dropped."""
+    return next((k for k in ORDER if j.startswith(k.rstrip(")"))), j)
+
+
 def ja(j):
     for k, v in JA.items():
         if j.startswith(k):
@@ -29,11 +35,11 @@ def main():
     real = [r for r in rows if not r["quote"].startswith("(")]
     print(f"主張 {len(real)} 件（ほかに「主張なし」の文書 {len(rows) - len(real)} 件）、製品 {len({r['product'] for r in rows})} 件。\n")
     print("| 判定 | 主張 | うち具体的 | うち曖昧 |\n|---|---|---|---|")
-    c = collections.Counter(r["judgment"] for r in real)
+    c = collections.Counter(key(r["judgment"]) for r in real)
     for j in ORDER:
         if c[j]:
-            sp = sum(1 for r in real if r["judgment"] == j and r["specificity"] == "specific")
-            va = sum(1 for r in real if r["judgment"] == j and r["specificity"] == "vague")
+            sp = sum(1 for r in real if key(r["judgment"]) == j and r["specificity"] == "specific")
+            va = sum(1 for r in real if key(r["judgment"]) == j and r["specificity"] == "vague")
             print(f"| {ja(j)} | {c[j]} | {sp} | {va} |")
     print("\n| 書き方 | 主張 |\n|---|---|")
     for k, n in collections.Counter(r["specificity"] for r in real).most_common():
@@ -42,7 +48,7 @@ def main():
     by = collections.defaultdict(list)
     for r in rows:
         by[r["product"]].append(r)
-    best = {p: min((ORDER.index(r["judgment"]) for r in rs if r["judgment"] in ORDER), default=len(ORDER) - 1)
+    best = {p: min((ORDER.index(key(r["judgment"])) for r in rs if key(r["judgment"]) in ORDER), default=len(ORDER) - 1)
             for p, rs in by.items()}
     print("\n| 製品ごとのいちばん強い判定 | 製品 |\n|---|---|")
     groups = collections.defaultdict(list)

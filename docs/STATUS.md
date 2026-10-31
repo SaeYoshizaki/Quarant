@@ -80,7 +80,7 @@
 - 進め方（案）：
   1. データセットの機器の一覧を、製造者と型番の単位で作る（UNSW、YourThings、CIC、Deakin、UNSW-IoTraffic）済み（2026-10-30、[claims/devices.md](claims/devices.md)）：7 データセット 202 行、製品 116 件（解析結果で見えたもの 102、2 つ以上のデータセットにまたがるもの 30）。型番まで分かったものは一部だけ。
   2. 機器ごとに主張を出典つきで集める（暗号化、更新、認証、データの扱いなど）。キャプチャした時期のページを優先し、URL と取得日を残す。
-     - 試し（YourThings の 5 製品）は済み（[claims/pilot-yourthings.md](claims/pilot-yourthings.md)）。進め方は [claims/method.md](claims/method.md)、先行研究は [claims/related-work.md](claims/related-work.md)、決めたことは D32。YourThings の 44 製品は、全製品で文書 D1〜D6 を探し直した（D33、[claims/results-yourthings.md](claims/results-yourthings.md)）：主張 657 件。範囲を暗号化の主張に絞った（D34）：145 件、食い違いの候補は 5 製品（Ring、Hue、Sonos、Withings Home、Harman Kardon Invoke）、53% は通信で判定できない。次：候補を人が確かめる。読めなかった文書 34 件（[claims/unreadable.md](claims/unreadable.md)）。
+     - 試し（YourThings の 5 製品）は済み（[claims/pilot-yourthings.md](claims/pilot-yourthings.md)）。進め方は [claims/method.md](claims/method.md)、先行研究は [claims/related-work.md](claims/related-work.md)、決めたことは D32。YourThings の 44 製品は、全製品で文書 D1〜D6 を探し直した（D33、[claims/results-yourthings.md](claims/results-yourthings.md)）：主張 657 件。範囲を暗号化の主張に絞った（D34）：145 件、53% は通信で判定できない。観測をすべての TCP・UDP のフローと証明書の鍵に広げ、作成者の検査（03-20 のポートスキャン、04-10〜12 の中間者）の通信を外した（D35）。食い違いの候補は 7 製品（Ring、Hue、Sonos、Withings Home、Harman Kardon Invoke、Wink Hub 2 の証明書の固定、Canary の AES-256 は弱い候補）。次：候補を人が確かめる。読めなかった文書 34 件（[claims/unreadable.md](claims/unreadable.md)）。
   3. 主張を ETSI の要件と、Quarant で観測できる事実に対応づける。
   4. 既存の解析結果と突き合わせて食い違いの候補を出し、人が確かめる。
 

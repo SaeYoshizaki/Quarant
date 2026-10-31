@@ -1,0 +1,46 @@
+slug	label	catalog_product	firmware	evaluated	Encryption Device-to-Cloud	Encryption Mobile-to-Device	HTTP	Custom Protocol	UPnP	NTPv3	Vulnerable TLS/SSL version	Self-Signed Certificates	Name Mismatch on Certificate	Cleartext Authentication	MITM Device-to-Cloud	source
+almond	SecurifiAlmond	Securifi Almond	AL2-R095	03/20/2018	2/4	0/2	0/1	2/2	0/2	1/1	10/10	0/10	0/10	0/13	0/4	https://yourthings.info/devices/almond
+amazon_echo	AmazonEchoGen1	Amazon Echo (1st gen)	N/A	03/20/2018	0/4	0/2	1/1	2/2	2/2	1/1	10/10	10/10	0/10	0/13	0/4	https://yourthings.info/devices/amazon_echo
+amazon_fire	AmazonFireTV	Amazon Fire TV	Fire OS 5.2.6.3 (606753920)	03/20/2018	0/4	1/2	0/1	0/2	2/2	0/1	0/10	0/10	0/10	0/13	0/4	https://yourthings.info/devices/amazon_fire
+apple_homepod	AppleHomePod	Apple HomePod	11.2.5 (15D59)	03/21/2018	0/4	0/2	0/1	2/2	0/2	1/1	10/10	10/10	10/10	0/13	0/4	https://yourthings.info/devices/apple_homepod
+apple_tv	AppleTV(4thGen)	Apple Apple TV (4th gen)	tvOS 11.3	03/20/2018	0/4	0/2	0/1	2/2	0/2	1/1	10/10	10/10	0/10	0/13	0/4	https://yourthings.info/devices/apple_tv
+august_doorbell	AugustDoorbellCam	August Doorbell Cam	2.3.0-ROVRC75+20180618	03/20/2018	2/4	2/2	0/1	0/2	0/2	0/1	10/10	10/10	0/10	13/13	4/4	https://yourthings.info/devices/august_doorbell
+belkin_crockpot	BelkinWeMoCrockpot	Belkin (Crock-Pot) WeMo Crock-Pot	WeMo_WW_2.00.10926.PVT-OWRT-Jarden	03/20/2018	2/4	2/2	0/1	2/2	2/2	0/1	10/10	0/10	0/10	0/13	0/4	https://yourthings.info/devices/belkin_crockpot
+belkin_link	BelkinWeMoLink	Belkin WeMo Link	WeMo_WW_2.00.11054.PVT-OWRT-Link	03/20/2018	2/4	2/2	0/1	2/2	2/2	1/1	0/10	0/10	0/10	0/13	0/4	https://yourthings.info/devices/belkin_link
+belkin_motion	BelkinWeMoMotionSensor	Belkin WeMo Motion Sensor	WeMo_WW_2.00.11057.PVT-OWRT-SNS	03/20/2018	2/4	2/2	0/1	2/2	2/2	1/1	0/10	0/10	0/10	0/13	0/4	https://yourthings.info/devices/belkin_motion
+belkin_netcam	BelkinNetcam	Belkin NetCam HD	WeMo_NetCam_WW_2.00.11020.PVT	03/21/2018	0/4	2/2	0/1	2/2	2/2	1/1	10/10	0/10	0/10	13/13	0/4	https://yourthings.info/devices/belkin_netcam
+belkin_switch	BelkinWeMoSwitch	Belkin WeMo Switch	WeMo_WW_2.00.11057.PVT-OWRT-SNS	03/21/2018	2/4	2/2	0/1	2/2	2/2	1/1	10/10	0/10	0/10	0/13	0/4	https://yourthings.info/devices/belkin_switch
+bose_soundtouch	BoseSoundTouch10	Bose SoundTouch 10	18.0.11	03/21/2018	0/4	2/2	0/1	2/2	2/2	0/1	10/10	0/10	0/10	13/13	0/4	https://yourthings.info/devices/bose_soundtouch
+canary_camera	Canary	Canary Canary	3.0.0	03/20/2018	0/4	0/2	0/1	0/2	0/2	0/1	0/10	10/10	0/10	0/13	0/4	https://yourthings.info/devices/canary_camera
+caseta_hub	CasetaWirelessHub	Lutron Caseta Smart Bridge	1.8	03/20/2018	2/4	2/2	1/1	2/2	0/2	1/1	0/10	0/10	0/10	0/13	0/4	https://yourthings.info/devices/caseta_hub
+cn_webcam	ChineseWebcam	unknown webcam	4.02.R12.00006510.10010.1403	03/20/2018	4/4	2/2	1/1	2/2	2/2	0/1	0/10	0/10	0/10	13/13	4/4	https://yourthings.info/devices/cn_webcam
+dlink_camera	D-LinkDCS-5009LCamera	D-Link DCS-5009L	N/A	03/20/2018	0/4	2/2	0/1	0/2	2/2	0/1	10/10	0/10	0/10	0/13	0/4	https://yourthings.info/devices/dlink_camera
+google_home	GoogleHome	Google Google Home	1.32.118652	03/20/2018	2/4	2/2	0/1	2/2	2/2	1/1	0/10	0/10	0/10	0/13	0/4	https://yourthings.info/devices/google_home
+google_home_m	GoogleHomeMini	Google Google Home Mini	1.32.118652	03/20/2018	2/4	2/2	0/1	2/2	2/2	1/1	0/10	0/10	0/10	0/13	0/4	https://yourthings.info/devices/google_home_m
+google_onhub			10032.86.0	03/21/2018	2/4	0/2	0/1	2/2	0/2	0/1	0/10	0/10	0/10	0/13	0/4	https://yourthings.info/devices/google_onhub
+harmon_invoke	HarmonKardonInvoke	Harman Kardon Invoke	N/A	03/20/2018	0/4	0/2	0/1	0/2	0/2	1/1	10/10	10/10	0/10	0/13	0/4	https://yourthings.info/devices/harmon_invoke
+insteon_hub	InsteonHub	Insteon Hub Pro	N/A	03/20/2018	4/4	0/2	1/1	0/2	0/2	1/1	0/10	10/10	0/10	0/13	4/4	https://yourthings.info/devices/insteon_hub
+koogeek_bulb	KoogeekLightbulb	Koogeek Smart Bulb	N/A	03/21/2018	0/4	0/2	0/1	2/2	0/2	1/1	0/10	0/10	0/10	0/13	0/4	https://yourthings.info/devices/koogeek_bulb
+lifx_bulb	LIFXVirtualBulb	LIFX Color 1000	1.22	03/21/2018	0/4	2/2	0/1	2/2	0/2	1/1	10/10	10/10	0/10	0/13	0/4	https://yourthings.info/devices/lifx_bulb
+logitech_circle	LogitechLogiCircle	Logitech Logi Circle	4.7.706	03/20/2018	0/4	0/2	0/1	0/2	0/2	1/1	0/10	10/10	0/10	0/13	0/4	https://yourthings.info/devices/logitech_circle
+logitech_hub	LogitechHarmonyHub	Logitech Harmony Hub	4.14.123	03/20/2018	2/4	0/2	0/1	0/2	2/2	0/1	0/10	0/10	0/10	0/13	0/4	https://yourthings.info/devices/logitech_hub
+myq_garage	ChamberlainmyQGarageOpener	Chamberlain myQ Garage	N/A	03/20/2018	0/4	0/2	0/1	2/2	0/2	0/1	0/10	10/10	0/10	0/13	0/4	https://yourthings.info/devices/myq_garage
+nest_cam	NestCamera	Nest (Google) Nest Cam	217-610040	03/21/2018	0/4	0/2	0/1	0/2	0/2	0/1	10/10	10/10	0/10	0/13	0/4	https://yourthings.info/devices/nest_cam
+nest_guard	NestGuard	Nest (Google) Nest Guard (Secure)	1.1.1-8	03/28/2018	0/4	0/2	0/1	2/2	0/2	1/1	0/10	10/10	0/10	0/13	0/4	https://yourthings.info/devices/nest_guard
+nest_iq	NestCamIQ	Nest (Google) Nest Cam IQ	2520014	03/28/2018	0/4	0/2	0/1	0/2	0/2	0/1	0/10	10/10	0/10	0/13	0/4	https://yourthings.info/devices/nest_iq
+netgear_cam	NetgearArloCamera	Arlo (Netgear) Arlo base station	1.2.16720-CAM, 1.092.0.5_13833-BS	03/20/2018	0/4	0/2	0/1	0/2	0/2	1/1	0/10	0/10	0/10	0/13	0/4	https://yourthings.info/devices/netgear_cam
+nvidia_shield	nVidiaShield	NVIDIA Shield TV	3.2	03/20/2018	2/4	0/2	0/1	2/2	0/2	0/1	0/10	0/10	0/10	0/13	0/4	https://yourthings.info/devices/nvidia_shield
+philips_hue	PhilipsHUEHub	Philips Hue Bridge	1802201122	03/20/2018	0/4	2/2	0/1	0/2	2/2	1/1	0/10	0/10	0/10	0/13	0/4	https://yourthings.info/devices/philips_hue
+piper_cam	PiperNV	Piper Piper nv	N/A	03/20/2018	0/4	0/2	0/1	0/2	0/2	1/1	10/10	10/10	0/10	0/13	0/4	https://yourthings.info/devices/piper_cam
+ring_doorbell	RingDoorbell	Ring Video Doorbell	N/A	03/20/2018	0/4	0/2	0/1	2/2	0/2	0/1	0/10	0/10	0/10	0/13	0/4	https://yourthings.info/devices/ring_doorbell
+roku4	Roku4	Roku Roku 4	8.0.0-build 4183-08	03/20/2018	0/4	2/2	0/1	2/2	2/2	0/1	10/10	10/10	0/10	0/13	0/4	https://yourthings.info/devices/roku4
+rokutv	RokuTV	TCL / Roku Roku TV	8.0.0-build 4183-08	03/20/2018	0/4	2/2	0/1	2/2	2/2	0/1	10/10	10/10	0/10	13/13	0/4	https://yourthings.info/devices/rokutv
+roomba	Roomba	iRobot Roomba	3.2.19	03/20/2018	0/4	2/2	0/1	2/2	0/2	1/1	10/10	0/10	0/10	0/13	0/4	https://yourthings.info/devices/roomba
+samsung_tv	SamsungSmartTV	Samsung Smart TV	T-KTMAKUC-1156.0, BT-S; T-KTMINTV-1012	03/20/2018	2/4	1/2	0/1	0/2	2/2	0/1	10/10	0/10	0/10	0/13	0/4	https://yourthings.info/devices/samsung_tv
+smartthings	SamsungSmartThingsHub	Samsung SmartThings Hub	000.020.00017	03/20/2018	0/4	0/2	0/1	0/2	2/2	0/1	10/10	10/10	0/10	0/13	0/4	https://yourthings.info/devices/smartthings
+sonos	Sonos	Sonos Sonos speaker	8.3	03/20/2018	2/4	2/2	0/1	2/2	2/2	0/1	0/10	0/10	0/10	0/13	0/4	https://yourthings.info/devices/sonos
+tplink_bulb	TP-LinkSmartWiFiLEDBulb	TP-Link Smart Wi-Fi LED Bulb	1.7.1	03/21/2018	0/4	0/2	0/1	0/2	0/2	1/1	0/10	0/10	0/10	0/13	0/4	https://yourthings.info/devices/tplink_bulb
+tplink_plug	TP-LinkWiFiPlug	TP-Link Smart Plug	1.5.1	03/21/2018	0/4	0/2	0/1	0/2	0/2	1/1	0/10	0/10	0/10	0/13	0/4	https://yourthings.info/devices/tplink_plug
+veralite	MiCasaVerdeVeraLite	MiCasaVerde VeraLite	N/A	03/20/2018	2/4	2/2	0/1	2/2	2/2	1/1	10/10	10/10	0/10	13/13	0/4	https://yourthings.info/devices/veralite
+wink2	Wink2Hub	Wink Hub 2	4.0.26	03/20/2018	0/4	2/2	0/1	0/2	2/2	1/1	0/10	0/10	0/10	0/13	4/4	https://yourthings.info/devices/wink2
+withings_cam	WithingsHome	Withings Home	409	03/20/2018	0/4	0/2	0/1	2/2	0/2	0/1	0/10	0/10	0/10	13/13	0/4	https://yourthings.info/devices/withings_cam
