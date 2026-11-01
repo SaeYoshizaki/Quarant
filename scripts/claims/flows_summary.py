@@ -51,7 +51,9 @@ def main():
                 p["excluded_flows"] += r["flows"]
                 continue
             scope = "external" if r["external"] else "lan"
-            key = f"{scope}|{r['role']}|{r['proto']}/{r['port']}|{r['kind']}|{r['class']}"
+            # FTP data connections use a new port each time; count them together
+            port = "data" if r["kind"] == "ftp-data" else r["port"]
+            key = f"{scope}|{r['role']}|{r['proto']}/{port}|{r['kind']}|{r['class']}"
             p["flows"][key] += r["flows"]
             p["bytes"][key] += r["bytes"]
         mac_of = {}

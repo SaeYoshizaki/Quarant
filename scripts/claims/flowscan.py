@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
 """Classify every flow of the dataset's devices as encrypted, plaintext or unknown.
 
-Usage: flowscan.py <devices.tsv> <dataset> <pcap or -> <out.jsonl>
+Usage: flowscan.py <devices.tsv> <dataset> <pcap or -> <out.jsonl> [<per-flow.tsv>]
 
 Covers all TCP and UDP traffic, not only HTTP, TLS and FTP (those come from
 Zeek in observations.py). Each flow (5-tuple, both directions) is labelled
 from the first payload bytes of each direction:
-- by structure: TLS, DTLS, QUIC, SSH, HTTP, RTSP, SSDP, MQTT, STUN, the
-  TP-Link LAN protocol (XOR obfuscation of JSON), LIFX LAN;
+- by structure: TLS, DTLS, QUIC, SSH, HTTP, RTSP, SSDP, MQTT, STUN, FTP, the
+  TP-Link LAN protocol (XOR obfuscation of JSON), LIFX LAN; FTP data
+  connections are found from the PASV, EPSV and PORT lines of the FTP
+  control connection (their contents may be compressed files, which look
+  random but are not encrypted);
 - by port, for network services that are plaintext by design: DNS, mDNS,
   NTP, DHCP, NetBIOS, LLMNR;
 - otherwise by the bytes: mostly printable text, or high entropy (likely
@@ -19,7 +22,9 @@ from the first payload bytes of each direction:
 A flow seen from the middle (begun before the capture) is still found to be
 TLS when one of its first packets starts with a TLS record header.
 Only labels, counts and entropy are written, never payload bytes. Flows are
-grouped per device, peer, protocol, server port and label.
+grouped per device, peer, protocol, server port and label. <per-flow.tsv>,
+if given, gets one line per flow (addresses, ports, label) for checking the
+client/server guess against Zeek (check_roles.py).
 """
 import collections
 import csv
@@ -41,8 +46,11 @@ PORT_LABEL = {53: "dns", 5353: "mdns", 123: "ntp", 67: "dhcp", 68: "dhcp", 137: 
 HTTP = re.compile(rb"^(GET|POST|PUT|HEAD|DELETE|PATCH|OPTIONS|SUBSCRIBE|UNSUBSCRIBE|NOTIFY|M-SEARCH) \S+ HTTP/1\.[01]\r?\n|^HTTP/1\.[01] \d{3}")
 RTSP = re.compile(rb"^(OPTIONS|DESCRIBE|SETUP|PLAY|PAUSE|TEARDOWN|ANNOUNCE|RECORD|GET_PARAMETER|SET_PARAMETER) rtsp://|^RTSP/1\.0 \d{3}")
 ENCRYPTED = {"tls", "dtls", "quic", "ssh", "high-entropy"}
-PLAINTEXT = {"http", "rtsp", "ssdp", "mqtt", "stun", "tplink-xor", "lifx", "text", "dns", "mdns", "ntp", "dhcp",
-             "netbios", "llmnr"}
+PLAINTEXT = {"http", "rtsp", "ssdp", "mqtt", "stun", "ftp", "ftp-data", "tplink-xor", "lifx", "text", "dns", "mdns",
+             "ntp", "dhcp", "netbios", "llmnr"}
+FTP_PASV = re.compile(rb"^227 [^(]*\((\d+),(\d+),(\d+),(\d+),(\d+),(\d+)\)", re.M)
+FTP_EPSV = re.compile(rb"^229 [^(]*\(\|\|\|(\d+)\|\)", re.M)
+FTP_PORT = re.compile(rb"^PORT (\d+),(\d+),(\d+),(\d+),(\d+),(\d+)", re.M)
 
 
 def private(ip):
@@ -80,6 +88,10 @@ def label(f):
     tcp = f["proto"] == "tcp"
     if f["tls_rec"]:
         return "tls"
+    if f.get("ftp_data"):
+        return "ftp-data"
+    if tcp and f["sport"] == 21 and (down.startswith(b"220") or up.startswith((b"USER ", b"AUTH "))):
+        return "ftp"
     for b in (up, down):
         if len(b) >= 3 and b[0] in (0x14, 0x15, 0x16, 0x17) and b[1] == 3 and b[2] <= 4:
             return "tls"
@@ -121,6 +133,7 @@ def label(f):
 
 def main():
     devices_tsv, dataset, pcap, out = sys.argv[1:5]
+    per_flow = open(sys.argv[5], "w") if len(sys.argv) > 5 else None
     macs = {r["mac"]: r["label"] for r in csv.DictReader(open(devices_tsv), delimiter="\t")
             if r["dataset"] == dataset and r["mac"] not in ("", "-")}
     flows = {}
@@ -128,6 +141,8 @@ def main():
 
     def close(k, f):
         lab = label(f)
+        if per_flow:
+            per_flow.write(f"{f['proto']}\t{f['cip']}\t{k[2] if k[1] == f['cip'] else k[4]}\t{f['sip']}\t{f['sport']}\t{f['first']}\t{lab}\n")
         cls = "encrypted" if lab in ENCRYPTED else "plaintext" if lab in PLAINTEXT else "unknown"
         for dev, peer, role in ((f["cmac"], f["smac"], "client"), (f["smac"], f["cmac"], "server")):
             if dev not in macs:
@@ -140,6 +155,8 @@ def main():
             g["first"] = f["first"] if g["first"] is None else min(g["first"], f["first"])
             g["last"] = f["last"] if g["last"] is None else max(g["last"], f["last"])
 
+    # (ip, port) where an FTP data connection is expected, from the control connections
+    ftp_expect = set()
     src = "/dev/stdin" if pcap == "-" else pcap
     next_sweep = None
     for ts, lt, fr in packets(src):
@@ -164,10 +181,18 @@ def main():
                 f = {"cmac": dmac, "smac": smac, "cip": dip, "sip": sip, "sport": sp}
                 flows[rk], d = f, 1
             f.update(proto=proto, first=ts, last=ts, pkts=0, bytes=0, s=(bytearray(), bytearray()), n=[0, 0],
-                     big=0, hi=0, tls_rec=False)
+                     big=0, hi=0, tls_rec=False,
+                     ftp_data=proto == "tcp" and ((dip, dp) in ftp_expect or (sip, sp) in ftp_expect))
         f["last"] = ts
         f["pkts"] += 1
         f["bytes"] += len(pl)
+        if pl and proto == "tcp" and f["sport"] == 21:
+            for m in FTP_PASV.finditer(pl):
+                ftp_expect.add((".".join(x.decode() for x in m.groups()[:4]), int(m.group(5)) * 256 + int(m.group(6))))
+            for m in FTP_EPSV.finditer(pl):
+                ftp_expect.add((f["sip"], int(m.group(1))))
+            for m in FTP_PORT.finditer(pl):
+                ftp_expect.add((".".join(x.decode() for x in m.groups()[:4]), int(m.group(5)) * 256 + int(m.group(6))))
         s = f["s"][d]
         if pl and len(s) < SAMPLE:
             s += pl[:SAMPLE - len(s)]

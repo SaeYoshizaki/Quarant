@@ -93,7 +93,7 @@
 | doc | D1〜D5 |
 | url | アーカイブの URL |
 | snapshot | アーカイブの日付 |
-| timing | before／during／after（キャプチャの期間との関係。スクリプトが付ける） |
+| timing | before／during／after（キャプチャの期間との関係。スクリプトが付ける）。期間は機器が見えた最初の日から最後の日までで、途中にキャプチャしていない日があっても「during」になる（YourThings は 03-20 と 04-10〜12） |
 | shared_source | 製造者の共通のページなら yes |
 | quote | 引用（原文のまま） |
 | type | T1〜T5、none、not assessable |
@@ -118,7 +118,10 @@
 - 高エントロピーの通信だけを根拠に「一致」とするときは、判定に「encryption inferred from entropy」と書く（観測ではなく推定）。
 - サーバー証明書と機器自身の証明書の鍵を数える（`flows_summary.py`）。
 - データセットの作成者の検査の通信は、機器のふるまいから外す。YourThings では、ポートスキャンをした端末（192.168.0.200）との通信と、中間者の検査の中継機（発行者 thing-catcher.gtisc.gatech.edu）との TLS。
-- YourThings の作成者の評価（[yourthings-scorecards.tsv](yourthings-scorecards.tsv)）と、こちらの観測を並べる。評価は能動的な検査を含むので、一致しないこともある（どちらが正しいかは決めない）。
+- YourThings の作成者の評価（[yourthings-scorecards.tsv](yourthings-scorecards.tsv)）と、こちらの観測を並べる。評価は能動的な検査を含むので、一致しないこともある（どちらが正しいかは決めない）。比べるのは、機器とクラウドの間の暗号化、HTTP を使うか、中間者の 3 つ（D36）。
+- FTP のデータの接続は、制御の接続の PASV・EPSV・PORT から見つけて平文に数える（圧縮ファイルは高エントロピーになり、暗号化と取り違えるため。D36）。
+- flowscan の接続の向きの推定は、Zeek と突き合わせて確かめる（`check_roles.py`。D36）。
+- 平文に出ている機器の版を取り出し、文書の時期や作成者の評価の版と並べる（`versions.py`、`versions_summary.py`、[versions-yourthings.md](versions-yourthings.md)。D36）。
 
 ## 決めていないこと
 

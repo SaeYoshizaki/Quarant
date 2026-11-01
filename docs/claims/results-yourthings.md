@@ -30,7 +30,7 @@ YourThings の対応表の 66 台のうち、次の 44 製品。
 
 - **引用**：保存した版の文字と機械的に照合した（`scripts/claims/check_quotes.py`、657 件すべて一致）。
 - **読み落としの確認**：保存した文書から、技術的な言葉（encrypt、TLS、password、firmware、signed など）を含むのに主張の表にない文を機械的に取り出した（1,504 文）。1 文ずつ「主張／手順・画面の文言／別の製品／セキュリティと関係ない／重複」に分け、主張を 72 文加えた。そのうち通信で判定できる型は 2 文（Apple TV の LAN 内の AirPlay と HomeKit のカメラ）だけだった。主張ではないとした文から無作為に 40 文を抜いて確かめ直し、40 文とも分け方に同意した。
-- **通信**：4 日分（03-20、04-10〜12）。Zeek の記録（TLS の版・暗号スイート・証明書の鍵、HTTP の要求の形。値は含まない）、すべての TCP・UDP のフローの分類（`scripts/claims/flowscan.py`。HTTP・TLS・FTP 以外の独自のプロトコルも含む）、Quarant の解析結果。製品ごとのまとめは `scripts/claims/observations.py` と `flows_summary.py`。
+- **通信**：4 日分（03-20、04-10〜12）。Zeek の記録（TLS の版・暗号スイート・証明書の鍵、HTTP の要求の形。値は含まない）、すべての TCP・UDP のフローの分類（`scripts/claims/flowscan.py`。HTTP・TLS・FTP 以外の独自のプロトコルも含む）、Quarant の解析結果。製品ごとのまとめは `scripts/claims/observations.py` と `flows_summary.py`。flowscan の「どちらが接続を始めたか」の推定は、04-10 の丸 1 日で Zeek と突き合わせた：SYN が見えた TCP の接続 109,472 件のうち、外れは 1 件（`check_roles.py`）。SYN の見えない 1.2% と UDP は、この方法では確かめられない。FTP のデータの接続は、制御の接続の PASV・EPSV・PORT から見つけて平文に数えた（中身が圧縮ファイルだと高エントロピーになり、暗号化と取り違えるため）。
 - **データセットの作成者の検査**：YourThings の作成者は、キャプチャの中で能動的な検査をしていた。03-20 のポートスキャン（192.168.0.200 から全機器へ、約 99 万接続）と、04-10〜12 の中間者の検査（偽の証明書で TLS に応答、30 機器、1,497 接続）。どちらも機器のふるまいではないので、集計から外した（D35）。中間者の検査に機器がどう反応したかは、別の結果として使った（下）。
 - **判定**：method.md の型（T1〜T5）と条件で決めた。人による確認はまだしていない。
 
@@ -66,7 +66,7 @@ YourThings の対応表の 66 台のうち、次の 44 製品。
 |---|---|---|---|---|
 | Ring Video Doorbell | 暗号化しているか | "Encryption Bank-Grade"（製品ページ、2017-04-20） | 外部への平文の HTTP 8,374 回のうち 8,373 回が `Authorization: Basic` つき（`vod.ring.com` に約 10 秒ごと、`fw.ring.com` に 1 回）。Quarant も `INSECURE_HTTP_AUTH` を 8,303 回出した。TLS は 1,566 回すべて前方秘匿性なし（`TLS_RSA_WITH_AES_128_CBC_SHA`） | 曖昧な主張なので「暗号化している」だけを判定した。平文はほぼ 03-20 |
 | Philips Hue Bridge | 暗号化しているか | "Philips Lighting, transfers data securely (using SSL) …"（プライバシーポリシー、2017-08-18） | 外部への平文の HTTP で中身があるもの 1,953 回、うち 1,013 回が `Authorization` ヘッダーつき（Quarant `INSECURE_HTTP_AUTH` 1,003）。本物のサーバーとの TLS は 1 回だけ（ほかの 7 回は検査の接続） | 直前にブリッジが送るデータ（ブリッジの ID、シリアル番号、使用データ）を挙げている |
-| Sonos PLAY:1 | 暗号化しているか | "Any data we transmit over the internet is protected using encryption."、ほか 2 文（プライバシーポリシー、2018-02-02） | 外部への平文の HTTP で中身があるもの 21 回。`update.sonos.com` の URL に `householdid`、`serial`、`sonosid` という名前のパラメータ | 送っているのは識別子で、「データ」に入るかは読み方による |
+| Sonos PLAY:1 | 暗号化しているか | "Any data we transmit over the internet is protected using encryption."、ほか 2 文（プライバシーポリシー、2018-02-02） | 外部への平文の HTTP で中身があるもの 21 回。`update.sonos.com` の URL に `householdid`、`serial`、`sonosid` という名前のパラメータ。03-20 にはファームウェアそのもの（8.3MB と 8.8MB）を `update-firmware.sonos.com` から平文の HTTP で取得し、再起動して版が 33.15 から 41.3 に上がった（下の「機器の版」） | 送っているのは識別子で、「データ」に入るかは読み方による |
 | Withings Home | 暗号化しているか | "Communication via Secure Socket Layer (SSL)"（製品ページ、2018-04-04） | `scalews.withings.net` へ本文つきの平文の POST が 3 回 | |
 | Withings Home | 暗号の方法 | "… AES-256 and secure HTTP (HTTPS) to protect your data at the device, cloud and app level so that all your data is stored safely."（同上） | 本物のサーバーとの TLS の 1,621 回中 1,619 回が AES-128 | AES-256 は保存時の暗号化を指している可能性がある |
 | Wink Hub 2 | 証明書の検証 | "We adopt security measures that include certificate pinning, encryption, …"（サポートの FAQ、2017-07-08） | 作成者の中間者の検査で、偽の証明書の接続 42 回のうち 21 回、握手のあとにハブがデータを送った（`hub-api.wink.com`）。YourThings の評価も「中間者が成功」（4/4） | 製造者全体の FAQ で、アプリの話か機器の話かは書いていない。データセットの検査があって初めて見えるもの（D35） |
@@ -99,6 +99,32 @@ YourThings の対応表の 66 台のうち、次の 44 製品。
 
 暗号化の主張がない製品（Belkin の WeMo と NetCam、Samsung Smart TV、Insteon）や、暗号化の主張がどれも判定できない製品（Harmony Hub）にも、前方秘匿性のない TLS や、中身のある平文があった。主張がないので食い違いには数えないが、利用者は文書から暗号化について知ることができない。
 
+### YourThings の作成者の評価との照らし合わせ
+
+作成者の評価（yourthings.info の機器ごとの点数。[yourthings-scorecards.tsv](yourthings-scorecards.tsv)）と、こちらの観測を製品ごとに並べた（表は [encryption-yourthings.md](encryption-yourthings.md) の「YourThings の作成者の評価と、こちらの観測」）。比べたのは、機器とクラウドの間の暗号化（すべて・一部・なし）、HTTP を使うか、中間者が成功したかの 3 つ。「TLS の版」「平文の認証」は、評価ではクラウド側のサーバーを能動的に調べた項目なので比べなかった。
+
+| 項目 | 合った | 合わなかった |
+|---|---|---|
+| 暗号化（平文はすべて数える） | 26 | 15 |
+| 暗号化（中身のある平文だけ数える） | 23 | 18 |
+| HTTP を使うか | 18 | 25 |
+| 中間者が成功したか | 25 | 5 |
+
+- 合わなかったものの多くは、評価が「すべて暗号化」「HTTP を使わない」で、こちらに平文が見えたもの。中身のない平文（OCSP、接続確認など）が理由のものもあるが、**Ring（中身のある平文 8,373 回、うち認証ヘッダーつき 8,373 回）と Hue（1,953 回）は、評価では「すべて暗号化」「HTTP を使わない」だった**。
+- HTTP を使うと評価された製品は 4 つだけ（Amazon Echo、Caseta、Insteon、Chinese Webcam）。こちらでは、比べた 43 製品のうち 28 製品で HTTP の要求が見えた（評価が「使う」で、こちらに見えなかったものはない）。
+- 中間者で合わなかった 5 製品（VeraLite、WeMo Crock-Pot、Harmony Hub、Harman Kardon Invoke、Samsung Smart TV）は、どれもこちらでは偽の証明書のあとにデータを送っていたが、評価では成功していない。
+- 評価の基準と、評価に使った通信は公開されていない。評価は、このキャプチャとは別の時点の機器を見た可能性がある（下の「機器の版」）。どちらが正しいかは決めない。
+
+### 機器の版
+
+平文の通信に出ていた版を取り出した（`scripts/claims/versions.py`。HTTP の User-Agent と Server、SSDP、URL のパラメータ、本文の版の欄、mDNS の TXT、DHCP。表は [versions-yourthings.md](versions-yourthings.md)）。
+
+- **キャプチャの期間中に版が変わった製品が 8 つあった**：Sonos（03-20 の 21:42〜21:44 UTC に 33.15 → 34.16 → 41.3）、Hue（04-11 の 19:29 UTC に IpBridge 1.15.0 → 1.23.0）、Apple TV（03-20 は tvOS 11.2.6、04-10 からは 11.3）、Roku TV（ビルド 4142 → 4183）、Caseta（06.04.03 → 06.05.08）、Google Home と Google Home Mini（Cast のファームウェア 1.30 → 1.31）、Wink Hub 2（node-ssdp 2.8.0 → 2.9.1）。どの日の通信をどの時点の文書と比べるかで、結果が変わりうる。
+- **Sonos は、ファームウェアそのものを平文の HTTP で取得していた**（8.3MB と 8.8MB、そのあと再起動）。Quarant の `I4_INSECURE_FIRMWARE_UPDATE_HTTP` も同じ時刻に出ていた。Hue は版が変わったが、取得の通信は見えなかった（04-10 と 04-11 に大きなダウンロードはない）。
+- **YourThings の評価に書かれた版は、03-20 の通信の版と合わないものがある**：Apple TV（評価は tvOS 11.3、03-20 の通信は 11.2.6）、Roku TV（評価はビルド 4183、03-20 は 4142）、Google Home（評価は 1.32、通信は 1.30 と 1.31）、Hue（評価は 1802201122、通信は 1801260942）。評価日は 03-20〜28 と書かれているが、版はそれより後に記録された可能性がある。合っていたのは HomePod（11.2.5）と Bose（18.0.11）。
+- **読んだリリースノートとの対応**：見えた版が載っていたのは、Apple TV（tvOS 11.3。2018-05-16 のアーカイブで、キャプチャ後）、Insteon（1.0.5）、NVIDIA Shield（Android 6.0）だけ。ほかは、アーカイブがキャプチャより前で新しい版がまだない（Hue は 2017-11-27、Fire TV は 2017-10-14）か、リリースノートが別の番号を使っている（Sonos は「8.3」のような番号で、機器は 41.3 という内部の番号を名乗る）。
+- TLS だけで通信する製品（Nest、Ring、Arlo、Piper など）は、版が見えない。
+
 ## 付録：暗号化以外も含めた全部の主張
 
 暗号化以外の主張（パスワードの決まり、更新のやり方、脆弱性の届け出の窓口など）も [claims.tsv](claims.tsv) に残している。全部で 657 件（ほかに「セキュリティの主張なし」の文書 129 件）、判定は次のとおり。
@@ -107,19 +133,22 @@ YourThings の対応表の 66 台のうち、次の 44 製品。
 |---|---|
 | 食い違いの候補 | 12（暗号化の主張 11 件と、August の「業界標準で PII を守る」） |
 | 文言の上で食い違い | 4 |
-| 一致（見えた範囲で） | 47 |
-| 見えない | 19 |
+| 一致（見えた範囲で） | 48 |
+| 見えない | 18 |
 | 判定できない | 575 |
+
+全通信の分類で「見えない」から変わったのは、Nest Protect と Nest Guard の 7 件（暗号化はエントロピーからの推定）と、VeraLite の「ssh で遠隔アクセスのサーバーにつなぐ」（tcp/232 の SSH が見えた）。残りの 18 件は、全通信を見ても確かめる手段がなかった（Arlo のカメラと基地局の間の無線、Apple の HomeKit と AirPlay のストリーム、カメラの映像、更新の取得など）。
 
 1 回目（読めたページだけ）は主張 232 件で、食い違いの候補は 5 製品だった。全文書を読むと、Hue の判定が「判定できない」から「食い違いの候補」に変わった（1 回目は主張の範囲を「アプリ」と読んでいた）。
 
 ## 限界
 
 - **読めなかった文書**：34 件（[unreadable.md](unreadable.md)）。Nest と Belkin のサポート記事、Roku の製品ページとサポート記事、iRobot のデータセキュリティのページなど。本文を JavaScript で表示するページか、文字の層がない PDF。
-- **時期**：アーカイブの日付とキャプチャのずれは `offset_months` に入れた。Piper の FAQ（37 か月前）、Logi のプライバシーの声明（26 か月前）のように古いものや、Arlo の英語版の FAQ・Canary と Piper の 2019 年のページのようにキャプチャ後のものがある。
+- **時期**：アーカイブの日付とキャプチャのずれは `offset_months` に入れた。Piper の FAQ（36 か月前）、Logi のプライバシーの声明（26 か月前）のように古いものや、Arlo の英語版の FAQ・Canary と Piper の 2019 年のページのようにキャプチャ後のものがある。
 - **型番**：Belkin NetCam は、機器の名乗りが NetCamHD（F7D7602）なのに、読んだ製品ページとマニュアルは F7D7601 のもの。August と myQ は型番が分からず、複数の型のページを読んだ。Apple の iOS Security Guide は HomePod に一度も触れていないので、HomePod への当てはめは推定。
-- **観測の範囲**：HTTP・TLS・FTP 以外は、構造かエントロピーで分類しただけで、中身は読んでいない。高エントロピーは暗号化と圧縮を区別できない。03-20 の Quarant は、スキャンの端末のパケットを除いて解析した。キャプチャの期間（`capture_start`、`capture_end`）は Quarant の 04-10〜12 で付けている。
+- **観測の範囲**：HTTP・TLS・FTP 以外は、構造かエントロピーで分類しただけで、中身は読んでいない。高エントロピーは暗号化と圧縮を区別できない。03-20 の Quarant は、スキャンの端末のパケットを除いて解析した。キャプチャの期間（`capture_start`、`capture_end`）は、Quarant で機器が見えた最初と最後の日（多くは 03-20〜04-12）。この間の 03-21〜04-09 はキャプチャしていないが、この間にアーカイブされた文書も「期間中」（ずれ 0）になる（265 件）。
 - **作成者の検査**：中間者の検査で機器が送ったデータの中身は分からない。データを送ったことを、証明書を受け入れたことの推定に使った。
+- **版**：平文に出ていた版だけで、TLS の中の版は見えない。User-Agent はアプリやライブラリの版のこともあり、ファームウェアの版とは限らない。
 - **判定**：1 人で行った。暗号化の主張のうち、食い違いの候補と文言の上の食い違いの 15 件は、人がまだ確かめていない。
 - **件数**：根拠の列（claims.tsv の evidence）の TLS と Quarant の件数は、4 日分・検査の接続を除いた値にそろえた。
 - 食い違いの候補は、主張が誤りだという意味ではない。食い違いが見つからなかった製品も、安全だという意味ではない。

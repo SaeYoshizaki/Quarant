@@ -115,11 +115,13 @@ def main():
         write_flows(w, products, cat, has_claim, sys.argv[5], sys.argv[6])
     if len(sys.argv) > 7:
         write_mitm(w, cat, sys.argv[7], sys.argv[6])
+        write_scorecard_check(w, products, cat, obs, sys.argv[5], sys.argv[6], sys.argv[7])
     w.close()
 
 
 NETWORK = {"dns", "mdns", "ntp", "dhcp", "netbios", "llmnr", "ssdp"}
 KIND_JA = {"high-entropy": "高エントロピー", "low-entropy-binary": "バイナリ", "text": "テキスト", "tplink-xor": "TP-Link（XOR）",
+           "ftp-data": "FTP のデータ",
            "lifx": "LIFX LAN", "too-short": "短すぎる", "no-payload": "中身なし"}
 
 
@@ -179,6 +181,77 @@ def write_mitm(w, cat, mitm_tsv, scorecards_tsv):
         x = c[p]
         w.write(f"| {name.get(p, p)} | {sum(x.values())} | {x['client-alert']} | {x['handshake-only']} | {x['data-sent']} | "
                 f"{sc.get(p, {}).get('MITM Device-to-Cloud', '')} |\n")
+
+
+
+def ours_encryption(flows):
+    """Device-to-cloud encryption as observed: all, partly or none of the external flows encrypted."""
+    enc = plain = 0
+    for k, n in flows.items():
+        scope, role, _, kind, cl = k.split("|")
+        if scope != "external" or role != "client" or kind in NETWORK:
+            continue
+        enc += n if cl == "encrypted" else 0
+        plain += n if cl == "plaintext" else 0
+    if not enc and not plain:
+        return None, "（外部への通信なし）"
+    grade = "0/4" if not plain else "4/4" if not enc else "2/4"
+    return grade, f"{grade}（暗号化 {enc}、平文 {plain}）"
+
+
+def write_scorecard_check(w, products, cat, obs, flows_json, scorecards_tsv, mitm_tsv):
+    fl = {r["product"]: r for r in json.load(open(flows_json))}
+    sc = {r["catalog_product"]: r for r in csv.DictReader(open(scorecards_tsv), delimiter="\t")}
+    label_product = {r["label"]: r["catalog_product"] for r in sc.values()}
+    sent = collections.Counter()
+    tested = set()
+    for r in csv.DictReader(open(mitm_tsv), delimiter="\t"):
+        p = label_product.get(r["label"], r["label"])
+        tested.add(p)
+        sent[p] += r["outcome"] == "data-sent"
+    w.write("\n### YourThings の作成者の評価と、こちらの観測\n\n")
+    w.write("評価（yourthings.info）は点数で、多いほど悪い。暗号化（機器とクラウドの間）は 0/4=すべて暗号化、2/4=一部、4/4=なし。"
+            "こちらは、機器から外部へのフロー（DNS などのネットワークの仕組みの通信を除く）が、すべて暗号化なら 0/4、一部なら 2/4、すべて平文なら 4/4 とした。"
+            "「中身のある平文だけ」は、外部への平文の HTTP のうち本文、URL のパラメータ、認証ヘッダーのどれかがあるもの（Zeek）と FTP だけを平文に数えた場合。"
+            "HTTP は、機器が平文の HTTP の要求を出したか（外部か LAN 内か問わない）。中間者は、偽の証明書のあとに機器がデータを送ったか（`mitm_sessions.py`）。"
+            "評価の「TLS の版」「平文の認証」は、クラウド側のサーバーを能動的に調べた項目なので、ここでは比べない。\n\n")
+    w.write("| 製品 | 暗号化：評価 | 暗号化：観測 | 暗号化：観測（中身のある平文だけ） | HTTP：評価 | HTTP：観測 | 中間者：評価 | 中間者：観測 | 合わない項目 |\n"
+            "|---|---|---|---|---|---|---|---|---|\n")
+    tally = collections.Counter()
+    for p in products:
+        c = cat.get(p, "")
+        s = sc.get(c)
+        if not s:
+            continue
+        f = fl.get(c, {}).get("flows", {})
+        g, text = ours_encryption(f)
+        o = (obs.get(c) or [{}])[0]
+        content = (o.get("plaintext_http", {}).get("external_content", 0)
+                   + sum(x["count"] for x in o.get("ftp", []) if x["scope"] == "external" and x["password"]))
+        enc = sum(n for k, n in f.items() if k.startswith("external|client|") and k.endswith("|encrypted"))
+        g2 = None if g is None else "0/4" if not content else "4/4" if not enc else "2/4"
+        text2 = "" if g is None else f"{g2}（{content}）"
+        http = sum(n for k, n in f.items() if k.split("|")[1] == "client" and k.split("|")[3] == "http")
+        http_g = "1/1" if http else "0/1"
+        m_g = ("4/4" if sent[c] else "0/4") if c in tested else None
+        diff = []
+        if g and g != s["Encryption Device-to-Cloud"]:
+            diff.append("暗号化")
+        if g2 and g2 != s["Encryption Device-to-Cloud"]:
+            diff.append("暗号化（中身）")
+        if f and http_g != s["HTTP"]:
+            diff.append("HTTP")
+        if m_g and m_g != s["MITM Device-to-Cloud"]:
+            diff.append("中間者")
+        for item, ok in (("暗号化", g), ("暗号化（中身）", g2), ("HTTP", f), ("中間者", m_g)):
+            if ok:
+                tally[(item, item not in diff)] += 1
+        w.write(f"| {p} | {s['Encryption Device-to-Cloud']} | {text} | {text2} | {s['HTTP']} | {http_g if f else '（観測なし）'}"
+                f"{f'（{http}）' if http else ''} | {s['MITM Device-to-Cloud']} | "
+                f"{(m_g + f'（{sent[c]} 回）' if sent[c] else m_g) if m_g else '（検査なし）'} | {'、'.join(diff)} |\n")
+    w.write("\n比べられた製品のうち、合ったもの／合わなかったもの："
+            + "、".join(f"{item} {tally[(item, True)]}／{tally[(item, False)]}" for item in ("暗号化", "暗号化（中身）", "HTTP", "中間者"))
+            + "。\n")
 
 
 if __name__ == "__main__":

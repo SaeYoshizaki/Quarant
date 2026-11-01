@@ -13,6 +13,7 @@
 | [unreadable.md](unreadable.md) | アーカイブにはあるが読めなかった文書の一覧（ブラウザで開く用） |
 | [results-yourthings.md](results-yourthings.md) | 結果：YourThings 2018 の 44 製品。暗号化の主張に絞った結果が中心 |
 | [encryption-yourthings.md](encryption-yourthings.md) | 暗号化の主張と観測の表、44 製品の観測した暗号化、すべてのフロー、中間者の検査への反応（スクリプトで作る） |
+| [versions-yourthings.md](versions-yourthings.md) | 平文の通信に出ていた機器の版（日ごと）、作成者の評価の版、リリースノートに載っているか（スクリプトで作る） |
 | [yourthings-scorecards.tsv](yourthings-scorecards.tsv) | YourThings の作成者の評価（yourthings.info）のうち、暗号化に関わる項目と、評価したファームウェアの版・日付 |
 | [pilot-yourthings.md](pilot-yourthings.md) | 試し：YourThings 2018 の 5 製品（Ring、Canary、Nest Cam、Belkin NetCam HD、Hue） |
 | [related-work.md](related-work.md) | 先行研究と、本研究の位置づけ |
@@ -25,9 +26,12 @@
 | `scripts/claims/claim_offsets.py` | `python3 scripts/claims/claim_offsets.py docs/claims/claims.tsv docs/claims/devices.json`：主張ごとに、キャプチャの期間とアーカイブの日付のずれを付ける |
 | `scripts/claims/check_quotes.py` | `python3 scripts/claims/check_quotes.py ~/datasets/claims/snapshots docs/claims/claims.tsv`：引用が保存した版に原文どおりあるかを確かめる |
 | `scripts/claims/run_flows.sh` | `scripts/claims/run_flows.sh <その日の PCAP のディレクトリ> ~/datasets/claims/flows-yt/yt-<日>`：1 日分を時間順に読み、`flowscan.py` と Zeek（conn、ssl、x509、`tls_records.zeek`）にかける |
-| `scripts/claims/flowscan.py` | すべての TCP・UDP のフローを、構造かエントロピーで分類する（暗号化、平文、分からない）。`run_flows.sh` から呼ぶ |
+| `scripts/claims/flowscan.py` | すべての TCP・UDP のフローを、構造かエントロピーで分類する（暗号化、平文、分からない）。FTP のデータの接続は制御の接続から見つける。`run_flows.sh` から呼ぶ |
 | `scripts/claims/mitm_sessions.py` | `python3 scripts/claims/mitm_sessions.py docs/claims/devices.tsv yourthings ~/datasets/claims/flows-yt thing-catcher.gtisc.gatech.edu ~/datasets/claims/mitm-yourthings.tsv`：データセットの作成者の中間者の検査の接続と、機器の反応（拒んだ、握手だけ、データを送った） |
 | `scripts/claims/flows_summary.py` | `python3 scripts/claims/flows_summary.py docs/claims/devices.tsv yourthings ~/datasets/claims/flows-yt ~/datasets/claims/flows-yourthings.json 192.168.0.200 thing-catcher.gtisc.gatech.edu`：製品ごとのフローの分類と証明書の鍵（スキャンの端末と検査の証明書は分けて数える） |
+| `scripts/claims/check_roles.py` | `python3 scripts/claims/check_roles.py <flowscan の 1 フロー 1 行の出力> <Zeek の conn.log>`：flowscan の接続の向きの推定を、SYN が見えた接続で Zeek と突き合わせる（flowscan.py の 5 つ目の引数で 1 フロー 1 行を出す） |
+| `scripts/claims/versions.py` | `python3 scripts/claims/versions.py docs/claims/devices.tsv yourthings - ~/datasets/claims/versions-yt/yt-<日>.json`（標準入力に 1 日分の PCAP）：平文に出ている機器の版 |
+| `scripts/claims/versions_summary.py` | `python3 scripts/claims/versions_summary.py ~/datasets/claims/versions-yt docs/claims/devices.tsv docs/claims/yourthings-scorecards.tsv docs/claims/coverage.tsv ~/datasets/claims/snapshots docs/claims/versions-yourthings.md`：製品ごと・日ごとの版の表 |
 | `scripts/claims/packet_entropy.py` | 1 つの機器・ポートの、パケットごとのエントロピー（独自のプロトコルが暗号化されていそうかの推定。Nest の tcp/11095 に使った） |
 | `scripts/claims/scorecards.py` | `python3 scripts/claims/scorecards.py <保存した yourthings.info のページ> docs/claims/devices.tsv docs/claims/yourthings-scorecards.tsv`：YourThings の作成者の評価から、暗号化に関わる項目を取り出す |
 | `scripts/claims/observations.py` | `python3 scripts/claims/observations.py docs/claims/devices.tsv yourthings ~/datasets/gt-yt ~/datasets/runs-yt5 ~/datasets/claims/obs-yourthings.json ~/datasets/claims/mitm-yourthings.tsv`：機器ごとの観測（TLS、HTTP の形、FTP、Quarant の検出）をまとめる。検査の接続は TLS の集計から外す |
@@ -44,5 +48,5 @@
 
 ## 今の状態（2026-10-31）
 
-- YourThings の 44 製品は、全製品で D1〜D6 を探し、読み落としの確認まで済んだ（D33）。主張 657 件。結果は [results-yourthings.md](results-yourthings.md)。研究の範囲は暗号化（暗号の方法と、暗号化しているか）に絞った（D34）。暗号化の主張は 145 件で、食い違いの候補は 7 製品（Ring、Hue、Sonos、Withings Home、Harman Kardon Invoke、Wink Hub 2、Canary）。観測を HTTP・TLS・FTP 以外のすべてのフローに広げ、データセットの作成者の検査（ポートスキャン、中間者）の通信を外した（D35）。
+- YourThings の 44 製品は、全製品で D1〜D6 を探し、読み落としの確認まで済んだ（D33）。主張 657 件。結果は [results-yourthings.md](results-yourthings.md)。研究の範囲は暗号化（暗号の方法と、暗号化しているか）に絞った（D34）。暗号化の主張は 145 件で、食い違いの候補は 7 製品（Ring、Hue、Sonos、Withings Home、Harman Kardon Invoke、Wink Hub 2、Canary）。観測を HTTP・TLS・FTP 以外のすべてのフローに広げ、データセットの作成者の検査（ポートスキャン、中間者）の通信を外した（D35）。キャプチャの期間に 03-20 を含め、機器の版と作成者の評価を観測と並べた（D36）：キャプチャの期間中に 8 製品の版が変わっていた。
 - 次：候補を人が確かめる。読めなかった文書（[unreadable.md](unreadable.md)）。ほかのデータセットに広げる。

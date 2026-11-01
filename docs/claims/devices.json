@@ -1144,8 +1144,8 @@
    "model_basis": "",
    "category": "hub",
    "note": "",
-   "runs_seen": 3,
-   "first_seen": "2018-04-10",
+   "runs_seen": 4,
+   "first_seen": "2018-03-20",
    "last_seen": "2018-04-12"
   },
   {
@@ -1158,8 +1158,8 @@
    "model_basis": "",
    "category": "hub",
    "note": "",
-   "runs_seen": 3,
-   "first_seen": "2018-04-10",
+   "runs_seen": 4,
+   "first_seen": "2018-03-20",
    "last_seen": "2018-04-12"
   },
   {
@@ -1172,8 +1172,8 @@
    "model_basis": "dhcp hostname HubPro",
    "category": "hub",
    "note": "",
-   "runs_seen": 3,
-   "first_seen": "2018-04-10",
+   "runs_seen": 4,
+   "first_seen": "2018-03-20",
    "last_seen": "2018-04-12"
   },
   {
@@ -1186,8 +1186,8 @@
    "model_basis": "ssdp server (ZPS1)",
    "category": "speaker",
    "note": "ZPS1 = PLAY:1 per Sonos model code (not checked against a primary source)",
-   "runs_seen": 3,
-   "first_seen": "2018-04-10",
+   "runs_seen": 4,
+   "first_seen": "2018-03-20",
    "last_seen": "2018-04-12"
   },
   {
@@ -1200,8 +1200,8 @@
    "model_basis": "",
    "category": "hub",
    "note": "router with smart-home hub",
-   "runs_seen": 3,
-   "first_seen": "2018-04-10",
+   "runs_seen": 4,
+   "first_seen": "2018-03-20",
    "last_seen": "2018-04-12"
   },
   {
@@ -1214,8 +1214,8 @@
    "model_basis": "",
    "category": "camera",
    "note": "",
-   "runs_seen": 3,
-   "first_seen": "2018-04-10",
+   "runs_seen": 4,
+   "first_seen": "2018-03-20",
    "last_seen": "2018-04-12"
   },
   {
@@ -1228,8 +1228,8 @@
    "model_basis": "",
    "category": "sensor",
    "note": "",
-   "runs_seen": 3,
-   "first_seen": "2018-04-10",
+   "runs_seen": 4,
+   "first_seen": "2018-03-20",
    "last_seen": "2018-04-12"
   },
   {
@@ -1242,8 +1242,8 @@
    "model_basis": "dhcp hostname",
    "category": "bulb",
    "note": "",
-   "runs_seen": 3,
-   "first_seen": "2018-04-10",
+   "runs_seen": 4,
+   "first_seen": "2018-03-20",
    "last_seen": "2018-04-12"
   },
   {
@@ -1270,8 +1270,8 @@
    "model_basis": "dataset label",
    "category": "voice-assistant",
    "note": "",
-   "runs_seen": 3,
-   "first_seen": "2018-04-10",
+   "runs_seen": 4,
+   "first_seen": "2018-03-20",
    "last_seen": "2018-04-12"
   },
   {
@@ -1298,8 +1298,8 @@
    "model_basis": "",
    "category": "sensor",
    "note": "",
-   "runs_seen": 3,
-   "first_seen": "2018-04-10",
+   "runs_seen": 4,
+   "first_seen": "2018-03-20",
    "last_seen": "2018-04-12"
   },
   {
@@ -1326,8 +1326,8 @@
    "model_basis": "",
    "category": "doorbell",
    "note": "",
-   "runs_seen": 2,
-   "first_seen": "2018-04-10",
+   "runs_seen": 3,
+   "first_seen": "2018-03-20",
    "last_seen": "2018-04-11"
   },
   {
@@ -1340,8 +1340,8 @@
    "model_basis": "",
    "category": "tv-streaming",
    "note": "",
-   "runs_seen": 3,
-   "first_seen": "2018-04-10",
+   "runs_seen": 4,
+   "first_seen": "2018-03-20",
    "last_seen": "2018-04-12"
   },
   {
@@ -1354,8 +1354,8 @@
    "model_basis": "dataset label",
    "category": "tv-streaming",
    "note": "",
-   "runs_seen": 3,
-   "first_seen": "2018-04-10",
+   "runs_seen": 4,
+   "first_seen": "2018-03-20",
    "last_seen": "2018-04-12"
   },
   {
@@ -1368,8 +1368,8 @@
    "model_basis": "",
    "category": "tv-streaming",
    "note": "",
-   "runs_seen": 3,
-   "first_seen": "2018-04-10",
+   "runs_seen": 4,
+   "first_seen": "2018-03-20",
    "last_seen": "2018-04-12"
   },
   {
@@ -1382,8 +1382,8 @@
    "model_basis": "",
    "category": "tv-streaming",
    "note": "",
-   "runs_seen": 3,
-   "first_seen": "2018-04-10",
+   "runs_seen": 4,
+   "first_seen": "2018-03-20",
    "last_seen": "2018-04-12"
   },
   {
@@ -1396,8 +1396,8 @@
    "model_basis": "dataset label",
    "category": "tv-streaming",
    "note": "",
-   "runs_seen": 3,
-   "first_seen": "2018-04-10",
+   "runs_seen": 4,
+   "first_seen": "2018-03-20",
    "last_seen": "2018-04-12"
   },
   {
@@ -1410,8 +1410,8 @@
    "model_basis": "",
    "category": "hub",
    "note": "",
-   "runs_seen": 3,
-   "first_seen": "2018-04-10",
+   "runs_seen": 4,
+   "first_seen": "2018-03-20",
    "last_seen": "2018-04-12"
   },
   {
@@ -1424,8 +1424,8 @@
    "model_basis": "dhcp hostname",
    "category": "camera",
    "note": "the observed host is the base station",
-   "runs_seen": 3,
-   "first_seen": "2018-04-10",
+   "runs_seen": 4,
+   "first_seen": "2018-03-20",
    "last_seen": "2018-04-12"
   },
   {
@@ -1438,8 +1438,8 @@
    "model_basis": "dataset label, dhcp hostname",
    "category": "camera",
    "note": "",
-   "runs_seen": 3,
-   "first_seen": "2018-04-10",
+   "runs_seen": 4,
+   "first_seen": "2018-03-20",
    "last_seen": "2018-04-12"
   },
   {
@@ -1452,8 +1452,8 @@
    "model_basis": "",
    "category": "camera",
    "note": "",
-   "runs_seen": 3,
-   "first_seen": "2018-04-10",
+   "runs_seen": 4,
+   "first_seen": "2018-03-20",
    "last_seen": "2018-04-12"
   },
   {
@@ -1466,8 +1466,8 @@
    "model_basis": "",
    "category": "camera",
    "note": "",
-   "runs_seen": 3,
-   "first_seen": "2018-04-10",
+   "runs_seen": 4,
+   "first_seen": "2018-03-20",
    "last_seen": "2018-04-12"
   },
   {
@@ -1480,8 +1480,8 @@
    "model_basis": "dataset label",
    "category": "camera",
    "note": "",
-   "runs_seen": 3,
-   "first_seen": "2018-04-10",
+   "runs_seen": 4,
+   "first_seen": "2018-03-20",
    "last_seen": "2018-04-12"
   },
   {
@@ -1494,8 +1494,8 @@
    "model_basis": "",
    "category": "camera",
    "note": "",
-   "runs_seen": 3,
-   "first_seen": "2018-04-10",
+   "runs_seen": 4,
+   "first_seen": "2018-03-20",
    "last_seen": "2018-04-12"
   },
   {
@@ -1508,8 +1508,8 @@
    "model_basis": "",
    "category": "appliance",
    "note": "",
-   "runs_seen": 3,
-   "first_seen": "2018-04-10",
+   "runs_seen": 4,
+   "first_seen": "2018-03-20",
    "last_seen": "2018-04-12"
   },
   {
@@ -1522,8 +1522,8 @@
    "model_basis": "dataset label",
    "category": "hub",
    "note": "",
-   "runs_seen": 3,
-   "first_seen": "2018-04-10",
+   "runs_seen": 4,
+   "first_seen": "2018-03-20",
    "last_seen": "2018-04-12"
   },
   {
@@ -1536,8 +1536,8 @@
    "model_basis": "",
    "category": "camera",
    "note": "maker unknown; claims cannot be collected",
-   "runs_seen": 3,
-   "first_seen": "2018-04-10",
+   "runs_seen": 4,
+   "first_seen": "2018-03-20",
    "last_seen": "2018-04-12"
   },
   {
@@ -1550,8 +1550,8 @@
    "model_basis": "",
    "category": "doorbell",
    "note": "",
-   "runs_seen": 3,
-   "first_seen": "2018-04-10",
+   "runs_seen": 4,
+   "first_seen": "2018-03-20",
    "last_seen": "2018-04-12"
   },
   {
@@ -1578,8 +1578,8 @@
    "model_basis": "",
    "category": "appliance",
    "note": "",
-   "runs_seen": 3,
-   "first_seen": "2018-04-10",
+   "runs_seen": 4,
+   "first_seen": "2018-03-20",
    "last_seen": "2018-04-12"
   },
   {
@@ -1592,8 +1592,8 @@
    "model_basis": "",
    "category": "hub",
    "note": "",
-   "runs_seen": 3,
-   "first_seen": "2018-04-10",
+   "runs_seen": 4,
+   "first_seen": "2018-03-20",
    "last_seen": "2018-04-12"
   },
   {
@@ -1606,8 +1606,8 @@
    "model_basis": "",
    "category": "hub",
    "note": "",
-   "runs_seen": 3,
-   "first_seen": "2018-04-10",
+   "runs_seen": 4,
+   "first_seen": "2018-03-20",
    "last_seen": "2018-04-12"
   },
   {
@@ -1620,8 +1620,8 @@
    "model_basis": "",
    "category": "voice-assistant",
    "note": "",
-   "runs_seen": 3,
-   "first_seen": "2018-04-10",
+   "runs_seen": 4,
+   "first_seen": "2018-03-20",
    "last_seen": "2018-04-12"
   },
   {
@@ -1634,8 +1634,8 @@
    "model_basis": "",
    "category": "voice-assistant",
    "note": "",
-   "runs_seen": 3,
-   "first_seen": "2018-04-10",
+   "runs_seen": 4,
+   "first_seen": "2018-03-20",
    "last_seen": "2018-04-12"
   },
   {
@@ -1648,8 +1648,8 @@
    "model_basis": "dataset label, dhcp hostname",
    "category": "speaker",
    "note": "",
-   "runs_seen": 3,
-   "first_seen": "2018-04-10",
+   "runs_seen": 4,
+   "first_seen": "2018-03-20",
    "last_seen": "2018-04-12"
   },
   {
@@ -1662,8 +1662,8 @@
    "model_basis": "dataset label",
    "category": "voice-assistant",
    "note": "",
-   "runs_seen": 3,
-   "first_seen": "2018-04-10",
+   "runs_seen": 4,
+   "first_seen": "2018-03-20",
    "last_seen": "2018-04-12"
   },
   {
@@ -1676,8 +1676,8 @@
    "model_basis": "",
    "category": "speaker",
    "note": "",
-   "runs_seen": 3,
-   "first_seen": "2018-04-10",
+   "runs_seen": 4,
+   "first_seen": "2018-03-20",
    "last_seen": "2018-04-12"
   },
   {
@@ -1690,8 +1690,8 @@
    "model_basis": "",
    "category": "appliance",
    "note": "",
-   "runs_seen": 3,
-   "first_seen": "2018-04-10",
+   "runs_seen": 4,
+   "first_seen": "2018-03-20",
    "last_seen": "2018-04-12"
   },
   {
@@ -1704,8 +1704,8 @@
    "model_basis": "",
    "category": "tv-streaming",
    "note": "",
-   "runs_seen": 3,
-   "first_seen": "2018-04-10",
+   "runs_seen": 4,
+   "first_seen": "2018-03-20",
    "last_seen": "2018-04-10"
   },
   {
@@ -1718,8 +1718,8 @@
    "model_basis": "dhcp hostname Koogeek-LB1-…",
    "category": "bulb",
    "note": "",
-   "runs_seen": 3,
-   "first_seen": "2018-04-10",
+   "runs_seen": 4,
+   "first_seen": "2018-03-20",
    "last_seen": "2018-04-12"
   },
   {
@@ -1732,8 +1732,8 @@
    "model_basis": "dhcp hostname",
    "category": "bulb",
    "note": "",
-   "runs_seen": 3,
-   "first_seen": "2018-04-10",
+   "runs_seen": 4,
+   "first_seen": "2018-03-20",
    "last_seen": "2018-04-12"
   },
   {
@@ -1746,8 +1746,8 @@
    "model_basis": "",
    "category": "hub",
    "note": "",
-   "runs_seen": 3,
-   "first_seen": "2018-04-10",
+   "runs_seen": 4,
+   "first_seen": "2018-03-20",
    "last_seen": "2018-04-12"
   },
   {
@@ -2880,7 +2880,7 @@
    ],
    "datasets": {
     "yourthings": {
-     "first_seen": "2018-04-10",
+     "first_seen": "2018-03-20",
      "last_seen": "2018-04-12",
      "units": 1
     }
@@ -2969,7 +2969,7 @@
    "models": [],
    "datasets": {
     "yourthings": {
-     "first_seen": "2018-04-10",
+     "first_seen": "2018-03-20",
      "last_seen": "2018-04-12",
      "units": 1
     }
@@ -3010,7 +3010,7 @@
    ],
    "datasets": {
     "yourthings": {
-     "first_seen": "2018-04-10",
+     "first_seen": "2018-03-20",
      "last_seen": "2018-04-12",
      "units": 1
     }
@@ -3023,7 +3023,7 @@
    "models": [],
    "datasets": {
     "yourthings": {
-     "first_seen": "2018-04-10",
+     "first_seen": "2018-03-20",
      "last_seen": "2018-04-12",
      "units": 1
     }
@@ -3038,7 +3038,7 @@
    ],
    "datasets": {
     "yourthings": {
-     "first_seen": "2018-04-10",
+     "first_seen": "2018-03-20",
      "last_seen": "2018-04-12",
      "units": 1
     }
@@ -3102,7 +3102,7 @@
      "units": 1
     },
     "yourthings": {
-     "first_seen": "2018-04-10",
+     "first_seen": "2018-03-20",
      "last_seen": "2018-04-12",
      "units": 1
     }
@@ -3170,7 +3170,7 @@
    "models": [],
    "datasets": {
     "yourthings": {
-     "first_seen": "2018-04-10",
+     "first_seen": "2018-03-20",
      "last_seen": "2018-04-12",
      "units": 1
     }
@@ -3198,7 +3198,7 @@
      "units": 1
     },
     "yourthings": {
-     "first_seen": "2018-04-10",
+     "first_seen": "2018-03-20",
      "last_seen": "2018-04-12",
      "units": 1
     }
@@ -3239,7 +3239,7 @@
    "models": [],
    "datasets": {
     "yourthings": {
-     "first_seen": "2018-04-10",
+     "first_seen": "2018-03-20",
      "last_seen": "2018-04-12",
      "units": 1
     }
@@ -3285,7 +3285,7 @@
    ],
    "datasets": {
     "yourthings": {
-     "first_seen": "2018-04-10",
+     "first_seen": "2018-03-20",
      "last_seen": "2018-04-12",
      "units": 1
     }
@@ -3308,7 +3308,7 @@
      "units": 1
     },
     "yourthings": {
-     "first_seen": "2018-04-10",
+     "first_seen": "2018-03-20",
      "last_seen": "2018-04-12",
      "units": 1
     }
@@ -3321,7 +3321,7 @@
    "models": [],
    "datasets": {
     "yourthings": {
-     "first_seen": "2018-04-10",
+     "first_seen": "2018-03-20",
      "last_seen": "2018-04-12",
      "units": 1
     }
@@ -3336,7 +3336,7 @@
    ],
    "datasets": {
     "yourthings": {
-     "first_seen": "2018-04-10",
+     "first_seen": "2018-03-20",
      "last_seen": "2018-04-12",
      "units": 1
     }
@@ -3460,7 +3460,7 @@
      "units": 1
     },
     "yourthings": {
-     "first_seen": "2018-04-10",
+     "first_seen": "2018-03-20",
      "last_seen": "2018-04-12",
      "units": 1
     }
@@ -3473,7 +3473,7 @@
    "models": [],
    "datasets": {
     "yourthings": {
-     "first_seen": "2018-04-10",
+     "first_seen": "2018-03-20",
      "last_seen": "2018-04-12",
      "units": 1
     }
@@ -3521,7 +3521,7 @@
    ],
    "datasets": {
     "yourthings": {
-     "first_seen": "2018-04-10",
+     "first_seen": "2018-03-20",
      "last_seen": "2018-04-12",
      "units": 1
     }
@@ -3639,7 +3639,7 @@
    ],
    "datasets": {
     "yourthings": {
-     "first_seen": "2018-04-10",
+     "first_seen": "2018-03-20",
      "last_seen": "2018-04-12",
      "units": 1
     }
@@ -3675,7 +3675,7 @@
    "models": [],
    "datasets": {
     "yourthings": {
-     "first_seen": "2018-04-10",
+     "first_seen": "2018-03-20",
      "last_seen": "2018-04-12",
      "units": 1
     },
@@ -3695,7 +3695,7 @@
    ],
    "datasets": {
     "yourthings": {
-     "first_seen": "2018-04-10",
+     "first_seen": "2018-03-20",
      "last_seen": "2018-04-12",
      "units": 1
     }
@@ -3723,7 +3723,7 @@
    ],
    "datasets": {
     "yourthings": {
-     "first_seen": "2018-04-10",
+     "first_seen": "2018-03-20",
      "last_seen": "2018-04-12",
      "units": 1
     }
@@ -3759,7 +3759,7 @@
    "models": [],
    "datasets": {
     "yourthings": {
-     "first_seen": "2018-04-10",
+     "first_seen": "2018-03-20",
      "last_seen": "2018-04-12",
      "units": 1
     }
@@ -3772,7 +3772,7 @@
    "models": [],
    "datasets": {
     "yourthings": {
-     "first_seen": "2018-04-10",
+     "first_seen": "2018-03-20",
      "last_seen": "2018-04-12",
      "units": 1
     }
@@ -3798,7 +3798,7 @@
    "models": [],
    "datasets": {
     "yourthings": {
-     "first_seen": "2018-04-10",
+     "first_seen": "2018-03-20",
      "last_seen": "2018-04-12",
      "units": 1
     }
@@ -3831,7 +3831,7 @@
    ],
    "datasets": {
     "yourthings": {
-     "first_seen": "2018-04-10",
+     "first_seen": "2018-03-20",
      "last_seen": "2018-04-12",
      "units": 1
     }
@@ -3851,7 +3851,7 @@
    "models": [],
    "datasets": {
     "yourthings": {
-     "first_seen": "2018-04-10",
+     "first_seen": "2018-03-20",
      "last_seen": "2018-04-12",
      "units": 1
     },
@@ -3910,7 +3910,7 @@
      "units": 1
     },
     "yourthings": {
-     "first_seen": "2018-04-10",
+     "first_seen": "2018-03-20",
      "last_seen": "2018-04-12",
      "units": 1
     }
@@ -4004,7 +4004,7 @@
    "models": [],
    "datasets": {
     "yourthings": {
-     "first_seen": "2018-04-10",
+     "first_seen": "2018-03-20",
      "last_seen": "2018-04-12",
      "units": 1
     }
@@ -4045,7 +4045,7 @@
      "units": 1
     },
     "yourthings": {
-     "first_seen": "2018-04-10",
+     "first_seen": "2018-03-20",
      "last_seen": "2018-04-12",
      "units": 1
     },
@@ -4065,7 +4065,7 @@
    ],
    "datasets": {
     "yourthings": {
-     "first_seen": "2018-04-10",
+     "first_seen": "2018-03-20",
      "last_seen": "2018-04-12",
      "units": 1
     }
@@ -4144,7 +4144,7 @@
      "units": 1
     },
     "yourthings": {
-     "first_seen": "2018-04-10",
+     "first_seen": "2018-03-20",
      "last_seen": "2018-04-11",
      "units": 1
     },
@@ -4164,7 +4164,7 @@
    ],
    "datasets": {
     "yourthings": {
-     "first_seen": "2018-04-10",
+     "first_seen": "2018-03-20",
      "last_seen": "2018-04-12",
      "units": 1
     }
@@ -4220,7 +4220,7 @@
    "models": [],
    "datasets": {
     "yourthings": {
-     "first_seen": "2018-04-10",
+     "first_seen": "2018-03-20",
      "last_seen": "2018-04-10",
      "units": 1
     }
@@ -4271,7 +4271,7 @@
      "units": 1
     },
     "yourthings": {
-     "first_seen": "2018-04-10",
+     "first_seen": "2018-03-20",
      "last_seen": "2018-04-12",
      "units": 1
     }
@@ -4284,7 +4284,7 @@
    "models": [],
    "datasets": {
     "yourthings": {
-     "first_seen": "2018-04-10",
+     "first_seen": "2018-03-20",
      "last_seen": "2018-04-12",
      "units": 1
     }
@@ -4341,7 +4341,7 @@
    ],
    "datasets": {
     "yourthings": {
-     "first_seen": "2018-04-10",
+     "first_seen": "2018-03-20",
      "last_seen": "2018-04-12",
      "units": 1
     }
@@ -4354,7 +4354,7 @@
    "models": [],
    "datasets": {
     "yourthings": {
-     "first_seen": "2018-04-10",
+     "first_seen": "2018-03-20",
      "last_seen": "2018-04-12",
      "units": 1
     }
@@ -4460,7 +4460,7 @@
    ],
    "datasets": {
     "yourthings": {
-     "first_seen": "2018-04-10",
+     "first_seen": "2018-03-20",
      "last_seen": "2018-04-12",
      "units": 1
     }
@@ -4509,7 +4509,7 @@
    "models": [],
    "datasets": {
     "yourthings": {
-     "first_seen": "2018-04-10",
+     "first_seen": "2018-03-20",
      "last_seen": "2018-04-12",
      "units": 1
     }
@@ -4570,7 +4570,7 @@
    "models": [],
    "datasets": {
     "yourthings": {
-     "first_seen": "2018-04-10",
+     "first_seen": "2018-03-20",
      "last_seen": "2018-04-12",
      "units": 1
     }
