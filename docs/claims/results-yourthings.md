@@ -22,13 +22,15 @@ YourThings の対応表の 66 台のうち、次の 44 製品。
   | 文書 | 読めた | アーカイブにあるが読めない | アーカイブにない | 製造者が出していない |
   |---|---|---|---|---|
   | D1 製品ページ・仕様 | 43 | 1 | 0 | 0 |
-  | D2 セキュリティ | 31 | 1 | 11 | 1 |
-  | D3 プライバシーポリシー | 43 | 1 | 0 | 0 |
-  | D4 サポート記事 | 36 | 7 | 1 | 0 |
+  | D2 セキュリティ | 32 | 0 | 11 | 1 |
+  | D3 プライバシーポリシー | 44 | 0 | 0 | 0 |
+  | D4 サポート記事 | 39 | 4 | 1 | 0 |
   | D5 マニュアル | 22 | 3 | 19 | 0 |
-  | D6 リリースノート | 16 | 6 | 13 | 9 |
+  | D6 リリースノート | 17 | 5 | 13 | 9 |
 
-- **引用**：保存した版の文字と機械的に照合した（`scripts/claims/check_quotes.py`、657 件すべて一致）。
+  最初の取得で読めなかった 34 文書は、ブラウザで開き直し、文字の層がない PDF は OCR にかけた。14 文書が読め、20 文書は読めなかった（[unreadable.md](unreadable.md)）。
+
+- **引用**：保存した版の文字と機械的に照合した（`scripts/claims/check_quotes.py`、678 件すべて一致）。
 - **読み落としの確認**：保存した文書から、技術的な言葉（encrypt、TLS、password、firmware、signed など）を含むのに主張の表にない文を機械的に取り出した（1,504 文）。1 文ずつ「主張／手順・画面の文言／別の製品／セキュリティと関係ない／重複」に分け、主張を 72 文加えた。そのうち通信で判定できる型は 2 文（Apple TV の LAN 内の AirPlay と HomeKit のカメラ）だけだった。主張ではないとした文から無作為に 40 文を抜いて確かめ直し、40 文とも分け方に同意した。
 - **通信**：4 日分（03-20、04-10〜12）。Zeek の記録（TLS の版・暗号スイート・証明書の鍵、HTTP の要求の形。値は含まない）、すべての TCP・UDP のフローの分類（`scripts/claims/flowscan.py`。HTTP・TLS・FTP 以外の独自のプロトコルも含む）、Quarant の解析結果。製品ごとのまとめは `scripts/claims/observations.py` と `flows_summary.py`。flowscan の「どちらが接続を始めたか」の推定は、04-10 の丸 1 日で Zeek と突き合わせた：SYN が見えた TCP の接続 109,472 件のうち、外れは 1 件（`check_roles.py`）。SYN の見えない 1.2% と UDP は、この方法では確かめられない。FTP のデータの接続は、制御の接続の PASV・EPSV・PORT から見つけて平文に数えた（中身が圧縮ファイルだと高エントロピーになり、暗号化と取り違えるため）。
 - **データセットの作成者の検査**：YourThings の作成者は、キャプチャの中で能動的な検査をしていた。03-20 のポートスキャン（192.168.0.200 から全機器へ、約 99 万接続）と、04-10〜12 の中間者の検査（偽の証明書で TLS に応答、30 機器、1,497 接続）。どちらも機器のふるまいではないので、集計から外した（D35）。中間者の検査に機器がどう反応したかは、別の結果として使った（下）。
@@ -45,22 +47,22 @@ YourThings の対応表の 66 台のうち、次の 44 製品。
 
 ### 数
 
-暗号化についての主張 145 件（31 製品）。13 製品には暗号化の主張がなかった（Belkin の WeMo 4 製品と NetCam、Roku 2 製品、Samsung Smart TV、Securifi Almond、Insteon Hub Pro、Koogeek、D-Link DCS-5009L、August）。
+暗号化についての主張 151 件（31 製品）。13 製品には暗号化の主張がなかった（Belkin の WeMo 4 製品と NetCam、Roku 2 製品、Samsung Smart TV、Securifi Almond、Insteon Hub Pro、Koogeek、D-Link DCS-5009L、August）。
 
 | 判定 | 暗号の方法 | 暗号化しているか | 計 |
 |---|---|---|---|
-| 食い違いの候補 | 4 | 7 | 11 |
+| 食い違いの候補 | 6 | 7 | 13 |
 | 文言の上で食い違い | 0 | 4 | 4 |
-| 一致（見えた範囲で） | 9 | 30 | 39 |
+| 一致（見えた範囲で） | 9 | 33 | 42 |
 | 見えない | 7 | 7 | 14 |
-| 判定できない | 23 | 54 | 77 |
-| 計 | 43 | 102 | 145 |
+| 判定できない | 23 | 55 | 78 |
+| 計 | 45 | 106 | 151 |
 
-全通信の分類を加えたことで、Nest Protect と Nest Guard の 7 件が「見えない」から「一致（暗号化はエントロピーからの推定）」に、Wink の 1 件と Canary の 2 件が「食い違いの候補」に変わった（下）。
+全通信の分類を加えたことで、Nest Protect と Nest Guard の 7 件が「見えない」から「一致（暗号化はエントロピーからの推定）」に、Wink の 1 件と Canary の 2 件が「食い違いの候補」に変わった（下）。読めなかった文書を読み直して、iRobot と Logi Circle の暗号の方法の主張（どちらも AES-256）が加わった。
 
-全部の主張（657 件）では 88% が判定できなかったが、暗号化の主張に絞ると 53%（77 件）。判定できない理由は、範囲がアプリや Web サイト、保存時の暗号化、Wi-Fi・Bluetooth・Z-Wave の区間のどれかが多い。
+全部の主張（678 件）では 87% が判定できなかったが、暗号化の主張に絞ると 52%（78 件）。判定できない理由は、範囲がアプリや Web サイト、保存時の暗号化、Wi-Fi・Bluetooth・Z-Wave の区間のどれかが多い。
 
-### 食い違いの候補（7 製品）
+### 食い違いの候補（9 製品）
 
 | 製品 | 軸 | 主張（出典、アーカイブの日付） | 観測（4 日分） | 注意 |
 |---|---|---|---|---|
@@ -71,6 +73,8 @@ YourThings の対応表の 66 台のうち、次の 44 製品。
 | Withings Home | 暗号の方法 | "… AES-256 and secure HTTP (HTTPS) to protect your data at the device, cloud and app level so that all your data is stored safely."（同上） | 本物のサーバーとの TLS の 1,621 回中 1,619 回が AES-128 | AES-256 は保存時の暗号化を指している可能性がある |
 | Wink Hub 2 | 証明書の検証 | "We adopt security measures that include certificate pinning, encryption, …"（サポートの FAQ、2017-07-08） | 作成者の中間者の検査で、偽の証明書の接続 42 回のうち 21 回、握手のあとにハブがデータを送った（`hub-api.wink.com`）。YourThings の評価も「中間者が成功」（4/4） | 製造者全体の FAQ で、アプリの話か機器の話かは書いていない。データセットの検査があって初めて見えるもの（D35） |
 | Canary | 暗号の方法 | "AES 256-bit data encryption"（製品ページの仕様、2018-03-23）、"… such as AES 256-bit symmetric-key encryption …"（セキュリティのページ、2018-02-27） | Canary のサーバーとの TLS 8,010 回のうち 4 回が AES-128（03-20、`o.canaryis.com`、`v.canaryis.com`）、残りは AES-256 | 弱い候補（0.05%）。仕様の欄は、通信か保存時かを書いていない |
+| Logi Circle | 暗号の方法 | "Logitech uses unique, random and automatically rotating AES 256 Bit Dual Layer Encryption to protect and store your audio and video content."（サポートの FAQ、2018-03-13） | 本物のサーバーとの TLS は 7 回すべて AES-128（`api.video.logi.com` を含む） | "Dual Layer" は TLS の内側の暗号を指す可能性があり、それは見えない。"store" は保存時 |
+| iRobot Roomba | 暗号の方法 | "Currently, we use AES 256-bit encryption and Transport Layer Security (TLS v1.2)."（データセキュリティのページ、2018-11-10） | iRobot 自身のサーバー `disc-prod.iot.irobotapi.com` との TLS は AES-128（4 回）。AES-256 は MQTT（tcp/8883）の 7 回だけ | 文書はキャプチャの 7 か月後（それより前の版は読み込みの通信がアーカイブされていない） |
 | Harman Kardon Invoke | 暗号化しているか | "… including without limitation, encryption technologies and authentication tools."（プライバシーポリシー、2018-03-15） | `esdk-ffl.spotify.com` へ平文の GET が 5 回（URL に `key_id`、`value`） | 宛先は第三者（Spotify の SDK）。いちばん弱い候補 |
 
 **文言の上で食い違い**：Canary（"Secure web transfer (SSL/TLS)" など。観測は本文のない平文の HEAD が `h.canaryis.com` に 50 回だけ）。
@@ -127,15 +131,15 @@ YourThings の対応表の 66 台のうち、次の 44 製品。
 
 ## 付録：暗号化以外も含めた全部の主張
 
-暗号化以外の主張（パスワードの決まり、更新のやり方、脆弱性の届け出の窓口など）も [claims.tsv](claims.tsv) に残している。全部で 657 件（ほかに「セキュリティの主張なし」の文書 129 件）、判定は次のとおり。
+暗号化以外の主張（パスワードの決まり、更新のやり方、脆弱性の届け出の窓口など）も [claims.tsv](claims.tsv) に残している。全部で 678 件（ほかに「セキュリティの主張なし」の文書 136 件）、判定は次のとおり。
 
 | 判定 | 主張 |
 |---|---|
-| 食い違いの候補 | 12（暗号化の主張 11 件と、August の「業界標準で PII を守る」） |
+| 食い違いの候補 | 14（暗号化の主張 13 件と、August の「業界標準で PII を守る」） |
 | 文言の上で食い違い | 4 |
-| 一致（見えた範囲で） | 48 |
+| 一致（見えた範囲で） | 52 |
 | 見えない | 18 |
-| 判定できない | 575 |
+| 判定できない | 590 |
 
 全通信の分類で「見えない」から変わったのは、Nest Protect と Nest Guard の 7 件（暗号化はエントロピーからの推定）と、VeraLite の「ssh で遠隔アクセスのサーバーにつなぐ」（tcp/232 の SSH が見えた）。残りの 18 件は、全通信を見ても確かめる手段がなかった（Arlo のカメラと基地局の間の無線、Apple の HomeKit と AirPlay のストリーム、カメラの映像、更新の取得など）。
 
@@ -143,7 +147,7 @@ YourThings の対応表の 66 台のうち、次の 44 製品。
 
 ## 限界
 
-- **読めなかった文書**：34 件（[unreadable.md](unreadable.md)）。Nest と Belkin のサポート記事、Roku の製品ページとサポート記事、iRobot のデータセキュリティのページなど。本文を JavaScript で表示するページか、文字の層がない PDF。
+- **読めなかった文書**：20 件（[unreadable.md](unreadable.md)）。ブラウザで開いても、本文を読み込む通信がアーカイブされていない（Nest と Belkin のサポート記事、Roku のサポート記事、Apple のユーザーガイド）か、アーカイブ自体が空・404・壊れている。iRobot のデータセキュリティのページは、本文の最も早いアーカイブがキャプチャの 7 か月後。
 - **時期**：アーカイブの日付とキャプチャのずれは `offset_months` に入れた。Piper の FAQ（36 か月前）、Logi のプライバシーの声明（26 か月前）のように古いものや、Arlo の英語版の FAQ・Canary と Piper の 2019 年のページのようにキャプチャ後のものがある。
 - **型番**：Belkin NetCam は、機器の名乗りが NetCamHD（F7D7602）なのに、読んだ製品ページとマニュアルは F7D7601 のもの。August と myQ は型番が分からず、複数の型のページを読んだ。Apple の iOS Security Guide は HomePod に一度も触れていないので、HomePod への当てはめは推定。
 - **観測の範囲**：HTTP・TLS・FTP 以外は、構造かエントロピーで分類しただけで、中身は読んでいない。高エントロピーは暗号化と圧縮を区別できない。03-20 の Quarant は、スキャンの端末のパケットを除いて解析した。キャプチャの期間（`capture_start`、`capture_end`）は、Quarant で機器が見えた最初と最後の日（多くは 03-20〜04-12）。この間の 03-21〜04-09 はキャプチャしていないが、この間にアーカイブされた文書も「期間中」（ずれ 0）になる（265 件）。
@@ -156,5 +160,5 @@ YourThings の対応表の 66 台のうち、次の 44 製品。
 ## 次
 
 1. 暗号化の主張のうち、食い違いの候補と文言の上の食い違いの 15 件と、確かめが要る一致（Nest の RSA）を、人が確かめる（主張の読み方と観測の両方）。
-2. 読めなかった文書（[unreadable.md](unreadable.md)）をブラウザで開いて読む。
+2. 読めなかった文書の残り 20 件は、ブラウザでも読めなかった。製造者の今のサイトや別の言語の版で、同じ内容が読めるかを探す（キャプチャの時期からは離れる）。
 3. 同じ製品が出てくるほかのデータセット（UNSW 2016・2018、CIC 2022、Deakin 2023）に広げ、時期による変化を見る。
