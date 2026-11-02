@@ -2,6 +2,8 @@
 
 2026-11-02。[handoff.md](handoff.md) の 4 節の 1 の結果。候補の一覧は [results-yourthings.md](results-yourthings.md)、スクリプトは `scripts/claims/ring/`、Ring だけを取り出した PCAP と集計は `~/datasets/claims/ring13/`（リポジトリの外）。
 
+**この製品は候補から除外した（2026-11-02、利用者の判断）。食い違いを証明できなかったため。**
+
 ## 1. 結論
 
 - **handoff の見立ては修正が必要**。「平文の SIP と暗号化されていない RTP の映像が追加の価値」としていたが、平文の HTTP・Basic 認証は Nick 2016、平文の SIP は Kidder 2017、RTP の映像が暗号化されていないことは Alharbi & Aspinall 2018 がすでに報告している。

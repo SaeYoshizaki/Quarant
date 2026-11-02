@@ -10,7 +10,7 @@
 
 結果は、各項目の「確認」の行に「同意」「不同意（理由）」「保留（理由）」のどれかを書く。
 
-## 1. Ring Video Doorbell：食い違いの候補（contradiction candidate (T1a)）
+## 1. Ring Video Doorbell：除外（元は食い違いの候補 T1a）
 
 - **主張**："Encryption Bank-Grade"
 - **文書**：D1、アーカイブ 2017-04-20（キャプチャとのずれ -11.0 か月）。https://web.archive.org/web/20170420084549/https://ring.com/video-doorbell
@@ -27,7 +27,7 @@
   - セキュリティのページ：2016〜2018 年には見つからない。
   - まとめ：機器の通信の暗号化について書いてあるのは、仕様の欄の一言だけ。それを限定・説明する文書はない。
 - **claims.tsv の行**：2（見出しを 1 行目とした行番号）
-- **確認**：
+- **確認**：除外（2026-11-02、利用者の判断）。食い違いを証明できなかった。
 
 ## 2. Canary：食い違いの候補（contradiction candidate (T2)）
 
