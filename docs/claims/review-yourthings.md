@@ -18,6 +18,13 @@
 - **型・範囲**：T1、主張の範囲 device-cloud、観測の範囲 external
 - **根拠**：plaintext GET to vod.ring.com with Authorization: Basic about every 10 s on 03-20 (8372) and 03-21 (8364), mostly 404, and 13 more on 04-11 and 04-13 (16,749 in all); plaintext POST to fw.ring.com with Authorization: Basic (5) (Zeek); Quarant INSECURE_HTTP_AUTH 16,633; TLS 6855, none with forward secrecy (TLS_RSA_WITH_AES_128_CBC_SHA) (13 days: 03-20, 03-21, 03-28, 04-10..19; 03-20 and 03-21 analysed by Quarant without the dataset's scanner host)
 - **注意**：vague claim: only "encryption is used" is judged; "bank-grade" is not
+- **調べた文書（2026-11-02 に探し直した）**：2016〜2018 年にアーカイブされた Ring の公開文書を、ring.com、support.ring.com、static.ring.com、blog.ring.com のすべての PDF を含めて探した。
+  - 製品ページ（2017-04-20）と「How it works」のページ（2016-04-07）：仕様の欄に「Encryption: Bank-grade」だけ（同じ文言。後者は claims.tsv に別の行で入れた）。
+  - ring.com の FAQ（2017-01-28）：支払いのページが HTTPS、Wi-Fi は WPA2、録画は「secure cloud servers」に保存。機器の通信の暗号化には触れていない。
+  - サポート記事「必要なポート」（2016-10-20）：機器が使うポートとして TCP 80 と TCP 443 などを列挙。80 の通信を暗号化するかは書いていない。
+  - サポート記事（Protect の FAQ 2018-01-27、ファームウェアの記事 2017）、公式ブログ（Wi-Fi パスワードの件、2016-01-13）、ユーザーマニュアルの PDF（2018-10-19）、メディアキットの PDF（2017-01-30）、プライバシーポリシー（2017-01-28）：機器の通信の暗号化の記述なし。
+  - セキュリティのページ：2016〜2018 年には見つからない。
+  - まとめ：機器の通信の暗号化について書いてあるのは、仕様の欄の一言だけ。それを限定・説明する文書はない。
 - **claims.tsv の行**：2（見出しを 1 行目とした行番号）
 - **確認**：
 
