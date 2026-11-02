@@ -82,4 +82,4 @@ Hue では「平文の HTTP」と見えた通信の本文が、独自の層で A
 - 製品を 1 つ終えるごとにコミットして push する。途中で止まっても、それまでの分を残すため。
 - ブランチは `claims-cloud-research`。
 - 全部終えるか、これ以上進められなくなったら、`docs/claims/research/README.md` に製品ごとの判定の案の一覧と、できなかったことを書く。
-- 最後に **`main` への PR を開く**。題は `Claims: cloud research`（通知はこの PR で届く）。**マージはしない**。
+- 最後に **`main` への PR を開く**。題は必ず `Claims: cloud research` で始める（`.github/workflows/notify-cloud-research.yml` がこの題を見て利用者に通知する）。**マージはしない**。
