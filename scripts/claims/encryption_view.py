@@ -97,7 +97,7 @@ def main():
         w.write(f"\n判定できなかったもの：{len(na)} 件（理由は claims.tsv の note）。\n")
 
     w.write("\n### 製品ごとの観測（主張の有無に関係なく）\n\n")
-    w.write("期間は YourThings の 2018-03-20、04-10〜12。TLS は握手が見えた接続の数と割合。平文の HTTP の「中身あり」は本文、URL のパラメータ、Authorization ヘッダーのどれかがある要求。\n\n")
+    w.write("期間は YourThings の公開されている 13 日分（2018-03-20、21、28、04-10〜19）。TLS は握手が見えた接続の数と割合。平文の HTTP の「中身あり」は本文、URL のパラメータ、Authorization ヘッダーのどれかがある要求。\n\n")
     w.write("| 製品 | 暗号化の主張 | TLS の接続 | TLS の版 | 暗号 | 前方秘匿性 | 外部への平文 HTTP（中身あり／うち認証ヘッダー／中身なし） | LAN 内の平文 HTTP（中身あり） | FTP のログイン |\n")
     w.write("|---|---|---|---|---|---|---|---|---|\n")
     has_claim = collections.Counter(r["product"] for r in enc)
@@ -172,7 +172,7 @@ def write_mitm(w, cat, mitm_tsv, scorecards_tsv):
     for r in csv.DictReader(open(mitm_tsv), delimiter="\t"):
         c[label_product.get(r["label"], r["label"])][r["outcome"]] += 1
     w.write("\n### データセットの作成者の中間者の検査への反応\n\n")
-    w.write("YourThings の作成者は、2018-04-10〜12 に、一部の TLS 接続へ偽の証明書（発行者 thing-catcher.gtisc.gatech.edu）で応答した。"
+    w.write("YourThings の作成者は、2018-04-10〜13 と 04-15 に、一部の TLS 接続へ偽の証明書（発行者 thing-catcher.gtisc.gatech.edu）で応答した。"
             "その接続で機器がどうしたかは、パッシブに見える（`mitm_sessions.py`）。「拒んだ」は握手の途中で機器が警告を送ったもの、"
             "「握手だけ」は警告もデータもなく終わったもの、「データを送った」は握手のあとに機器がアプリケーションデータのレコードを送ったもの"
             "（証明書を受け入れた疑い。中身は暗号化されていて分からない）。これらの接続は、上の TLS の集計から除いてある。\n\n")

@@ -4,111 +4,148 @@
 
 | 製品 | 出どころ | 値 | 見えた日 | YourThings の評価の版（評価日） | リリースノートに載っているか |
 |---|---|---|---|---|---|
-| Amazon Fire TV | http-request user-agent | `Android/5.1.1 UPnP/1.0 Cling/2.0` | 03-20, 04-10, 04-11, 04-12 | Fire OS 5.2.6.3 (606753920)（03/20/2018） | 載っていない（2017-10-14 の版） |
-| Amazon Fire TV | http-request user-agent | `Dalvik/2.1.0 (Linux; U; Android 5.1.1; AFTS Build/LVY48F)` | 03-20, 04-10, 04-11, 04-12 |  | 載っていない（2017-10-14 の版） |
-| Amazon Fire TV | http-response server | `Linux/3.10.61 UPnP/1.0 Cling/2.0` | 03-20 |  | 載っていない（2017-10-14 の版） |
-| Amazon Fire TV | ssdp server | `Linux/3.10.61 UPnP/1.0 Cling/2.0` | 03-20, 04-10, 04-11, 04-12 |  | 載っていない（2017-10-14 の版） |
+| Amazon Fire TV | http-request user-agent | `Android/5.1.1 UPnP/1.0 Cling/2.0` | 03-20, 03-21, 03-28, 04-10, 04-11, 04-12, 04-13, 04-14, 04-15, 04-16, 04-17, 04-18, 04-19 | Fire OS 5.2.6.3 (606753920)（03/20/2018） | 載っていない（2017-10-14 の版） |
+| Amazon Fire TV | http-request user-agent | `Dalvik/2.1.0 (Linux; U; Android 5.1.1; AFTS Build/LVY48F)` | 03-20, 03-21, 03-28, 04-10, 04-11, 04-12, 04-13, 04-14, 04-15, 04-16, 04-17, 04-18, 04-19 |  | 載っていない（2017-10-14 の版） |
+| Amazon Fire TV | http-response server | `Linux/3.10.61 UPnP/1.0 Cling/2.0` | 03-20, 04-13, 04-15 |  | 載っていない（2017-10-14 の版） |
+| Amazon Fire TV | ssdp server | `Linux/3.10.61 UPnP/1.0 Cling/2.0` | 03-20, 03-21, 03-28, 04-10, 04-11, 04-12, 04-13, 04-14, 04-15, 04-16, 04-17, 04-18, 04-19 |  | 載っていない（2017-10-14 の版） |
 | Amazon Fire TV | http-request user-agent | `com.amazon.sics/3.0.50.0 (AFTS; Android 22; Amazon)` | 04-11 |  | 載っていない（2017-10-14 の版） |
-| Amazon Fire TV | http-request user-agent | `kindle/2.0` | 04-11, 04-12 |  |  |
+| Amazon Fire TV | http-request user-agent | `kindle/2.0` | 04-11, 04-12, 04-17 |  |  |
 | Apple Apple TV (4th gen) | http-request user-agent | `App%C2%A0Store/1.0 CFNetwork/893.14 Darwin/17.4.0` | 03-20 | tvOS 11.3（03/20/2018） |  |
-| Apple Apple TV (4th gen) | http-request user-agent | `AppleTV5,3/11.2.6 (15K600)` | 03-20 |  | 載っていない（2018-05-16 の版） |
+| Apple Apple TV (4th gen) | http-request user-agent | `AppleTV5,3/11.2.6 (15K600)` | 03-20, 03-28 |  | 載っていない（2018-05-16 の版） |
 | Apple Apple TV (4th gen) | http-request user-agent | `TVAppStore/1.0 iOS/11.2.6 AppleTV/11.2.6 model/AppleTV5,3 hwp/t7000 build/15K600 (3; dt:11` | 03-20 |  | 載っていない（2018-05-16 の版） |
 | Apple Apple TV (4th gen) | http-response server | `AirTunes/356.19` | 03-20 |  | 載っていない（2018-05-16 の版） |
 | Apple Apple TV (4th gen) | mdns SystemBuildVersion | `15K600` | 03-20 |  | 載っていない（2018-05-16 の版） |
-| Apple Apple TV (4th gen) | mdns Ver | `131075` | 03-20, 04-10, 04-11, 04-12 |  |  |
-| Apple Apple TV (4th gen) | mdns srcvers | `356.19` | 03-20 |  | 載っていない（2018-05-16 の版） |
-| Apple Apple TV (4th gen) | mdns vs | `356.19` | 03-20 |  | 載っていない（2018-05-16 の版） |
-| Apple Apple TV (4th gen) | http-request user-agent | `AppleTV5,3/11.3 (15L211)` | 04-10, 04-11, 04-12 |  | 載っている：11.3（2018-05-16） |
-| Apple Apple TV (4th gen) | mdns SystemBuildVersion | `15L211` | 04-10, 04-11, 04-12 |  | 載っていない（2018-05-16 の版） |
-| Apple Apple TV (4th gen) | mdns srcvers | `365.53` | 04-10, 04-11, 04-12 |  | 載っていない（2018-05-16 の版） |
-| Apple Apple TV (4th gen) | mdns vs | `365.53` | 04-10, 04-11, 04-12 |  | 載っていない（2018-05-16 の版） |
-| Apple Apple TV (4th gen) | http-request user-agent | `MobileAsset/1.1` | 04-11 |  |  |
+| Apple Apple TV (4th gen) | mdns Ver | `131075` | 03-20, 04-10, 04-11, 04-12, 04-13, 04-14 |  |  |
+| Apple Apple TV (4th gen) | mdns srcvers | `356.19` | 03-20, 03-21, 03-28 |  | 載っていない（2018-05-16 の版） |
+| Apple Apple TV (4th gen) | mdns vs | `356.19` | 03-20, 03-21, 03-28 |  | 載っていない（2018-05-16 の版） |
+| Apple Apple TV (4th gen) | http-request user-agent | `AppleTV5,3/11.3 (15L211)` | 04-10, 04-11, 04-12, 04-13, 04-15, 04-16, 04-17, 04-18, 04-19 |  | 載っている：11.3（2018-05-16） |
+| Apple Apple TV (4th gen) | mdns SystemBuildVersion | `15L211` | 04-10, 04-11, 04-12, 04-13, 04-14, 04-15, 04-16, 04-17, 04-18, 04-19 |  | 載っていない（2018-05-16 の版） |
+| Apple Apple TV (4th gen) | mdns srcvers | `365.53` | 04-10, 04-11, 04-12, 04-13, 04-14, 04-15, 04-16, 04-17, 04-18, 04-19 |  | 載っていない（2018-05-16 の版） |
+| Apple Apple TV (4th gen) | mdns vs | `365.53` | 04-10, 04-11, 04-12, 04-13, 04-14, 04-15, 04-16, 04-17, 04-18, 04-19 |  | 載っていない（2018-05-16 の版） |
+| Apple Apple TV (4th gen) | http-request user-agent | `MobileAsset/1.1` | 04-11, 04-13, 04-17, 04-18 |  |  |
 | Apple Apple TV (4th gen) | http-request user-agent | `TVSettings/1.0 iOS/11.3 AppleTV/11.3 model/AppleTV5,3 hwp/t7000 build/15L211 (3; dt:119)` | 04-11 |  | 載っている：11.3（2018-05-16） |
 | Apple Apple TV (4th gen) | http-request user-agent | `gamed/5.11.20.4.8.16.5.5.2 (AppleTV5,3; 11.3; 15L211; GameKit-563.15)` | 04-11 |  | 載っている：11.3（2018-05-16） |
-| Apple HomePod | http-request user-agent | `SoundBoard/1 CFNetwork/894 Darwin/17.4.0` | 03-20 | 11.2.5 (15D59)（03/21/2018） | （リリースノートなし） |
-| Apple HomePod | http-request user-agent | `server-bag [iPhone OS,11.2.5,15D59,AudioAccessory1,1]` | 03-20, 04-10, 04-11, 04-12 |  | （リリースノートなし） |
-| Apple HomePod | http-request user-agent | `AudioAccessory1,1/11.2.5 (15D59)` | 04-10, 04-11, 04-12 |  | （リリースノートなし） |
-| Apple HomePod | mdns srcvers | `356.19` | 04-10, 04-11 |  | （リリースノートなし） |
-| Apple HomePod | mdns vs | `356.19` | 04-10, 04-11 |  | （リリースノートなし） |
-| Belkin NetCam HD | http-request user-agent | `Fedora/8, UPnP/1.0, MiniUPnPc/1.7` | 04-10, 04-11, 04-12 | WeMo_NetCam_WW_2.00.11020.PVT（03/21/2018） | （リリースノートなし） |
-| Bose SoundTouch 10 | http-request user-agent | `Allegro-Software-WebClient/5.40b1 DLNADOC/1.50` | 03-20, 04-10, 04-11, 04-12 | 18.0.11（03/21/2018） | （リリースノートなし） |
-| Bose SoundTouch 10 | http-request user-agent | `Bose_Lisa/18.0.11` | 03-20 |  | （リリースノートなし） |
-| Bose SoundTouch 10 | mdns VERSION | `1.0` | 03-20 |  | （リリースノートなし） |
-| Bose SoundTouch 10 | ssdp server | `Linux/3.14.43+ UPnP/1.0 GUPnP/0.20.18` | 03-20, 04-10, 04-11, 04-12 |  | （リリースノートなし） |
-| Bose SoundTouch 10 | url fver | `0.001` | 03-20 |  | （リリースノートなし） |
+| Apple Apple TV (4th gen) | http-request user-agent | `TV/1 CFNetwork/897.15 Darwin/17.5.0` | 04-13 |  |  |
+| Apple Apple TV (4th gen) | http-request user-agent | `com.apple.invitation-registration [Apple TVOS,11.3,15L211,AppleTV5,3]` | 04-15 |  | 載っている：11.3（2018-05-16） |
+| Apple Apple TV (4th gen) | http-request user-agent | `com.apple.siri.analyzer/1 CFNetwork/897.15 Darwin/17.5.0` | 04-15 |  |  |
+| Apple Apple TV (4th gen) | http-request user-agent | `server-bag [Apple TVOS,11.3,15L211,AppleTV5,3]` | 04-15 |  | 載っている：11.3（2018-05-16） |
+| Apple HomePod | http-request user-agent | `SoundBoard/1 CFNetwork/894 Darwin/17.4.0` | 03-20, 03-21 | 11.2.5 (15D59)（03/21/2018） | （リリースノートなし） |
+| Apple HomePod | http-request user-agent | `server-bag [iPhone OS,11.2.5,15D59,AudioAccessory1,1]` | 03-20, 03-21, 03-28, 04-10, 04-11, 04-12, 04-13, 04-14, 04-15, 04-16, 04-17, 04-18 |  | （リリースノートなし） |
+| Apple HomePod | http-request user-agent | `AppleCoreMedia/1.0.0.15D59 (HomePod; U; CPU OS 11_2_5 like Mac OS X; en_us)` | 03-21 |  | （リリースノートなし） |
+| Apple HomePod | http-request user-agent | `AudioAccessory1,1/11.2.5 (15D59)` | 03-21, 03-28, 04-10, 04-11, 04-12, 04-13, 04-15, 04-17, 04-18, 04-19 |  | （リリースノートなし） |
+| Apple HomePod | http-request user-agent | `com.apple.invitation-registration [iPhone OS,11.2.5,15D59,AudioAccessory1,1]` | 03-21 |  | （リリースノートなし） |
+| Apple HomePod | http-response server | `AirTunes/356.19` | 03-21 |  | （リリースノートなし） |
+| Apple HomePod | mdns srcvers | `356.19` | 03-21, 03-28, 04-10, 04-11, 04-13, 04-15, 04-16, 04-17, 04-18, 04-19 |  | （リリースノートなし） |
+| Apple HomePod | mdns vs | `356.19` | 03-21, 03-28, 04-10, 04-11, 04-13, 04-15, 04-16, 04-17, 04-18, 04-19 |  | （リリースノートなし） |
+| Apple HomePod | http-request user-agent | `itunesstored/1.0 iOS/11.2.5 model/AudioAccessory1,1 hwp/t7000 build/15D59 (dt:150)` | 03-28 |  | （リリースノートなし） |
+| Belkin NetCam HD | http-request user-agent | `Fedora/8, UPnP/1.0, MiniUPnPc/1.7` | 03-21, 03-28, 04-10, 04-11, 04-12, 04-13, 04-14, 04-15, 04-16, 04-17, 04-18, 04-19 | WeMo_NetCam_WW_2.00.11020.PVT（03/21/2018） | （リリースノートなし） |
+| Bose SoundTouch 10 | http-request user-agent | `Allegro-Software-WebClient/5.40b1 DLNADOC/1.50` | 03-20, 03-21, 04-10, 04-11, 04-12, 04-13, 04-14, 04-15, 04-16, 04-17, 04-18, 04-19 | 18.0.11（03/21/2018） | （リリースノートなし） |
+| Bose SoundTouch 10 | http-request user-agent | `Bose_Lisa/18.0.11` | 03-20, 04-13, 04-15 |  | （リリースノートなし） |
+| Bose SoundTouch 10 | mdns VERSION | `1.0` | 03-20, 03-21 |  | （リリースノートなし） |
+| Bose SoundTouch 10 | ssdp server | `Linux/3.14.43+ UPnP/1.0 GUPnP/0.20.18` | 03-20, 03-21, 04-10, 04-11, 04-12, 04-13, 04-14, 04-15, 04-16, 04-17, 04-18, 04-19 |  | （リリースノートなし） |
+| Bose SoundTouch 10 | url fver | `0.001` | 03-20, 04-13, 04-15 |  | （リリースノートなし） |
+| Bose SoundTouch 10 | http-response server | `Allegro-Software-RomPager/5.40b1` | 03-21 |  | （リリースノートなし） |
+| Bose SoundTouch 10 | http-request user-agent | `Bose/7.22.0` | 04-13, 04-15 |  | （リリースノートなし） |
+| Bose SoundTouch 10 | http-request user-agent | `NSPlayer/4.1.0.3856` | 04-13, 04-15 |  | （リリースノートなし） |
+| Bose SoundTouch 10 | http-response server | `Linux/3.14.43+ UPnP/1.0 GUPnP/0.20.18` | 04-15 |  | （リリースノートなし） |
 | Canary Canary | http-request user-agent | `ConnMan/1.35 wispr` | 03-20 | 3.0.0（03/20/2018） | （リリースノートなし） |
 | Canary Canary | http-request user-agent | `curl/7.56.1` | 03-20 |  | （リリースノートなし） |
-| Canary Canary | http-request user-agent | `htpdate/1.1.2` | 03-20, 04-10, 04-11, 04-12 |  | （リリースノートなし） |
+| Canary Canary | http-request user-agent | `htpdate/1.1.2` | 03-20, 03-21, 03-28, 04-10, 04-11, 04-12, 04-13, 04-14, 04-15, 04-16, 04-17, 04-18, 04-19 |  | （リリースノートなし） |
 | Google Google Home | http-request user-agent | `Mozilla/5.0 (X11; Linux armv7l) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.96` | 03-20 | 1.32.118652（03/20/2018） | 載っていない（2018-01-25 の版） |
-| Google Google Home | mdns ve | `05` | 03-20, 04-10, 04-11, 04-12 |  |  |
-| Google Google Home | http-request user-agent | `Mozilla/5.0 (X11; Linux armv7l) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.14` | 04-10, 04-12 |  | 載っていない（2018-01-25 の版） |
+| Google Google Home | mdns ve | `05` | 03-20, 03-21, 03-28, 04-10, 04-11, 04-12, 04-13, 04-14, 04-15, 04-16, 04-17, 04-18, 04-19 |  |  |
+| Google Google Home | http-request user-agent | `Mozilla/5.0 (X11; Linux armv7l) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.14` | 04-10, 04-12, 04-17, 04-19 |  | 載っていない（2018-01-25 の版） |
 | Google Google Home Mini | http-request user-agent | `Mozilla/5.0 (X11; Linux armv7l) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.96` | 03-20 | 1.32.118652（03/20/2018） | 載っていない（2018-01-25 の版） |
-| Google Google Home Mini | mdns ve | `05` | 03-20, 04-10, 04-11, 04-12 |  |  |
-| Google Google Home Mini | http-request user-agent | `Mozilla/5.0 (X11; Linux armv7l) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.14` | 04-10, 04-12 |  | 載っていない（2018-01-25 の版） |
-| Harman Kardon Invoke | mdns VERSION | `1.0` | 03-20, 04-10, 04-11, 04-12 | N/A（03/20/2018） | （リリースノートなし） |
-| Insteon Hub Pro | url fw | `s:1.0.5|c:5.0.5` | 04-11, 04-12 | N/A（03/20/2018） | 載っている：1.0.5（2018-02-25） |
+| Google Google Home Mini | mdns ve | `05` | 03-20, 03-21, 03-28, 04-10, 04-11, 04-12, 04-13, 04-14, 04-15, 04-16, 04-17, 04-18, 04-19 |  |  |
+| Google Google Home Mini | http-request user-agent | `Mozilla/5.0 (X11; Linux armv7l) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.14` | 04-10, 04-12, 04-13, 04-14, 04-17 |  | 載っていない（2018-01-25 の版） |
+| Harman Kardon Invoke | mdns VERSION | `1.0` | 03-20, 03-21, 03-28, 04-10, 04-11, 04-12, 04-13, 04-14, 04-15, 04-16, 04-17, 04-18, 04-19 | N/A（03/20/2018） | （リリースノートなし） |
+| Insteon Hub Pro | url fw | `s:1.0.5|c:5.0.5` | 04-11, 04-12, 04-13, 04-14, 04-15, 04-16, 04-17, 04-18, 04-19 | N/A（03/20/2018） | 載っている：1.0.5（2018-02-25） |
 | Koogeek Smart Bulb | mdns srcvers | `1.14` | 03-20 | N/A（03/21/2018） | （リリースノートなし） |
-| Logitech Harmony Hub | ssdp server | `Ubuntu/10.04 UPnP/1.1 Harmony/16.3` | 03-20, 04-10, 04-11, 04-12 | 4.14.123（03/20/2018） | 載っていない（2019-01-23、2019-02-18 の版） |
-| Lutron Caseta Smart Bridge | mdns CODEVER | `06.04.03f000` | 03-20 | 1.8（03/20/2018） | （リリースノートなし） |
-| Lutron Caseta Smart Bridge | mdns CODEVER | `06.05.08f000` | 04-10, 04-11, 04-12 |  | （リリースノートなし） |
-| Lutron Caseta Smart Bridge | ssdp user-agent | `Go-http-client/1.1` | 04-11 |  | （リリースノートなし） |
-| MiCasaVerde VeraLite | http-response server | `Linux/2.6.37.1, UPnP/1.0, Portable SDK for UPnP devices/1.6.6` | 03-20, 04-11 | N/A（03/20/2018） | 載っていない（2017-12-31、2016-09-15、2017-10-25、2018-01-17 の版） |
-| MiCasaVerde VeraLite | http-response server | `lighttpd/1.4.29` | 03-20, 04-11 |  | 載っていない（2017-12-31、2016-09-15、2017-10-25、2018-01-17 の版） |
-| MiCasaVerde VeraLite | ssdp server | `Linux/2.6.37.1, UPnP/1.0, Portable SDK for UPnP devices/1.6.6` | 03-20, 04-10, 04-11, 04-12 |  | 載っていない（2017-12-31、2016-09-15、2017-10-25、2018-01-17 の版） |
-| NVIDIA Shield TV | http-request user-agent | `Dalvik/2.1.0 (Linux; U; Android 6.0; SHIELD Android TV Build/MRA58K)` | 03-20, 04-10, 04-11, 04-12 | 3.2（03/20/2018） | 載っている：6.0（2018-03-08） |
-| NVIDIA Shield TV | mdns ve | `05` | 03-20, 04-10, 04-11, 04-12 |  |  |
+| Logitech Harmony Hub | ssdp server | `Ubuntu/10.04 UPnP/1.1 Harmony/16.3` | 03-20, 03-21, 03-28, 04-10, 04-11, 04-12, 04-13, 04-14, 04-15, 04-16, 04-17, 04-18, 04-19 | 4.14.123（03/20/2018） | 載っていない（2019-01-23、2019-02-18 の版） |
+| Logitech Harmony Hub | ssdp user-agent | `UDAP/2.0` | 04-13, 04-15 |  |  |
+| Logitech Harmony Hub | url version | `4.15.96` | 04-13, 04-14, 04-15, 04-16, 04-17, 04-18, 04-19 |  | 載っている：4.15.96（2019-01-23） |
+| Lutron Caseta Smart Bridge | mdns CODEVER | `06.04.03f000` | 03-20, 03-21, 03-28 | 1.8（03/20/2018） | （リリースノートなし） |
+| Lutron Caseta Smart Bridge | mdns CODEVER | `06.05.08f000` | 04-10, 04-11, 04-12, 04-13, 04-14 |  | （リリースノートなし） |
+| Lutron Caseta Smart Bridge | ssdp user-agent | `Go-http-client/1.1` | 04-11, 04-14, 04-19 |  | （リリースノートなし） |
+| Lutron Caseta Smart Bridge | mdns CODEVER | `06.05.09f000` | 04-14, 04-15, 04-16, 04-17, 04-18, 04-19 |  | （リリースノートなし） |
+| Lutron Caseta Smart Bridge | mdns CODEVER | `06.05.10f000` | 04-19 |  | （リリースノートなし） |
+| MiCasaVerde VeraLite | http-response server | `Linux/2.6.37.1, UPnP/1.0, Portable SDK for UPnP devices/1.6.6` | 03-20, 04-11, 04-13 | N/A（03/20/2018） | 載っていない（2017-12-31、2016-09-15、2017-10-25、2018-01-17 の版） |
+| MiCasaVerde VeraLite | http-response server | `lighttpd/1.4.29` | 03-20, 04-11, 04-13, 04-15 |  | 載っていない（2017-12-31、2016-09-15、2017-10-25、2018-01-17 の版） |
+| MiCasaVerde VeraLite | ssdp server | `Linux/2.6.37.1, UPnP/1.0, Portable SDK for UPnP devices/1.6.6` | 03-20, 03-21, 03-28, 04-10, 04-11, 04-12, 04-13, 04-14, 04-15, 04-16, 04-17, 04-18, 04-19 |  | 載っていない（2017-12-31、2016-09-15、2017-10-25、2018-01-17 の版） |
+| NVIDIA Shield TV | http-request user-agent | `Dalvik/2.1.0 (Linux; U; Android 6.0; SHIELD Android TV Build/MRA58K)` | 03-20, 03-21, 03-28, 04-10, 04-11, 04-12, 04-13, 04-14, 04-15, 04-16, 04-17, 04-18, 04-19 | 3.2（03/20/2018） | 載っている：6.0（2018-03-08） |
+| NVIDIA Shield TV | mdns ve | `05` | 03-20, 03-21, 03-28, 04-10, 04-11, 04-12, 04-13, 04-14, 04-15, 04-16, 04-17, 04-18, 04-19 |  |  |
 | NVIDIA Shield TV | ssdp server | `Linux/3.10.67+, UPnP/1.0, Portable SDK for UPnP devices/1.6.18` | 03-20, 04-11 |  | 載っていない（2018-03-08 の版） |
-| NVIDIA Shield TV | http-request user-agent | `NVIDIA Tegra Updates v11.0` | 04-10, 04-12 |  |  |
+| NVIDIA Shield TV | http-request user-agent | `NVIDIA Tegra Updates v11.0` | 03-21, 04-10, 04-12, 04-14, 04-16, 04-18 |  |  |
 | NVIDIA Shield TV | http-request user-agent | `TegraOTA HTTP Client 2.0` | 04-11 |  |  |
-| Nest (Google) Nest Cam IQ | http-request user-agent | `ConnMan/1.29 wispr` | 04-10, 04-12 | 2520014（03/28/2018） | （リリースノートなし） |
-| Nest (Google) Nest Guard (Secure) | http-request user-agent | `ConnMan/1.29 wispr` | 04-10 | 1.1.1-8（03/28/2018） | （リリースノートなし） |
-| Philips Hue Bridge | ssdp server | `Linux/3.14.0 UPnP/1.0 IpBridge/1.15.0` | 03-20, 04-10, 04-11 | 1802201122（03/20/2018） | 載っていない（2017-11-27 の版） |
-| Philips Hue Bridge | body apiversion | `1.23.0` | 04-11 |  | 載っていない（2017-11-27 の版） |
-| Philips Hue Bridge | body swversion | `1.0` | 04-11 |  |  |
-| Philips Hue Bridge | body swversion | `1801260942` | 04-11 |  | 載っていない（2017-11-27 の版） |
-| Philips Hue Bridge | body swversion | `5.38.1.14919` | 04-11, 04-12 |  | 載っていない（2017-11-27 の版） |
+| Nest (Google) Nest Cam IQ | http-request user-agent | `ConnMan/1.29 wispr` | 04-10, 04-12, 04-14, 04-16, 04-17, 04-18, 04-19 | 2520014（03/28/2018） | （リリースノートなし） |
+| Nest (Google) Nest Guard (Secure) | http-request user-agent | `ConnMan/1.29 wispr` | 03-28, 04-10, 04-15, 04-16 | 1.1.1-8（03/28/2018） | （リリースノートなし） |
+| Philips Hue Bridge | ssdp server | `Linux/3.14.0 UPnP/1.0 IpBridge/1.15.0` | 03-20, 03-21, 03-28, 04-10, 04-11 | 1802201122（03/20/2018） | 載っていない（2017-11-27 の版） |
+| Philips Hue Bridge | body apiversion | `1.23.0` | 04-11, 04-13 |  | 載っていない（2017-11-27 の版） |
+| Philips Hue Bridge | body swversion | `1.0` | 04-11, 04-13 |  |  |
+| Philips Hue Bridge | body swversion | `1801260942` | 04-11, 04-13 |  | 載っていない（2017-11-27 の版） |
+| Philips Hue Bridge | body swversion | `5.38.1.14919` | 04-11, 04-12, 04-13 |  | 載っていない（2017-11-27 の版） |
 | Philips Hue Bridge | body swversion | `5.50.2.16151` | 04-11 |  | 載っていない（2017-11-27 の版） |
-| Philips Hue Bridge | ssdp server | `Linux/3.14.0 UPnP/1.0 IpBridge/1.23.0` | 04-11, 04-12 |  | 載っていない（2017-11-27 の版） |
-| Ring Video Doorbell | url api_version | `4` | 04-11 | N/A（03/20/2018） | （リリースノートなし） |
-| Roku Roku 4 | http-request user-agent | `Gibbon/2015.1.1/2015.1.1: Netflix/2015.1.1 (DEVTYPE=RKU-44XXX-; CERTVER=1)` | 03-20, 04-10, 04-12 | 8.0.0-build 4183-08（03/20/2018） | （リリースノートなし） |
-| Roku Roku 4 | http-response server | `Roku UPnP/1.0 MiniUPnPd/1.4` | 03-20 |  | （リリースノートなし） |
-| Roku Roku 4 | ssdp server | `Roku UPnP/1.0 Roku/8.0.0` | 03-20, 04-10, 04-11, 04-12 |  | （リリースノートなし） |
-| Roku Roku 4 | http-request user-agent | `Gibbon/2015.1.1/2015.1.1: Netflix/2015.1.1 (DEVTYPE=RKU-44XXX-;` | 04-10, 04-11, 04-12 |  | （リリースノートなし） |
-| Roku Roku 4 | http-request user-agent | `Roku/DVP-8.0 (178.00E04184A)` | 04-10, 04-11, 04-12 |  | （リリースノートなし） |
-| Samsung Smart TV | http-request user-agent | `DLNADOC/1.50 SEC_HHP_[TV] Samsung 8 Series (55)/1.0 UPnP/1.0` | 03-20, 04-10 | T-KTMAKUC-1156.0, BT-S; T-KTMINTV-1012（03/20/2018） | （リリースノートなし） |
-| Samsung Smart TV | http-request user-agent | `Gibbon/2016.1.2/2016.1.2: Netflix/2016.1.2 (DEVTYPE=SSTV-KTM1-; CERTVER=1)` | 03-20, 04-10 |  | （リリースノートなし） |
-| Samsung Smart TV | http-response server | `SHP, UPnP/1.0, Samsung UPnP SDK/1.0` | 03-20 |  | （リリースノートなし） |
-| Samsung Smart TV | http-response server | `UPnP/1.1 Samsung AllShare Server/1.0` | 03-20 |  | （リリースノートなし） |
-| Samsung Smart TV | http-response user-agent | `DLNADOC/1.50 SEC_HHP_[TV] Samsung 8 Series (55)` | 03-20 |  | （リリースノートなし） |
-| Samsung Smart TV | http-response user-agent | `DLNADOC/1.50 SEC_HHP_[TV] Samsung 8 Series (55)/1.0 UPnP/1.0` | 03-20 |  | （リリースノートなし） |
-| Samsung Smart TV | ssdp server | `SHP, UPnP/1.0, Samsung UPnP SDK/1.0` | 03-20, 04-10 |  | （リリースノートなし） |
-| Samsung Smart TV | ssdp server | `Samsung-Linux/4.1, UPnP/1.0, Samsung_UPnP_SDK/1.0` | 03-20, 04-10 |  | （リリースノートなし） |
-| Samsung Smart TV | http-request user-agent | `Mozilla/5.0 (SMART-TV; LINUX; Tizen 3.0) AppleWebKit/538.1 (KHTML, like Gecko) Version/3.0` | 04-10 |  | （リリースノートなし） |
+| Philips Hue Bridge | ssdp server | `Linux/3.14.0 UPnP/1.0 IpBridge/1.23.0` | 04-11, 04-12, 04-13 |  | 載っていない（2017-11-27 の版） |
+| Philips Hue Bridge | body apiversion | `1.24.0` | 04-13, 04-15 |  | 載っていない（2017-11-27 の版） |
+| Philips Hue Bridge | body swversion | `1802201122` | 04-13, 04-15 |  | 載っていない（2017-11-27 の版） |
+| Philips Hue Bridge | body swversion | `5.105.0.21536` | 04-13, 04-14, 04-15, 04-16, 04-17, 04-18, 04-19 |  | 載っていない（2017-11-27 の版） |
+| Philips Hue Bridge | ssdp server | `Linux/3.14.0 UPnP/1.0 IpBridge/1.24.0` | 04-13, 04-14, 04-15, 04-16, 04-17, 04-18, 04-19 |  | 載っていない（2017-11-27 の版） |
+| Philips Hue Bridge | body swversion | `5.105.0.21169` | 04-15, 04-16, 04-17, 04-19 |  | 載っていない（2017-11-27 の版） |
+| Ring Video Doorbell | url api_version | `4` | 03-21, 04-11, 04-13 | N/A（03/20/2018） | （リリースノートなし） |
+| Roku Roku 4 | http-request user-agent | `Gibbon/2015.1.1/2015.1.1: Netflix/2015.1.1 (DEVTYPE=RKU-44XXX-; CERTVER=1)` | 03-20, 03-21, 03-28, 04-10, 04-12, 04-15, 04-17, 04-18 | 8.0.0-build 4183-08（03/20/2018） | （リリースノートなし） |
+| Roku Roku 4 | http-response server | `Roku UPnP/1.0 MiniUPnPd/1.4` | 03-20, 04-13, 04-15 |  | （リリースノートなし） |
+| Roku Roku 4 | ssdp server | `Roku UPnP/1.0 Roku/8.0.0` | 03-20, 03-21, 03-28, 04-10, 04-11, 04-12, 04-13, 04-14, 04-15, 04-16, 04-17, 04-18, 04-19 |  | （リリースノートなし） |
+| Roku Roku 4 | http-request user-agent | `Roku/DVP-8.0 (178.00E04128A)` | 03-21, 03-28 |  | （リリースノートなし） |
+| Roku Roku 4 | http-request user-agent | `Gibbon/2015.1.1/2015.1.1: Netflix/2015.1.1 (DEVTYPE=RKU-44XXX-;` | 04-10, 04-11, 04-12, 04-13, 04-14, 04-15, 04-16, 04-17, 04-18, 04-19 |  | （リリースノートなし） |
+| Roku Roku 4 | http-request user-agent | `Roku/DVP-8.0 (178.00E04184A)` | 04-10, 04-11, 04-12, 04-13, 04-14, 04-15, 04-17, 04-18, 04-19 |  | （リリースノートなし） |
+| Samsung Smart TV | http-request user-agent | `DLNADOC/1.50 SEC_HHP_[TV] Samsung 8 Series (55)/1.0 UPnP/1.0` | 03-20, 03-21, 03-28, 04-10, 04-13, 04-15, 04-18 | T-KTMAKUC-1156.0, BT-S; T-KTMINTV-1012（03/20/2018） | （リリースノートなし） |
+| Samsung Smart TV | http-request user-agent | `Gibbon/2016.1.2/2016.1.2: Netflix/2016.1.2 (DEVTYPE=SSTV-KTM1-; CERTVER=1)` | 03-20, 03-21, 04-10, 04-18 |  | （リリースノートなし） |
+| Samsung Smart TV | http-response server | `SHP, UPnP/1.0, Samsung UPnP SDK/1.0` | 03-20, 04-13, 04-15 |  | （リリースノートなし） |
+| Samsung Smart TV | http-response server | `UPnP/1.1 Samsung AllShare Server/1.0` | 03-20, 04-15 |  | （リリースノートなし） |
+| Samsung Smart TV | http-response user-agent | `DLNADOC/1.50 SEC_HHP_[TV] Samsung 8 Series (55)` | 03-20, 04-13, 04-15 |  | （リリースノートなし） |
+| Samsung Smart TV | http-response user-agent | `DLNADOC/1.50 SEC_HHP_[TV] Samsung 8 Series (55)/1.0 UPnP/1.0` | 03-20, 04-13 |  | （リリースノートなし） |
+| Samsung Smart TV | ssdp server | `SHP, UPnP/1.0, Samsung UPnP SDK/1.0` | 03-20, 03-21, 03-28, 04-10, 04-13, 04-15, 04-18 |  | （リリースノートなし） |
+| Samsung Smart TV | ssdp server | `Samsung-Linux/4.1, UPnP/1.0, Samsung_UPnP_SDK/1.0` | 03-20, 03-21, 03-28, 04-10, 04-13, 04-15, 04-18 |  | （リリースノートなし） |
+| Samsung Smart TV | http-request user-agent | `Gibbon/2016.1.2/2016.1.2: Netflix/2016.1.2 (DEVTYPE=SSTV-KTM1-; C` | 03-21 |  | （リリースノートなし） |
+| Samsung Smart TV | http-request user-agent | `Mozilla/5.0 (SMART-TV; LINUX; Tizen 3.0) AppleWebKit/538.1 (KHTML, like Gecko) Version/3.0` | 04-10, 04-18 |  | （リリースノートなし） |
 | Samsung Smart TV | http-request user-agent | `Mozilla/5.0 (SMART-TV; Linux; Tizen 3.0) AppleWebKit/537.36 (KHTML, like Gecko) SamsungBro` | 04-10 |  | （リリースノートなし） |
 | Samsung Smart TV | http-request user-agent | `Mozilla/5.0 (compatible; U; Fymp) Factory Media Production GmbH/3.0.2` | 04-10 |  | （リリースノートなし） |
 | Samsung Smart TV | url Ver | `2` | 04-10 |  | （リリースノートなし） |
 | Samsung Smart TV | url codeVersion | `samsungtv%202017%201.2.0%3A95%3A2017-11-15` | 04-10 |  | （リリースノートなし） |
 | Samsung Smart TV | url coreCodeVersion | `mdotfantasyscode%7Cv20160614%7CH.27.5%7C1.5%7CATM%20Container` | 04-10 |  | （リリースノートなし） |
-| Samsung Smart TV | url d_ver | `2` | 04-10 |  | （リリースノートなし） |
+| Samsung Smart TV | url d_ver | `2` | 04-10, 04-18 |  | （リリースノートなし） |
 | Samsung Smart TV | url d_visid_ver | `1.5.3` | 04-10 |  | （リリースノートなし） |
 | Samsung Smart TV | url mboxVersion | `41` | 04-10 |  | （リリースノートなし） |
 | Samsung Smart TV | url version | `42` | 04-10 |  | （リリースノートなし） |
+| Samsung Smart TV | http-request user-agent | `samsung-agent/1.1` | 04-15 |  | （リリースノートなし） |
+| Samsung Smart TV | http-response server | `UPnP/1.0, Samsung AllShare Server/1.0` | 04-15 |  | （リリースノートなし） |
+| Samsung Smart TV | http-request user-agent | `Gibbon/2016.1.2/2016.1.2: Netflix/2016.1` | 04-18 |  | （リリースノートなし） |
+| Samsung Smart TV | http-request user-agent | `Ignition/1.0 (samsungtv, arm)` | 04-18 |  | （リリースノートなし） |
+| Samsung Smart TV | url d_visid_ver | `1.6.0` | 04-18 |  | （リリースノートなし） |
 | Sonos Sonos speaker | http-request user-agent | `Linux UPnP/1.0 Sonos/33.15-33210 (ZPS1)` | 03-20 | 8.3（03/20/2018） | 載っていない（2018-04-09 の版） |
 | Sonos Sonos speaker | http-response server | `Linux UPnP/1.0 Sonos/33.15-33210 (ZPS1)` | 03-20 |  | 載っていない（2018-04-09 の版） |
 | Sonos Sonos speaker | http-response server | `Linux UPnP/1.0 Sonos/34.16-37101 (ZPS1)` | 03-20 |  | 載っていない（2018-04-09 の版） |
-| Sonos Sonos speaker | http-response server | `Linux UPnP/1.0 Sonos/41.3-50131 (ZPS1)` | 03-20, 04-10, 04-11, 04-12 |  | 載っていない（2018-04-09 の版） |
+| Sonos Sonos speaker | http-response server | `Linux UPnP/1.0 Sonos/41.3-50131 (ZPS1)` | 03-20, 03-21, 03-28, 04-10, 04-11, 04-12, 04-13 |  | 載っていない（2018-04-09 の版） |
 | Sonos Sonos speaker | ssdp server | `Linux UPnP/1.0 Sonos/33.15-33210 (ZPS1)` | 03-20 |  | 載っていない（2018-04-09 の版） |
 | Sonos Sonos speaker | ssdp server | `Linux UPnP/1.0 Sonos/34.16-37101 (ZPS1)` | 03-20 |  | 載っていない（2018-04-09 の版） |
-| Sonos Sonos speaker | ssdp server | `Linux UPnP/1.0 Sonos/41.3-50131 (ZPS1)` | 03-20, 04-10, 04-11, 04-12 |  | 載っていない（2018-04-09 の版） |
+| Sonos Sonos speaker | ssdp server | `Linux UPnP/1.0 Sonos/41.3-50131 (ZPS1)` | 03-20, 03-21, 03-28, 04-10, 04-11, 04-12, 04-13 |  | 載っていない（2018-04-09 の版） |
 | Sonos Sonos speaker | http-request user-agent | `Linux UPnP/1.0 Sonos/41.3-50131 (ZPS1)` | 04-10, 04-11 |  | 載っていない（2018-04-09 の版） |
-| TCL / Roku Roku TV | http-request user-agent | `Gibbon/2015.1.1/2015.1.1: Netflix/2015.1.1 (DEVTYPE=RKU-5XXXX-; CERTVER=1)` | 03-20, 04-11, 04-12 | 8.0.0-build 4183-08（03/20/2018） | （リリースノートなし） |
-| TCL / Roku Roku TV | http-request user-agent | `Roku/DVP-8.0 (088.00E04142A)` | 03-20 |  | （リリースノートなし） |
-| TCL / Roku Roku TV | http-response server | `Roku UPnP/1.0 MiniUPnPd/1.4` | 03-20 |  | （リリースノートなし） |
-| TCL / Roku Roku TV | ssdp server | `Roku UPnP/1.0 Roku/8.0.0` | 03-20, 04-10, 04-11, 04-12 |  | （リリースノートなし） |
-| TCL / Roku Roku TV | url keyVersion | `1` | 03-20, 04-10, 04-11, 04-12 |  | （リリースノートなし） |
-| TCL / Roku Roku TV | http-request user-agent | `Gibbon/2015.1.1/2015.1.1: Netflix/2015.1.1 (DEVTYPE=` | 04-10, 04-11, 04-12 |  | （リリースノートなし） |
-| TCL / Roku Roku TV | http-request user-agent | `Roku/DVP-8.0 (088.00E04183A)` | 04-10, 04-11, 04-12 |  | （リリースノートなし） |
-| Wink Hub 2 | ssdp server | `node.js/6.1.0 UPnP/1.1 node-ssdp/2.8.0` | 03-20 | 4.0.26（03/20/2018） | （リリースノートなし） |
-| Wink Hub 2 | ssdp server | `node.js/6.1.0 UPnP/1.1 node-ssdp/2.9.1` | 04-10, 04-11, 04-12 |  | （リリースノートなし） |
+| Sonos Sonos speaker | body SoftwareVersion | `41.3-50131` | 04-13 |  | 載っていない（2018-04-09 の版） |
+| Sonos Sonos speaker | body SoftwareVersion | `42.2-51240` | 04-13, 04-15 |  | 載っていない（2018-04-09 の版） |
+| Sonos Sonos speaker | body apiVersion | `1.3.0` | 04-13 |  | 載っていない（2018-04-09 の版） |
+| Sonos Sonos speaker | body apiVersion | `1.4.1` | 04-13, 04-15 |  | 載っていない（2018-04-09 の版） |
+| Sonos Sonos speaker | http-request user-agent | `Linux UPnP/1.0 Sonos/42.2-51240 (ZPS1)` | 04-13, 04-14, 04-15, 04-16, 04-17, 04-18, 04-19 |  | 載っていない（2018-04-09 の版） |
+| Sonos Sonos speaker | http-request user-agent | `Nullsoft Winamp3 version 3.0 (compatible)` | 04-13, 04-15 |  | 載っている：3.0（2018-04-09） |
+| Sonos Sonos speaker | http-response server | `Linux UPnP/1.0 Sonos/42.2-51240 (ZPS1)` | 04-13, 04-14, 04-15, 04-16, 04-17, 04-18, 04-19 |  | 載っていない（2018-04-09 の版） |
+| Sonos Sonos speaker | ssdp server | `Linux UPnP/1.0 Sonos/42.2-51240 (ZPS1)` | 04-13, 04-14, 04-15, 04-16, 04-17, 04-18, 04-19 |  | 載っていない（2018-04-09 の版） |
+| Sonos Sonos speaker | url version | `42.2` | 04-13, 04-14, 04-15, 04-16, 04-17, 04-18, 04-19 |  | 載っていない（2018-04-09 の版） |
+| TCL / Roku Roku TV | http-request user-agent | `Gibbon/2015.1.1/2015.1.1: Netflix/2015.1.1 (DEVTYPE=RKU-5XXXX-; CERTVER=1)` | 03-20, 03-21, 04-11, 04-12, 04-17, 04-18 | 8.0.0-build 4183-08（03/20/2018） | （リリースノートなし） |
+| TCL / Roku Roku TV | http-request user-agent | `Roku/DVP-8.0 (088.00E04142A)` | 03-20, 03-21, 03-28 |  | （リリースノートなし） |
+| TCL / Roku Roku TV | http-response server | `Roku UPnP/1.0 MiniUPnPd/1.4` | 03-20, 04-15 |  | （リリースノートなし） |
+| TCL / Roku Roku TV | ssdp server | `Roku UPnP/1.0 Roku/8.0.0` | 03-20, 03-21, 03-28, 04-10, 04-11, 04-12, 04-13, 04-14, 04-15, 04-16, 04-17, 04-18, 04-19 |  | （リリースノートなし） |
+| TCL / Roku Roku TV | url keyVersion | `1` | 03-20, 03-21, 03-28, 04-10, 04-11, 04-12, 04-13, 04-14, 04-15, 04-16, 04-17, 04-18, 04-19 |  | （リリースノートなし） |
+| TCL / Roku Roku TV | http-request user-agent | `Gibbon/2015.1.1/2015.1.1: Netflix/2015.1.1 (DEVTYPE=` | 03-21, 03-28, 04-10, 04-11, 04-12, 04-13, 04-14, 04-15, 04-16, 04-17, 04-18, 04-19 |  | （リリースノートなし） |
+| TCL / Roku Roku TV | http-request user-agent | `Roku/DVP-8.0 (088.00E04183A)` | 04-10, 04-11, 04-12, 04-13, 04-14, 04-15, 04-16, 04-17, 04-18 |  | （リリースノートなし） |
+| Wink Hub 2 | ssdp server | `node.js/6.1.0 UPnP/1.1 node-ssdp/2.8.0` | 03-20, 03-21 | 4.0.26（03/20/2018） | （リリースノートなし） |
+| Wink Hub 2 | ssdp server | `node.js/6.1.0 UPnP/1.1 node-ssdp/2.9.1` | 03-21, 03-28, 04-10, 04-11, 04-12, 04-13, 04-14, 04-15, 04-16, 04-17, 04-18, 04-19 |  | （リリースノートなし） |
 | unknown webcam | http-response server | `H264DVR 1.0` | 03-20 | 4.02.R12.00006510.10010.1403（03/20/2018） | （リリースノートなし） |
 | unknown webcam | http-response server | `gSOAP/2.7` | 03-20 |  | （リリースノートなし） |
