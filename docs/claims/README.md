@@ -48,5 +48,5 @@
 
 ## 今の状態（2026-10-31）
 
-- YourThings の 44 製品は、全製品で D1〜D6 を探し、読み落としの確認まで済んだ（D33）。主張 678 件（最初に読めなかった 34 文書のうち 14 文書を、ブラウザと OCR で読み直した。D37）。結果は [results-yourthings.md](results-yourthings.md)。研究の範囲は暗号化（暗号の方法と、暗号化しているか）に絞った（D34）。暗号化の主張は 145 件で、食い違いの候補は 9 製品（Ring、Hue、Sonos、Withings Home、Harman Kardon Invoke、Wink Hub 2、Canary、Logi Circle、iRobot Roomba）。観測を HTTP・TLS・FTP 以外のすべてのフローに広げ、データセットの作成者の検査（ポートスキャン、中間者）の通信を外した（D35）。キャプチャの期間に 03-20 を含め、機器の版と作成者の評価を観測と並べた（D36）：キャプチャの期間中に 8 製品の版が変わっていた。
+- YourThings の 44 製品は、全製品で D1〜D6 を探し、読み落としの確認まで済んだ（D33）。主張 678 件（最初に読めなかった 34 文書のうち 14 文書を、ブラウザと OCR で読み直した。D37）。結果は [results-yourthings.md](results-yourthings.md)。研究の範囲は暗号化（暗号の方法と、暗号化しているか）に絞った（D34）。暗号化の主張は 145 件で、通信は公開されている 13 日分すべて（D38）。食い違いの候補は 12 製品（Ring、Hue、Sonos、TP-Link の 2 製品、Apple HomePod、Withings Home、Harman Kardon Invoke、Wink Hub 2、Canary、Logi Circle、iRobot Roomba）。観測を HTTP・TLS・FTP 以外のすべてのフローに広げ、データセットの作成者の検査（ポートスキャン、中間者）の通信を外した（D35）。キャプチャの期間に 03-20 を含め、機器の版と作成者の評価を観測と並べた（D36）：キャプチャの期間中に 8 製品の版が変わっていた。
 - 次：候補を人が確かめる。読めなかった文書（[unreadable.md](unreadable.md)）。ほかのデータセットに広げる。

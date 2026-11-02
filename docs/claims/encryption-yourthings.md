@@ -4,10 +4,10 @@
 
 | 判定 | 暗号の方法 | 暗号化しているか | 計 |
 |---|---|---|---|
-| 食い違いの候補 | 6 | 7 | 13 |
-| 文言の上で食い違い | 0 | 4 | 4 |
-| 一致（見えた範囲で） | 9 | 33 | 42 |
-| 見えない | 7 | 7 | 14 |
+| 食い違いの候補 | 6 | 10 | 16 |
+| 文言の上で食い違い | 1 | 5 | 6 |
+| 一致（見えた範囲で） | 8 | 31 | 39 |
+| 見えない | 7 | 5 | 12 |
 | 判定できない | 23 | 55 | 78 |
 | 計 | 45 | 106 | 151 |
 
@@ -15,21 +15,21 @@
 
 | 製品 | 主張 | 文書 | 判定 | 根拠 |
 |---|---|---|---|---|
-| Canary | All parts of our system—from the device to the cloud to the app—employ extensive security measures to protect … | D2 2018-02-27 | 食い違いの候補 (T2) | 4 of 8010 TLS handshakes with Canary's servers used AES-128 (ECDHE_RSA_WITH_AES_128_GCM_SHA256, o.canaryis.com and v.canaryis.com, 03-20); the rest AES-256; … |
-| Canary | AES 256-bit data encryption | D1 2018-03-23 | 食い違いの候補 (T2) | TLS 8002/8010 ECDHE_RSA_WITH_AES_256_GCM_SHA384, 4 ECDHE_RSA_WITH_AES_256_CBC_SHA384, 4 ECDHE_RSA_WITH_AES_128_GCM_SHA256 (the AES-128 ones to o.canaryis.com … |
-| Logi Circle | Logitech uses unique, random and automatically rotating AES 256 Bit Dual Layer Encryption to protect and … | D4 2018-03-13 | 食い違いの候補 (T2) | all 7 TLS handshakes with the real servers (including api.video.logi.com) used AES-128 (TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256); 6 more were the dataset's … |
+| Canary | All parts of our system—from the device to the cloud to the app—employ extensive security measures to protect … | D2 2018-02-27 | 食い違いの候補 (T2) | 4 of 26334 TLS handshakes with Canary's servers used AES-128 (ECDHE_RSA_WITH_AES_128_GCM_SHA256, o.canaryis.com and v.canaryis.com, 03-20); the rest AES-256; … |
+| Canary | AES 256-bit data encryption | D1 2018-03-23 | 食い違いの候補 (T2) | TLS 26324/26334 ECDHE_RSA_WITH_AES_256_GCM_SHA384, 6 ECDHE_RSA_WITH_AES_256_CBC_SHA384, 4 ECDHE_RSA_WITH_AES_128_GCM_SHA256 (the AES-128 ones to o.canaryis.com … |
+| Logi Circle | Logitech uses unique, random and automatically rotating AES 256 Bit Dual Layer Encryption to protect and … | D4 2018-03-13 | 食い違いの候補 (T2) | all 19 TLS handshakes with the real servers (including api.video.logi.com) used AES-128 (TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256); 6 more were the dataset's … |
 | Wink Hub 2 | We adopt security measures that include certificate pinning, encryption, two-factor authentication for all … | D4 2017-07-08 | 食い違いの候補 (T2: certificate validation) | in the dataset authors' man-in-the-middle test (04-12, forged certificate issued by thing-catcher.gtisc.gatech.edu), the hub sent application data after the … |
-| Withings Home | Nokia Home uses bank level technologies such as AES-256 and secure HTTP (HTTPS) to protect your data at the … | D1 2018-04-04 | 食い違いの候補 (T2) | 1619 of 1621 TLS handshakes negotiated AES-128 (ECDHE_RSA_WITH_AES_128_GCM_SHA256); 2 used AES-256 (Zeek; the dataset's man-in-the-middle test sessions … |
-| iRobot Roomba | Currently, we use AES 256-bit encryption and Transport Layer Security (TLS v1.2). | D2 2018-11-10 | 食い違いの候補 (T2) | TLS with iRobot's own server disc-prod.iot.irobotapi.com used AES-128 (TLS_RSA_WITH_AES_128_CBC_SHA256, 4 handshakes), as did cloudfront downloads (4); only … |
-| Arlo base station | AES encryption protects your information. | D4 2019-08-07 | 一致（見えた範囲で） | 284 TLS1.2 handshakes, all with forward secrecy; no plaintext HTTP (Zeek) |
-| Arlo base station | AES-Verschlüsselung schützt Ihre Daten | D4 2017-08-24 | 一致（見えた範囲で） | 284 TLS1.2, all with forward secrecy; no plaintext HTTP (Zeek) |
-| Nest Cam | That’s why Nest Cam uses 128-bit AES with TLS/SSL encryption, Perfect Forward Secrecy and a unique 2048-bit … | D1 2018-04-10 | 一致（見えた範囲で） | 18/93 TLS1.0 ECDHE_RSA_WITH_AES_128_CBC_SHA, 75 without visible handshake; no plaintext HTTP; the camera's own (client) certificate has a 2048-bit RSA key in … |
-| Nest Cam | So Nest Cam uses security with 128-bit SSL encryption. | D5 2016-10-05 | 一致（見えた範囲で） | 18/93 TLS1.0 ECDHE_RSA_WITH_AES_128_CBC_SHA, 75 without visible handshake; no plaintext HTTP |
-| Nest Cam IQ | Dropcams and Nest Cams connect to the Nest cloud service using 2048-bit RSA private keys for key exchange, … | D2 2018-04-10 | 一致（見えた範囲で） | 118/157 handshakes TLS1.0 ECDHE_RSA_WITH_AES_128_CBC_SHA (forward secrecy), 39 without a visible handshake; server certificates RSA 2048 (118); the Nest Cam … |
-| Nest Cam IQ | AES 128-bit encryption | D1 2018-04-10 | 一致（見えた範囲で） | 118/157 TLS1.0 ECDHE_RSA_WITH_AES_128_CBC_SHA, 39 without visible handshake; plaintext only 5 GET to ipv4.connman.net (third-party connectivity check, no body) |
-| Nest Cam IQ | 128-bit AES with TLS/SSL | D1 2018-04-10 | 一致（見えた範囲で） | 118/157 TLS1.0 ECDHE_RSA_WITH_AES_128_CBC_SHA, 39 without visible handshake; plaintext only 5 GET to ipv4.connman.net (third-party connectivity check, no body) |
-| Nest Protect | Nest Protect alarms use a proprietary secure protocol similar to TLS to share data. | D2 2018-04-10 | 一致（見えた範囲で。暗号化はエントロピーからの推定） | all its traffic is one proprietary protocol on tcp/11095 to AWS addresses (16 flows over 4 days; no HTTP, TLS or other plaintext; flowscan.py); 95% of the … |
-| Piper nv | Piper encrypts all outbound communication to its secure cloud using AES-128 and AES-256 algorithms. | D2 2019-07-21 | 一致（見えた範囲で） | 4949 AES_256_GCM and 540 AES_128 handshakes (Zeek; the dataset's man-in-the-middle test sessions excluded) |
+| Withings Home | Nokia Home uses bank level technologies such as AES-256 and secure HTTP (HTTPS) to protect your data at the … | D1 2018-04-04 | 食い違いの候補 (T2) | 5248 of 5259 TLS handshakes with the real servers negotiated AES-128 (ECDHE_RSA_WITH_AES_128_GCM_SHA256); 11 used AES-256; on the LAN, 3 DTLS 1.0 sessions with … |
+| iRobot Roomba | Currently, we use AES 256-bit encryption and Transport Layer Security (TLS v1.2). | D2 2018-11-10 | 食い違いの候補 (T2) | TLS with iRobot's own server disc-prod.iot.irobotapi.com used AES-128 (TLS_RSA_WITH_AES_128_CBC_SHA256, 17 handshakes), as did cloudfront downloads (17); only … |
+| Piper nv | Piper encrypts all outbound communication to its secure cloud using AES-128 and AES-256 algorithms. | D2 2019-07-21 | 文言の上で食い違い | 16115 AES_256_GCM and 1750 AES_128 handshakes, as claimed; but 5 plaintext GET without content to static.getPiper.com on 04-16 (Zeek, 13 days: 03-20, 03-21, … |
+| Arlo base station | AES encryption protects your information. | D4 2019-08-07 | 一致（見えた範囲で） | 500 TLS1.2 handshakes, all with forward secrecy; no plaintext of any protocol (Zeek, flowscan.py; 13 days: 03-20, 03-21, 03-28, 04-10..19; the dataset's … |
+| Arlo base station | AES-Verschlüsselung schützt Ihre Daten | D4 2017-08-24 | 一致（見えた範囲で） | 500 TLS1.2 handshakes, all with forward secrecy; no plaintext of any protocol (Zeek, flowscan.py; 13 days: 03-20, 03-21, 03-28, 04-10..19; the dataset's … |
+| Nest Cam | That’s why Nest Cam uses 128-bit AES with TLS/SSL encryption, Perfect Forward Secrecy and a unique 2048-bit … | D1 2018-04-10 | 一致（見えた範囲で） | 118/193 TLS1.0 ECDHE_RSA_WITH_AES_128_CBC_SHA, 75 without visible handshake; no plaintext of any protocol (Zeek, flowscan.py; 13 days: 03-20, 03-21, 03-28, … |
+| Nest Cam | So Nest Cam uses security with 128-bit SSL encryption. | D5 2016-10-05 | 一致（見えた範囲で） | 118/193 TLS1.0 ECDHE_RSA_WITH_AES_128_CBC_SHA, 75 without visible handshake; no plaintext of any protocol (Zeek, flowscan.py; 13 days: 03-20, 03-21, 03-28, … |
+| Nest Cam IQ | Dropcams and Nest Cams connect to the Nest cloud service using 2048-bit RSA private keys for key exchange, … | D2 2018-04-10 | 一致（見えた範囲で） | 350/389 handshakes TLS1.0 ECDHE_RSA_WITH_AES_128_CBC_SHA (forward secrecy), 39 without a visible handshake; server certificates RSA 2048 (350); the Nest Cam … |
+| Nest Cam IQ | AES 128-bit encryption | D1 2018-04-10 | 一致（見えた範囲で） | 350/389 TLS1.0 ECDHE_RSA_WITH_AES_128_CBC_SHA, 39 without visible handshake; plaintext only 11 GET to ipv4.connman.net (third-party connectivity check, no … |
+| Nest Cam IQ | 128-bit AES with TLS/SSL | D1 2018-04-10 | 一致（見えた範囲で） | 350/389 TLS1.0 ECDHE_RSA_WITH_AES_128_CBC_SHA, 39 without visible handshake; plaintext only 11 GET to ipv4.connman.net (third-party connectivity check, no … |
+| Nest Protect | Nest Protect alarms use a proprietary secure protocol similar to TLS to share data. | D2 2018-04-10 | 一致（見えた範囲で。暗号化はエントロピーからの推定） | all its traffic is one proprietary protocol on tcp/11095 to AWS addresses (60 flows over 13 days; no HTTP, TLS or other plaintext; flowscan.py); 93% of the … |
 | Apple HomePod | AirPlay audio and CarPlay video streams utilize the MFi-SAP (Secure Association Protocol), which encrypts … | D2 2018-04-11 | 見えない | LAN flows with an iOS device (192.168.0.138): TLS on high ports and short UDP packets on udp/3722, no plaintext; not identified as AirPlay streams or HomeKit … |
 | Apple HomePod | Ephemeral keys are exchanged using ECDH key exchange (Curve25519) and signed using the authentication IC’s … | D2 2018-04-11 | 見えない | LAN flows with an iOS device (192.168.0.138): TLS on high ports and short UDP packets on udp/3722, no plaintext; not identified as AirPlay streams or HomeKit … |
 | Apple TV (4th gen) | AirPlay audio and CarPlay video streams utilize the MFi-SAP (Secure Association Protocol), which encrypts … | D2 2018-04-11 | 見えない | no AirPlay audio stream identified; one plaintext RTSP 'GET /info' (AirPlay capability query) to tcp/7000 from an iOS device on the LAN, answered 200 … |
@@ -44,110 +44,110 @@
 
 | 製品 | 主張 | 文書 | 判定 | 根拠 |
 |---|---|---|---|---|
-| Harman Kardon Invoke | Harman engages the use of numerous technological security measures to preserve the security of your … | D3 2018-03-15 | 食い違いの候補 (T1a) | 5 plaintext GET to esdk-ffl.spotify.com with URL parameters named key_id, value (Zeek); 689 TLS otherwise (test sessions excluded) |
-| Philips Hue Bridge | Philips Lighting, transfers data securely (using SSL) and will encrypt some data, such as your MAC address … | D3 2017-08-18 | 食い違いの候補 (T1a) | 1615 plaintext HTTP POST from the bridge to Philips hosts (www.ecdinterface.philips.com, dcp.cpp.philips.com, bridge.meethue.com) with bodies, many with an … |
-| Ring Video Doorbell | Encryption Bank-Grade | D1 2017-04-20 | 食い違いの候補 (T1a) | plaintext GET to vod.ring.com with Authorization: Basic about every 10 s on 2018-03-20 (8372, mostly 404) and plaintext POST to fw.ring.com with Authorization: … |
-| Sonos PLAY:1 | When we transmit data over the Internet, we protect it through the use of encryption. | D3 2018-02-02 | 食い違いの候補 (T1a) | plaintext GET to update.sonos.com with URL parameters named householdid, serial, sonosid and version fields (11 in 4 days; Zeek); Quarant INSECURE_HTTP_TOKEN … |
-| Sonos PLAY:1 | In addition, your data is protected with encryption, such as Transport Layer Security (TLS), during … | D3 2018-02-02 | 食い違いの候補 (T1a) | same as above (plaintext update.sonos.com requests and the plaintext firmware download on 03-20) |
-| Sonos PLAY:1 | Any data we transmit over the internet is protected using encryption. | D3 2018-02-02 | 食い違いの候補 (T1a) | same as above (plaintext update.sonos.com requests and the plaintext firmware download on 03-20) |
-| Withings Home | Communication via Secure Socket Layer (SSL) | D1 2018-04-04 | 食い違いの候補 (T1a) | 3 plaintext POST to scalews.withings.net with URL parameter named action and a 101-byte text body (Zeek); 1621 TLS otherwise (test sessions excluded) |
-| Canary | When a customer streams video through the Canary app, all video and data is securely encrypted between the … | D2 2018-02-27 | 文言の上で食い違い | same 50 HEAD requests (4 days); TLS 8002/8010 ECDHE_RSA_WITH_AES_256_GCM_SHA384, 4 ECDHE_RSA_WITH_AES_256_CBC_SHA384, 4 ECDHE_RSA_WITH_AES_128_GCM_SHA256 (the … |
-| Canary | Secure web transfer (SSL/TLS) | D1 2018-03-23 | 文言の上で食い違い | 50 plaintext HEAD to h.canaryis.com:80, no body or parameters (Zeek, 4 days); TLS 8002/8010 ECDHE_RSA_WITH_AES_256_GCM_SHA384, 4 … |
-| Canary | If a customer uses an open or insecure Wi-Fi network (or in the event their home network is ever … | D2 2018-02-27 | 文言の上で食い違い | 50 plaintext HEAD to h.canaryis.com:80, no body or parameters (Zeek, 4 days) |
-| Canary | Canary connects directly to Canary Services through authenticated and encrypted channels. | D4 2019-07-16 | 文言の上で食い違い | 50 plaintext HEAD to h.canaryis.com:80, no body or parameters (Zeek, 4 days) |
-| Apple HomePod | certain information such as your name, contacts, music you listen to, and searches is sent to Apple servers … | D2 2018-04-12 | 一致（見えた範囲で） | 814 TLS1.2; plaintext GET without body only to OCSP and push/config hosts (82) |
-| Apple HomePod | All your iCloud content — like photos, contacts, and reminders — is encrypted when it’s transferred and, in … | D2 2018-04-12 | 一致（見えた範囲で） | no plaintext to iCloud hosts |
-| Apple HomePod | It’s also encrypted in transit between your Apple device and the devices you’re controlling in your home. | D2 2018-04-12 | 一致（見えた範囲で） | no plaintext HTTP on the LAN; external plaintext GET without body only to OCSP and push/config hosts |
-| Apple HomePod | And when you control your accessories from a remote location, that data is encrypted when it’s sent. | D2 2018-04-12 | 一致（見えた範囲で） | external plaintext GET without body only to OCSP and push/config hosts |
-| Apple HomePod | All communication with the server is over HTTPS. | D2 2018-04-11 | 一致（見えた範囲で） | external plaintext GET without body only to OCSP and push/config hosts |
-| Apple TV (4th gen) | certain information such as your name, contacts, music you listen to, and searches is sent to Apple servers … | D2 2018-04-12 | 一致（見えた範囲で） | 1282 TLS1.2 (100 test sessions excluded); plaintext GET without body only to OCSP, push/config and artwork hosts (55) |
-| Apple TV (4th gen) | All your iCloud content — like photos, contacts, and reminders — is encrypted when it’s transferred and, in … | D2 2018-04-12 | 一致（見えた範囲で） | no plaintext to iCloud hosts |
-| Apple TV (4th gen) | It’s also encrypted in transit between your Apple device and the devices you’re controlling in your home. | D2 2018-04-12 | 一致（見えた範囲で） | no plaintext HTTP on the LAN; external plaintext GET without body only to OCSP, push/config and artwork hosts; across all TCP/UDP flows on the LAN, one … |
-| Apple TV (4th gen) | And when you control your accessories from a remote location, that data is encrypted when it’s sent. | D2 2018-04-12 | 一致（見えた範囲で） | no plaintext HTTP on the LAN; external plaintext GET without body only to OCSP, push/config and artwork hosts |
-| Apple TV (4th gen) | All communication with the server is over HTTPS. | D2 2018-04-11 | 一致（見えた範囲で） | no plaintext HTTP on the LAN; external plaintext GET without body only to OCSP, push/config and artwork hosts |
-| Logi Circle | Instant data encryption with secure sockets layer (SSL) web transfer | D1 2017-05-28 | 一致（見えた範囲で） | 7 TLS1.2 (6 test sessions excluded), all with forward secrecy; no plaintext HTTP (Zeek) |
-| Logi Circle | Instant data encryption with secure sockets layer (SSL) web transfer | D1 2018-03-16 | 一致（見えた範囲で） | 7 TLS1.2 (6 test sessions excluded), all with forward secrecy; no plaintext HTTP (Zeek) |
-| Logi Circle | We use a variety of security technologies and procedures, including SSL encryption, to help protect your … | D3 2016-02-04 | 一致（見えた範囲で） | 7 TLS1.2 (6 test sessions excluded), all with forward secrecy; no plaintext HTTP (Zeek) |
-| Logi Circle | Logitech uses bank-level, industry standard encryption to transfer all data. | D4 2018-03-13 | 一致（見えた範囲で） | all TCP/UDP flows to the internet were TLS apart from NTP; no plaintext HTTP, no LAN plaintext (Zeek, flowscan.py; 4 days) |
-| Nest Cam | So we encrypt our connections to help keep your info safe. | D3 2018-04-10 | 一致（見えた範囲で） | 18/93 TLS1.0 ECDHE_RSA_WITH_AES_128_CBC_SHA, 75 without visible handshake; no plaintext HTTP |
-| Nest Cam | All personal information is encrypted as it is transmitted to Nest and cannot easily be accessed. | D3 2018-04-10 | 一致（見えた範囲で） | 18/93 TLS1.0 ECDHE_RSA_WITH_AES_128_CBC_SHA, 75 without visible handshake; no plaintext HTTP |
-| Nest Cam IQ | We encrypt our connections. Keep data safe and private. | D1 2018-04-10 | 一致（見えた範囲で） | 5 plaintext GET to ipv4.connman.net (third-party connectivity check, no body); no plaintext to Nest |
-| Nest Cam IQ | All personal information is encrypted as it is transmitted to Nest and cannot easily be accessed. | D3 2018-04-10 | 一致（見えた範囲で） | no plaintext to Nest seen |
-| Nest Cam IQ | TLS/SSL | D1 2018-04-10 | 一致（見えた範囲で） | 118/157 TLS1.0 ECDHE_RSA_WITH_AES_128_CBC_SHA, 39 without visible handshake; plaintext only 5 GET to ipv4.connman.net (third-party connectivity check, no body) |
-| Nest Cam IQ | So we encrypt our connections to help keep your info safe. | D3 2018-04-10 | 一致（見えた範囲で） | 118/157 TLS1.0 ECDHE_RSA_WITH_AES_128_CBC_SHA, 39 without visible handshake; plaintext only 5 GET to ipv4.connman.net (third-party connectivity check, no body) |
-| Nest Protect | All personal information is encrypted as it is transmitted to Nest and cannot easily be accessed. | D3 2018-04-10 | 一致（見えた範囲で。暗号化はエントロピーからの推定） | all its traffic is one proprietary protocol on tcp/11095 to AWS addresses (16 flows over 4 days; no HTTP, TLS or other plaintext; flowscan.py); 95% of the … |
-| Nest Protect | So we encrypt our connections to help keep your info safe. | D3 2018-04-10 | 一致（見えた範囲で。暗号化はエントロピーからの推定） | all its traffic is one proprietary protocol on tcp/11095 to AWS addresses (16 flows over 4 days; no HTTP, TLS or other plaintext; flowscan.py); 95% of the … |
-| Nest Secure (Nest Guard) | All personal information is encrypted as it is transmitted to Nest and cannot easily be accessed. | D3 2018-04-10 | 一致（見えた範囲で。暗号化はエントロピーからの推定） | tcp/11095 proprietary protocol to AWS addresses (11 flows over 4 days): 93% of the payload packets of at least 64 bytes it sent had high entropy (70762/76476), … |
-| Nest Secure (Nest Guard) | So we encrypt our connections to help keep your info safe. | D3 2018-04-10 | 一致（見えた範囲で。暗号化はエントロピーからの推定） | tcp/11095 proprietary protocol to AWS addresses (11 flows over 4 days): 93% of the payload packets of at least 64 bytes it sent had high entropy (70762/76476), … |
-| Piper nv | All feeds from Piper are encrypted and authenticated. | D4 2015-03-20 | 一致（見えた範囲で） | 5489 TLS1.2, all with forward secrecy; no plaintext HTTP (Zeek) |
-| Piper nv | All connections to and from Piper (including Live video, 2-way audio, cloud communications and video clips) … | D4 2019-07-21 | 一致（見えた範囲で） | 5489 TLS1.2, all with forward secrecy; no plaintext HTTP (Zeek) |
-| TP-Link HS105 | We have implemented measures, including encryption and SSL technology, designed to secure your personal … | D3 2018-01-31 | 一致（見えた範囲で） | 4 flows, all TLS (tcp/50443); no plaintext of any protocol, no LAN control traffic seen (Zeek, flowscan; 4 days) |
-| TP-Link LB130 | We have implemented measures, including encryption and SSL technology, designed to secure your personal … | D3 2018-01-31 | 一致（見えた範囲で） | 36 flows, all TLS (tcp/443, tcp/50443); 13 TLS1.2 handshakes with the real servers, all with forward secrecy (20 more were the dataset's MITM test and are … |
-| VeraLite | his username and an MD5 hash (security checksum) of the password, along with the serial number and hardware … | D2 2016-10-13 | 一致（見えた範囲で） | TLS1.2 to *.mios.com relay/auth/device/account/storage (413+37+36+33+21+12+4), several without forward secrecy; also 151 FTP logins (302 USER/PASS records) to … |
-| VeraLite | NetworkMonitor runs on Vera and calls a php page on the remote access server using https, passing in the … | D2 2016-10-13 | 一致（見えた範囲で） | TLS1.2 to *.mios.com relay/auth/device/account/storage (413+37+36+33+21+12+4), several without forward secrecy |
-| VeraLite | With this service, Vera makes a secure, encrypted connection to the FindVera server, and you can remotely … | D2 2017-05-12 | 一致（見えた範囲で） | TLS1.2 to *.mios.com relay/auth/device/account/storage (413+37+36+33+21+12+4), several without forward secrecy; also 151 FTP logins (302 USER/PASS records) to … |
-| iRobot Roomba | The data is encrypted both in transit and at rest. | D2 2018-11-10 | 一致（見えた範囲で） | all TCP/UDP flows to the internet were TLS (tcp/443, tcp/8883) apart from NTP; no plaintext HTTP (Zeek, flowscan.py; 4 days) |
-| iRobot Roomba | When a robot requires an update, the robots are notified of the available update when they interact with the … | D2 2018-11-10 | 一致（見えた範囲で） | Quarant I4_FIRMWARE_UPDATE_OBSERVED (4); the robot's downloads went to cloudfront hosts over TLS 1.2 (AES-128); no plaintext update traffic (Zeek, Quarant; 4 … |
+| Apple HomePod | certain information such as your name, contacts, music you listen to, and searches is sent to Apple servers … | D2 2018-04-12 | 食い違いの候補 (T1a) | on 03-21 the HomePod fetched audio from streamingaudio.itunes.apple.com over plaintext HTTP 3 times, with a URL parameter named accesskey and an … |
+| Harman Kardon Invoke | Harman engages the use of numerous technological security measures to preserve the security of your … | D3 2018-03-15 | 食い違いの候補 (T1a) | 15 plaintext GET to esdk-ffl.spotify.com with URL parameters named key_id, value (Zeek); 2212 TLS otherwise (13 days: 03-20, 03-21, 03-28, 04-10..19, test … |
+| Philips Hue Bridge | Philips Lighting, transfers data securely (using SSL) and will encrypt some data, such as your MAC address … | D3 2017-08-18 | 食い違いの候補 (T1a) | 3208 plaintext HTTP requests with content from the bridge to Philips hosts (dcp.cpp.philips.com 968, www.ecdinterface.philips.com 916, bridge.meethue.com with … |
+| Ring Video Doorbell | Encryption Bank-Grade | D1 2017-04-20 | 食い違いの候補 (T1a) | plaintext GET to vod.ring.com with Authorization: Basic about every 10 s on 03-20 (8372) and 03-21 (8364), mostly 404, and 13 more on 04-11 and 04-13 (16,749 … |
+| Sonos PLAY:1 | When we transmit data over the Internet, we protect it through the use of encryption. | D3 2018-02-02 | 食い違いの候補 (T1a) | plaintext GET to update.sonos.com with URL parameters named householdid, serial, sonosid and version fields; Quarant INSECURE_HTTP_TOKEN 51, … |
+| Sonos PLAY:1 | In addition, your data is protected with encryption, such as Transport Layer Security (TLS), during … | D3 2018-02-02 | 食い違いの候補 (T1a) | same as above (plaintext update.sonos.com requests and three plaintext firmware downloads on 03-20 and 04-13) |
+| Sonos PLAY:1 | Any data we transmit over the internet is protected using encryption. | D3 2018-02-02 | 食い違いの候補 (T1a) | same as above (plaintext update.sonos.com requests and three plaintext firmware downloads on 03-20 and 04-13) |
+| TP-Link HS105 | We have implemented measures, including encryption and SSL technology, designed to secure your personal … | D3 2018-01-31 | 食い違いの候補 (T1a) | on 04-13 and 04-15 the phone app controlled the plug over the LAN (tcp/9999, 46 flows): the plug's replies carried the cloud account user name … |
+| TP-Link LB130 | We have implemented measures, including encryption and SSL technology, designed to secure your personal … | D3 2018-01-31 | 食い違いの候補 (T1a) | on 04-13 and 04-15 the phone app controlled the bulb over the LAN (tcp/9999 and udp/9999, 71 flows): the bulb's replies carried the cloud account user name … |
+| Withings Home | Communication via Secure Socket Layer (SSL) | D1 2018-04-04 | 食い違いの候補 (T1a) | 4 plaintext POST to scalews.withings.net with URL parameter named action and a text body (Zeek); 5259 TLS otherwise (13 days: 03-20, 03-21, 03-28, 04-10..19, … |
+| Canary | When a customer streams video through the Canary app, all video and data is securely encrypted between the … | D2 2018-02-27 | 文言の上で食い違い | same 158 HEAD requests; TLS 26324/26334 ECDHE_RSA_WITH_AES_256_GCM_SHA384, 6 ECDHE_RSA_WITH_AES_256_CBC_SHA384, 4 ECDHE_RSA_WITH_AES_128_GCM_SHA256 (the … |
+| Canary | Secure web transfer (SSL/TLS) | D1 2018-03-23 | 文言の上で食い違い | 158 plaintext HEAD to h.canaryis.com:80, no body or parameters (Zeek, 13 days: 03-20, 03-21, 03-28, 04-10..19); TLS 26324/26334 … |
+| Canary | If a customer uses an open or insecure Wi-Fi network (or in the event their home network is ever … | D2 2018-02-27 | 文言の上で食い違い | 158 plaintext HEAD to h.canaryis.com:80, no body or parameters (Zeek, 13 days: 03-20, 03-21, 03-28, 04-10..19) |
+| Canary | Canary connects directly to Canary Services through authenticated and encrypted channels. | D4 2019-07-16 | 文言の上で食い違い | 158 plaintext HEAD to h.canaryis.com:80, no body or parameters (Zeek, 13 days: 03-20, 03-21, 03-28, 04-10..19) |
+| Piper nv | All connections to and from Piper (including Live video, 2-way audio, cloud communications and video clips) … | D4 2019-07-21 | 文言の上で食い違い | 5 plaintext GET without content to static.getPiper.com on 04-16; everything else TLS (17865 TLS1.2 handshakes, all with forward secrecy) (Zeek, flowscan.py, 13 … |
+| Apple HomePod | All your iCloud content — like photos, contacts, and reminders — is encrypted when it’s transferred and, in … | D2 2018-04-12 | 一致（見えた範囲で） | no plaintext to iCloud hosts (13 days: 03-20, 03-21, 03-28, 04-10..19) |
+| Apple HomePod | It’s also encrypted in transit between your Apple device and the devices you’re controlling in your home. | D2 2018-04-12 | 一致（見えた範囲で） | no plaintext HTTP on the LAN; external plaintext to OCSP and push/config hosts, plus 3 plaintext audio requests to streamingaudio.itunes.apple.com on 03-21 … |
+| Apple HomePod | And when you control your accessories from a remote location, that data is encrypted when it’s sent. | D2 2018-04-12 | 一致（見えた範囲で） | external plaintext to OCSP and push/config hosts, plus 3 plaintext audio requests to streamingaudio.itunes.apple.com on 03-21 (not the HomeKit server) (13 … |
+| Apple HomePod | All communication with the server is over HTTPS. | D2 2018-04-11 | 一致（見えた範囲で） | external plaintext to OCSP and push/config hosts, plus 3 plaintext audio requests to streamingaudio.itunes.apple.com on 03-21 (not the HomeKit server) (13 … |
+| Apple TV (4th gen) | certain information such as your name, contacts, music you listen to, and searches is sent to Apple servers … | D2 2018-04-12 | 一致（見えた範囲で） | 3423 TLS1.2 (the dataset's man-in-the-middle test sessions excluded: 100); plaintext without credentials only to OCSP, push/config (init.*.apple.com with an … |
+| Apple TV (4th gen) | All your iCloud content — like photos, contacts, and reminders — is encrypted when it’s transferred and, in … | D2 2018-04-12 | 一致（見えた範囲で） | no plaintext to iCloud hosts (13 days: 03-20, 03-21, 03-28, 04-10..19) |
+| Apple TV (4th gen) | It’s also encrypted in transit between your Apple device and the devices you’re controlling in your home. | D2 2018-04-12 | 一致（見えた範囲で） | no plaintext HTTP on the LAN; across all TCP/UDP flows on the LAN, one plaintext RTSP 'GET /info' (AirPlay capability query) to tcp/7000 from an iOS device; … |
+| Apple TV (4th gen) | And when you control your accessories from a remote location, that data is encrypted when it’s sent. | D2 2018-04-12 | 一致（見えた範囲で） | external plaintext only to OCSP, push/config and artwork hosts (13 days: 03-20, 03-21, 03-28, 04-10..19) |
+| Apple TV (4th gen) | All communication with the server is over HTTPS. | D2 2018-04-11 | 一致（見えた範囲で） | external plaintext only to OCSP, push/config and artwork hosts (13 days: 03-20, 03-21, 03-28, 04-10..19) |
+| Caseta Smart Bridge | We employ computer industry best practices including encryption of the communication between the Smart Bridge … | D4 2018-03-31 | 一致（見えた範囲で） | on the LAN, phones reached the bridge's app port tcp/8081 over TLS (11 flows; 2 more on tcp/8083) and its HomeKit port tcp/4548 (10 flows with high entropy, 6 … |
+| Logi Circle | Instant data encryption with secure sockets layer (SSL) web transfer | D1 2017-05-28 | 一致（見えた範囲で） | 19 TLS1.2 (the dataset's man-in-the-middle test sessions excluded: 6), all with forward secrecy; no plaintext of any protocol (Zeek, flowscan.py, 13 days: … |
+| Logi Circle | Instant data encryption with secure sockets layer (SSL) web transfer | D1 2018-03-16 | 一致（見えた範囲で） | 19 TLS1.2 (the dataset's man-in-the-middle test sessions excluded: 6), all with forward secrecy; no plaintext of any protocol (Zeek, flowscan.py, 13 days: … |
+| Logi Circle | We use a variety of security technologies and procedures, including SSL encryption, to help protect your … | D3 2016-02-04 | 一致（見えた範囲で） | 19 TLS1.2 (the dataset's man-in-the-middle test sessions excluded: 6), all with forward secrecy; no plaintext of any protocol (Zeek, flowscan.py, 13 days: … |
+| Logi Circle | Logitech uses bank-level, industry standard encryption to transfer all data. | D4 2018-03-13 | 一致（見えた範囲で） | all TCP/UDP flows to the internet were TLS apart from NTP (51 flows); no plaintext HTTP, no LAN plaintext (Zeek, flowscan.py, 13 days: 03-20, 03-21, 03-28, … |
+| Nest Cam | So we encrypt our connections to help keep your info safe. | D3 2018-04-10 | 一致（見えた範囲で） | 118/193 TLS1.0 ECDHE_RSA_WITH_AES_128_CBC_SHA, 75 without visible handshake; no plaintext of any protocol (Zeek, flowscan.py; 13 days: 03-20, 03-21, 03-28, … |
+| Nest Cam | All personal information is encrypted as it is transmitted to Nest and cannot easily be accessed. | D3 2018-04-10 | 一致（見えた範囲で） | 118/193 TLS1.0 ECDHE_RSA_WITH_AES_128_CBC_SHA, 75 without visible handshake; no plaintext of any protocol (Zeek, flowscan.py; 13 days: 03-20, 03-21, 03-28, … |
+| Nest Cam IQ | We encrypt our connections. Keep data safe and private. | D1 2018-04-10 | 一致（見えた範囲で） | 11 plaintext GET to ipv4.connman.net (third-party connectivity check, no body); no plaintext to Nest (13 days: 03-20, 03-21, 03-28, 04-10..19) |
+| Nest Cam IQ | All personal information is encrypted as it is transmitted to Nest and cannot easily be accessed. | D3 2018-04-10 | 一致（見えた範囲で） | no plaintext to Nest seen (13 days: 03-20, 03-21, 03-28, 04-10..19) |
+| Nest Cam IQ | TLS/SSL | D1 2018-04-10 | 一致（見えた範囲で） | 350/389 TLS1.0 ECDHE_RSA_WITH_AES_128_CBC_SHA, 39 without visible handshake; plaintext only 11 GET to ipv4.connman.net (third-party connectivity check, no … |
+| Nest Cam IQ | So we encrypt our connections to help keep your info safe. | D3 2018-04-10 | 一致（見えた範囲で） | 350/389 TLS1.0 ECDHE_RSA_WITH_AES_128_CBC_SHA, 39 without visible handshake; plaintext only 11 GET to ipv4.connman.net (third-party connectivity check, no … |
+| Nest Protect | All personal information is encrypted as it is transmitted to Nest and cannot easily be accessed. | D3 2018-04-10 | 一致（見えた範囲で。暗号化はエントロピーからの推定） | all its traffic is one proprietary protocol on tcp/11095 to AWS addresses (60 flows over 13 days; no HTTP, TLS or other plaintext; flowscan.py); 93% of the … |
+| Nest Protect | So we encrypt our connections to help keep your info safe. | D3 2018-04-10 | 一致（見えた範囲で。暗号化はエントロピーからの推定） | all its traffic is one proprietary protocol on tcp/11095 to AWS addresses (60 flows over 13 days; no HTTP, TLS or other plaintext; flowscan.py); 93% of the … |
+| Nest Secure (Nest Guard) | All personal information is encrypted as it is transmitted to Nest and cannot easily be accessed. | D3 2018-04-10 | 一致（見えた範囲で。暗号化はエントロピーからの推定） | tcp/11095 proprietary protocol to AWS addresses (682 flows over 13 days): 92% of the payload packets of at least 64 bytes it sent had high entropy … |
+| Nest Secure (Nest Guard) | So we encrypt our connections to help keep your info safe. | D3 2018-04-10 | 一致（見えた範囲で。暗号化はエントロピーからの推定） | tcp/11095 proprietary protocol to AWS addresses (682 flows over 13 days): 92% of the payload packets of at least 64 bytes it sent had high entropy … |
+| Piper nv | All feeds from Piper are encrypted and authenticated. | D4 2015-03-20 | 一致（見えた範囲で） | 17865 TLS1.2, all with forward secrecy; plaintext only 5 GET without content to static.getPiper.com on 04-16 (not a feed) (Zeek, 13 days: 03-20, 03-21, 03-28, … |
+| VeraLite | his username and an MD5 hash (security checksum) of the password, along with the serial number and hardware … | D2 2016-10-13 | 一致（見えた範囲で） | TLS1.2 to *.mios.com relay/auth/device/account/storage (1805 handshakes, 1357 with forward secrecy); also 470 FTP logins to 82.77.228.112:21 (Zeek; Quarant … |
+| VeraLite | NetworkMonitor runs on Vera and calls a php page on the remote access server using https, passing in the … | D2 2016-10-13 | 一致（見えた範囲で） | TLS1.2 to *.mios.com relay/auth/device/account/storage (1805 handshakes, 1357 with forward secrecy); also 470 FTP logins to 82.77.228.112:21 (Zeek; Quarant … |
+| VeraLite | With this service, Vera makes a secure, encrypted connection to the FindVera server, and you can remotely … | D2 2017-05-12 | 一致（見えた範囲で） | TLS1.2 to *.mios.com relay/auth/device/account/storage (1805 handshakes, 1357 with forward secrecy); also 470 FTP logins to 82.77.228.112:21 (Zeek; Quarant … |
+| VeraLite | change FirmwareImageUrl from http to https in cmh/upgrade_step2.sh | D6 2017-12-31 | 一致（見えた範囲で） | on 04-13 and 04-15 the hub reached vera-us-oem-firmware11.mios.com over TLS 1.2 (6 handshakes, TLS_RSA_WITH_AES_256_CBC_SHA) during update activity (Quarant … |
+| iRobot Roomba | The data is encrypted both in transit and at rest. | D2 2018-11-10 | 一致（見えた範囲で） | all TCP/UDP flows to the internet were TLS (tcp/443, tcp/8883) apart from NTP; no plaintext HTTP (Zeek, flowscan.py; 13 days: 03-20, 03-21, 03-28, 04-10..19) |
+| iRobot Roomba | When a robot requires an update, the robots are notified of the available update when they interact with the … | D2 2018-11-10 | 一致（見えた範囲で） | Quarant I4_FIRMWARE_UPDATE_OBSERVED (15); the robot's downloads went to cloudfront hosts over TLS 1.2 (AES-128); no plaintext update traffic (Zeek, Quarant; 13 … |
 | Apple TV (4th gen) | The streams are encrypted using randomly generated keys on the iOS device and the IP camera, which are … | D2 2018-04-11 | 見えない | no HomeKit session identified: on the LAN the Apple TV only answered one plaintext RTSP 'GET /info' (AirPlay query) and no other plaintext or encrypted session … |
-| Caseta Smart Bridge | We employ computer industry best practices including encryption of the communication between the Smart Bridge … | D4 2018-03-31 | 見えない | no session between the bridge and the Lutron app identified; on the LAN the bridge only made TLS connections (tcp/1443 to the Sonos speaker, 9 flows); … |
-| Google Home | Conversations in Google Home are encrypted by default. | D4 2018-04-04 | 見えない | 2849 TLS1.2 handshakes (51 test sessions excluded), all with forward secrecy; plaintext only HEAD to clients1.google.com (5503, no body) and 5 GET to … |
-| Google Home Mini | Conversations in Google Home are encrypted by default. | D4 2018-04-04 | 見えない | 2852 TLS1.2 handshakes (28 test sessions excluded), all with forward secrecy; plaintext only HEAD to clients1.google.com (5503, no body) and 3 GET to … |
-| VeraLite | change FirmwareImageUrl from http to https in cmh/upgrade_step2.sh | D6 2017-12-31 | 見えない | no firmware download seen (Quarant I4_WEAK_UPDATE_VISIBILITY only) |
-| VeraLite | change ChangeLogURL from http to https in upgrade_step1.sh | D6 2017-12-31 | 見えない | no firmware download seen |
-| Withings Home | h5LS end-to-end encryption. | D1 2018-04-04 | 見えない | no plaintext video seen (Quarant); across all TCP/UDP flows, everything to the internet was TLS except 3 plaintext POST to scalews.withings.net (flowscan.py) |
+| Google Home | Conversations in Google Home are encrypted by default. | D4 2018-04-04 | 見えない | 9304 TLS1.2 handshakes (the dataset's man-in-the-middle test sessions excluded: 51), all with forward secrecy; plaintext only HEAD to clients1.google.com … |
+| Google Home Mini | Conversations in Google Home are encrypted by default. | D4 2018-04-04 | 見えない | 9777 TLS1.2 handshakes (the dataset's man-in-the-middle test sessions excluded: 28), all with forward secrecy; plaintext only HEAD to clients1.google.com … |
+| VeraLite | change ChangeLogURL from http to https in upgrade_step1.sh | D6 2017-12-31 | 見えない | no change-log request identified; no plaintext request to a change-log host (13 days: 03-20, 03-21, 03-28, 04-10..19) |
+| Withings Home | h5LS end-to-end encryption. | D1 2018-04-04 | 見えない | no plaintext video seen (Quarant); the local video sessions with the phone were DTLS 1.0 with AES-256 (3, on 04-13 and 04-15; the camera's certificate there … |
 
 判定できなかったもの：55 件（理由は claims.tsv の note）。
 
 ### 製品ごとの観測（主張の有無に関係なく）
 
-期間は YourThings の 2018-03-20、04-10〜12。TLS は握手が見えた接続の数と割合。平文の HTTP の「中身あり」は本文、URL のパラメータ、Authorization ヘッダーのどれかがある要求。
+期間は YourThings の公開されている 13 日分（2018-03-20、21、28、04-10〜19）。TLS は握手が見えた接続の数と割合。平文の HTTP の「中身あり」は本文、URL のパラメータ、Authorization ヘッダーのどれかがある要求。
 
 | 製品 | 暗号化の主張 | TLS の接続 | TLS の版 | 暗号 | 前方秘匿性 | 外部への平文 HTTP（中身あり／うち認証ヘッダー／中身なし） | LAN 内の平文 HTTP（中身あり） | FTP のログイン |
 |---|---|---|---|---|---|---|---|---|
-| Amazon Echo (1st gen) | 1 | 544 | TLS 1.0 90%, TLS 1.2 9% | AES-128 100% | 100% | 1／0／0 | 24 |  |
-| Amazon Fire TV | 1 | 1045 | TLS 1.2 98%, TLS 1.0 1% | AES-128 99%, AES-256 <1% | 98% | 5／0／46 | 0 |  |
-| Apple HomePod | 18 | 814 | TLS 1.2 100% | AES-256 65%, AES-128 32%, CHACHA20 2% | 84% | 10／0／72 | 0 |  |
-| Apple TV (4th gen) | 21 | 1282 | TLS 1.2 100% | AES-256 76%, AES-128 23%, CHACHA20 <1% | 83% | 16／0／39 | 0 |  |
-| Arlo base station | 7 | 284 | TLS 1.2 100% | AES-128 76%, AES-256 23% | 100% | 0／0／0 | 0 |  |
-| August Doorbell Cam | 0 | 8290 | TLS 1.2 99%, TLS 1.0 <1% | AES-256 96%, AES-128 3% | 99% | 3／0／0 | 0 |  |
-| Belkin NetCam HD | 0 | 584 | TLS 1.2 100% | AES-256 100% | 0% | 0／0／0 | 0 |  |
-| Belkin WeMo Link | 0 | 10 | TLS 1.0 100% | AES-256 100% | 0% | 0／0／0 | 0 |  |
-| Belkin WeMo Motion Sensor | 0 | 62 | TLS 1.0 100% | AES-256 100% | 0% | 0／0／0 | 0 |  |
-| Belkin WeMo Switch | 0 | 5 | TLS 1.0 100% | AES-256 100% | 0% | 0／0／0 | 0 |  |
-| Bose SoundTouch 10 | 3 | 24 | TLS 1.2 100% | AES-128 83%, AES-256 16% | 79% | 7／0／0 | 0 |  |
-| Canary | 8 | 8010 | TLS 1.2 100% | AES-256 99%, AES-128 <1% | 100% | 0／0／52 | 0 |  |
-| Caseta Smart Bridge | 3 | 19 | TLS 1.2 100% | AES-128 89%, AES-256 10% | 52% | 0／0／16 | 0 |  |
+| Amazon Echo (1st gen) | 1 | 1743 | TLS 1.0 91%, TLS 1.2 8% | AES-128 100% | 100% | 1／0／0 | 72 |  |
+| Amazon Fire TV | 1 | 4010 | TLS 1.2 98%, TLS 1.0 1% | AES-128 99%, AES-256 <1% | 98% | 28／0／110 | 0 |  |
+| Apple HomePod | 18 | 2430 | TLS 1.2 100% | AES-256 57%, AES-128 39%, CHACHA20 3% | 85% | 26／0／186 | 0 |  |
+| Apple TV (4th gen) | 21 | 3423 | TLS 1.2 100% | AES-256 71%, AES-128 28%, CHACHA20 <1% | 81% | 17／0／184 | 0 |  |
+| Arlo base station | 7 | 500 | TLS 1.2 100% | AES-128 75%, AES-256 24% | 100% | 0／0／0 | 0 |  |
+| August Doorbell Cam | 0 | 26907 | TLS 1.2 99%, TLS 1.0 <1% | AES-256 96%, AES-128 3% | 99% | 3／0／0 | 0 |  |
+| Belkin NetCam HD | 0 | 848 | TLS 1.2 99%, TLS 1.0 <1% | AES-256 99%, AES-128 <1% | 0% | 1／0／0 | 4 |  |
+| Belkin WeMo Link | 0 | 94 | TLS 1.0 100% | AES-256 100% | 0% | 1／0／2 | 24 |  |
+| Belkin WeMo Motion Sensor | 0 | 203 | TLS 1.0 100% | AES-256 100% | 0% | 3／0／0 | 20 |  |
+| Belkin WeMo Switch | 0 | 32 | TLS 1.0 100% | AES-256 100% | 0% | 3／0／0 | 15 |  |
+| Bose SoundTouch 10 | 3 | 106 | TLS 1.2 100% | AES-128 90%, AES-256 9% | 51% | 41／0／12 | 4 |  |
+| Canary | 8 | 26334 | TLS 1.2 100% | AES-256 99%, AES-128 <1% | 100% | 0／0／160 | 0 |  |
+| Caseta Smart Bridge | 3 | 130 | TLS 1.2 100% | AES-128 96%, AES-256 3% | 29% | 0／0／76 | 0 |  |
 | D-Link DCS-5009L | 0 | 0 |  |  |  | 0／0／0 | 0 |  |
-| Google Home | 3 | 2849 | TLS 1.2 100% | CHACHA20 100% | 100% | 0／0／5508 | 0 |  |
-| Google Home Mini | 3 | 2852 | TLS 1.2 100% | CHACHA20 100% | 100% | 0／0／5506 | 0 |  |
-| Harman Kardon Invoke | 1 | 689 | TLS 1.2 97%, TLS 1.0 2% | AES-256 63%, AES-128 36% | 100% | 5／0／0 | 0 |  |
-| Harmony Hub | 4 | 78 | TLS 1.2 100% | AES-128 100% | 0% | 2468／0／337 | 0 |  |
-| Insteon Hub Pro | 0 | 0 |  |  |  | 29／0／766 | 0 |  |
+| Google Home | 3 | 9304 | TLS 1.2 100% | CHACHA20 100% | 100% | 0／0／17836 | 0 |  |
+| Google Home Mini | 3 | 9777 | TLS 1.2 100% | CHACHA20 100% | 100% | 0／0／17996 | 0 |  |
+| Harman Kardon Invoke | 1 | 2212 | TLS 1.2 97%, TLS 1.0 2% | AES-256 65%, AES-128 34% | 100% | 15／0／0 | 0 |  |
+| Harmony Hub | 4 | 208 | TLS 1.2 100% | AES-128 98%, AES-256 1% | 0% | 5692／0／12352 | 3 |  |
+| Insteon Hub Pro | 0 | 0 |  |  |  | 197／0／2484 | 0 |  |
 | Koogeek Smart Bulb LB1 | 0 | 0 |  |  |  | 0／0／0 | 0 |  |
-| LIFX Color 1000 | 4 | 10 | TLS 1.2 100% | AES-128 100% | 0% | 0／0／0 | 0 |  |
-| Logi Circle | 8 | 7 | TLS 1.2 100% | AES-128 100% | 100% | 0／0／0 | 0 |  |
-| NVIDIA Shield TV | 1 | 1601 | TLS 1.2 100% | AES-128 99%, AES-256 <1% | 99% | 25／0／792 | 0 |  |
-| Nest Cam | 5 | 27 | TLS 1.0 100% | AES-128 100% | 100% | 0／0／0 | 0 |  |
-| Nest Cam IQ | 9 | 118 | TLS 1.0 100% | AES-128 100% | 100% | 0／0／5 | 0 |  |
+| LIFX Color 1000 | 4 | 25 | TLS 1.2 100% | AES-128 100% | 0% | 0／0／0 | 0 |  |
+| Logi Circle | 8 | 19 | TLS 1.2 100% | AES-128 100% | 100% | 0／0／0 | 0 |  |
+| NVIDIA Shield TV | 1 | 5386 | TLS 1.2 100% | AES-128 99%, AES-256 <1% | 99% | 79／0／1494 | 0 |  |
+| Nest Cam | 5 | 118 | TLS 1.0 100% | AES-128 100% | 100% | 0／0／0 | 0 |  |
+| Nest Cam IQ | 9 | 350 | TLS 1.0 100% | AES-128 100% | 100% | 0／0／11 | 0 |  |
 | Nest Protect | 4 | 0 |  |  |  | 0／0／0 | 0 |  |
-| Nest Secure (Nest Guard) | 4 | 0 |  |  |  | 0／0／3 | 0 |  |
-| Philips Hue Bridge | 2 | 1 | TLS 1.2 100% | AES-128 100% | 100% | 1953／1013／3 | 0 |  |
-| Piper nv | 7 | 5489 | TLS 1.2 100% | AES-256 90%, AES-128 9% | 100% | 0／0／0 | 0 |  |
-| Ring Video Doorbell | 1 | 1566 | TLS 1.2 100% | AES-128 100% | 0% | 8373／8373／1 | 0 |  |
-| Roku 4 | 0 | 977 | TLS 1.2 100% | AES-128 86%, AES-256 13% | 98% | 19／0／9 | 0 |  |
-| Roku TV | 0 | 1097 | TLS 1.2 100% | AES-128 87%, AES-256 12% | 99% | 14／0／25 | 0 |  |
-| Samsung Smart TV | 0 | 3574 | TLS 1.2 99%, TLS 1.0 <1% | AES-128 85%, AES-256 14% | 94% | 364／0／1061 | 0 |  |
-| Securifi Almond | 0 | 99 | TLS 1.2 100% | AES-256 97%, AES-128 2% | 100% | 0／0／2 | 0 |  |
-| SmartThings Hub | 1 | 1051 | TLS 1.2 100% | AES-128 100% | 100% | 0／0／0 | 0 |  |
-| Sonos PLAY:1 | 5 | 124 | TLS 1.2 100% | AES-128 89%, AES-256 10% | 79% | 21／0／6 | 156 |  |
-| TP-Link HS105 | 1 | 1 | TLS 1.2 100% | AES-128 100% | 100% | 0／0／0 | 0 |  |
-| TP-Link LB130 | 1 | 13 | TLS 1.2 100% | AES-128 100% | 100% | 0／0／0 | 0 |  |
-| VeraLite | 14 | 564 | TLS 1.2 99%, TLS 1.0 <1% | AES-256 100% | 74% | 0／0／0 | 24 | 151 |
-| WeMo Crock-Pot | 0 | 366 | TLS 1.0 100% | AES-256 100% | 0% | 4／0／0 | 0 |  |
-| Wink Hub 2 | 2 | 45 | TLS 1.2 100% | AES-128 66%, AES-256 33% | 66% | 0／0／0 | 0 |  |
-| Withings Home | 3 | 1621 | TLS 1.2 100% | AES-128 99%, AES-256 <1% | 99% | 3／0／0 | 0 |  |
-| iRobot Roomba | 5 | 15 | TLS 1.2 100% | AES-128 53%, AES-256 46% | 46% | 0／0／0 | 0 |  |
-| myQ Garage | 1 | 11 | TLS 1.1 100% | AES-128 100% | 0% | 0／0／0 | 0 |  |
+| Nest Secure (Nest Guard) | 4 | 3 | TLS 1.2 100% | AES-128 100% | 100% | 0／0／287 | 0 |  |
+| Philips Hue Bridge | 2 | 6 | TLS 1.2 83%, TLS 1.0 16% | AES-128 100% | 100% | 3208／1905／3 | 0 |  |
+| Piper nv | 7 | 17865 | TLS 1.2 100% | AES-256 90%, AES-128 9% | 100% | 0／0／5 | 0 |  |
+| Ring Video Doorbell | 1 | 6855 | TLS 1.2 100% | AES-128 100% | 0% | 16749／16749／6 | 0 |  |
+| Roku 4 | 0 | 3309 | TLS 1.2 100% | AES-128 84%, AES-256 15% | 97% | 48／0／53 | 0 |  |
+| Roku TV | 0 | 3530 | TLS 1.2 100% | AES-128 87%, AES-256 12% | 99% | 40／0／44 | 0 |  |
+| Samsung Smart TV | 0 | 9957 | TLS 1.2 99%, TLS 1.0 <1% | AES-128 86%, AES-256 13%, 3DES <1% | 95% | 717／0／2222 | 4 |  |
+| Securifi Almond | 0 | 335 | TLS 1.2 100% | AES-256 98%, AES-128 1% | 100% | 0／0／22 | 0 |  |
+| SmartThings Hub | 1 | 3391 | TLS 1.2 100% | AES-128 100% | 100% | 0／0／0 | 8 |  |
+| Sonos PLAY:1 | 5 | 424 | TLS 1.2 100% | AES-128 91%, AES-256 8% | 94% | 165／0／15 | 652 |  |
+| TP-Link HS105 | 1 | 45 | TLS 1.2 100% | AES-128 100% | 100% | 0／0／1 | 0 |  |
+| TP-Link LB130 | 1 | 44 | TLS 1.2 100% | AES-128 100% | 100% | 0／0／0 | 0 |  |
+| VeraLite | 14 | 1805 | TLS 1.2 99%, TLS 1.0 <1% | AES-256 99%, AES-128 <1% | 75% | 8／0／7 | 79 | 470 |
+| WeMo Crock-Pot | 0 | 1192 | TLS 1.0 100% | AES-256 100% | 0% | 8／0／0 | 12 |  |
+| Wink Hub 2 | 2 | 103 | TLS 1.2 100% | AES-128 71%, AES-256 28% | 71% | 0／0／0 | 0 |  |
+| Withings Home | 3 | 5262 | TLS 1.2 99%, DTLS 1.0 <1% | AES-128 99%, AES-256 <1% | 99% | 4／0／0 | 0 |  |
+| iRobot Roomba | 5 | 55 | TLS 1.2 100% | AES-128 61%, AES-256 38% | 38% | 0／0／0 | 0 |  |
+| myQ Garage | 1 | 24 | TLS 1.1 100% | AES-128 100% | 0% | 0／0／0 | 0 |  |
 
 ### すべての TCP・UDP の通信（HTTP・TLS・FTP 以外も）
 
@@ -155,54 +155,54 @@
 
 | 製品 | 暗号化の主張 | 外部：暗号化 | 外部：平文 | 外部：分からない | LAN：暗号化 | LAN：平文 | LAN：分からない | サーバー証明書の鍵 | YourThings の評価（暗号化／HTTP） |
 |---|---|---|---|---|---|---|---|---|---|
-| Amazon Echo (1st gen) | 1 | 798（TLS tcp/443: 785, 高エントロピー tcp/4070: 9, 高エントロピー tcp/80: 2, 高エントロピー tcp/443: 2） | 3（テキスト udp/33434: 2, HTTP tcp/80: 1） | 17（バイナリ udp/33434: 10, バイナリ udp/40317: 2, バイナリ udp/49317: 2, バイナリ tcp/4070: 2 ほか） | 0 | 137（HTTP tcp/80: 137） | 2（バイナリ udp/20561: 2） | rsa-2048 99%, test-proxy <1% | 0/4／1/1 |
-| Amazon Fire TV | 1 | 1496（TLS tcp/443: 1496） | 32（HTTP tcp/80: 32） | 0 | 0 | 2077（HTTP tcp/8592: 1949, HTTP tcp/1400: 66, HTTP tcp/80: 62） | 6（短すぎる udp/9: 4, バイナリ udp/20561: 2） | rsa-2048 59%, none (resumed) 31%, test-proxy 9% | 0/4／0/1 |
-| Apple HomePod | 18 | 930（TLS tcp/443: 845, TLS tcp/53075: 60, TLS tcp/5223: 17, TLS tcp/53748: 5 ほか） | 83（HTTP tcp/80: 83） | 0 | 79（TLS tcp/54108: 57, TLS tcp/49367: 19, TLS tcp/52808: 1, TLS tcp/56378: 1 ほか） | 0 | 71（短すぎる udp/3722: 70, 短すぎる tcp/49152: 1） | rsa-2048 68%, ecdsa-256 21%, none (resumed) 8% | 0/4／0/1 |
-| Apple TV (4th gen) | 21 | 1901（TLS tcp/443: 1882, TLS tcp/5223: 9, TLS tcp/49209: 4, TLS tcp/49186: 3 ほか） | 46（HTTP tcp/80: 46） | 4（バイナリ udp/16403: 1, バイナリ udp/16384: 1, バイナリ udp/16385: 1, バイナリ udp/16386: 1） | 0 | 1（RTSP tcp/7000: 1） | 2（バイナリ udp/20561: 2） | rsa-2048 83%, test-proxy 7%, none (resumed) 4% | 0/4／0/1 |
-| Arlo base station | 7 | 288（TLS tcp/443: 288） | 0 | 0 | 0 | 0 | 2（バイナリ udp/20561: 2） | none (resumed) 54%, rsa-2048 44%, not seen <1% | 0/4／0/1 |
-| August Doorbell Cam | 0 | 8524（TLS tcp/443: 8524） | 1（HTTP tcp/80: 1） | 0 | 0 | 0 | 2（バイナリ udp/20561: 2） | rsa-2048 91%, none (resumed) 8%, rsa-4096 <1%；機器の証明書 rsa-4096: 6466 | 2/4／0/1 |
-| Belkin NetCam HD | 0 | 615（TLS tcp/8443: 375, TLS tcp/5104: 240） | 233（STUN tcp/3478: 125, テキスト tcp/3475: 107, STUN tcp/53283: 1） | 0 | 0 | 310（HTTP tcp/80: 310） | 33（短すぎる udp/9: 33） | rsa-2048 98%, none (resumed) 1%, test-proxy <1% | 0/4／0/1 |
-| Belkin WeMo Link | 0 | 10（TLS tcp/8443: 10） | 31（STUN tcp/3478: 23, テキスト tcp/3475: 8） | 0 | 0 | 0 | 15（短すぎる udp/9: 13, バイナリ udp/20561: 2） | rsa-2048 100% | 2/4／0/1 |
-| Belkin WeMo Motion Sensor | 0 | 89（TLS tcp/8443: 88, TLS tcp/8445: 1） | 29（STUN tcp/3478: 23, テキスト tcp/3475: 6） | 0 | 0 | 0 | 3（バイナリ udp/20561: 2, 短すぎる udp/9: 1） | rsa-2048 95%, test-proxy 3%, not seen 1% | 2/4／0/1 |
-| Belkin WeMo Switch | 0 | 13（TLS tcp/8443: 13） | 24（STUN tcp/3478: 17, テキスト tcp/3475: 7） | 0 | 0 | 0 | 1（短すぎる udp/9: 1） | test-proxy 58%, rsa-2048 41% | 2/4／0/1 |
-| Bose SoundTouch 10 | 3 | 26（TLS tcp/443: 22, TLS tcp/8883: 4） | 7（HTTP tcp/80: 7） | 0 | 0 | 19186（HTTP tcp/1400: 11510, HTTP tcp/80: 7675, テキスト tcp/1400: 1） | 2（短すぎる udp/9: 2） | rsa-2048 91%, ecdsa-256 8%；機器の証明書 ecdsa-256: 2 | 0/4／0/1 |
-| Canary | 8 | 8288（TLS tcp/443: 8288） | 52（HTTP tcp/80: 52） | 0 | 0 | 0 | 2（バイナリ udp/20561: 2） | rsa-2048 78%, none (resumed) 19%, not seen 2%；機器の証明書 rsa-2048: 6425 | 0/4／0/1 |
-| Caseta Smart Bridge | 3 | 22（TLS tcp/443: 15, TLS tcp/8883: 7） | 4（HTTP tcp/80: 4） | 0 | 9（TLS tcp/1443: 9） | 0 | 2（バイナリ udp/20561: 2） | rsa-2048 37%, rsa-1024 33%, test-proxy 29% | 2/4／1/1 |
-| D-Link DCS-5009L | 0 | 0 | 0 | 0 | 0 | 3033（HTTP tcp/8592: 3026, HTTP tcp/80: 6, テキスト udp/5978: 1） | 3（バイナリ udp/20561: 2, 短すぎる udp/9: 1） |  | 0/4／0/1 |
-| Google Home | 3 | 2924（TLS tcp/443: 2898, TLS tcp/5228: 26） | 5509（HTTP tcp/80: 5509） | 0 | 0 | 0 | 3（バイナリ udp/20561: 2, 短すぎる udp/9: 1） | none (resumed) 77%, ecdsa-256 20%, test-proxy 1% | 2/4／0/1 |
-| Google Home Mini | 3 | 2905（TLS tcp/443: 2878, TLS tcp/5228: 27） | 5507（HTTP tcp/80: 5507） | 0 | 0 | 0 | 3（バイナリ udp/20561: 2, 短すぎる udp/9: 1） | none (resumed) 77%, ecdsa-256 20%, test-proxy <1% | 2/4／0/1 |
-| Harman Kardon Invoke | 1 | 726（TLS tcp/443: 726） | 5（HTTP tcp/80: 5） | 0 | 0 | 0 | 2（バイナリ udp/20561: 2） | rsa-2048 96%, test-proxy 3% | 0/4／0/1 |
-| Harmony Hub | 4 | 82（TLS tcp/443: 82） | 2817（HTTP tcp/80: 2816, テキスト tcp/80: 1） | 0 | 0 | 402（HTTP tcp/1400: 399, HTTP tcp/57356: 3） | 3（バイナリ udp/20561: 2, 短すぎる udp/9: 1） | rsa-2048 95%, test-proxy 4% | 2/4／0/1 |
-| Insteon Hub Pro | 0 | 0 | 795（HTTP tcp/80: 795） | 0 | 0 | 24（HTTP tcp/80: 24） | 2（バイナリ udp/20561: 2） |  | 4/4／1/1 |
-| Koogeek Smart Bulb LB1 | 0 | 0 | 0 | 0 | 0 | 24（HTTP tcp/80: 24） | 1（バイナリ udp/1466: 1） |  | 0/4／0/1 |
-| LIFX Color 1000 | 4 | 17（TLS tcp/56700: 14, TLS tcp/62107: 2, TLS tcp/62114: 1） | 0 | 0 | 0 | 1（LIFX LAN udp/56700: 1） | 1（バイナリ udp/61294: 1） | rsa-2048 66%, test-proxy 33% | 0/4／0/1 |
-| Logi Circle | 8 | 21（TLS tcp/443: 21） | 0 | 0 | 0 | 0 | 2（バイナリ udp/20561: 2） | rsa-2048 53%, test-proxy 46%；機器の証明書 rsa-2048: 7 | 0/4／0/1 |
-| NVIDIA Shield TV | 1 | 1983（TLS tcp/443: 1622, TLS tcp/5228: 296, TLS tcp/53360: 23, TLS tcp/35123: 17 ほか） | 259（HTTP tcp/80: 259） | 0 | 0 | 0 | 2（バイナリ udp/20561: 2） | none (resumed) 64%, ecdsa-256 18%, rsa-2048 15% | 2/4／0/1 |
-| Nest Cam | 5 | 106（TLS tcp/443: 106） | 0 | 0 | 0 | 0 | 0 | not seen 73%, rsa-2048 26%；機器の証明書 rsa-2048: 27 | 0/4／0/1 |
-| Nest Cam IQ | 9 | 160（TLS tcp/443: 160） | 5（HTTP tcp/80: 5） | 0 | 0 | 0 | 0 | rsa-2048 75%, not seen 24%；機器の証明書 ecdsa-224: 114 | 0/4／0/1 |
-| Nest Protect | 4 | 4（高エントロピー tcp/11095: 4） | 0 | 12（バイナリ tcp/11095: 12） | 0 | 0 | 0 |  |  |
-| Nest Secure (Nest Guard) | 4 | 5（高エントロピー tcp/11095: 5） | 3（HTTP tcp/80: 3） | 6（バイナリ tcp/11095: 6） | 0 | 0 | 0 |  | 0/4／0/1 |
-| Philips Hue Bridge | 2 | 9（TLS tcp/443: 9） | 1953（HTTP tcp/80: 1948, テキスト tcp/80: 5） | 1（短すぎる tcp/80: 1） | 0 | 182148（HTTP tcp/80: 182132, テキスト tcp/80: 16） | 4（バイナリ udp/20561: 2, 短すぎる tcp/80: 1, 短すぎる udp/9: 1） | test-proxy 87%, ecdsa-256 12% | 0/4／0/1 |
-| Piper nv | 7 | 5904（TLS tcp/443: 5515, TLS tcp/6514: 388, TLS tcp/59116: 1） | 0 | 0 | 0 | 0 | 2（バイナリ udp/20561: 2） | rsa-2048 99%, test-proxy <1%, not seen <1% | 0/4／0/1 |
-| Ring Video Doorbell | 1 | 1569（TLS tcp/9998: 1567, 高エントロピー udp/25922: 1, TLS tcp/52643: 1） | 8372（HTTP tcp/80: 8084, テキスト tcp/80: 287, テキスト udp/15063: 1） | 0 | 0 | 0 | 1（バイナリ udp/20561: 1） | rsa-2048 100% | 0/4／0/1 |
-| Roku 4 | 0 | 1784（TLS tcp/443: 1784） | 34（HTTP tcp/80: 34） | 0 | 0 | 0 | 11（短すぎる udp/9: 9, バイナリ udp/20561: 2） | rsa-2048 90%, ecdsa-256 7%, test-proxy 1%；機器の証明書 rsa-2048: 112 | 0/4／0/1 |
-| Roku TV | 0 | 1949（TLS tcp/443: 1939, 高エントロピー tcp/30000: 10） | 41（HTTP tcp/80: 41） | 17（バイナリ tcp/30000: 14, バイナリ tcp/30011: 3） | 0 | 0 | 11（短すぎる udp/9: 9, バイナリ udp/20561: 2） | rsa-2048 89%, ecdsa-256 7%, test-proxy 3%；機器の証明書 rsa-2048: 116 | 0/4／0/1 |
-| Samsung Smart TV | 0 | 4886（TLS tcp/443: 4886） | 1090（HTTP tcp/80: 1090） | 0 | 0 | 33461（テキスト udp/15600: 32293, HTTP tcp/8592: 1074, HTTP tcp/8888: 56, HTTP tcp/1400: 34 ほか） | 1（バイナリ udp/20561: 1） | rsa-2048 57%, test-proxy 19%, ecdsa-256 14%；機器の証明書 rsa-2048: 108 | 2/4／0/1 |
-| Securifi Almond | 0 | 105（TLS tcp/8080: 97, TLS tcp/1026: 5, TLS tcp/443: 2, TLS tcp/37777: 1） | 2（HTTP tcp/80: 2） | 0 | 0 | 5（HTTP tcp/80: 5） | 2（バイナリ udp/20561: 2） | rsa-2048 98%, test-proxy 1% | 2/4／0/1 |
-| SmartThings Hub | 1 | 1082（TLS tcp/443: 1082） | 0 | 0 | 0 | 173734（HTTP tcp/80: 173718, テキスト tcp/80: 16） | 85（短すぎる udp/9: 82, バイナリ udp/20561: 2, 短すぎる tcp/80: 1） | rsa-1024 97%, test-proxy 2% | 0/4／0/1 |
-| Sonos PLAY:1 | 5 | 126（TLS tcp/443: 126） | 27（HTTP tcp/80: 27） | 0 | 9（TLS tcp/1443: 9） | 18083（HTTP tcp/1400: 17920, HTTP tcp/3500: 153, HTTP tcp/57356: 3, テキスト tcp/4444: 2 ほか） | 3（バイナリ udp/20561: 2, 短すぎる udp/9: 1） | rsa-2048 95%, none (resumed) 3%, test-proxy 1% | 2/4／0/1 |
-| TP-Link HS105 | 1 | 4（TLS tcp/50443: 4） | 0 | 0 | 0 | 0 | 0 | rsa-2048 100% | 0/4／0/1 |
-| TP-Link LB130 | 1 | 36（TLS tcp/443: 34, TLS tcp/50443: 2） | 0 | 0 | 0 | 0 | 0 | test-proxy 60%, rsa-2048 39% | 0/4／0/1 |
-| VeraLite | 14 | 598（TLS tcp/443: 569, SSH tcp/232: 25, 高エントロピー tcp/232: 4） | 302（FTP tcp/21: 151, FTP のデータ tcp/data: 151） | 8（短すぎる tcp/37: 8） | 0 | 153（HTTP tcp/80: 149, HTTP tcp/49451: 4） | 2（バイナリ udp/20561: 2） | rsa-2048 99%, test-proxy <1% | 2/4／0/1 |
-| WeMo Crock-Pot | 0 | 461（TLS tcp/8443: 460, TLS tcp/8445: 1） | 37（STUN tcp/3478: 24, テキスト tcp/3475: 9, HTTP tcp/8899: 4） | 0 | 0 | 0 | 4（バイナリ udp/20561: 2, 短すぎる udp/9: 2） | rsa-2048 98%, test-proxy 1% | 2/4／0/1 |
-| Wink Hub 2 | 2 | 91（TLS tcp/443: 91） | 0 | 0 | 1（TLS tcp/8888: 1） | 58（HTTP tcp/8888: 56, HTTP tcp/80: 2） | 2（バイナリ udp/20561: 1, 短すぎる udp/9: 1） | rsa-2048 51%, test-proxy 48% | 0/4／0/1 |
-| Withings Home | 3 | 1630（TLS tcp/443: 1623, TLS tcp/5222: 7） | 3（HTTP tcp/80: 3） | 0 | 0 | 0 | 2（バイナリ udp/20561: 2） | rsa-2048 99%, not seen <1%, test-proxy <1% | 0/4／0/1 |
-| iRobot Roomba | 5 | 25（TLS tcp/8883: 17, TLS tcp/443: 8） | 0 | 0 | 0 | 0 | 2（バイナリ udp/20561: 1, バイナリ udp/34616: 1） | rsa-2048 71%, not seen 28%；機器の証明書 rsa-2048: 7 | 0/4／0/1 |
-| myQ Garage | 1 | 17（TLS tcp/8883: 17） | 0 | 0 | 0 | 24（HTTP tcp/80: 24） | 2（バイナリ udp/20561: 2） | not seen 100% | 0/4／0/1 |
+| Amazon Echo (1st gen) | 1 | 2564（TLS tcp/443: 2539, 高エントロピー tcp/4070: 9, 高エントロピー tcp/80: 8, 高エントロピー tcp/443: 6 ほか） | 3（テキスト udp/33434: 2, HTTP tcp/80: 1） | 49（バイナリ udp/33434: 33, バイナリ udp/40317: 4, バイナリ udp/49317: 4, バイナリ tcp/80: 4 ほか） | 0 | 444（HTTP tcp/80: 444） | 4（バイナリ udp/20561: 2, 短すぎる udp/9: 2） | rsa-2048 99%, test-proxy <1% | 0/4／1/1 |
+| Amazon Fire TV | 1 | 5221（TLS tcp/443: 5221） | 85（HTTP tcp/80: 85） | 0 | 6（TLS tcp/53133: 6） | 6649（HTTP tcp/8592: 6269, HTTP tcp/80: 239, HTTP tcp/1400: 118, HTTP tcp/9000: 8 ほか） | 6（短すぎる udp/9: 4, バイナリ udp/20561: 2） | rsa-2048 58%, none (resumed) 38%, test-proxy 2% | 0/4／0/1 |
+| Apple HomePod | 18 | 3007（TLS tcp/443: 2628, TLS tcp/54642: 84, TLS tcp/54323: 83, TLS tcp/53075: 60 ほか） | 213（HTTP tcp/80: 213） | 0 | 110（TLS tcp/54108: 67, TLS tcp/49367: 39, 高エントロピー tcp/49152: 2, TLS tcp/52808: 1 ほか） | 0 | 134（短すぎる udp/3722: 129, 短すぎる tcp/49152: 2, バイナリ udp/20561: 1, バイナリ udp/49001: 1 ほか） | rsa-2048 69%, ecdsa-256 25%, none (resumed) 4% | 0/4／0/1 |
+| Apple TV (4th gen) | 21 | 4295（TLS tcp/443: 4080, TLS tcp/49220: 86, TLS tcp/5223: 74, TLS tcp/49214: 26 ほか） | 177（HTTP tcp/80: 177） | 4（バイナリ udp/16403: 1, バイナリ udp/16384: 1, バイナリ udp/16385: 1, バイナリ udp/16386: 1） | 2（高エントロピー tcp/49222: 2） | 1（RTSP tcp/7000: 1） | 4（バイナリ udp/20561: 2, バイナリ udp/49001: 2） | rsa-2048 84%, ecdsa-256 7%, none (resumed) 5% | 0/4／0/1 |
+| Arlo base station | 7 | 525（TLS tcp/443: 525） | 0 | 3（短すぎる tcp/443: 3） | 0 | 0 | 2（バイナリ udp/20561: 2） | none (resumed) 48%, rsa-2048 48%, test-proxy 2% | 0/4／0/1 |
+| August Doorbell Cam | 0 | 27586（TLS tcp/443: 27586） | 1（HTTP tcp/80: 1） | 0 | 0 | 1（RTSP tcp/8554: 1） | 2（バイナリ udp/20561: 2） | rsa-2048 89%, none (resumed) 9%, rsa-4096 <1%；機器の証明書 rsa-4096: 20797 | 2/4／0/1 |
+| Belkin NetCam HD | 0 | 927（TLS tcp/8443: 629, TLS tcp/5104: 286, TLS tcp/443: 4, 高エントロピー tcp/4103: 4 ほか） | 279（STUN tcp/3478: 155, テキスト tcp/3475: 122, HTTP tcp/8899: 1, STUN tcp/53283: 1） | 10（バイナリ udp/5338: 10） | 0 | 478（HTTP tcp/80: 463, HTTP tcp/49153: 11, HTTP tcp/39500: 4） | 34（短すぎる udp/9: 33, バイナリ udp/20561: 1） | rsa-2048 98%, none (resumed) 1%, test-proxy <1% | 0/4／0/1 |
+| Belkin WeMo Link | 0 | 136（TLS tcp/8443: 136） | 100（STUN tcp/3478: 62, テキスト tcp/3475: 35, HTTP tcp/80: 3） | 0 | 0 | 70（HTTP tcp/49153: 46, HTTP tcp/39500: 24） | 15（短すぎる udp/9: 13, バイナリ udp/20561: 2） | rsa-2048 69%, test-proxy 30% | 2/4／0/1 |
+| Belkin WeMo Motion Sensor | 0 | 295（TLS tcp/8443: 291, TLS tcp/8445: 4） | 69（STUN tcp/3478: 50, テキスト tcp/3475: 16, HTTP tcp/80: 3） | 0 | 0 | 50（HTTP tcp/49153: 30, HTTP tcp/39500: 20） | 3（バイナリ udp/20561: 2, 短すぎる udp/9: 1） | rsa-2048 97%, none (resumed) <1%, test-proxy <1% | 2/4／0/1 |
+| Belkin WeMo Switch | 0 | 44（TLS tcp/8443: 41, TLS tcp/8445: 3） | 65（STUN tcp/3478: 44, テキスト tcp/3475: 18, HTTP tcp/80: 3） | 0 | 0 | 43（HTTP tcp/49153: 28, HTTP tcp/39500: 15） | 2（バイナリ udp/20561: 1, 短すぎる udp/9: 1） | rsa-2048 79%, test-proxy 17%, none (resumed) 2% | 2/4／0/1 |
+| Bose SoundTouch 10 | 3 | 117（TLS tcp/443: 99, TLS tcp/8883: 17, TLS tcp/52678: 1） | 53（HTTP tcp/80: 53） | 0 | 0 | 52889（HTTP tcp/1400: 33809, HTTP tcp/80: 19037, HTTP tcp/8091: 21, HTTP tcp/8080: 10 ほか） | 4（短すぎる udp/9: 2, バイナリ udp/20561: 1, バイナリ udp/111: 1） | rsa-2048 91%, ecdsa-256 7%, not seen <1%；機器の証明書 ecdsa-256: 8 | 0/4／0/1 |
+| Canary | 8 | 26855（TLS tcp/443: 26855） | 160（HTTP tcp/80: 160） | 0 | 0 | 0 | 2（バイナリ udp/20561: 2） | rsa-2048 78%, none (resumed) 20%, not seen <1%；機器の証明書 rsa-2048: 20936 | 0/4／0/1 |
+| Caseta Smart Bridge | 3 | 59（TLS tcp/443: 40, TLS tcp/8883: 19） | 17（HTTP tcp/80: 17） | 0 | 116（TLS tcp/1443: 92, TLS tcp/8081: 11, 高エントロピー tcp/4548: 10, TLS tcp/8083: 2 ほか） | 6（HTTP tcp/4548: 6） | 10（バイナリ tcp/4548: 6, バイナリ udp/20561: 2, バイナリ tcp/52435: 1, 短すぎる udp/9: 1） | rsa-1024 66%, rsa-2048 27%, test-proxy 5% | 2/4／1/1 |
+| D-Link DCS-5009L | 0 | 0 | 0 | 0 | 0 | 9580（HTTP tcp/8592: 9444, HTTP tcp/80: 125, テキスト udp/5978: 9, HTTP tcp/59259: 1 ほか） | 3（バイナリ udp/20561: 2, 短すぎる udp/9: 1） |  | 0/4／0/1 |
+| Google Home | 3 | 9427（TLS tcp/443: 9336, TLS tcp/5228: 89, TLS udp/53: 2） | 17839（HTTP tcp/80: 17839） | 0 | 6（TLS tcp/8009: 6） | 8（HTTP tcp/8008: 8） | 5（バイナリ udp/20561: 2, バイナリ udp/49001: 2, 短すぎる udp/9: 1） | none (resumed) 78%, ecdsa-256 20%, rsa-2048 <1% | 2/4／0/1 |
+| Google Home Mini | 3 | 9877（TLS tcp/443: 9725, TLS tcp/5228: 151, TLS udp/53: 1） | 17975（HTTP tcp/80: 17975） | 0 | 6（TLS tcp/8009: 6） | 8（HTTP tcp/8008: 8） | 5（バイナリ udp/20561: 2, バイナリ udp/49001: 2, 短すぎる udp/9: 1） | none (resumed) 79%, ecdsa-256 19%, rsa-2048 <1% | 2/4／0/1 |
+| Harman Kardon Invoke | 1 | 2277（TLS tcp/443: 2277） | 15（HTTP tcp/80: 15） | 0 | 0 | 0 | 2（バイナリ udp/20561: 2） | rsa-2048 98%, test-proxy 1% | 0/4／0/1 |
+| Harmony Hub | 4 | 197（TLS tcp/443: 197） | 18067（HTTP tcp/80: 18066, テキスト tcp/80: 1） | 0 | 16（TLS tcp/8888: 12, TLS tcp/1443: 4） | 1277（HTTP tcp/1400: 1228, HTTP tcp/8088: 19, HTTP tcp/49451: 11, テキスト tcp/60173: 6 ほか） | 3（バイナリ udp/20561: 2, 短すぎる udp/9: 1） | rsa-2048 90%, rsa-1024 7%, test-proxy 1% | 2/4／0/1 |
+| Insteon Hub Pro | 0 | 0 | 2681（HTTP tcp/80: 2681） | 0 | 1（TLS udp/53: 1） | 52（HTTP tcp/80: 52） | 2（バイナリ udp/20561: 2） |  | 4/4／1/1 |
+| Koogeek Smart Bulb LB1 | 0 | 0 | 0 | 0 | 12（高エントロピー tcp/80: 12） | 57（HTTP tcp/80: 57） | 4（バイナリ udp/20561: 1, バイナリ udp/1466: 1, バイナリ udp/1877: 1, バイナリ udp/1815: 1） |  | 0/4／0/1 |
+| LIFX Color 1000 | 4 | 41（TLS tcp/56700: 32, TLS tcp/62107: 2, TLS tcp/60950: 1, TLS tcp/61908: 1 ほか） | 0 | 0 | 0 | 1（LIFX LAN udp/56700: 1） | 11（バイナリ udp/61294: 1, バイナリ udp/20561: 1, バイナリ udp/52531: 1, バイナリ udp/61258: 1 ほか） | rsa-2048 83%, test-proxy 16% | 0/4／0/1 |
+| Logi Circle | 8 | 51（TLS tcp/443: 51） | 0 | 0 | 0 | 0 | 2（バイナリ udp/20561: 2） | rsa-2048 76%, test-proxy 24%；機器の証明書 rsa-2048: 19 | 0/4／0/1 |
+| NVIDIA Shield TV | 1 | 6394（TLS tcp/443: 5413, TLS tcp/5228: 775, TLS tcp/45567: 31, TLS tcp/53360: 23 ほか） | 547（HTTP tcp/80: 547） | 0 | 6（TLS tcp/8009: 6） | 5（HTTP tcp/8008: 3, テキスト udp/49001: 2） | 2（バイナリ udp/20561: 2） | none (resumed) 66%, ecdsa-256 19%, rsa-2048 14% | 2/4／0/1 |
+| Nest Cam | 5 | 206（TLS tcp/443: 206） | 0 | 0 | 0 | 0 | 1（バイナリ udp/20561: 1） | rsa-2048 61%, not seen 38%；機器の証明書 rsa-2048: 118 | 0/4／0/1 |
+| Nest Cam IQ | 9 | 400（TLS tcp/443: 400） | 11（HTTP tcp/80: 11） | 0 | 0 | 0 | 1（バイナリ udp/20561: 1） | rsa-2048 89%, not seen 10%；機器の証明書 ecdsa-224: 336 | 0/4／0/1 |
+| Nest Protect | 4 | 13（高エントロピー tcp/11095: 13） | 0 | 47（バイナリ tcp/11095: 47） | 0 | 0 | 0 |  |  |
+| Nest Secure (Nest Guard) | 4 | 48（高エントロピー tcp/11095: 45, TLS tcp/443: 3） | 287（HTTP tcp/80: 287） | 411（バイナリ tcp/11095: 411） | 0 | 0 | 1（バイナリ udp/20561: 1） | rsa-2048 100% | 0/4／0/1 |
+| Philips Hue Bridge | 2 | 20（TLS tcp/443: 20） | 3189（HTTP tcp/80: 3182, テキスト tcp/80: 7） | 1（短すぎる tcp/80: 1） | 0 | 586709（HTTP tcp/80: 586670, テキスト tcp/80: 39） | 4（バイナリ udp/20561: 2, 短すぎる tcp/80: 1, 短すぎる udp/9: 1） | test-proxy 53%, ecdsa-256 38%, rsa-2048 7% | 0/4／0/1 |
+| Piper nv | 7 | 19274（TLS tcp/443: 17938, TLS tcp/6514: 1329, TLS udp/53: 2, TLS tcp/50179: 1 ほか） | 5（HTTP tcp/80: 5） | 0 | 1（TLS udp/53: 1） | 0 | 2（バイナリ udp/20561: 2） | rsa-2048 99%, not seen <1%, test-proxy <1% | 0/4／0/1 |
+| Ring Video Doorbell | 1 | 6866（TLS tcp/9998: 6849, TLS tcp/443: 10, 高エントロピー udp/39700: 1, 高エントロピー udp/25922: 1 ほか） | 16749（HTTP tcp/80: 16193, テキスト tcp/80: 551, テキスト udp/15063: 5） | 0 | 0 | 0 | 1（バイナリ udp/20561: 1） | rsa-2048 99%, not seen <1% | 0/4／0/1 |
+| Roku 4 | 0 | 5903（TLS tcp/443: 5903） | 92（HTTP tcp/80: 92） | 0 | 0 | 39（HTTP tcp/8060: 39） | 11（短すぎる udp/9: 9, バイナリ udp/20561: 2） | rsa-2048 91%, ecdsa-256 7%, test-proxy <1%；機器の証明書 rsa-2048: 402 | 0/4／0/1 |
+| Roku TV | 0 | 6221（TLS tcp/443: 6187, 高エントロピー tcp/30000: 34） | 91（HTTP tcp/80: 91） | 58（バイナリ tcp/30000: 49, バイナリ tcp/30011: 9） | 0 | 28（HTTP tcp/8060: 28） | 11（短すぎる udp/9: 9, バイナリ udp/20561: 2） | rsa-2048 91%, ecdsa-256 7%, test-proxy 1%；機器の証明書 rsa-2048: 373 | 0/4／0/1 |
+| Samsung Smart TV | 0 | 11724（TLS tcp/443: 11724） | 2568（HTTP tcp/80: 2568） | 2（バイナリ tcp/30000: 2） | 3（TLS tcp/8002: 3） | 98708（テキスト udp/15600: 95220, HTTP tcp/8592: 3169, HTTP tcp/8888: 164, HTTP tcp/1400: 66 ほか） | 12（短すぎる udp/9: 11, バイナリ udp/20561: 1） | rsa-2048 69%, ecdsa-256 14%, test-proxy 8%；機器の証明書 rsa-2048: 332 | 2/4／0/1 |
+| Securifi Almond | 0 | 363（TLS tcp/8080: 329, TLS tcp/1026: 28, TLS tcp/443: 3, TLS tcp/41832: 2 ほか） | 22（HTTP tcp/80: 22） | 0 | 0 | 95（HTTP tcp/80: 40, HTTP tcp/1400: 16, HTTP tcp/49451: 11, HTTP tcp/9197: 7 ほか） | 3（バイナリ udp/20561: 2, 短すぎる udp/9: 1） | rsa-2048 95%, test-proxy 4% | 2/4／0/1 |
+| SmartThings Hub | 1 | 3432（TLS tcp/443: 3432） | 0 | 0 | 0 | 565023（HTTP tcp/80: 564984, テキスト tcp/80: 39） | 106（短すぎる udp/9: 103, バイナリ udp/20561: 2, 短すぎる tcp/80: 1） | rsa-1024 99%, test-proxy <1%, not seen <1% | 0/4／0/1 |
+| Sonos PLAY:1 | 5 | 433（TLS tcp/443: 433） | 180（HTTP tcp/80: 171, HTTP tcp/3690: 9） | 0 | 96（TLS tcp/1443: 96） | 46829（HTTP tcp/1400: 46156, HTTP tcp/3500: 533, HTTP tcp/3401: 99, HTTP tcp/9000: 20 ほか） | 3（バイナリ udp/20561: 2, 短すぎる udp/9: 1） | rsa-2048 96%, test-proxy 2%, none (resumed) 1% | 2/4／0/1 |
+| TP-Link HS105 | 1 | 56（TLS tcp/443: 48, TLS tcp/50443: 8） | 1（HTTP tcp/80: 1） | 0 | 0 | 46（TP-Link（XOR） tcp/9999: 46） | 15（バイナリ udp/20561: 1, バイナリ udp/50060: 1, バイナリ udp/52090: 1, バイナリ udp/54172: 1 ほか） | rsa-2048 100% | 0/4／0/1 |
+| TP-Link LB130 | 1 | 75（TLS tcp/443: 69, TLS tcp/50443: 5, TLS tcp/60443: 1） | 0 | 0 | 0 | 71（TP-Link（XOR） tcp/9999: 63, TP-Link（XOR） udp/9999: 8） | 15（バイナリ udp/20561: 1, バイナリ udp/50060: 1, バイナリ udp/52090: 1, バイナリ udp/54172: 1 ほか） | rsa-2048 68%, test-proxy 31% | 0/4／0/1 |
+| VeraLite | 14 | 1897（TLS tcp/443: 1813, SSH tcp/232: 72, 高エントロピー tcp/232: 12） | 955（FTP tcp/21: 470, FTP のデータ tcp/data: 470, HTTP tcp/80: 15） | 32（短すぎる tcp/37: 29, バイナリ tcp/232: 2, バイナリ tcp/443: 1） | 0 | 623（HTTP tcp/80: 596, HTTP tcp/49451: 26, LIFX LAN udp/56700: 1） | 2（バイナリ udp/20561: 2） | rsa-2048 99%, test-proxy <1%, not seen <1% | 2/4／0/1 |
+| WeMo Crock-Pot | 0 | 1358（TLS tcp/8443: 1354, TLS tcp/8445: 4） | 80（STUN tcp/3478: 52, テキスト tcp/3475: 20, HTTP tcp/8899: 7, HTTP tcp/80: 1） | 0 | 0 | 39（HTTP tcp/49153: 27, HTTP tcp/39500: 12） | 4（バイナリ udp/20561: 2, 短すぎる udp/9: 2） | rsa-2048 99%, test-proxy <1%, none (resumed) <1% | 2/4／0/1 |
+| Wink Hub 2 | 2 | 158（TLS tcp/443: 158） | 0 | 0 | 60（TLS tcp/8888: 60） | 166（HTTP tcp/8888: 164, HTTP tcp/80: 2） | 2（バイナリ udp/20561: 1, 短すぎる udp/9: 1） | rsa-2048 71%, test-proxy 28% | 0/4／0/1 |
+| Withings Home | 3 | 5283（TLS tcp/443: 5258, TLS tcp/5222: 25） | 12（HTTP tcp/80: 4, STUN udp/3478: 3, STUN udp/50959: 1, STUN udp/58714: 1 ほか） | 0 | 0 | 5（STUN udp/50637: 1, STUN udp/62313: 1, STUN udp/50959: 1, STUN udp/58714: 1 ほか） | 5（バイナリ udp/20561: 2, バイナリ udp/208: 1, バイナリ udp/65280: 1, バイナリ udp/8066: 1） | rsa-2048 99%, not seen <1%, test-proxy <1%；機器の証明書 rsa-1024: 3 | 0/4／0/1 |
+| iRobot Roomba | 5 | 71（TLS tcp/8883: 38, TLS tcp/443: 32, TLS tcp/49155: 1） | 0 | 0 | 1（TLS tcp/8883: 1） | 1（テキスト udp/5678: 1） | 2（バイナリ udp/20561: 1, バイナリ udp/34616: 1） | rsa-2048 90%, not seen 9%；機器の証明書 rsa-2048: 21 | 0/4／0/1 |
+| myQ Garage | 1 | 39（TLS tcp/8883: 39） | 0 | 0 | 0 | 24（HTTP tcp/80: 24） | 2（バイナリ udp/20561: 2） | not seen 100% | 0/4／0/1 |
 
 ### データセットの作成者の中間者の検査への反応
 
-YourThings の作成者は、2018-04-10〜12 に、一部の TLS 接続へ偽の証明書（発行者 thing-catcher.gtisc.gatech.edu）で応答した。その接続で機器がどうしたかは、パッシブに見える（`mitm_sessions.py`）。「拒んだ」は握手の途中で機器が警告を送ったもの、「握手だけ」は警告もデータもなく終わったもの、「データを送った」は握手のあとに機器がアプリケーションデータのレコードを送ったもの（証明書を受け入れた疑い。中身は暗号化されていて分からない）。これらの接続は、上の TLS の集計から除いてある。
+YourThings の作成者は、2018-04-10〜13 と 04-15 に、一部の TLS 接続へ偽の証明書（発行者 thing-catcher.gtisc.gatech.edu）で応答した。その接続で機器がどうしたかは、パッシブに見える（`mitm_sessions.py`）。「拒んだ」は握手の途中で機器が警告を送ったもの、「握手だけ」は警告もデータもなく終わったもの、「データを送った」は握手のあとに機器がアプリケーションデータのレコードを送ったもの（証明書を受け入れた疑い。中身は暗号化されていて分からない）。これらの接続は、上の TLS の集計から除いてある。
 
 | 製品 | 偽の証明書の接続 | 拒んだ | 握手だけ | データを送った | YourThings の評価（中間者、機器とクラウド） |
 |---|---|---|---|---|---|
@@ -216,8 +216,9 @@ YourThings の作成者は、2018-04-10〜12 に、一部の TLS 接続へ偽の
 | Amazon Echo (1st gen) | 4 | 4 | 0 | 0 | 0/4 |
 | Amazon Fire TV | 112 | 112 | 0 | 0 | 0/4 |
 | Apple TV (4th gen) | 100 | 2 | 98 | 0 | 0/4 |
-| Arlo base station | 1 | 1 | 0 | 0 | 0/4 |
+| Arlo base station | 12 | 12 | 0 | 0 | 0/4 |
 | Belkin NetCam HD | 1 | 1 | 0 | 0 | 0/4 |
+| Belkin WeMo Link | 42 | 42 | 0 | 0 | 0/4 |
 | Belkin WeMo Motion Sensor | 2 | 2 | 0 | 0 | 0/4 |
 | Belkin WeMo Switch | 7 | 7 | 0 | 0 | 0/4 |
 | Canary | 29 | 29 | 0 | 0 | 0/4 |
@@ -231,9 +232,9 @@ YourThings の作成者は、2018-04-10〜12 に、一部の TLS 接続へ偽の
 | Piper nv | 4 | 4 | 0 | 0 | 0/4 |
 | Roku 4 | 17 | 17 | 0 | 0 | 0/4 |
 | Roku TV | 36 | 36 | 0 | 0 | 0/4 |
-| Securifi Almond | 2 | 2 | 0 | 0 | 0/4 |
+| Securifi Almond | 15 | 15 | 0 | 0 | 0/4 |
 | SmartThings Hub | 27 | 27 | 0 | 0 | 0/4 |
-| Sonos PLAY:1 | 2 | 2 | 0 | 0 | 0/4 |
+| Sonos PLAY:1 | 9 | 9 | 0 | 0 | 0/4 |
 | TP-Link LB130 | 20 | 20 | 0 | 0 | 0/4 |
 | Withings Home | 3 | 3 | 0 | 0 | 0/4 |
 
@@ -243,48 +244,48 @@ YourThings の作成者は、2018-04-10〜12 に、一部の TLS 接続へ偽の
 
 | 製品 | 暗号化：評価 | 暗号化：観測 | 暗号化：観測（中身のある平文だけ） | HTTP：評価 | HTTP：観測 | 中間者：評価 | 中間者：観測 | 合わない項目 |
 |---|---|---|---|---|---|---|---|---|
-| Amazon Echo (1st gen) | 0/4 | 2/4（暗号化 798、平文 3） | 2/4（1） | 1/1 | 1/1（138） | 0/4 | 0/4 | 暗号化、暗号化（中身） |
-| Amazon Fire TV | 0/4 | 2/4（暗号化 1496、平文 32） | 2/4（5） | 0/1 | 1/1（2109） | 0/4 | 0/4 | 暗号化、暗号化（中身）、HTTP |
-| Apple HomePod | 0/4 | 2/4（暗号化 862、平文 83） | 2/4（10） | 0/1 | 1/1（83） | 0/4 | （検査なし） | 暗号化、暗号化（中身）、HTTP |
-| Apple TV (4th gen) | 0/4 | 2/4（暗号化 1891、平文 46） | 2/4（16） | 0/1 | 1/1（46） | 0/4 | 0/4 | 暗号化、暗号化（中身）、HTTP |
-| Arlo base station | 0/4 | 0/4（暗号化 288、平文 0） | 0/4（0） | 0/1 | 0/1 | 0/4 | 0/4 |  |
-| August Doorbell Cam | 2/4 | 2/4（暗号化 8524、平文 1） | 2/4（3） | 0/1 | 1/1（1） | 4/4 | 4/4（5 回） | HTTP |
-| Belkin NetCam HD | 0/4 | 2/4（暗号化 615、平文 232） | 0/4（0） | 0/1 | 1/1（310） | 0/4 | 0/4 | 暗号化、HTTP |
-| Belkin WeMo Link | 2/4 | 2/4（暗号化 10、平文 31） | 0/4（0） | 0/1 | 0/1 | 0/4 | （検査なし） | 暗号化（中身） |
-| Belkin WeMo Motion Sensor | 2/4 | 2/4（暗号化 89、平文 29） | 0/4（0） | 0/1 | 0/1 | 0/4 | 0/4 | 暗号化（中身） |
-| Belkin WeMo Switch | 2/4 | 2/4（暗号化 13、平文 24） | 0/4（0） | 0/1 | 0/1 | 0/4 | 0/4 | 暗号化（中身） |
-| Bose SoundTouch 10 | 0/4 | 2/4（暗号化 26、平文 7） | 2/4（7） | 0/1 | 1/1（19189） | 0/4 | （検査なし） | 暗号化、暗号化（中身）、HTTP |
-| Canary | 0/4 | 2/4（暗号化 8288、平文 52） | 0/4（0） | 0/1 | 1/1（52） | 0/4 | 0/4 | 暗号化、HTTP |
-| Caseta Smart Bridge | 2/4 | 2/4（暗号化 22、平文 4） | 0/4（0） | 1/1 | 1/1（4） | 0/4 | 0/4 | 暗号化（中身） |
-| D-Link DCS-5009L | 0/4 | （外部への通信なし） |  | 0/1 | 0/1 | 0/4 | （検査なし） |  |
-| Google Home | 2/4 | 2/4（暗号化 2924、平文 5509） | 0/4（0） | 0/1 | 1/1（5509） | 0/4 | 0/4 | 暗号化（中身）、HTTP |
-| Google Home Mini | 2/4 | 2/4（暗号化 2905、平文 5507） | 0/4（0） | 0/1 | 1/1（5507） | 0/4 | 0/4 | 暗号化（中身）、HTTP |
-| Harman Kardon Invoke | 0/4 | 2/4（暗号化 726、平文 5） | 2/4（5） | 0/1 | 1/1（5） | 0/4 | 4/4（2 回） | 暗号化、暗号化（中身）、HTTP、中間者 |
-| Harmony Hub | 2/4 | 2/4（暗号化 82、平文 2817） | 2/4（2468） | 0/1 | 1/1（3215） | 0/4 | 4/4（4 回） | HTTP、中間者 |
-| Insteon Hub Pro | 4/4 | 4/4（暗号化 0、平文 795） | 4/4（29） | 1/1 | 1/1（795） | 4/4 | （検査なし） |  |
+| Amazon Echo (1st gen) | 0/4 | 2/4（暗号化 2563、平文 3） | 2/4（1） | 1/1 | 1/1（445） | 0/4 | 0/4 | 暗号化、暗号化（中身） |
+| Amazon Fire TV | 0/4 | 2/4（暗号化 5221、平文 85） | 2/4（28） | 0/1 | 1/1（6723） | 0/4 | 0/4 | 暗号化、暗号化（中身）、HTTP |
+| Apple HomePod | 0/4 | 2/4（暗号化 2683、平文 213） | 2/4（26） | 0/1 | 1/1（213） | 0/4 | （検査なし） | 暗号化、暗号化（中身）、HTTP |
+| Apple TV (4th gen) | 0/4 | 2/4（暗号化 4154、平文 177） | 2/4（17） | 0/1 | 1/1（177） | 0/4 | 0/4 | 暗号化、暗号化（中身）、HTTP |
+| Arlo base station | 0/4 | 0/4（暗号化 525、平文 0） | 0/4（0） | 0/1 | 0/1 | 0/4 | 0/4 |  |
+| August Doorbell Cam | 2/4 | 2/4（暗号化 27586、平文 1） | 2/4（3） | 0/1 | 1/1（1） | 4/4 | 4/4（5 回） | HTTP |
+| Belkin NetCam HD | 0/4 | 2/4（暗号化 926、平文 278） | 2/4（1） | 0/1 | 1/1（411） | 0/4 | 0/4 | 暗号化、暗号化（中身）、HTTP |
+| Belkin WeMo Link | 2/4 | 2/4（暗号化 136、平文 100） | 2/4（1） | 0/1 | 1/1（27） | 0/4 | 0/4 | HTTP |
+| Belkin WeMo Motion Sensor | 2/4 | 2/4（暗号化 295、平文 69） | 2/4（3） | 0/1 | 1/1（23） | 0/4 | 0/4 | HTTP |
+| Belkin WeMo Switch | 2/4 | 2/4（暗号化 44、平文 65） | 2/4（3） | 0/1 | 1/1（18） | 0/4 | 0/4 | HTTP |
+| Bose SoundTouch 10 | 0/4 | 2/4（暗号化 116、平文 53） | 2/4（41） | 0/1 | 1/1（52904） | 0/4 | （検査なし） | 暗号化、暗号化（中身）、HTTP |
+| Canary | 0/4 | 2/4（暗号化 26855、平文 160） | 0/4（0） | 0/1 | 1/1（160） | 0/4 | 0/4 | 暗号化、HTTP |
+| Caseta Smart Bridge | 2/4 | 2/4（暗号化 59、平文 17） | 0/4（0） | 1/1 | 1/1（17） | 0/4 | 0/4 | 暗号化（中身） |
+| D-Link DCS-5009L | 0/4 | （外部への通信なし） |  | 0/1 | 1/1（2） | 0/4 | （検査なし） | HTTP |
+| Google Home | 2/4 | 2/4（暗号化 9427、平文 17839） | 0/4（0） | 0/1 | 1/1（17839） | 0/4 | 0/4 | 暗号化（中身）、HTTP |
+| Google Home Mini | 2/4 | 2/4（暗号化 9877、平文 17975） | 0/4（0） | 0/1 | 1/1（17975） | 0/4 | 0/4 | 暗号化（中身）、HTTP |
+| Harman Kardon Invoke | 0/4 | 2/4（暗号化 2277、平文 15） | 2/4（15） | 0/1 | 1/1（15） | 0/4 | 4/4（2 回） | 暗号化、暗号化（中身）、HTTP、中間者 |
+| Harmony Hub | 2/4 | 2/4（暗号化 197、平文 18067） | 2/4（5692） | 0/1 | 1/1（19307） | 0/4 | 4/4（4 回） | HTTP、中間者 |
+| Insteon Hub Pro | 4/4 | 4/4（暗号化 0、平文 2681） | 4/4（197） | 1/1 | 1/1（2681） | 4/4 | （検査なし） |  |
 | Koogeek Smart Bulb LB1 | 0/4 | （外部への通信なし） |  | 0/1 | 0/1 | 0/4 | （検査なし） |  |
-| LIFX Color 1000 | 0/4 | 0/4（暗号化 14、平文 0） | 0/4（0） | 0/1 | 0/1 | 0/4 | 0/4 |  |
-| Logi Circle | 0/4 | 0/4（暗号化 21、平文 0） | 0/4（0） | 0/1 | 0/1 | 0/4 | 0/4 |  |
-| NVIDIA Shield TV | 2/4 | 2/4（暗号化 1918、平文 259） | 2/4（25） | 0/1 | 1/1（259） | 0/4 | 0/4 | HTTP |
-| Nest Cam | 0/4 | 0/4（暗号化 106、平文 0） | 0/4（0） | 0/1 | 0/1 | 0/4 | （検査なし） |  |
-| Nest Cam IQ | 0/4 | 2/4（暗号化 160、平文 5） | 0/4（0） | 0/1 | 1/1（5） | 0/4 | （検査なし） | 暗号化、HTTP |
-| Nest Secure (Nest Guard) | 0/4 | 2/4（暗号化 5、平文 3） | 0/4（0） | 0/1 | 1/1（3） | 0/4 | （検査なし） | 暗号化、HTTP |
-| Philips Hue Bridge | 0/4 | 2/4（暗号化 9、平文 1953） | 2/4（1953） | 0/1 | 1/1（1948） | 0/4 | 0/4 | 暗号化、暗号化（中身）、HTTP |
-| Piper nv | 0/4 | 0/4（暗号化 5903、平文 0） | 0/4（0） | 0/1 | 0/1 | 0/4 | 0/4 |  |
-| Ring Video Doorbell | 0/4 | 2/4（暗号化 1568、平文 8372） | 2/4（8373） | 0/1 | 1/1（8084） | 0/4 | （検査なし） | 暗号化、暗号化（中身）、HTTP |
-| Roku 4 | 0/4 | 2/4（暗号化 1784、平文 34） | 2/4（19） | 0/1 | 1/1（34） | 0/4 | 0/4 | 暗号化、暗号化（中身）、HTTP |
-| Roku TV | 0/4 | 2/4（暗号化 1949、平文 41） | 2/4（14） | 0/1 | 1/1（41） | 0/4 | 0/4 | 暗号化、暗号化（中身）、HTTP |
-| Samsung Smart TV | 2/4 | 2/4（暗号化 4886、平文 1090） | 2/4（364） | 0/1 | 1/1（2254） | 0/4 | 4/4（6 回） | HTTP、中間者 |
-| Securifi Almond | 2/4 | 2/4（暗号化 104、平文 2） | 0/4（0） | 0/1 | 1/1（2） | 0/4 | 0/4 | 暗号化（中身）、HTTP |
-| SmartThings Hub | 0/4 | 0/4（暗号化 1082、平文 0） | 0/4（0） | 0/1 | 1/1（173718） | 0/4 | 0/4 | HTTP |
-| Sonos PLAY:1 | 2/4 | 2/4（暗号化 126、平文 27） | 2/4（21） | 0/1 | 1/1（187） | 0/4 | 0/4 | HTTP |
-| TP-Link HS105 | 0/4 | 0/4（暗号化 4、平文 0） | 0/4（0） | 0/1 | 0/1 | 0/4 | （検査なし） |  |
-| TP-Link LB130 | 0/4 | 0/4（暗号化 36、平文 0） | 0/4（0） | 0/1 | 0/1 | 0/4 | 0/4 |  |
-| VeraLite | 2/4 | 2/4（暗号化 598、平文 302） | 2/4（151） | 0/1 | 1/1（144） | 0/4 | 4/4（5 回） | HTTP、中間者 |
-| WeMo Crock-Pot | 2/4 | 2/4（暗号化 461、平文 37） | 2/4（4） | 0/1 | 1/1（4） | 0/4 | 4/4（5 回） | HTTP、中間者 |
-| Wink Hub 2 | 0/4 | 0/4（暗号化 91、平文 0） | 0/4（0） | 0/1 | 0/1 | 4/4 | 4/4（21 回） |  |
-| Withings Home | 0/4 | 2/4（暗号化 1630、平文 3） | 2/4（3） | 0/1 | 1/1（3） | 0/4 | 0/4 | 暗号化、暗号化（中身）、HTTP |
-| iRobot Roomba | 0/4 | 0/4（暗号化 25、平文 0） | 0/4（0） | 0/1 | 0/1 | 0/4 | （検査なし） |  |
-| myQ Garage | 0/4 | 0/4（暗号化 17、平文 0） | 0/4（0） | 0/1 | 0/1 | 0/4 | （検査なし） |  |
+| LIFX Color 1000 | 0/4 | 0/4（暗号化 32、平文 0） | 0/4（0） | 0/1 | 0/1 | 0/4 | 0/4 |  |
+| Logi Circle | 0/4 | 0/4（暗号化 51、平文 0） | 0/4（0） | 0/1 | 0/1 | 0/4 | 0/4 |  |
+| NVIDIA Shield TV | 2/4 | 2/4（暗号化 6188、平文 547） | 2/4（79） | 0/1 | 1/1（547） | 0/4 | 0/4 | HTTP |
+| Nest Cam | 0/4 | 0/4（暗号化 206、平文 0） | 0/4（0） | 0/1 | 0/1 | 0/4 | （検査なし） |  |
+| Nest Cam IQ | 0/4 | 2/4（暗号化 400、平文 11） | 0/4（0） | 0/1 | 1/1（11） | 0/4 | （検査なし） | 暗号化、HTTP |
+| Nest Secure (Nest Guard) | 0/4 | 2/4（暗号化 48、平文 287） | 0/4（0） | 0/1 | 1/1（287） | 0/4 | （検査なし） | 暗号化、HTTP |
+| Philips Hue Bridge | 0/4 | 2/4（暗号化 20、平文 3189） | 2/4（3208） | 0/1 | 1/1（3182） | 0/4 | 0/4 | 暗号化、暗号化（中身）、HTTP |
+| Piper nv | 0/4 | 2/4（暗号化 19269、平文 5） | 0/4（0） | 0/1 | 1/1（5） | 0/4 | 0/4 | 暗号化、HTTP |
+| Ring Video Doorbell | 0/4 | 2/4（暗号化 6864、平文 16749） | 2/4（16749） | 0/1 | 1/1（16193） | 0/4 | （検査なし） | 暗号化、暗号化（中身）、HTTP |
+| Roku 4 | 0/4 | 2/4（暗号化 5903、平文 92） | 2/4（48） | 0/1 | 1/1（92） | 0/4 | 0/4 | 暗号化、暗号化（中身）、HTTP |
+| Roku TV | 0/4 | 2/4（暗号化 6221、平文 91） | 2/4（40） | 0/1 | 1/1（91） | 0/4 | 0/4 | 暗号化、暗号化（中身）、HTTP |
+| Samsung Smart TV | 2/4 | 2/4（暗号化 11724、平文 2568） | 2/4（717） | 0/1 | 1/1（5977） | 0/4 | 4/4（6 回） | HTTP、中間者 |
+| Securifi Almond | 2/4 | 2/4（暗号化 360、平文 22） | 0/4（0） | 0/1 | 1/1（77） | 0/4 | 0/4 | 暗号化（中身）、HTTP |
+| SmartThings Hub | 0/4 | 0/4（暗号化 3432、平文 0） | 0/4（0） | 0/1 | 1/1（564984） | 0/4 | 0/4 | HTTP |
+| Sonos PLAY:1 | 2/4 | 2/4（暗号化 433、平文 180） | 2/4（165） | 0/1 | 1/1（846） | 0/4 | 0/4 | HTTP |
+| TP-Link HS105 | 0/4 | 2/4（暗号化 56、平文 1） | 0/4（0） | 0/1 | 1/1（1） | 0/4 | （検査なし） | 暗号化、HTTP |
+| TP-Link LB130 | 0/4 | 0/4（暗号化 75、平文 0） | 0/4（0） | 0/1 | 0/1 | 0/4 | 0/4 |  |
+| VeraLite | 2/4 | 2/4（暗号化 1897、平文 955） | 2/4（478） | 0/1 | 1/1（438） | 0/4 | 4/4（5 回） | HTTP、中間者 |
+| WeMo Crock-Pot | 2/4 | 2/4（暗号化 1358、平文 80） | 2/4（8） | 0/1 | 1/1（20） | 0/4 | 4/4（5 回） | HTTP、中間者 |
+| Wink Hub 2 | 0/4 | 0/4（暗号化 158、平文 0） | 0/4（0） | 0/1 | 0/1 | 4/4 | 4/4（21 回） |  |
+| Withings Home | 0/4 | 2/4（暗号化 5283、平文 12） | 2/4（4） | 0/1 | 1/1（4） | 0/4 | 0/4 | 暗号化、暗号化（中身）、HTTP |
+| iRobot Roomba | 0/4 | 0/4（暗号化 70、平文 0） | 0/4（0） | 0/1 | 0/1 | 0/4 | （検査なし） |  |
+| myQ Garage | 0/4 | 0/4（暗号化 39、平文 0） | 0/4（0） | 0/1 | 0/1 | 0/4 | （検査なし） |  |
 
-比べられた製品のうち、合ったもの／合わなかったもの：暗号化 26／15、暗号化（中身） 23／18、HTTP 18／25、中間者 25／5。
+比べられた製品のうち、合ったもの／合わなかったもの：暗号化 24／17、暗号化（中身） 25／16、HTTP 12／31、中間者 26／5。
