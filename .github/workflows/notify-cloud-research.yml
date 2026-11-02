@@ -8,7 +8,9 @@ permissions:
   pull-requests: write
 jobs:
   notify:
-    if: startsWith(github.event.pull_request.title, 'Claims: cloud research') && github.event.pull_request.head.repo.full_name == github.repository
+    if: >-
+      startsWith(github.event.pull_request.title, 'Claims: cloud research') &&
+      github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     steps:
       - name: Comment with a mention
