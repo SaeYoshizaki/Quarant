@@ -35,3 +35,5 @@ runs/
 
 # containerlab runtime state (contains host paths)
 clab-*/
+
+.claude/worktrees/

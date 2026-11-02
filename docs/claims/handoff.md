@@ -56,6 +56,7 @@
 ## 4. 未完了の作業
 
 0. **次：Philips Hue Bridge（2 節の 2 行目）を Ring と同じ方法で調べる**（版、当時の文書、先行研究、パケットの根拠）。
+   ほかの製品の文書と先行研究はクラウドのセッションで調べる（[cloud-research-brief.md](cloud-research-brief.md)、結果は `research/`）。
 1. **先行研究との比較（Ring）**：済み（[ring-prior-work.md](ring-prior-work.md)）。4 本を読み、表にした。暫定の見立ては誤りで、平文の HTTP・Basic・SIP・1.10.70 の RTP は既知。残りは同じ文書の 5 節（更新の転送の報告の追加の検索、UNSW 2018 と Deakin の Ring で版と挙動を確かめる）。利用者の判断で候補から除外した（判定の列は not assessable）。
 2. **ほかの 11 製品の文書の探し直し**：Ring と同じ深さで（全ドメインの PDF、サポート記事の題名、ブログ）。
 3. **人の確認**：[review-yourthings.md](review-yourthings.md) の 23 件。
