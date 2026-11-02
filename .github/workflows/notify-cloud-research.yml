@@ -1,0 +1,19 @@
+# Mention the owner when a cloud session opens its research PR. GitHub does not notify people about
+# their own actions, and cloud sessions act as the owner, so the mention has to come from the bot.
+name: Notify on cloud research PR
+on:
+  pull_request:
+    types: [opened, reopened]
+permissions:
+  pull-requests: write
+jobs:
+  notify:
+    if: startsWith(github.event.pull_request.title, 'Claims: cloud research') && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - name: Comment with a mention
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+        run: gh pr comment "$PR" --repo "$REPO" --body "@SaeYoshizaki クラウドの調査の PR が開きました。結果は docs/claims/research/README.md にあります。"
