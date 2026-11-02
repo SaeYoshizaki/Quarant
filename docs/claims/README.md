@@ -12,6 +12,7 @@
 | [coverage.tsv](coverage.tsv) | 製品 × 文書の種類（D1〜D6）ごとに、探した結果（見つかった、アーカイブにない、読めない、製造者が出していない） |
 | [unreadable.md](unreadable.md) | アーカイブにはあるが読めなかった文書の一覧（ブラウザで開く用） |
 | [handoff.md](handoff.md) | 引き継ぎ：候補の一覧（強い順）、Ring のパケット単位の再確認、未完了の作業、データと道具の場所 |
+| [ring-prior-work.md](ring-prior-work.md) | Ring：先行研究 4 本との比較表、版ごとのパケット単位の確認、当時の文書、handoff の訂正 |
 | [review-yourthings.md](review-yourthings.md) | 人が確かめる 23 件（食い違いの候補、文言の上で食い違い、確かめが要る一致）の確認用の表。各項目の「確認」に結果を書く |
 | [results-yourthings.md](results-yourthings.md) | 結果：YourThings 2018 の 44 製品。暗号化の主張に絞った結果が中心 |
 | [encryption-yourthings.md](encryption-yourthings.md) | 暗号化の主張と観測の表、44 製品の観測した暗号化、すべてのフロー、中間者の検査への反応（スクリプトで作る） |

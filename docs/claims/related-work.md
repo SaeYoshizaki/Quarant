@@ -56,6 +56,10 @@
 
 必ず引用するもの：Subahi & Theodorakopoulos 2018（と博士論文）、PoliCheck、Koch et al. 2022、Blythe et al. 2019、Ren et al. 2019、IoT Inspector、Alrawi et al. 2019、Iqbal et al. 2023、Mandalari et al. 2023。
 
+## 機器ごとの実機調査
+
+Ring Video Doorbell は [ring-prior-work.md](ring-prior-work.md)（Nick 2016、Kidder 2017、Alharbi & Aspinall 2018、Paracha ほか 2021、Dojo by BullGuard 2019）。通信の問題の多くは既知で、本研究の主張は「公開データでの再現」と「版ごとの差」に限る。
+
 ## 要確認
 
 - Subahi らの機器名（TP-Link のプラグ、Belkin NetCam）と、食い違いの件数。本研究の試しの機器と重なるので、本文で確かめる。

@@ -1,6 +1,6 @@
 # 引き継ぎ：製造者の暗号化の主張と通信の食い違い（YourThings 2018）
 
-2026-11-02。次の会話はここから始める。全体の結果は [results-yourthings.md](results-yourthings.md)、人が確かめる 23 件は [review-yourthings.md](review-yourthings.md)、決めたことは [../DECISIONS.md](../DECISIONS.md) の D31〜D38。
+2026-11-02。次の会話はここから始める。全体の結果は [results-yourthings.md](results-yourthings.md)、人が確かめる 23 件は [review-yourthings.md](review-yourthings.md)、決めたことは [../DECISIONS.md](../DECISIONS.md) の D31〜D39。Ring の先行研究との比較と検証のやり直しは [ring-prior-work.md](ring-prior-work.md)（下の 2 節の 1 行目と 3 節はこの結果で直した）。
 
 ## 1. ここまでの状態
 
@@ -14,7 +14,7 @@
 
 | # | 製品 | 主張（出典） | 観測（13 日分） | 強さと注意 |
 |---|---|---|---|---|
-| 1 | Ring Video Doorbell（初代とみられる） | 仕様の欄の「Encryption: Bank-grade」（製品ページ 2017-04、How it works 2016-04）。Ring の 2016〜2018 年の公開文書で、機器の通信の暗号化に触れたのはこれだけ | 下の 3 節。平文の HTTP に固定の認証情報、平文の SIP、暗号化されていない RTP の映像 | 強い。ただし先行の実機調査が多い（4 節）。新規性は「公開データでの再現・定量化」と「主張との照合」 |
+| 1 | Ring Video Doorbell（初代とみられる） | 仕様の欄の「Encryption: Bank-grade」（製品ページ 2017-04、How it works 2016-04）。Ring の 2016〜2018 年の公開文書で、機器の通信の暗号化に触れたのはこれだけ。**対象の説明がなく、2017-11-15 以降の販売ページの仕様の欄にはない** | 下の 3 節。平文の HTTP に固定の認証情報、平文の SIP。映像は 1.10.70 で平文、1.19.217 で不透明。平文の HTTP でのファームウェアの取得 | **食い違いの判定は未確認**（[ring-prior-work.md](ring-prior-work.md) 4 節）。観測の多くは既知の問題。追加検証の候補は同じ文書の 5 節 |
 | 2 | Philips Hue Bridge | 「transfers data securely (using SSL)」（プライバシーポリシー 2017-08） | 平文の HTTP で中身があるもの 3,208 回、うち Authorization つき 1,905 回（Philips のホストへ） | 強い。直前に送るデータ（ブリッジの ID など）を挙げている |
 | 3 | Sonos PLAY:1 | 「Any data we transmit over the internet is protected using encryption」ほか 2 文（2018-02） | `update.sonos.com` の URL に householdid・serial・sonosid。ファームウェアを平文の HTTP で 3 回取得（03-20 に 2 回、04-13 に 1 回）し、そのたびに版が上がった | 強い |
 | 4 | TP-Link HS105・LB130 | 「measures, including encryption and SSL technology, designed to secure your personal information」（プライバシーポリシー 2018-01） | アプリからの LAN の制御（tcp/9999）が公開鍵の XOR だけ。プラグはアカウント名・緯度・経度、電球はアカウント名を返す | 中。LAN 内だけ。キー名だけ確認（値は未記録） |
@@ -34,23 +34,27 @@
 
 元の PCAP（`/Volumes/QuarantData/yt-extract/20180320/2018/03/20/`、03-21 は `usb-yourthings/iot_traffic20180321.tgz`）で確かめた。
 
-- **機種**：要求の `X-RingDeviceType: doorbell`（03-20、1,163 回すべて）。Ring の API を扱う公開のライブラリでは、後継機は doorbell_v4 などを名乗る。MAC の先頭 00:1d:c9 は GainSpan（初代の Wi-Fi モジュール）。YourThings の評価の型番は N/A。**ファームウェアの版は通信に出ていない（未確認）**。
+- **機種**：要求の `X-RingDeviceType: doorbell`（03-20、ヘッダーがそろう 8,356 回すべて）。Ring の API を扱う公開のライブラリでは、後継機は doorbell_v4 などを名乗る（API の `kind` の値で、このヘッダーとの対応は未確認）。MAC の先頭 00:1d:c9 は GainSpan。YourThings の評価の型番は Video Doorbell、版は N/A。本体は確かめていない（未確認）。
+- **ファームウェアの版は SIP の User-Agent に出ている**：03-21 は `Device/dpdv2/1.10.70`、04-11 は `1.19.217`、04-13 は `1.10.70` のあと `1.19.217`。Ring の版の表（2017-10-22）は Ring Video Doorbell を 1.10.71 としている。
 - **平文の HTTP**：`eth1-20180320.1200.1521565200` の TCP ストリーム 21。フレーム 2450 `GET /doorbots_api/vod/ready HTTP/1.1`、2452 `Host: vod.ring.com`、2454 `Authorization: Basic …`、2456 `Content-Length: 0`、2458 `X-RingDeviceType: doorbell`、2460 空行。応答 2478 `HTTP/1.1 404 Not Found`（nginx）。復号した表示ではなく、元の TCP の中身。要求は行ごとに別のセグメントで送られる。**どのパケットも 2 回ずつ入っている**（同じシーケンス番号。キャプチャの重複）。
 - **キャプチャの位置**：YourThings のゲートウェイの eth1（ドアベルの送信元 MAC が見える LAN 側）。この位置では平文。**ゲートウェイより外で VPN などがあったかは分からない（未確認）**。
-- **認証情報の構造**（値は記録していない）：Base64 を戻すと「ユーザー名:パスワード」。ユーザー名は 12 桁の 16 進で、機器の MAC と一致。パスワードは 32 桁の 16 進のあとに NUL が 1 バイト。**03-20 と 03-21 の全要求（約 16,700 回）で同じ値**（要求ごと・日ごとに変わらない）。機器固有の値とみられるが、何から作られたかは不明（MD5 かどうかも不明）。利用者のアカウント情報ではない（ユーザー名がメールアドレスではなく MAC）。
-- **件数**：要求の行を（宛先、送信元ポート、TCP の絶対シーケンス番号）で数え、重複を除くと 03-20 が 8,364 件、03-21 が 8,363 件。Zeek は 8,372 件と 8,364 件（差 8 件と 1 件）。tshark の `http.request` だけで数えると、分割された要求を組み立てられず少なく出る（6,972 件など）ので使わない。コマンドは `~/datasets/claims/jobs/ring_http.sh`、`ring_auth_summary.py`。
-- **/vod/ready の 404**：約 10 秒ごとのポーリングで、応答はほぼ 404（03-20：404 が 8,083 件、408 が 3 件）。先行の実機調査（Kidder 2017）は「映像の開始要求がない」意味と説明している。**こちらでは、映像のセッションの直前に 404 以外の応答があるかを確かめていない（未確認）**。
-- **fw.ring.com の POST はファームウェアではない**：`POST /doorbots_api/vod?api_version=4`、本文 `protocol=sip`（12 バイト）。応答は 200、本文は Base64 で 1,040 バイト、偏りなし（7.83 ビット／バイト）。映像のセッションの情報をアプリの層で暗号化（または圧縮）して返しているとみられる。前の記録で「ファームウェア」としたのは誤りで、claims.tsv を直した。Quarant の Ring への `I4_INSECURE_FIRMWARE_UPDATE_HTTP`（2 回）も、ホスト名による誤検出の可能性が高い。
-- **映像と音声**：03-21 17:50（キャプチャの時刻）のセッション（`eth1-20180321.1750.1521672600`）。
-  - SIP は udp/15063 の平文（INVITE はフレーム 133 から、100、183、200、ACK、BYE）。SDP は音声 `m=audio … RTP/AVP 0`（PCMU）、映像 `m=video … RTP/AVP 97`（H.264）。`RTP/SAVP`、`a=crypto`、`a=fingerprint`、`a=key-mgmt` はない。
-  - 映像の RTP（udp/51504 → 52.206.247.65:39700、12 秒で重複を除いて 1,085 パケット）は版 2、種類 97。中身の先頭の 1 バイトは H.264 の構造どおり（FU-A 1,060、SPS 12、PPS 12）。SPS は Baseline、レベル 4.0（フレーム 143 など）。**暗号化されていない H.264**。映像そのものは戻していない。
-  - ドアベルからの音声の RTP は、このセッションでは見えなかった。
-  - 調べたのは 03-21 の 1 セッションだけ。13 日分のほかの 4 回の POST の後も同じかは未確認。
-- **時計**：サーバーの Date ヘッダー（11:43:00 GMT）とパケットの時刻（12:00:08 UTC）が約 17 分ずれる。どちらが正しいかは未確認。
+- **認証情報の構造**（値は記録していない）：Base64 を戻すと「ユーザー名:パスワード」。ユーザー名は 12 桁の 16 進で、機器の MAC と一致。パスワードは 32 桁の 16 進のあとに NUL が 1 バイト。**03-20、03-21、04-11 の全要求で同じ値で、04-13 は別の値**（同じ構造。04-13 の前に約 2 日通信がない）。何から作られたかは不明（MD5 かどうかも不明）。利用者のアカウント情報ではない（ユーザー名がメールアドレスではなく MAC）。
+- **件数**：要求の行を（宛先、送信元ポート、TCP の絶対シーケンス番号）で数え、重複を除くと 03-20 が 8,364 件、03-21 が 8,363 件、04-11 が 1 件、04-13 が 12 件。Zeek は 03-20 が 8,372 件、03-21 が 8,364 件。tshark の `http.request` だけで数えると、分割された要求を組み立てられず少なく出る（6,972 件など）ので使わない。
+- **平文のポーリングは版で消える**：`GET /doorbots_api/vod/ready` は 03-20、03-21 と 04-13 の更新前（1.10.70）にだけあり、04-10、04-11、04-13 の更新後、04-14〜19 にはない。代わりに tcp/9998 への接続が約 15 秒ごとに始まる（04-13 は 15:51:09 から）。接続の目的は TLS の中なので未確認。
+- **/vod/ready の応答**：約 10 秒（中央値 10.15 秒）ごとで、応答はほぼ 404（03-20：404 が 8,083 件、408 が 3 件）。先行の実機調査（Kidder 2017）は「映像の開始要求がない」意味と説明している。**映像の前には 200 が返り、直後に POST が続く**（`eth1-20180321.1750` のフレーム 7456→7515、`eth1-20180413.1545` の 239450→239687）。
+- **fw.ring.com の POST はセッションの要求で、ファームウェアではない**：`/doorbots_api/vod` が 2 回、`/doorbots_api/dings` が 3 回（`?api_version=4`、本文 `protocol=sip`）。応答は 200 で Base64。
+- **ただし fw.ring.com からのファームウェアの取得も平文**：04-13 15:49:50 と 15:50:15 に `GET /doorbots_api/v2_firmwares/1550/download`（`component=flash`、`app`。`eth1-20180413.1545` のフレーム 359841、`eth1-20180413.1550` の 14465）。応答は `1550_flash.bin` と `1550_app.bin`。**Quarant の Ring への `I4_INSECURE_FIRMWARE_UPDATE_HTTP`（2 回）はこの 2 回と一致し、正しかった**（前の記録の「ホスト名による誤検出」は誤り）。署名の有無は未確認。
+- **映像と音声**：全 5 セッションの SIP は udp/15063 の平文で、SDP は `RTP/AVP`、`a=crypto` などはない。ドアベルの udp/51506 からの音声は 5 回とも見えない。
+  - **1.10.70**（03-21 17:50、04-13 15:41、15:48）：RTP の中身は H.264 の構造どおりで、**暗号化されていない**。例：`eth1-20180321.1750.1521672600` の INVITE はフレーム 7667、最初の RTP は 8209。映像そのものは戻していない。
+  - **1.19.217**（04-11 20:04、04-13 15:55）：先頭バイトは一様でエントロピーは 8.000。**中身は不透明**（暗号化の可能性が高いが方式は不明）。INVITE に `X-Session-Hash` が増える。
+  - サーバー→スマートフォン（192.168.0.159）は、どちらの版のときも H.264 の構造が見える。スマートフォンの SIP は tcp/15064 の TLS 1.2。
+- **時計**：パケットの時計がずれている。03-20 は 8 台のサーバーの Date と NTP の応答に対して約 1,028 秒進み、04-11 は約 11 秒、04-13 は約 21 秒。
+
+詳しい根拠（ファイル、フレーム、フィールド）は [ring-prior-work.md](ring-prior-work.md) の 3 節。
 
 ## 4. 未完了の作業
 
-1. **先行研究との比較（Ring）**：利用者が挙げた 4 本（Nick「Ring Doorbell Security」2016-07-24、Scott Kidder「The Ring Smart Doorbell API」2017-07-04、Alharbi & Aspinall 2018、Paracha ほか IoTLS、IMC 2021）を**まだ読んでいない**。読んで、機種・時期・ファームウェア・通信先・認証方式・暗号化の対象・今回との差分を表にし、「既知の挙動の再確認／既知の問題への追加証拠／未報告の可能性／証拠不足」に分ける。暫定の見立ては「平文 HTTP と Basic 認証は既知に近い。平文の SIP と暗号化されていない RTP の映像、主張との照合が追加の価値になりうる」。
+1. **先行研究との比較（Ring）**：済み（[ring-prior-work.md](ring-prior-work.md)）。4 本を読み、表にした。暫定の見立ては誤りで、平文の HTTP・Basic・SIP・1.10.70 の RTP は既知。残りは同じ文書の 5 節（更新の転送の報告の追加の検索、UNSW 2018 と Deakin の Ring で版と挙動を確かめる）。claims.tsv の判定の列を「未確認」にするかは、利用者の判断待ち。
 2. **ほかの 11 製品の文書の探し直し**：Ring と同じ深さで（全ドメインの PDF、サポート記事の題名、ブログ）。
 3. **人の確認**：[review-yourthings.md](review-yourthings.md) の 23 件。
 4. ほかのデータセット（UNSW、CIC、Deakin）への展開。
@@ -60,5 +64,5 @@
 - 外付けディスク QuarantData（`~/datasets` はここへのリンク）。13 日分の元データは `usb-yourthings/`（tgz）、03-20 と 04-10 は `yt-extract/` に展開済み。
 - 集計の出力：`~/datasets/claims/`（`flows-yt/`、`gt-yt/`、`obs-yourthings.json`、`flows-yourthings.json`、`mitm-yourthings.tsv`、`versions-yt/`、`entropy-yt/`、保存した文書 `snapshots/`）。
 - リポジトリの外の道具：`~/datasets/claims/jobs/`（`wb.py`：Wayback の取得、間隔を空ける。`ocr.sh`、`tplink_keys.py`、`ring_http.sh`、`ring_auth_summary.py`、`launch.py`：Claude Code を閉じても止まらない起動）。
-- Ring だけを取り出した PCAP（一時）：`~/yt-tmp/ring/0320/`、`0321/`（各 35MB）。
+- Ring だけを取り出した 13 日分の PCAP と集計：`~/datasets/claims/ring13/`（`<日>/` に PCAP と元のフレーム番号の `.frames`、`out/` に集計、`phone-<日>/` にスマートフォンとサーバーの通信）。スクリプトは `scripts/claims/ring/`。`out/cred-labels.json` は資格情報の SHA-256 なので外に出さない。
 - Mac は 16GB。ほかのアプリでスワップが増えると Quarant が止まる。長い処理は `launch.py` で切り離し、スクリプトの中でログを開く。
