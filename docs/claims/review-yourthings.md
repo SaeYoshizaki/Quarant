@@ -18,6 +18,7 @@
 - **型・範囲**：T1、主張の範囲 device-cloud、観測の範囲 external
 - **根拠**：plaintext GET to vod.ring.com with Authorization: Basic about every 10 s on 03-20 (8372) and 03-21 (8364), mostly 404, and 13 more on 04-11 and 04-13 (16,749 in all); plaintext POST to fw.ring.com with Authorization: Basic (5) (Zeek); Quarant INSECURE_HTTP_AUTH 16,633; TLS 6855, none with forward secrecy (TLS_RSA_WITH_AES_128_CBC_SHA) (13 days: 03-20, 03-21, 03-28, 04-10..19; 03-20 and 03-21 analysed by Quarant without the dataset's scanner host)
 - **注意**：vague claim: only "encryption is used" is judged; "bank-grade" is not
+- **2026-11-02 の再確認**：[ring-prior-work.md](ring-prior-work.md)。上の根拠のうち POST 5 回の内訳は vod 2 回、dings 3 回。映像は 1.10.70 で平文、1.19.217 で不透明。平文の HTTP でのファームウェアの取得（04-13）を確認。文言には対象の説明がなく、2017-11-15 以降の販売ページの仕様の欄にはないので、当時の説明としての適用は未確認。**判定の案：食い違いは未確認**。
 - **調べた文書（2026-11-02 に探し直した）**：2016〜2018 年にアーカイブされた Ring の公開文書を、ring.com、support.ring.com、static.ring.com、blog.ring.com のすべての PDF を含めて探した。
   - 製品ページ（2017-04-20）と「How it works」のページ（2016-04-07）：仕様の欄に「Encryption: Bank-grade」だけ（同じ文言。後者は claims.tsv に別の行で入れた）。
   - ring.com の FAQ（2017-01-28）：支払いのページが HTTPS、Wi-Fi は WPA2、録画は「secure cloud servers」に保存。機器の通信の暗号化には触れていない。
