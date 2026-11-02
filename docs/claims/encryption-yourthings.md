@@ -4,11 +4,11 @@
 
 | 判定 | 暗号の方法 | 暗号化しているか | 計 |
 |---|---|---|---|
-| 食い違いの候補 | 6 | 11 | 17 |
+| 食い違いの候補 | 6 | 9 | 15 |
 | 文言の上で食い違い | 1 | 5 | 6 |
 | 一致（見えた範囲で） | 8 | 31 | 39 |
 | 見えない | 7 | 5 | 12 |
-| 判定できない | 23 | 56 | 79 |
+| 判定できない | 23 | 58 | 81 |
 | 計 | 45 | 108 | 153 |
 
 ### 暗号の方法の主張（判定できたもの）
@@ -47,8 +47,6 @@
 | Apple HomePod | certain information such as your name, contacts, music you listen to, and searches is sent to Apple servers … | D2 2018-04-12 | 食い違いの候補 (T1a) | on 03-21 the HomePod fetched audio from streamingaudio.itunes.apple.com over plaintext HTTP 3 times, with a URL parameter named accesskey and an … |
 | Harman Kardon Invoke | Harman engages the use of numerous technological security measures to preserve the security of your … | D3 2018-03-15 | 食い違いの候補 (T1a) | 15 plaintext GET to esdk-ffl.spotify.com with URL parameters named key_id, value (Zeek); 2212 TLS otherwise (13 days: 03-20, 03-21, 03-28, 04-10..19, test … |
 | Philips Hue Bridge | Philips Lighting, transfers data securely (using SSL) and will encrypt some data, such as your MAC address … | D3 2017-08-18 | 食い違いの候補 (T1a) | 3208 plaintext HTTP requests with content from the bridge to Philips hosts (dcp.cpp.philips.com 968, www.ecdinterface.philips.com 916, bridge.meethue.com with … |
-| Ring Video Doorbell | Encryption Bank-Grade | D1 2017-04-20 | 食い違いの候補 (T1a) | plaintext GET to vod.ring.com with Authorization: Basic about every 10 s on 03-20 (8372) and 03-21 (8364), mostly 404, and 13 more on 04-11 and 04-13 (16,749 … |
-| Ring Video Doorbell | Encryption: Bank-grade | D1 2016-04-07 | 食い違いの候補 (T1a) | plaintext GET to vod.ring.com with Authorization: Basic about every 10 s on 03-20 (8372) and 03-21 (8364), mostly 404, and 13 more on 04-11 and 04-13 (16,749 … |
 | Sonos PLAY:1 | When we transmit data over the Internet, we protect it through the use of encryption. | D3 2018-02-02 | 食い違いの候補 (T1a) | plaintext GET to update.sonos.com with URL parameters named householdid, serial, sonosid and version fields; Quarant INSECURE_HTTP_TOKEN 51, … |
 | Sonos PLAY:1 | In addition, your data is protected with encryption, such as Transport Layer Security (TLS), during … | D3 2018-02-02 | 食い違いの候補 (T1a) | same as above (plaintext update.sonos.com requests and three plaintext firmware downloads on 03-20 and 04-13) |
 | Sonos PLAY:1 | Any data we transmit over the internet is protected using encryption. | D3 2018-02-02 | 食い違いの候補 (T1a) | same as above (plaintext update.sonos.com requests and three plaintext firmware downloads on 03-20 and 04-13) |
@@ -97,7 +95,7 @@
 | VeraLite | change ChangeLogURL from http to https in upgrade_step1.sh | D6 2017-12-31 | 見えない | no change-log request identified; no plaintext request to a change-log host (13 days: 03-20, 03-21, 03-28, 04-10..19) |
 | Withings Home | h5LS end-to-end encryption. | D1 2018-04-04 | 見えない | no plaintext video seen (Quarant); the local video sessions with the phone were DTLS 1.0 with AES-256 (3, on 04-13 and 04-15; the camera's certificate there … |
 
-判定できなかったもの：56 件（理由は claims.tsv の note）。
+判定できなかったもの：58 件（理由は claims.tsv の note）。
 
 ### 製品ごとの観測（主張の有無に関係なく）
 

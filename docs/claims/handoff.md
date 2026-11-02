@@ -14,7 +14,6 @@
 
 | # | 製品 | 主張（出典） | 観測（13 日分） | 強さと注意 |
 |---|---|---|---|---|
-| 1 | Ring Video Doorbell（初代とみられる） | 仕様の欄の「Encryption: Bank-grade」（製品ページ 2017-04、How it works 2016-04）。Ring の 2016〜2018 年の公開文書で、機器の通信の暗号化に触れたのはこれだけ。**対象の説明がなく、2017-11-15 以降の販売ページの仕様の欄にはない** | 下の 3 節。平文の HTTP に固定の認証情報、平文の SIP。映像は 1.10.70 で平文、1.19.217 で不透明。平文の HTTP でのファームウェアの取得 | **食い違いの判定は未確認**（[ring-prior-work.md](ring-prior-work.md) 4 節）。観測の多くは既知の問題。追加検証の候補は同じ文書の 5 節 |
 | 2 | Philips Hue Bridge | 「transfers data securely (using SSL)」（プライバシーポリシー 2017-08） | 平文の HTTP で中身があるもの 3,208 回、うち Authorization つき 1,905 回（Philips のホストへ） | 強い。直前に送るデータ（ブリッジの ID など）を挙げている |
 | 3 | Sonos PLAY:1 | 「Any data we transmit over the internet is protected using encryption」ほか 2 文（2018-02） | `update.sonos.com` の URL に householdid・serial・sonosid。ファームウェアを平文の HTTP で 3 回取得（03-20 に 2 回、04-13 に 1 回）し、そのたびに版が上がった | 強い |
 | 4 | TP-Link HS105・LB130 | 「measures, including encryption and SSL technology, designed to secure your personal information」（プライバシーポリシー 2018-01） | アプリからの LAN の制御（tcp/9999）が公開鍵の XOR だけ。プラグはアカウント名・緯度・経度、電球はアカウント名を返す | 中。LAN 内だけ。キー名だけ確認（値は未記録） |
@@ -28,9 +27,11 @@
 | 12 | 文言の上で食い違い | Canary（HEAD のみ 158 回）、Piper（中身のない GET 5 回） | | 弱 |
 | 13 | 確かめが要る一致 | Nest「2048-bit RSA private keys for key exchange」 | Nest Cam IQ 自身の鍵は ECDSA P-224 | 読み方次第 |
 
+**除外：Ring Video Doorbell**（2026-11-02、利用者の判断）。平文の通信は確かめられたが、「Encryption: Bank-grade」は対象が書かれておらず、2017-11-15 以降の販売ページの仕様の欄にもないので、食い違いを証明できなかった。観測の多くも既知の問題だった（[ring-prior-work.md](ring-prior-work.md)）。
+
 主張がない（または判定できない）が目立つ観測：VeraLite がログを平文の FTP で送る（470 回）、偽の証明書を受け入れた疑い（August、VeraLite、WeMo Crock-Pot、Harmony Hub、Harman、Samsung TV）、SmartThings のサーバー証明書が RSA 1,024 ビット、WeMo は TLS 1.0 のみで前方秘匿性なし。
 
-## 3. Ring の再確認（2026-11-02、パケット単位）
+## 3. Ring の再確認（2026-11-02、パケット単位。除外した製品の記録）
 
 元の PCAP（`/Volumes/QuarantData/yt-extract/20180320/2018/03/20/`、03-21 は `usb-yourthings/iot_traffic20180321.tgz`）で確かめた。
 
@@ -54,7 +55,8 @@
 
 ## 4. 未完了の作業
 
-1. **先行研究との比較（Ring）**：済み（[ring-prior-work.md](ring-prior-work.md)）。4 本を読み、表にした。暫定の見立ては誤りで、平文の HTTP・Basic・SIP・1.10.70 の RTP は既知。残りは同じ文書の 5 節（更新の転送の報告の追加の検索、UNSW 2018 と Deakin の Ring で版と挙動を確かめる）。claims.tsv の判定の列を「未確認」にするかは、利用者の判断待ち。
+0. **次：Philips Hue Bridge（2 節の 2 行目）を Ring と同じ方法で調べる**（版、当時の文書、先行研究、パケットの根拠）。
+1. **先行研究との比較（Ring）**：済み（[ring-prior-work.md](ring-prior-work.md)）。4 本を読み、表にした。暫定の見立ては誤りで、平文の HTTP・Basic・SIP・1.10.70 の RTP は既知。残りは同じ文書の 5 節（更新の転送の報告の追加の検索、UNSW 2018 と Deakin の Ring で版と挙動を確かめる）。利用者の判断で候補から除外した（判定の列は not assessable）。
 2. **ほかの 11 製品の文書の探し直し**：Ring と同じ深さで（全ドメインの PDF、サポート記事の題名、ブログ）。
 3. **人の確認**：[review-yourthings.md](review-yourthings.md) の 23 件。
 4. ほかのデータセット（UNSW、CIC、Deakin）への展開。
