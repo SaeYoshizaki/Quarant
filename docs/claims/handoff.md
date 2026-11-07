@@ -57,7 +57,7 @@
 
 ## 4. 未完了の作業
 
-0. **次：[triage.md](triage.md) の深掘り 1〜4（Sonos、Withings Home、Wink Hub 2、TP-Link）を順に調べる。** Hue は調べ終えて除外案（同じ文書）。
+0. **深掘り 1〜4 は済み**（[sonos-check.md](sonos-check.md)、[deep-checks.md](deep-checks.md)）。強い候補は Sonos だけ。Withings Home、TP-Link、Wink Hub 2 の扱いは利用者の判断待ち。
    ほかの製品の文書と先行研究はクラウドのセッションで調べる（[cloud-research-brief.md](cloud-research-brief.md)、結果は `research/`）。
 1. **先行研究との比較（Ring）**：済み（[ring-prior-work.md](ring-prior-work.md)）。4 本を読み、表にした。暫定の見立ては誤りで、平文の HTTP・Basic・SIP・1.10.70 の RTP は既知。残りは同じ文書の 5 節（更新の転送の報告の追加の検索、UNSW 2018 と Deakin の Ring で版と挙動を確かめる）。利用者の判断で候補から除外した（判定の列は not assessable）。
 2. **ほかの 11 製品の文書の探し直し**：Ring と同じ深さで（全ドメインの PDF、サポート記事の題名、ブログ）。
