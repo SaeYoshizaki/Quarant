@@ -4,24 +4,19 @@
 
 | 判定 | 暗号の方法 | 暗号化しているか | 計 |
 |---|---|---|---|
-| 食い違いの候補 | 6 | 9 | 15 |
-| 文言の上で食い違い | 1 | 5 | 6 |
+| 食い違いの候補 | 2 | 7 | 9 |
+| 文言の上で食い違い | 0 | 0 | 0 |
 | 一致（見えた範囲で） | 8 | 31 | 39 |
 | 見えない | 7 | 5 | 12 |
-| 判定できない | 23 | 58 | 81 |
+| 判定できない | 28 | 65 | 93 |
 | 計 | 45 | 108 | 153 |
 
 ### 暗号の方法の主張（判定できたもの）
 
 | 製品 | 主張 | 文書 | 判定 | 根拠 |
 |---|---|---|---|---|
-| Canary | All parts of our system—from the device to the cloud to the app—employ extensive security measures to protect … | D2 2018-02-27 | 食い違いの候補 (T2) | 4 of 26334 TLS handshakes with Canary's servers used AES-128 (ECDHE_RSA_WITH_AES_128_GCM_SHA256, o.canaryis.com and v.canaryis.com, 03-20); the rest AES-256; … |
-| Canary | AES 256-bit data encryption | D1 2018-03-23 | 食い違いの候補 (T2) | TLS 26324/26334 ECDHE_RSA_WITH_AES_256_GCM_SHA384, 6 ECDHE_RSA_WITH_AES_256_CBC_SHA384, 4 ECDHE_RSA_WITH_AES_128_GCM_SHA256 (the AES-128 ones to o.canaryis.com … |
-| Logi Circle | Logitech uses unique, random and automatically rotating AES 256 Bit Dual Layer Encryption to protect and … | D4 2018-03-13 | 食い違いの候補 (T2) | all 19 TLS handshakes with the real servers (including api.video.logi.com) used AES-128 (TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256); 6 more were the dataset's … |
 | Wink Hub 2 | We adopt security measures that include certificate pinning, encryption, two-factor authentication for all … | D4 2017-07-08 | 食い違いの候補 (T2: certificate validation) | in the dataset authors' man-in-the-middle test (04-12, forged certificate issued by thing-catcher.gtisc.gatech.edu), the hub sent application data after the … |
 | Withings Home | Nokia Home uses bank level technologies such as AES-256 and secure HTTP (HTTPS) to protect your data at the … | D1 2018-04-04 | 食い違いの候補 (T2) | 5248 of 5259 TLS handshakes with the real servers negotiated AES-128 (ECDHE_RSA_WITH_AES_128_GCM_SHA256); 11 used AES-256; on the LAN, 3 DTLS 1.0 sessions with … |
-| iRobot Roomba | Currently, we use AES 256-bit encryption and Transport Layer Security (TLS v1.2). | D2 2018-11-10 | 食い違いの候補 (T2) | TLS with iRobot's own server disc-prod.iot.irobotapi.com used AES-128 (TLS_RSA_WITH_AES_128_CBC_SHA256, 17 handshakes), as did cloudfront downloads (17); only … |
-| Piper nv | Piper encrypts all outbound communication to its secure cloud using AES-128 and AES-256 algorithms. | D2 2019-07-21 | 文言の上で食い違い | 16115 AES_256_GCM and 1750 AES_128 handshakes, as claimed; but 5 plaintext GET without content to static.getPiper.com on 04-16 (Zeek, 13 days: 03-20, 03-21, … |
 | Arlo base station | AES encryption protects your information. | D4 2019-08-07 | 一致（見えた範囲で） | 500 TLS1.2 handshakes, all with forward secrecy; no plaintext of any protocol (Zeek, flowscan.py; 13 days: 03-20, 03-21, 03-28, 04-10..19; the dataset's … |
 | Arlo base station | AES-Verschlüsselung schützt Ihre Daten | D4 2017-08-24 | 一致（見えた範囲で） | 500 TLS1.2 handshakes, all with forward secrecy; no plaintext of any protocol (Zeek, flowscan.py; 13 days: 03-20, 03-21, 03-28, 04-10..19; the dataset's … |
 | Nest Cam | That’s why Nest Cam uses 128-bit AES with TLS/SSL encryption, Perfect Forward Secrecy and a unique 2048-bit … | D1 2018-04-10 | 一致（見えた範囲で） | 118/193 TLS1.0 ECDHE_RSA_WITH_AES_128_CBC_SHA, 75 without visible handshake; no plaintext of any protocol (Zeek, flowscan.py; 13 days: 03-20, 03-21, 03-28, … |
@@ -38,26 +33,19 @@
 | Arlo base station | AES-128 bit encryption and Transport Layer Security (TLS) ensure that your Arlo camera videos are secure to … | D4 2019-08-07 | 見えない | camera-to-base-station link is not in the capture |
 | Arlo base station | AES-128- Bit-Verschlüsselung und Transport Layer Security TLS) sorgen dafür, dass Ihre Videos auf dem Weg von … | D4 2017-08-24 | 見えない | camera-to-base-station link is not in the capture |
 
-判定できなかったもの：23 件（理由は claims.tsv の note）。
+判定できなかったもの：28 件（理由は claims.tsv の note）。
 
 ### 暗号化しているかの主張（判定できたもの）
 
 | 製品 | 主張 | 文書 | 判定 | 根拠 |
 |---|---|---|---|---|
 | Apple HomePod | certain information such as your name, contacts, music you listen to, and searches is sent to Apple servers … | D2 2018-04-12 | 食い違いの候補 (T1a) | on 03-21 the HomePod fetched audio from streamingaudio.itunes.apple.com over plaintext HTTP 3 times, with a URL parameter named accesskey and an … |
-| Harman Kardon Invoke | Harman engages the use of numerous technological security measures to preserve the security of your … | D3 2018-03-15 | 食い違いの候補 (T1a) | 15 plaintext GET to esdk-ffl.spotify.com with URL parameters named key_id, value (Zeek); 2212 TLS otherwise (13 days: 03-20, 03-21, 03-28, 04-10..19, test … |
-| Philips Hue Bridge | Philips Lighting, transfers data securely (using SSL) and will encrypt some data, such as your MAC address … | D3 2017-08-18 | 食い違いの候補 (T1a) | 3208 plaintext HTTP requests with content from the bridge to Philips hosts (dcp.cpp.philips.com 968, www.ecdinterface.philips.com 916, bridge.meethue.com with … |
 | Sonos PLAY:1 | When we transmit data over the Internet, we protect it through the use of encryption. | D3 2018-02-02 | 食い違いの候補 (T1a) | plaintext GET to update.sonos.com with URL parameters named householdid, serial, sonosid and version fields; Quarant INSECURE_HTTP_TOKEN 51, … |
 | Sonos PLAY:1 | In addition, your data is protected with encryption, such as Transport Layer Security (TLS), during … | D3 2018-02-02 | 食い違いの候補 (T1a) | same as above (plaintext update.sonos.com requests and three plaintext firmware downloads on 03-20 and 04-13) |
 | Sonos PLAY:1 | Any data we transmit over the internet is protected using encryption. | D3 2018-02-02 | 食い違いの候補 (T1a) | same as above (plaintext update.sonos.com requests and three plaintext firmware downloads on 03-20 and 04-13) |
 | TP-Link HS105 | We have implemented measures, including encryption and SSL technology, designed to secure your personal … | D3 2018-01-31 | 食い違いの候補 (T1a) | on 04-13 and 04-15 the phone app controlled the plug over the LAN (tcp/9999, 46 flows): the plug's replies carried the cloud account user name … |
 | TP-Link LB130 | We have implemented measures, including encryption and SSL technology, designed to secure your personal … | D3 2018-01-31 | 食い違いの候補 (T1a) | on 04-13 and 04-15 the phone app controlled the bulb over the LAN (tcp/9999 and udp/9999, 71 flows): the bulb's replies carried the cloud account user name … |
 | Withings Home | Communication via Secure Socket Layer (SSL) | D1 2018-04-04 | 食い違いの候補 (T1a) | 4 plaintext POST to scalews.withings.net with URL parameter named action and a text body (Zeek); 5259 TLS otherwise (13 days: 03-20, 03-21, 03-28, 04-10..19, … |
-| Canary | When a customer streams video through the Canary app, all video and data is securely encrypted between the … | D2 2018-02-27 | 文言の上で食い違い | same 158 HEAD requests; TLS 26324/26334 ECDHE_RSA_WITH_AES_256_GCM_SHA384, 6 ECDHE_RSA_WITH_AES_256_CBC_SHA384, 4 ECDHE_RSA_WITH_AES_128_GCM_SHA256 (the … |
-| Canary | Secure web transfer (SSL/TLS) | D1 2018-03-23 | 文言の上で食い違い | 158 plaintext HEAD to h.canaryis.com:80, no body or parameters (Zeek, 13 days: 03-20, 03-21, 03-28, 04-10..19); TLS 26324/26334 … |
-| Canary | If a customer uses an open or insecure Wi-Fi network (or in the event their home network is ever … | D2 2018-02-27 | 文言の上で食い違い | 158 plaintext HEAD to h.canaryis.com:80, no body or parameters (Zeek, 13 days: 03-20, 03-21, 03-28, 04-10..19) |
-| Canary | Canary connects directly to Canary Services through authenticated and encrypted channels. | D4 2019-07-16 | 文言の上で食い違い | 158 plaintext HEAD to h.canaryis.com:80, no body or parameters (Zeek, 13 days: 03-20, 03-21, 03-28, 04-10..19) |
-| Piper nv | All connections to and from Piper (including Live video, 2-way audio, cloud communications and video clips) … | D4 2019-07-21 | 文言の上で食い違い | 5 plaintext GET without content to static.getPiper.com on 04-16; everything else TLS (17865 TLS1.2 handshakes, all with forward secrecy) (Zeek, flowscan.py, 13 … |
 | Apple HomePod | All your iCloud content — like photos, contacts, and reminders — is encrypted when it’s transferred and, in … | D2 2018-04-12 | 一致（見えた範囲で） | no plaintext to iCloud hosts (13 days: 03-20, 03-21, 03-28, 04-10..19) |
 | Apple HomePod | It’s also encrypted in transit between your Apple device and the devices you’re controlling in your home. | D2 2018-04-12 | 一致（見えた範囲で） | no plaintext HTTP on the LAN; external plaintext to OCSP and push/config hosts, plus 3 plaintext audio requests to streamingaudio.itunes.apple.com on 03-21 … |
 | Apple HomePod | And when you control your accessories from a remote location, that data is encrypted when it’s sent. | D2 2018-04-12 | 一致（見えた範囲で） | external plaintext to OCSP and push/config hosts, plus 3 plaintext audio requests to streamingaudio.itunes.apple.com on 03-21 (not the HomeKit server) (13 … |
@@ -95,7 +83,7 @@
 | VeraLite | change ChangeLogURL from http to https in upgrade_step1.sh | D6 2017-12-31 | 見えない | no change-log request identified; no plaintext request to a change-log host (13 days: 03-20, 03-21, 03-28, 04-10..19) |
 | Withings Home | h5LS end-to-end encryption. | D1 2018-04-04 | 見えない | no plaintext video seen (Quarant); the local video sessions with the phone were DTLS 1.0 with AES-256 (3, on 04-13 and 04-15; the camera's certificate there … |
 
-判定できなかったもの：58 件（理由は claims.tsv の note）。
+判定できなかったもの：65 件（理由は claims.tsv の note）。
 
 ### 製品ごとの観測（主張の有無に関係なく）
 
