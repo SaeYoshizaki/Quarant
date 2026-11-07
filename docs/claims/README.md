@@ -16,6 +16,7 @@
 | [cloud-research-brief.md](cloud-research-brief.md) | クラウドのセッションへの調査の指示（製造者の文書と先行研究、結果は research/ に書く） |
 | [triage.md](triage.md) | 候補の一次ふるい（時期・範囲・観測）と深掘りの順番、Hue の 13 日分 |
 | [sonos-check.md](sonos-check.md) | Sonos PLAY:1 の深掘り：主張の範囲と時期、13 日分の平文の識別子とファームウェア、先行研究 |
+| [sonos-paper.md](sonos-paper.md) | Sonos の論文に向けた整理：収録の前後の文書の版、2018 年と 2021 年（CIC）の観測、先行研究の表 |
 | [deep-checks.md](deep-checks.md) | 深掘り 2〜4（Withings Home、Wink Hub 2、TP-Link）の短い確認と判定の案 |
 | [review-yourthings.md](review-yourthings.md) | 人が確かめる 23 件（食い違いの候補、文言の上で食い違い、確かめが要る一致）の確認用の表。各項目の「確認」に結果を書く |
 | [results-yourthings.md](results-yourthings.md) | 結果：YourThings 2018 の 44 製品。暗号化の主張に絞った結果が中心 |

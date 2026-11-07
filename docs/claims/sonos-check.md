@@ -36,11 +36,12 @@
 | 資料 | 対象と時期 | 観測・検証した内容 | 今回との関係 | 判定 |
 |---|---|---|---|---|
 | S. Hilt（Trend Micro）, [The Sound of a Targeted Attack](https://documents.trendmicro.com/assets/pdf/The-Sound-of-a-Targeted-Attack.pdf), 2017-12（PDF の作成日 2017-12-26） | PLAY:1。版の記載は一部のみ | LAN とインターネットに開いた状態ページからの情報の漏れ（p.3、8）。状態ページの `upgrade.log` の URL でファームウェアを取得でき、中身は gzip に独自の形式（p.37–38） | ファームウェアの URL が分かることは同じ方向。更新の確認の URL に識別子が入ることは書いていない | 関連する別の問題 |
-| O. Alrawi ほか, [SoK, IEEE S&P 2019](https://coeus.ece.gatech.edu/articles/sok_sp19.pdf)（YourThings の出典） | 同じ PLAY:1（YourThings の評価：版 8.3、2018-03-20） | Sonos の TLS の鍵が 1024 ビット、UPnP で LAN から操作できる（p.11）。評価の表で Encryption Device-to-Cloud は 2/4（[yourthings-scorecards.tsv](yourthings-scorecards.tsv)） | 作成者の評価も、機器とクラウドの間の暗号化に問題があるとしている。何が平文かは書いていない | 関連する既知の観測（詳細は未確認） |
-| S. P. Kavalaris, E. Serrelis, Security issues of contemporary multimedia implementations: the case of Sonos and SonosNet, ISDF 2011 | | LAN の認証のないサービス（SoK の引用による） | 本文は取得できず | 未確認 |
+| O. Alrawi ほか, [SoK, IEEE S&P 2019](https://coeus.ece.gatech.edu/articles/sok_sp19.pdf)（YourThings の出典） | 同じ PLAY:1（YourThings の評価：版 8.3、2018-03-20） | 機器が LAN に出すサービスの TLS の鍵が 1024 ビット、UPnP で LAN から操作できる（p.11）。評価の表で Encryption Device-to-Cloud は 2/4（[yourthings-scorecards.tsv](yourthings-scorecards.tsv)） | 作成者の評価も、機器とクラウドの間の暗号化に問題があるとしている。何が平文かは書いていない | 関連する既知の観測（詳細は未確認） |
+| S. P. Kavalaris, E. Serrelis, Security issues of contemporary multimedia implementations: the case of Sonos and SonosNet, ISDF 2014 | | LAN の認証のないサービス。本文は [sonos-paper.md](sonos-paper.md) で確認 | LAN 側だけ | 関連する別の問題 |
 
 ## まとめ
 
 - **既知の再確認にとどまる点**：ファームウェアの URL が分かること（Trend Micro）。機器とクラウドの間の暗号化に問題があること（YourThings の評価）。
 - **追加検証する価値がある点**：シリアル番号、世帯 ID、Sonos ID が、13 日すべて、3 つの版すべてで平文の URL に出ること。利用状況の XML が旧版だけ平文で、更新後に TLS に移ったこと（Ring、Hue と同じく、版で変わる）。
 - **判断に不足する証拠**：更新の確認の応答の中身（text/html、771 バイト）の形。ファームウェアの署名。YourThings の評価の「2/4」が何を数えたか。Kavalaris ほか 2011 の本文。
+- **2026-11-07 の追記**：上の 4 点のうち、応答の形、評価の意味、Kavalaris（2014 年の誤り）は [sonos-paper.md](sonos-paper.md) で確かめた。ファームウェアの署名は今も未確認。
