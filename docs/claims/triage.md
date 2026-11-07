@@ -34,4 +34,4 @@
 
 ## 次
 
-深掘りの結果：Sonos は候補を維持（[sonos-check.md](sonos-check.md)）。Withings Home と TP-Link は既知の問題の再確認、Wink Hub 2 は主張の範囲が未確認（[deep-checks.md](deep-checks.md)）。除外は利用者の判断で claims.tsv に反映した（判定の列は not assessable）。
+深掘りの結果：Sonos は候補を維持（[sonos-check.md](sonos-check.md)、論文に向けた整理は [sonos-paper.md](sonos-paper.md)）。Withings Home と TP-Link は既知の問題の再確認、Wink Hub 2 は主張の範囲が未確認（[deep-checks.md](deep-checks.md)）。除外は利用者の判断で claims.tsv に反映した（判定の列は not assessable）。
