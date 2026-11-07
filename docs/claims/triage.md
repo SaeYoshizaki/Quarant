@@ -34,4 +34,4 @@
 
 ## 次
 
-深掘り 1〜4 を、この順に Ring と同じ深さで調べる。除外は利用者の判断で claims.tsv に反映した（判定の列は not assessable）。
+深掘り 1〜4 を、この順に調べる。Sonos は [sonos-check.md](sonos-check.md)（候補を維持）。除外は利用者の判断で claims.tsv に反映した（判定の列は not assessable）。
