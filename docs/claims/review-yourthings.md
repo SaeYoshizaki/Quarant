@@ -29,7 +29,7 @@
 - **claims.tsv の行**：2（見出しを 1 行目とした行番号）
 - **確認**：除外（2026-11-02、利用者の判断）。食い違いを証明できなかった。
 
-## 2. Canary：食い違いの候補（contradiction candidate (T2)）
+## 2. Canary：除外（元は食い違いの候補（contradiction candidate (T2)））
 
 - **主張**："All parts of our system—from the device to the cloud to the app—employ extensive security measures to protect private data, such as AES 256-bit symmetric-key encryption, Virtual Private Cloud (VPC), secure HTTP access (HTTPS) using TLS/SSL, and more."
 - **文書**：D2、アーカイブ 2018-02-27（キャプチャとのずれ -0.7 か月）。https://web.archive.org/web/20180227160118/https://canary.is/uk/security/
@@ -38,9 +38,9 @@
 - **根拠**：4 of 26334 TLS handshakes with Canary's servers used AES-128 (ECDHE_RSA_WITH_AES_128_GCM_SHA256, o.canaryis.com and v.canaryis.com, 03-20); the rest AES-256; also 158 plaintext HEAD to h.canaryis.com:80, no body or parameters (Zeek, 13 days: 03-20, 03-21, 03-28, 04-10..19); the dataset's man-in-the-middle test sessions excluded
 - **注意**：UK page; US page 2017-05-13 not compared yet; weak candidate: 4 of 8010 handshakes; the plaintext HEADs alone would make it wording-only (T1b)
 - **claims.tsv の行**：3（見出しを 1 行目とした行番号）
-- **確認**：
+- **確認**：除外（2026-11-07、利用者の判断。[triage.md](triage.md)）
 
-## 3. Canary：文言の上で食い違い（wording-only contradiction）
+## 3. Canary：除外（元は文言の上で食い違い（wording-only contradiction））
 
 - **主張**："When a customer streams video through the Canary app, all video and data is securely encrypted between the device, the cloud, and the smartphone."
 - **文書**：D2、アーカイブ 2018-02-27（キャプチャとのずれ -0.7 か月）。https://web.archive.org/web/20180227160118/https://canary.is/uk/security/
@@ -49,7 +49,7 @@
 - **根拠**：same 158 HEAD requests; TLS 26324/26334 ECDHE_RSA_WITH_AES_256_GCM_SHA384, 6 ECDHE_RSA_WITH_AES_256_CBC_SHA384, 4 ECDHE_RSA_WITH_AES_128_GCM_SHA256 (the AES-128 ones to o.canaryis.com and v.canaryis.com on 03-20 only; Zeek, 13 days: 03-20, 03-21, 03-28, 04-10..19, the dataset's man-in-the-middle test sessions excluded)
 - **注意**：no video or data seen in plaintext
 - **claims.tsv の行**：4（見出しを 1 行目とした行番号）
-- **確認**：
+- **確認**：除外（2026-11-07、利用者の判断。[triage.md](triage.md)）
 
 ## 4. TP-Link HS105：食い違いの候補（contradiction candidate (T1a)）
 
@@ -139,7 +139,7 @@
 - **claims.tsv の行**：251（見出しを 1 行目とした行番号）
 - **確認**：
 
-## 12. Harman Kardon Invoke：食い違いの候補（contradiction candidate (T1a)）
+## 12. Harman Kardon Invoke：除外（元は食い違いの候補（contradiction candidate (T1a)））
 
 - **主張**："Harman engages the use of numerous technological security measures to preserve the security of your information, including without limitation, encryption technologies and authentication tools."
 - **文書**：D3、アーカイブ 2018-03-15（キャプチャとのずれ -0.2 か月）。https://web.archive.org/web/20180315093228/http://www.harman.com:80/privacy-policy
@@ -148,9 +148,9 @@
 - **根拠**：15 plaintext GET to esdk-ffl.spotify.com with URL parameters named key_id, value (Zeek); 2212 TLS otherwise (13 days: 03-20, 03-21, 03-28, 04-10..19, test sessions excluded)
 - **注意**：only 'encryption is used' could be judged; scope not stated (website and products); same text on harmankardon.com/privacy-policy.html 2018-01-23; policy last updated 2016-03-31; vague claim: only 'encryption is used' judged; destination is the third-party Spotify SDK and the content of the parameters is unknown
 - **claims.tsv の行**：268（見出しを 1 行目とした行番号）
-- **確認**：
+- **確認**：除外（2026-11-07、利用者の判断。[triage.md](triage.md)）
 
-## 13. Canary：文言の上で食い違い（wording-only contradiction）
+## 13. Canary：除外（元は文言の上で食い違い（wording-only contradiction））
 
 - **主張**："Secure web transfer (SSL/TLS)"
 - **文書**：D1、アーカイブ 2018-03-23（キャプチャとのずれ 0.0 か月）。https://web.archive.org/web/20180323133427/https://canary.is/canary/
@@ -159,9 +159,9 @@
 - **根拠**：158 plaintext HEAD to h.canaryis.com:80, no body or parameters (Zeek, 13 days: 03-20, 03-21, 03-28, 04-10..19); TLS 26324/26334 ECDHE_RSA_WITH_AES_256_GCM_SHA384, 6 ECDHE_RSA_WITH_AES_256_CBC_SHA384, 4 ECDHE_RSA_WITH_AES_128_GCM_SHA256 (the AES-128 ones to o.canaryis.com and v.canaryis.com on 03-20 only; Zeek, 13 days: 03-20, 03-21, 03-28, 04-10..19, the dataset's man-in-the-middle test sessions excluded)
 - **注意**：spec section 'Security & Data Protection'; range not stated
 - **claims.tsv の行**：288（見出しを 1 行目とした行番号）
-- **確認**：
+- **確認**：除外（2026-11-07、利用者の判断。[triage.md](triage.md)）
 
-## 14. Canary：食い違いの候補（contradiction candidate (T2)）
+## 14. Canary：除外（元は食い違いの候補（contradiction candidate (T2)））
 
 - **主張**："AES 256-bit data encryption"
 - **文書**：D1、アーカイブ 2018-03-23（キャプチャとのずれ 0.0 か月）。https://web.archive.org/web/20180323133427/https://canary.is/canary/
@@ -170,9 +170,9 @@
 - **根拠**：TLS 26324/26334 ECDHE_RSA_WITH_AES_256_GCM_SHA384, 6 ECDHE_RSA_WITH_AES_256_CBC_SHA384, 4 ECDHE_RSA_WITH_AES_128_GCM_SHA256 (the AES-128 ones to o.canaryis.com and v.canaryis.com on 03-20 only; Zeek, 13 days: 03-20, 03-21, 03-28, 04-10..19, the dataset's man-in-the-middle test sessions excluded)
 - **注意**：spec section; unclear whether transport or storage; weak candidate: 4 of 8010 handshakes used AES-128
 - **claims.tsv の行**：289（見出しを 1 行目とした行番号）
-- **確認**：
+- **確認**：除外（2026-11-07、利用者の判断。[triage.md](triage.md)）
 
-## 15. Canary：文言の上で食い違い（wording-only contradiction）
+## 15. Canary：除外（元は文言の上で食い違い（wording-only contradiction））
 
 - **主張**："If a customer uses an open or insecure Wi-Fi network (or in the event their home network is ever compromised), they can feel comfortable knowing their video and data connection to the Canary Cloud is securely encrypted."
 - **文書**：D2、アーカイブ 2018-02-27（キャプチャとのずれ -0.7 か月）。https://web.archive.org/web/20180227160118/https://canary.is/uk/security/
@@ -181,9 +181,9 @@
 - **根拠**：158 plaintext HEAD to h.canaryis.com:80, no body or parameters (Zeek, 13 days: 03-20, 03-21, 03-28, 04-10..19)
 - **注意**：video and data connection to the cloud
 - **claims.tsv の行**：292（見出しを 1 行目とした行番号）
-- **確認**：
+- **確認**：除外（2026-11-07、利用者の判断。[triage.md](triage.md)）
 
-## 16. Canary：文言の上で食い違い（wording-only contradiction）
+## 16. Canary：除外（元は文言の上で食い違い（wording-only contradiction））
 
 - **主張**："Canary connects directly to Canary Services through authenticated and encrypted channels."
 - **文書**：D4、アーカイブ 2019-07-16（キャプチャとのずれ 14.9 か月）。https://web.archive.org/web/20190716202759/https://help.canary.is/hc/en-us/articles/115005468648-How-do-I-know-my-Canary-s-connection-is-secure-
@@ -192,9 +192,9 @@
 - **根拠**：158 plaintext HEAD to h.canaryis.com:80, no body or parameters (Zeek, 13 days: 03-20, 03-21, 03-28, 04-10..19)
 - **注意**：after capture; claim archived after capture
 - **claims.tsv の行**：309（見出しを 1 行目とした行番号）
-- **確認**：
+- **確認**：除外（2026-11-07、利用者の判断。[triage.md](triage.md)）
 
-## 17. Piper nv：文言の上で食い違い（wording-only contradiction）
+## 17. Piper nv：除外（元は文言の上で食い違い（wording-only contradiction））
 
 - **主張**："All connections to and from Piper (including Live video, 2-way audio, cloud communications and video clips) are encrypted and authenticated."
 - **文書**：D4、アーカイブ 2019-07-21（キャプチャとのずれ 15.0 か月）。https://web.archive.org/web/20190721215820/https://getpiper.zendesk.com/hc/en-us/articles/200684304-How-secure-is-Piper-How-can-I-be-sure-it-won-t-be-hacked-
@@ -203,9 +203,9 @@
 - **根拠**：5 plaintext GET without content to static.getPiper.com on 04-16; everything else TLS (17865 TLS1.2 handshakes, all with forward secrecy) (Zeek, flowscan.py, 13 days: 03-20, 03-21, 03-28, 04-10..19)
 - **注意**：after capture; revised wording of the same article; claim archived after capture
 - **claims.tsv の行**：349（見出しを 1 行目とした行番号）
-- **確認**：
+- **確認**：除外（2026-11-07、利用者の判断。[triage.md](triage.md)）
 
-## 18. Piper nv：文言の上で食い違い（wording-only contradiction）
+## 18. Piper nv：除外（元は文言の上で食い違い（wording-only contradiction））
 
 - **主張**："Piper encrypts all outbound communication to its secure cloud using AES-128 and AES-256 algorithms."
 - **文書**：D2、アーカイブ 2019-07-21（キャプチャとのずれ 15.0 か月）。https://web.archive.org/web/20190721211821/https://getpiper.zendesk.com/hc/en-us/articles/219256067-Security-and-Privacy-Details
@@ -214,9 +214,9 @@
 - **根拠**：16115 AES_256_GCM and 1750 AES_128 handshakes, as claimed; but 5 plaintext GET without content to static.getPiper.com on 04-16 (Zeek, 13 days: 03-20, 03-21, 03-28, 04-10..19, the dataset's man-in-the-middle test sessions excluded)
 - **注意**：after capture (article dated January 27, 2019); claim archived after capture; the algorithms match; only the 'all outbound' part fails, with content-less requests
 - **claims.tsv の行**：351（見出しを 1 行目とした行番号）
-- **確認**：
+- **確認**：除外（2026-11-07、利用者の判断。[triage.md](triage.md)）
 
-## 19. Philips Hue Bridge：食い違いの候補（contradiction candidate (T1a)）
+## 19. Philips Hue Bridge：除外（元は食い違いの候補（contradiction candidate (T1a)））
 
 - **主張**："Philips Lighting, transfers data securely (using SSL) and will encrypt some data, such as your MAC address when it is stored."
 - **文書**：D3、アーカイブ 2017-08-18（キャプチャとのずれ -7.0 か月）。https://web.archive.org/web/20170818072006/http://www2.meethue.com/en-us/privacy-policy
@@ -225,7 +225,7 @@
 - **根拠**：3208 plaintext HTTP requests with content from the bridge to Philips hosts (dcp.cpp.philips.com 968, www.ecdinterface.philips.com 916, bridge.meethue.com with URL parameters named auth and sso), 1905 with an Authorization header (Zeek); Quarant INSECURE_HTTP_AUTH 1873; TLS with the real servers only 6 times (7 more were the dataset's MITM test) (13 days: 03-20, 03-21, 03-28, 04-10..19)
 - **注意**：in the section on data collected via the Website and the App; 'using SSL' is the transfer claim, storage encryption is not assessable; the sentence follows the list of bridge data (bridge ID, serial number, usage and crash data), so it covers data sent by the bridge; claim_scope corrected to device-cloud
 - **claims.tsv の行**：526（見出しを 1 行目とした行番号）
-- **確認**：
+- **確認**：除外（2026-11-07、利用者の判断。[triage.md](triage.md)）
 
 ## 20. Wink Hub 2：食い違いの候補（contradiction candidate (T2: certificate validation)）
 
@@ -238,7 +238,7 @@
 - **claims.tsv の行**：586（見出しを 1 行目とした行番号）
 - **確認**：
 
-## 21. iRobot Roomba：食い違いの候補（contradiction candidate (T2)）
+## 21. iRobot Roomba：除外（元は食い違いの候補（contradiction candidate (T2)））
 
 - **主張**："Currently, we use AES 256-bit encryption and Transport Layer Security (TLS v1.2)."
 - **文書**：D2、アーカイブ 2018-11-10（キャプチャとのずれ 6.7 か月）。https://web.archive.org/web/20181110041231/https://webapi.irobot.com//Legal/Documents/North-America/United-States/Legal-Documents/Data-Security.aspx?sc_lang=en
@@ -247,9 +247,9 @@
 - **根拠**：TLS with iRobot's own server disc-prod.iot.irobotapi.com used AES-128 (TLS_RSA_WITH_AES_128_CBC_SHA256, 17 handshakes), as did cloudfront downloads (17); only the MQTT connections on tcp/8883 used AES-256 (21 TLS_DHE_RSA_WITH_AES_256_CBC_SHA, 1 TLS_RSA_WITH_AES_256_CBC_SHA256; 6 more without a visible handshake); all TLS 1.2 (Zeek, 13 days: 03-20, 03-21, 03-28, 04-10..19)
 - **注意**：read in a browser (body is an embedded page, earliest capture after the capture period); the sentence before says 'All iRobot connected products communicate with the iRobot cloud service using robust encryption'; weak on timing (7 months after)
 - **claims.tsv の行**：788（見出しを 1 行目とした行番号）
-- **確認**：
+- **確認**：除外（2026-11-07、利用者の判断。[triage.md](triage.md)）
 
-## 22. Logi Circle：食い違いの候補（contradiction candidate (T2)）
+## 22. Logi Circle：除外（元は食い違いの候補（contradiction candidate (T2)））
 
 - **主張**："Logitech uses unique, random and automatically rotating AES 256 Bit Dual Layer Encryption to protect and store your audio and video content."
 - **文書**：D4、アーカイブ 2018-03-13（キャプチャとのずれ -0.2 か月）。https://web.archive.org/web/20180313165545/http://support.logitech.com:80/en_us/product/circle/faq
@@ -258,7 +258,7 @@
 - **根拠**：all 19 TLS handshakes with the real servers (including api.video.logi.com) used AES-128 (TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256); 6 more were the dataset's man-in-the-middle test and are excluded (Zeek, 13 days: 03-20, 03-21, 03-28, 04-10..19)
 - **注意**：'Dual Layer' may mean an inner encryption layer inside TLS, which is not visible; 'store' is storage
 - **claims.tsv の行**：798（見出しを 1 行目とした行番号）
-- **確認**：
+- **確認**：除外（2026-11-07、利用者の判断。[triage.md](triage.md)）
 
 ## 23. Nest Cam IQ：一致（確かめが要る）（consistent (as observed)）
 

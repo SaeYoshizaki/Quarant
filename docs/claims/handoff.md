@@ -27,6 +27,8 @@
 | 12 | 文言の上で食い違い | Canary（HEAD のみ 158 回）、Piper（中身のない GET 5 回） | | 弱 |
 | 13 | 確かめが要る一致 | Nest「2048-bit RSA private keys for key exchange」 | Nest Cam IQ 自身の鍵は ECDSA P-224 | 読み方次第 |
 
+**除外（2026-11-07、一次ふるい）：Philips Hue Bridge、Harman Kardon Invoke、Canary、Logi Circle、iRobot Roomba、Piper nv**（[triage.md](triage.md)）。上の表の 2、6〜12 行目のうち、これらの製品の行は候補ではない。
+
 **除外：Ring Video Doorbell**（2026-11-02、利用者の判断）。平文の通信は確かめられたが、「Encryption: Bank-grade」は対象が書かれておらず、2017-11-15 以降の販売ページの仕様の欄にもないので、食い違いを証明できなかった。観測の多くも既知の問題だった（[ring-prior-work.md](ring-prior-work.md)）。
 
 主張がない（または判定できない）が目立つ観測：VeraLite がログを平文の FTP で送る（470 回）、偽の証明書を受け入れた疑い（August、VeraLite、WeMo Crock-Pot、Harmony Hub、Harman、Samsung TV）、SmartThings のサーバー証明書が RSA 1,024 ビット、WeMo は TLS 1.0 のみで前方秘匿性なし。

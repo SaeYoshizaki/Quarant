@@ -49,37 +49,32 @@ YourThings の対応表の 66 台のうち、次の 44 製品。
 
 | 判定 | 暗号の方法 | 暗号化しているか | 計 |
 |---|---|---|---|
-| 食い違いの候補 | 6 | 9 | 15 |
-| 文言の上で食い違い | 1 | 5 | 6 |
+| 食い違いの候補 | 2 | 7 | 9 |
+| 文言の上で食い違い | 0 | 0 | 0 |
 | 一致（見えた範囲で） | 8 | 31 | 39 |
 | 見えない | 7 | 5 | 12 |
-| 判定できない | 23 | 58 | 81 |
+| 判定できない | 28 | 65 | 93 |
 | 計 | 45 | 108 | 153 |
 
 全部の主張（687 件）では 87% が判定できなかったが、暗号化の主張に絞ると 52%（79 件）。判定できない理由は、範囲がアプリや Web サイト、保存時の暗号化、Wi-Fi・Bluetooth・Z-Wave の区間のどれかが多い。
 
 4 日分（03-20、04-10〜12）から 13 日分にしたことで、判定が変わったのは 7 件：TP-Link の 2 製品と Apple HomePod が「一致」から「食い違いの候補」に、Piper の 2 件が「一致」から「文言の上で食い違い」に、Caseta と VeraLite（リリースノート）の 1 件ずつが「見えない」から「一致」に変わった（下）。
 
-### 食い違いの候補（11 製品）
+### 食い違いの候補（6 製品）
 
-Ring Video Doorbell は候補から外した（2026-11-02）。平文の通信は確かめられたが、主張の「Encryption: Bank-grade」は対象が書かれておらず、収録時点で有効だったかも分からないので、食い違いを証明できなかった。[ring-prior-work.md](ring-prior-work.md)。
+2026-11-07 の一次ふるい（[triage.md](triage.md)）で、Philips Hue Bridge、Harman Kardon Invoke、Canary、Logi Circle、iRobot Roomba、Piper nv を外した（収録時点の版に文がない、観測に中身がない、主張が曖昧、など）。Ring Video Doorbell は候補から外した（2026-11-02）。平文の通信は確かめられたが、主張の「Encryption: Bank-grade」は対象が書かれておらず、収録時点で有効だったかも分からないので、食い違いを証明できなかった。[ring-prior-work.md](ring-prior-work.md)。
 
 | 製品 | 軸 | 主張（出典、アーカイブの日付） | 観測（13 日分） | 注意 |
 |---|---|---|---|---|
-| Philips Hue Bridge | 暗号化しているか | "Philips Lighting, transfers data securely (using SSL) …"（プライバシーポリシー、2017-08-18） | 外部への平文の HTTP で中身があるもの 3,208 回、うち 1,905 回が `Authorization` ヘッダーつき。本物のサーバーとの TLS は 6 回だけ | 直前にブリッジが送るデータ（ブリッジの ID、シリアル番号、使用データ）を挙げている |
 | Sonos PLAY:1 | 暗号化しているか | "Any data we transmit over the internet is protected using encryption."、ほか 2 文（プライバシーポリシー、2018-02-02） | `update.sonos.com` の URL に `householdid`、`serial`、`sonosid` という名前のパラメータ。ファームウェアそのものを平文の HTTP で 3 回取得（03-20 に 2 回、04-13 に 1 回、各 8〜9MB）し、そのたびに版が上がった | 送っているのは識別子と、配られたファームウェア |
 | TP-Link HS105（プラグ） | 暗号化しているか | "We have implemented measures, including encryption and SSL technology, designed to secure your personal information …"（プライバシーポリシー、2018-01-31） | LAN の制御（tcp/9999）で、プラグがクラウドのアカウント名、設置場所の緯度・経度、deviceId、MAC、名前を返していた。中身は公開された鍵の XOR で隠してあるだけで、誰でも戻せる | LAN 内だけ。アプリからの操作は 04-13 と 04-15 |
 | TP-Link LB130（電球） | 暗号化しているか | 同上 | 同じく LAN の制御で、アカウント名、deviceId、MAC、名前を返していた | 同上 |
 | Apple HomePod | 暗号化しているか | "certain information such as your name, contacts, music you listen to, and searches is sent to Apple servers using encrypted protocols."（Apple のプライバシーのページ） | 03-21 に `streamingaudio.itunes.apple.com` から平文の HTTP で音声を 3 回取得（URL に `accesskey` という名前のパラメータ、`x-playback-session-id` ヘッダー） | 音声のデータ自体はファイルの中で暗号化されている可能性がある。どの音声を取りに行ったかの要求が平文 |
 | Withings Home | 暗号化しているか | "Communication via Secure Socket Layer (SSL)"（製品ページ、2018-04-04） | `scalews.withings.net` へ本文つきの平文の POST が 4 回 | |
 | Withings Home | 暗号の方法 | "… AES-256 and secure HTTP (HTTPS) to protect your data at the device, cloud and app level …"（同上） | 本物のサーバーとの TLS の 5,259 回中 5,248 回が AES-128（LAN の映像の DTLS 3 回は AES-256） | AES-256 は保存時の暗号化を指している可能性がある |
-| Harman Kardon Invoke | 暗号化しているか | "… including without limitation, encryption technologies and authentication tools."（プライバシーポリシー、2018-03-15） | `esdk-ffl.spotify.com` へ平文の GET が 15 回（URL に `key_id`、`value`） | 宛先は第三者（Spotify の SDK）。いちばん弱い候補 |
 | Wink Hub 2 | 証明書の検証 | "We adopt security measures that include certificate pinning, encryption, …"（サポートの FAQ、2017-07-08） | 作成者の中間者の検査で、偽の証明書の接続 42 回のうち 21 回、握手のあとにハブがデータを送った。YourThings の評価も「中間者が成功」 | アプリの話か機器の話かは書いていない（D35） |
-| Canary | 暗号の方法 | "AES 256-bit data encryption"（製品ページの仕様、2018-03-23）ほか | Canary のサーバーとの TLS 26,334 回のうち 4 回が AES-128（03-20 だけ） | 弱い候補（0.02%） |
-| Logi Circle | 暗号の方法 | "Logitech uses unique, random and automatically rotating AES 256 Bit Dual Layer Encryption to protect and store your audio and video content."（サポートの FAQ、2018-03-13） | 本物のサーバーとの TLS は 19 回すべて AES-128 | "Dual Layer" は TLS の内側の暗号を指す可能性があり、それは見えない |
-| iRobot Roomba | 暗号の方法 | "Currently, we use AES 256-bit encryption and Transport Layer Security (TLS v1.2)."（データセキュリティのページ、2018-11-10） | iRobot 自身のサーバー `disc-prod.iot.irobotapi.com` との TLS は 17 回すべて AES-128。AES-256 は MQTT（tcp/8883）の 22 回だけ | 文書はキャプチャの 7 か月後 |
 
-**文言の上で食い違い**（中身のない平文だけ）：Canary（`h.canaryis.com` への HEAD が 158 回）、Piper（"All connections to and from Piper … are encrypted"、"Piper encrypts all outbound communication …"。`static.getPiper.com` への中身のない GET が 04-16 に 5 回）。
+**文言の上で食い違い**：なし（Canary と Piper は 2026-11-07 に除外）。
 
 **一致の例**：
 - Nest Cam："128-bit AES with TLS/SSL encryption, Perfect Forward Secrecy and a unique 2048-bit RSA key"。観測した握手はすべて ECDHE と AES-128、カメラ自身の証明書の鍵は 118 回とも RSA 2048 ビット。
@@ -131,15 +126,15 @@ Ring Video Doorbell は候補から外した（2026-11-02）。平文の通信�
 
 ## 付録：暗号化以外も含めた全部の主張
 
-暗号化以外の主張（パスワードの決まり、更新のやり方、脆弱性の届け出の窓口など）も [claims.tsv](claims.tsv) に残している。全部で 687 件（ほかに「セキュリティの主張なし」の文書 138 件）、判定は次のとおり。
+暗号化以外の主張（パスワードの決まり、更新のやり方、脆弱性の届け出の窓口など）も [claims.tsv](claims.tsv) に残している。全部で 690 件（2026-11-07 に claims.tsv から数え直した）（ほかに「セキュリティの主張なし」の文書 138 件）、判定は次のとおり。
 
 | 判定 | 主張 |
 |---|---|
-| 食い違いの候補 | 16（暗号化の主張 15 件と、August の「業界標準で PII を守る」。Ring の 2 件は除外） |
-| 文言の上で食い違い | 6 |
-| 一致（見えた範囲で） | 49 |
+| 食い違いの候補 | 10（暗号化の主張 9 件と、August の「業界標準で PII を守る」。Ring と、一次ふるいで外した 6 製品は除く） |
+| 文言の上で食い違い | 0 |
+| 一致（見えた範囲で） | 50 |
 | 見えない | 16 |
-| 判定できない | 600 |
+| 判定できない | 614 |
 
 更新の主張（「定期的に更新される」「自動で更新する」など）は、3 週間のキャプチャでは「更新しない」ことを示せないので、判定できないとした。ただし、実際に更新が起きたもの（Sonos、Hue、Roku TV、Caseta）は根拠の欄に書いた。
 
