@@ -12,7 +12,7 @@
   - HTTP でのファームウェアの取得。
   - TLS の版、暗号、前方秘匿性、サーバー証明書。YourThings の作成者の中間者の検査（発行者 `thing-catcher.gtisc.gatech.edu`、04-10〜13）は除いた。
 - **先行研究**：論文 11 本の機器ごとの対応表と、候補ごとの検索（CVE、ブログ、論文）。本文を読めたものだけを根拠にした。結果は [sweep/prior-ids.tsv](sweep/prior-ids.tsv) と [sweep/prior-tls.tsv](sweep/prior-tls.tsv)。
-- **確かめ方**：Sonos の既知の結果（YourThings 2018-03-20 のフレーム 60977 の serial と householdid、フレーム 4429 の UPnP のシリアル）を自動で再現した。Nest Guard はパケットで確かめた（下）。**ほかの候補は自動の検出で、パケットでは確かめていない。**
+- **確かめ方**：Sonos の既知の結果（YourThings 2018-03-20 のフレーム 60977 の serial と householdid、フレーム 4429 の UPnP のシリアル）を自動で再現した。「見つからず」と「ブログ等のみ」の 20 件は、パケットで確かめた（下）。**「論文で一部」と TLS の候補は自動の検出のままで、パケットでは確かめていない。**
 
 ## 数
 
@@ -95,13 +95,38 @@
 | unknown webcam | MAC（HTTP 以外） | yourthings | 28 | aabbccddeeff in udp/8765 payload | yourthings:eth1-20180320.0250.1521532200 フレーム 544406 | Alrawi, Lever, Antonakakis, Monrose, 'SoK: Security Evaluation of Home（2019） | 論文で一部 |
 | Insteon Hub Pro | 識別子（平文の HTTP） | yourthings | 197 | q:mac=named q:mac -> connect.insteon.com:80 | yourthings:eth1-20180411.1935.1523493300 フレーム 52663 | Information Exposure From Consumer IoT Devices（2019） | 除く（トップ会議） |
 
-- **Nest Guard（パケットで確認）**：YourThings `eth1-20180410.0045.1523339100` のフレーム 49432 と 66102。機器が tcp/11095 の接続で最初に送るメッセージ（520 バイト）の 416 バイト目から、自分の MAC の 6 バイトがそのまま入る。先頭は TLS のレコードではなく、MAC は証明書（DER）の中でもない。OpenWeave の資料は、ノード ID を暗号化の対象に入れていない。観測したバイト列がこのノード ID の項目か、このポートのプロトコルが Weave かは未確認。
-- **August の HTTP 以外の MAC**：2 回だけで、偶然の一致を否定していない。
-- **TP-Link NC220 の UDP の MAC**：宛先は UNSW の範囲のアドレスで、TP-Link のサーバーではない（スマートフォンのアプリの可能性。未確認）。
-- **Smart Board のファームウェア**：Chrome の部品の更新で、署名つきの設計どおりの動き（Chromium の Omaha 3.1 の文書）。問題としては扱わない。
 - **Insteon Hub Pro（除く）**：Ren ほか（IMC 2019、§6.2）が、Insteon のハブが MAC を平文で送ると報告している。Hub と Hub Pro が同じ型かは未確認。
 - **同じ研究室の評価と合わないもの**：Loi ほか（2017、UNSW）は、Pix-Star、Withings の睡眠センサー、Samsung SmartCam を「平文なし」と評価している。こちらはどれも平文の送信を観測した。同じ個体かは未確認。
 - **項目名だけで拾ったもの**（Bose の `q:mac`、Amazon Echo の `q:serial` など）は、値が本当にその識別子かを確かめていない。
+
+## パケットでの確認（「見つからず」と「ブログ等のみ」の 20 件）
+
+`scripts/claims/sweep/verify.py` で、根拠のキャプチャを tshark で開き直して確かめた（2026-11-10）。値はメモリの中で比べ、長さ、形、一致の有無だけを見た。宛先の DNS の応答は、どのキャプチャにもなかった（名前は HTTP の Host ヘッダーによる）。
+
+| 製品 | 確かめた根拠 | 結果 | 判定 |
+|---|---|---|---|
+| Invoxia Triby | iotraffic `TribySpeaker_18B79E022044.pcap` フレーム 7741〜937874 | `developer.invoxia.com/update/triby/update.pup` への GET 107 回で `mac` が機器の MAC と一致（値は 1 種類）。`airable.io/authentication` への GET 7 回で `device` が MAC と一致 | 確認 |
+| Invoxia Triby | 同 フレーム 60097〜483309 | `airable.io` への GET 21 回に平文の Basic 認証。ユーザー名 64 文字（6 種類）、パスワード 32 文字（毎回違う）。どちらも MAC ではない | 確認 |
+| Invoxia Triby | 同 TCP ストリーム 1778 | `update.pup` を HTTP で取得（206、4,064,439 バイト、text/plain）。中身のエントロピー 8.00 で、暗号化か圧縮 | 確認 |
+| Invoxia Triby | 同 フレーム 10、11 | tcp/5228 への通信は、メッセージの中身（REGISTER、INVITE、Via、CSeq）から平文の SIP。ユーザー名が `triby_` と MAC。206,593 パケット中 21,991 に MAC | 確認 |
+| Nest Guard | yourthings `eth1-20180410.0045.1523339100` フレーム 49432、66102 | tcp/11095 の最初のメッセージ（520 バイト）の 416 バイト目に MAC の 6 バイト。TLS のレコードではなく、証明書の中でもない | 確認 |
+| HeimVision カメラ | cic `1-Power/Cameras/HeimVision Camera/POWER/heimvisioncamPOWER_1.pcap` フレーム 62 | `esd.closeli.com/lookup/v6/assignRelayIp` への POST の `device_id`（英字 5 文字、`_`、MAC の 12 文字） | 確認 |
+| Home Eye カメラ | cic `.../Home Eye Camera/POWER/homeeyecamPOWER_1.pcap` フレーム 239〜948 | **写真（image/jpg、約 204 KB）を HTTP で PUT**（3 回。本文の先頭が JPEG）。宛先は `xyxcamera.oss-cn-hongkong.aliyuncs.com`。OSS の署名のアクセスキー ID は 6 回とも同じ値（24 文字）、署名は毎回違う | 確認 |
+| SimCam カメラ | cic `2021_11_02_Active.pcap` フレーム 1234〜631073 | **人物検知の画像（JPEG、22〜25 KB）を HTTP で PUT**（15 回、パス `.../SimCam/{id}/PersonDetect/{id}`）。宛先は S3 のバケット。AWS4 の署名のアクセスキー ID は 15 回とも同じ値（20 文字） | 確認 |
+| Samsung SmartCam | iotraffic `SamsungCamera_00166cab6b88.pcap` フレーム 17830〜3023532 | `www.samsungsmartcam.com/web/event.stw` への POST 13,310 回すべてで `serial` が UPnP のシリアル番号と一致（値は 1 種類） | 確認 |
+| Samsung Pan/Tilt 1080P カメラ | deakin `2023-07-26.pcap` フレーム 278764、`2023-08-16.pcap` | 同じ宛先への POST の `serial`（15 文字、値は 1 種類）。08-16 では mDNS の `sn` と一致（2 回とも） | 確認 |
+| Pix-Star フォトフレーム | iotraffic `PixStarPhotoFrame_e076d033bb85.pcap` フレーム 814〜81232、deakin `2023-07-26.pcap` フレーム 630490 | `iptime.pix-star.com/iptime` への GET の `usr` が MAC と一致（2016〜17 年 23 回、2023 年 1 回） | 確認 |
+| Netatmo 気象計 | cic `1-Power/Other/Netatmo Weather Station/POWER/netatmoweatherPOWER_1.pcap` フレーム 29 | tcp/25050 の最初のメッセージ（52 バイト、バイナリ）の 9 バイト目に MAC を文字で（16 パケット中 1） | 確認 |
+| Borun カメラ | cic `.../Borun Camera/POWER/boruncamPOWER_1.pcap` フレーム 91、117 | udp/8877 の最初のメッセージ（84 バイト）の 58 バイト目に MAC を文字で（4 パケット中 2）。HTTP の `deviceid` は 8 文字で MAC ではない | 確認 |
+| Amcrest カメラ | cic `.../Amcrest/POWER/amcrestcamPOWER_1.pcap` フレーム 143 | udp/8802 の文字のメッセージ（258 バイト）の 20 バイト目に、機器が mDNS で名乗る名前（18 文字） | 確認 |
+| TP-Link NC220 | unsw2016 `16-09-30.pcap` フレーム 493236 | MAC は 2,876 パケット中 1 つだけ。宛先は UNSW の範囲のアドレスで、メーカーのサーバーではない | 弱い |
+| Apple HomePod | yourthings `eth1-20180321.2015.1521681300` フレーム 61634〜73255 | `x-playback-session-id` は再生ごとの UUID（3 回で 2 種類）。機器の識別子でも認証情報でもない | 外す |
+| August Doorbell Cam | iotraffic `AugustDoorBell_e076d03f00ae.pcap` フレーム 5122643、5490378 | その位置のパケットに MAC が見つからない（1 つはペイロードなし）。自動の検出の誤り | 外す |
+| Smart Board | cic `2-Idle/2021_12_20_Idle.pcap` フレーム 9926 | Chrome の部品の差分更新（CRX diff）。署名つきの設計どおりの動き（Chromium の Omaha 3.1 の文書） | 外す |
+
+- 16 件を確認、1 件は弱い、3 件は外す。
+- Home Eye と SimCam は、識別子より重い。カメラの画像そのものが平文で送られていた。
+- 「見つからず」は探した範囲の話で、新しいとは言わない。
 
 ## TLS（105 件）
 
@@ -125,5 +150,6 @@
 
 ## 次
 
-- 「見つからず」と「ブログ等のみ」の候補（20 件）を、パケットで 1 件ずつ確かめる。
 - 分類を人が確かめる。特に「除く」と「論文で一部」の境目（Insteon、Roku、証明書）。
+- 「論文で一部」の候補（40 件）も、同じ方法でパケットで確かめる。
+- Home Eye と SimCam の画像の平文の送信について、先行研究をもう一度探す（画像の送信に絞って）。
