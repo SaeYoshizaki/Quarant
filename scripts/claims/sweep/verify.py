@@ -133,7 +133,11 @@ def cmd_http(cap, mac, host, key, lan_kind=None):
     print(f"  values: {len(set(vals))} distinct over {len(vals)}; shapes: {shape_list(set(vals))}")
     print(f"  relation to the device's MAC: {dict(collections.Counter(mac_relation(v, mac) for v in vals))}")
     if lan_kind:
-        lan = lan_values(cap, mac, lan_kind)
+        kind, _, other = lan_kind.partition("@")
+        lan = lan_values(other or cap, mac, kind)
+        if other:
+            print(f"  LAN values read from {Path(other).name}")
+        lan_kind = kind
         eq = sum(1 for v in vals if v in lan)
         inside = sum(1 for v in vals if any(x and x in v for x in lan))
         print(f"  LAN values ({lan_kind}) announced in this capture: {len(lan)}; requests whose value equals one: {eq}; holds one: {inside}")
@@ -182,7 +186,7 @@ def kind_of(b):
 def cmd_payload(cap, mac, frame, lan_kind=None):
     (row,) = tshark(cap, f"frame.number == {frame}", ["ip.src", "ip.dst", "tcp.srcport", "tcp.dstport", "udp.srcport",
                     "udp.dstport", "tcp.stream", "udp.stream", "tcp.seq", "tcp.payload", "udp.payload", "data.data"])
-    src, dst, ts, td, us, ud, tst, ust, seq, tpl, upl, data = row
+    sip, dst, ts, td, us, ud, tst, ust, seq, tpl, upl, data = row
     proto, port, stream = ("tcp", td, tst) if tst else ("udp", ud, ust)
     pl = unhex(tpl or upl or data)
     texts, raw = mac_forms(mac)
@@ -190,7 +194,7 @@ def cmd_payload(cap, mac, frame, lan_kind=None):
     found = [(low.find(t), "text " + ["aa:bb..", "aabb..", "aa-bb.."][i]) for i, t in enumerate(texts) if t in low]
     if raw in pl:
         found.append((pl.find(raw), "raw 6 bytes"))
-    print(f"frame {frame}: {proto} {src} -> {dst}:{port}, payload {len(pl)} bytes, starts as {kind_of(pl[:256])}")
+    print(f"frame {frame}: {proto} {sip} -> {dst}:{port}, payload {len(pl)} bytes, starts as {kind_of(pl[:256])}")
     for off, how in found:
         before = re.search(rb"([A-Za-z_\-]{2,24})[\"'=: ]{0,3}$", pl[max(0, off - 28):off])
         print(f"  MAC as {how} at offset {off}; name just before it: {before.group(1).decode() if before else 'none'}")
