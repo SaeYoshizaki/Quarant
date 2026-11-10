@@ -20,7 +20,7 @@
 | | | softScheck, tplink-smartplug, 2016 | GitHub | XOR の自己鍵（初期値 171）、認証がない | なし |
 | | | Alrawi ほか, S&P 2019（Table VII, p.18） | 論文 | 指摘していない。アプリと機器の間は「すべて暗号化」 | ― |
 | Withings Home | 「Communication via Secure Socket Layer (SSL)」／平文の POST 4 回（証明書の一覧の取得、MAC アドレスを送る） | E. Clausing, AV-TEST, 2017-01-06 | 試験報告 | 同じ。MP3 とファームウェアの平文の取得も | なし |
-| | | Alrawi ほか, S&P 2019（Table VII, p.18） | 論文 | 指摘していない。すべて暗号化 | ― |
+| | | Alrawi ほか, S&P 2019（Table VII, p.18。付録の事例 p.19） | 論文 | 機器とクラウドの間は「すべて暗号化」。ただし付録の事例で、XMPP のサーバー（xmpp.withings.net:5222）への認証は平文とする（2026-11-10 に訂正）。こちらの証明書の取得とは別の通信 | なし |
 | Sonos PLAY:1 | 「Any data we transmit over the internet is protected using encryption.」ほか／識別子を入れた更新の確認を平文の HTTP で送る | P. Geissler, HITB Amsterdam 2023（p.58） | 発表 | 同じ URL の形と識別子。ただし示す URL は HTTPS | なし |
 | | | Alrawi ほか, S&P 2019（Table VII, p.18） | 論文 | 機器とクラウドの間は「部分的に暗号化」（◐）。何が平文かは書いていない | なし |
 | | | S. Hilt, Trend Micro, 2017-12。S. P. Kavalaris, E. Serrelis, ISDF 2014 | 報告、論文 | LAN 側の問題（状態ページ、認証のないサービス） | なし |
