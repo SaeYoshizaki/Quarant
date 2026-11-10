@@ -36,6 +36,7 @@ import collections
 import csv
 import hashlib
 import hmac
+import io
 import json
 import math
 import os
@@ -69,6 +70,7 @@ SKIP_HEADERS = {b"host", b"accept", b"accept-encoding", b"accept-language", b"ac
                 b"referer", b"origin", b"content-encoding"}
 UPNP_TAGS = re.compile(rb"<(serialNumber|serialNum|UDN|MACAddress|macAddress|deviceID|DeviceID|deviceId)>\s*([^<]{4,120}?)\s*</", re.I)
 XML_LEAF = re.compile(rb"<([A-Za-z_][\w.\-:]{0,40})>([^<>]{1,200})</\1>")
+FORM_KEY = re.compile(rb"[A-Za-z0-9_.\-\[\]]{1,60}")
 EMAIL = re.compile(rb"[A-Za-z0-9._%+\-]{1,64}@[A-Za-z0-9.\-]{1,190}\.[A-Za-z]{2,24}")
 BINARY_TYPES = ("application/octet-stream", "application/x-binary", "application/binary", "application/x-gzip",
                 "application/gzip", "application/zip", "application/x-tar", "application/vnd.android")
@@ -378,15 +380,20 @@ def http_fields(msg, out):
 
 def body_fields(body, ctype, ctx, out):
     s = body.strip()
+    head = s[:2048]
+    if sum(1 for x in head if 32 <= x < 127 or x in (9, 10, 13)) < 0.85 * len(head):
+        return      # binary or encrypted body: nothing to read
     if s[:1] in (b"{", b"["):
         try:
             flat(json.loads(s.decode("utf-8", "replace")), "", ctx, out)
-            return
         except ValueError:
-            pass
+            words(s, "body", ctx, out)      # cut JSON: no key names can be trusted
+        return
     if b"x-www-form-urlencoded" in ctype or (b"=" in s[:100] and b"&" in s and b" " not in s[:200]):
         for k, v in urllib.parse.parse_qsl(s, keep_blank_values=False):
-            out.append(("form:" + k.decode("latin-1")[:60], v, ctx))
+            # a key that is not a plain name is part of a value: never write it
+            key = k.decode("latin-1") if FORM_KEY.fullmatch(k) else "<unparsed>"
+            out.append(("form:" + key, v, ctx))
         return
     if s[:1] == b"<":
         for k, v in XML_LEAF.findall(s):
@@ -871,7 +878,9 @@ def run(job):
                 return [(name, -2)]
         os.replace(str(out) + ".tmp", out)
     else:
-        with tarfile.open(src, "r|*", bufsize=16 << 20) as t:
+        # gzip runs in its own process; tarfile then reads plain tar from the pipe
+        unz = subprocess.Popen(["gzip", "-dc", src], stdout=subprocess.PIPE, bufsize=1 << 20) if src.endswith(("gz", "tgz")) else None
+        with tarfile.open(fileobj=unz.stdout, mode="r|") if unz else tarfile.open(src, "r|") as t:
             for m in t:
                 if not m.isfile():
                     continue
@@ -881,7 +890,7 @@ def run(job):
                 out = Path(out_dir) / (name + ".jsonl")
                 if out.exists():
                     continue
-                f = t.extractfile(m)
+                f = io.BufferedReader(t.extractfile(m), buffer_size=1 << 20)
                 try:
                     done.append(scan(f, name, macs, str(out) + ".tmp"))
                     os.replace(str(out) + ".tmp", out)

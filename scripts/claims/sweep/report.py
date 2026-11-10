@@ -35,6 +35,22 @@ ID_KEY = re.compile(r"(?i)(serial|(^|[^a-z])sn($|[^a-z])|uuid|udid|guid|device_?
                     r"geo|location|ssid|bssid|phone|zip|postal)")
 CRED_KEY = re.compile(r"(?i)(pass(word|wd)?($|[^a-z])|pwd|secret|token|session|(^|[^a-z])sid($|[^a-z])|api_?key|(^|[^a-z])auth|cookie:)")
 WEAK = {"rc4", "3des", "des", "export", "null", "anon", "md5"}
+# LAN announcements that name a model, version or feature, not one device
+NOT_ID = re.compile(r"(?i)^mdns_txt:(model|md|am|osvers|vers|ver|codever|txtvers|protovers|fv|sw|hw|fw|ff|ci|sf|c#|s#|pv|"
+                    r"features|flags|srcvers|vv|sv|ty|rp|pk|ct|st|sh|ca|ve|ov|rmodel|rs|nf|dvty|dvsv|tv|vn|vs)$")
+ID_LIKE = re.compile(r"(?i)^(upnp:|ssdp_uuid$|dhcp_client_id$|ssdp:.*(household|id|serial|mac))|^mdns_txt:.*(id|serial|sn|mac|uuid|guid)$")
+
+
+def lan_id(kind, rec):
+    """True if a LAN announcement names one device: an ID-type field, or a value with a digit and 8 or more characters."""
+    if NOT_ID.search(kind):
+        return False
+    # without the value, a hex digit is the best sign of a number: ask for at least four
+    return bool(ID_LIKE.search(kind)) or (rec["len"] >= 8 and rec["shape"].count("h") >= 4)
+
+
+def clean(x):
+    return re.sub(r"[^\x20-\x7e]", "?", str(x)) if x is not None else ""
 
 
 def version(v):
@@ -72,6 +88,8 @@ def main():
             for line in open(jf):
                 r = json.loads(line)
                 if r["r"] == "ident":
+                    if not lan_id(r["kind"], r):
+                        continue
                     d = idx[r["dev"]]
                     d.setdefault(r["h"], r["kind"])
                     for t in r["tok"]:
@@ -81,6 +99,13 @@ def main():
         for r in recs:
             dev, kind = r["dev"], r["r"]
             if kind == "field":
+                if re.search(r"[^\x20-\x7e]", r["key"]):
+                    continue        # a key read out of a binary body
+                pre, _, name = r["key"].partition(":")
+                if pre in ("form", "q", "json", "xml", "cookie", "h") and (
+                        not re.fullmatch(r"[A-Za-z0-9_.:\-\[\]]{1,80}", name)
+                        or any(len(x) >= 20 and re.search(r"\d", x) for x in re.split(r"[.:\[\]]", name))):
+                    r["key"] = pre + ":<unparsed>"     # part of a value, not a name: never write it
                 cats = []
                 if r["mac"]:
                     cats.append("id-mac")
@@ -94,9 +119,13 @@ def main():
                     cats.append("id-key")
                 if not cats:
                     continue
-                where = f'{r["host"] or r["peer"]}:{r["port"]} {r["method"] or r["proto"]} {r["path"] or ""}'.strip()
+                host = r["host"] or r["peer"]
+                hp = host if ":" in host else f'{host}:{r["port"]}'
+                where = f'{hp} {r["method"] or r["proto"]} {r["path"] or ""}'.strip()
                 k = (ds, dev, where, r["key"])
-                e = ids.setdefault(k, {"cats": set(), "lan": set(), "shapes": collections.Counter(), "n": 0, "files": set(), "ev": None})
+                e = ids.setdefault(k, {"cats": set(), "lan": set(), "shapes": collections.Counter(), "n": 0, "files": set(),
+                                       "values": set(), "ev": None})
+                e["values"].add(r["h"])
                 e["cats"].update(cats)
                 e["lan"].update(lan)
                 e["shapes"][(r["shape"], r["len"])] += r["n"]
@@ -188,13 +217,13 @@ def main():
     with open(Path(out) / "findings.tsv", "w") as o:
         o.write("dataset\tproduct\tmac\tcat\tdetail\tcount\tfiles\tfirst_file\tfirst_frame\n")
         for (ds, dev, cat, detail), f in sorted(findings.items(), key=lambda x: (x[0][0], label(x[0][0], x[0][1]), x[0][2], x[0][3])):
-            o.write(f'{ds}\t{label(ds, dev)}\t{dev}\t{cat}\t{detail}\t{f["n"]}\t{len(f["files"])}\t{f["ev"]["file"]}\t{f["ev"]["frame"]}\n')
+            o.write(f'{ds}\t{label(ds, dev)}\t{dev}\t{cat}\t{clean(detail)}\t{f["n"]}\t{len(f["files"])}\t{f["ev"]["file"]}\t{f["ev"]["frame"]}\n')
     with open(Path(out) / "ids.tsv", "w") as o:
-        o.write("dataset\tproduct\tmac\twhere\tkey\tcats\tlan_ids\tshape\tlen\tcount\tfiles\tfirst_file\tfirst_frame\n")
+        o.write("dataset\tproduct\tmac\twhere\tkey\tcats\tlan_ids\tshape\tlen\tcount\tfiles\tvalues\tfirst_file\tfirst_frame\n")
         for (ds, dev, where, key), e in sorted(ids.items(), key=lambda x: (x[0][0], label(x[0][0], x[0][1]), x[0][2], x[0][3])):
             (sh, ln), _ = e["shapes"].most_common(1)[0]
-            o.write(f'{ds}\t{label(ds, dev)}\t{dev}\t{where}\t{key}\t{",".join(sorted(e["cats"]))}\t{",".join(sorted(e["lan"]))}\t'
-                    f'{sh}\t{ln}\t{e["n"]}\t{len(e["files"])}\t{e["ev"]["file"]}\t{e["ev"]["frame"]}\n')
+            o.write(f'{ds}\t{label(ds, dev)}\t{dev}\t{clean(where)}\t{clean(key)}\t{",".join(sorted(e["cats"]))}\t{",".join(sorted(e["lan"]))}\t'
+                    f'{clean(sh)}\t{ln}\t{e["n"]}\t{len(e["files"])}\t{len(e["values"])}\t{e["ev"]["file"]}\t{e["ev"]["frame"]}\n')
     with open(Path(out) / "tls.tsv", "w") as o:
         o.write("dataset\tproduct\tmac\tside\thandshakes\toffered_max\toffered_weak\toffered_fs\tchosen_version\tchosen_fs\ttop_suites\tcerts\texcluded_test\tfirst_file\tfirst_frame\n")
         for (ds, dev, side), t in sorted(tls_dev.items(), key=lambda x: (x[0][0], label(x[0][0], x[0][1]), x[0][2])):
