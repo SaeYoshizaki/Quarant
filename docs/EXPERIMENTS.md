@@ -1169,3 +1169,14 @@ python3 scripts/accuracy/compare_misses.py docs/assessment/evidence-map.json ~/d
 
 **論文での書き方**：判定の一部は LLM（Claude）が行い、利用者が LLM の判定と理由を見たうえで全件を確認した。基準の判定（36 件）は、伏せた形で独立に判定し、一致は 24/36（κ 0.19）だった。
 
+
+## E16：5 つのデータセットの自動の洗い出し（識別子と暗号化、2026-11-10）
+
+- **目的**：教授との面談（D41）を受けて、識別子の平文の送信と暗号化の弱さを、手元のデータセットすべてで自動で洗い出す。
+- **データ**：UNSW 2016（20 日、tar.gz のまま）、UNSW-IoTraffic（27 機器）、YourThings 2018（13 日、tgz のまま）、CIC IoT 2022（1-Power、2-Idle、3-Interactions、4-Scenarios、2021_11_02_Active。6-Attacks は除く）、Deakin 2023（34 日）。機器は claims/devices.tsv。
+- **道具**：`scripts/claims/sweep/`（main の 2c0faba 時点）。`run_all.sh` → `expose.py`（1 回の読み込みで、LAN の識別子、公開アドレスへの平文の値、TLS の握手、HTTP の取得を記録。値は鍵付きのハッシュ、形、長さだけ）→ `report.py`（製品ごとの表。YourThings の作成者の中間者の検査は発行者 `thing-catcher.gtisc.gatech.edu` で除く）→ `candidates.py` → `merge_prior.py`。確認は `verify.py`（tshark で根拠のフレームを開き直す）。
+- **手順**：外付けディスクから 3 プロセスで読む（多いと読み込みが詰まる）。tgz は gzip を別プロセスで展開する。所要は全体で約 1 時間半。
+- **結果**：74 製品・166 件の候補（識別子 31、HTTP 以外の MAC 9、認証情報らしい値 14、HTTP でのファームウェア 7、TLS 105）。識別子など 61 件は、除く 1、論文で一部 40、ブログ等のみ 9、見つからず 11。TLS 105 件は、除く 20、論文で一部 42、対応表にない 35、未確認 8。「見つからず」と「ブログ等のみ」の 20 件をパケットで確かめ、16 件を確認、1 件は弱い、3 件は外した。詳細は [claims/sweep-results.md](claims/sweep-results.md)。
+- **確かめ方**：Sonos の既知の結果（YourThings 2018-03-20 のフレーム 60977 と 4429）を自動で再現した。
+- **途中の誤り**：(1) 外付けディスクに 8 プロセスで読ませて詰まった。(2) tarfile に大きなバッファを渡して CPU を使い切った。(3) 暗号化された本文をフォームとして読み、値の一部がキー名に入った（表から除く処理を足し、ツールの出力に一度出たことを利用者に報告）。(4) 確認で、Deakin の Linux cooked の形式と、製品名の取り違え（Tapo と Samsung）。どれも結論の前に直した。
+- **限界**：値の一致は、機器が LAN で名乗った値と MAC とだけ。UNSW 2018 と IoT-23 は使っていない。「論文で一部」と TLS の候補はパケットで確かめていない。先行研究の分類は人がまだ確かめていない。
