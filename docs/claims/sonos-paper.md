@@ -26,6 +26,25 @@
 - URL の `householdid` が、文書の「unique alpha-numeric identification number」と同じものかは未確認。
 - 前回の調査（[coverage.tsv](coverage.tsv) の D1〜D6）で、ほかの文書（製品ページ、PLAY:1 のガイド、サポート記事、リリースノート、EULA）には、機器とクラウドの間の暗号化の記述がなかった。
 
+### 技術的な文書（2026-11-10 に追加で確認）
+
+上の文書はプライバシー文書で、更新の通信の仕様書ではない。そこで Sonos のほかの技術的な文書を探した。**更新の通信を暗号化するかどうかを書いた文書は、探した範囲にはなかった。** 一方で、2017 年のサポート記事は、TCP 80 を更新に使うと書いていた。
+
+| 時期 | 文書 | アーカイブの日時 | 更新について書いていること |
+|---|---|---|---|
+| 2018 | [Configuring your firewall to work with Sonos](https://web.archive.org/web/20170822231507/https://sonos.custhelp.com/app/answers/detail/a_id/692)（サポート記事 692、最終更新 2017-03-08） | 2017-08-22 23:15 | 「Below are the ports that Sonos uses」の表で、TCP 80 を「Internet Radio, updates and registration」、TCP 4444 を「Sonos update process」とする。HTTP か、暗号化するかは書いていない。記事の対象はコンピューターのファイアウォールの設定 |
+| 2018 | [Mac/PC 用のガイド](https://web.archive.org/web/20170712175520/http://www.sonos.com:80/documents/productguides/en/MacPCGuide_EN.pdf)（PDF） | 2017-07-12 | オンラインの更新があること。ファイアウォールは上の記事を見るよう書くだけ |
+| 2018 | [セットアップガイド](https://web.archive.org/web/20171013154032/http://www.sonos.com:80/documents/productguides/en/SetupGuide_EN.pdf)（PDF） | 2017-10-13 | オンラインの更新があることだけ |
+| 2021 | [Security のページ](https://web.archive.org/web/20211121060704/https://www.sonos.com/en-us/security) | 2021-11-21、[2021-12-23](https://web.archive.org/web/20211223081202/https://www.sonos.com/en-us/security) | 脆弱性の報告の窓口と、報告者への謝辞だけ |
+| 2021 | [Sonos One の製品ページ](https://web.archive.org/web/20211104032415/https://www.sonos.com/en-us/shop/one) | 2021-11-04 | 読めた範囲に記述なし。仕様の欄は保存された HTML になく、未確認 |
+| 2021 | ファイアウォールの記事（`support.sonos.com/s/article/688`）、リリースノート（同 3521） | 2021-06-16、2021-09-25、2021-10-25、2021-11-19 | アーカイブは JavaScript の枠だけで、本文がない。未確認 |
+| 参考（収録後） | [ファイアウォールの記事の新しい版](https://web.archive.org/web/20221206092811/https://support.sonos.com/en-us/article/configure-your-firewall-to-work-with-sonos) | 2022-12-06 | TCP 80 と 443 は「Music services, radio, and Sonos account」、TCP 4444 は「System updates」。80 の用途から updates がなくなった |
+
+- 2017 年の記事は用途を書いているだけで、ポート番号から平文とは言えない。ただし、Sonos が「80 番を更新に使う」と公開していたことは、食い違いを論じるときに必ず書く。
+- 記事 692 の記録は 2017-03-14 と 2017-08-22 だけで、その後 2018 年の収録までの版はない。
+- 2018 年分は、[PLAY:1 のガイド](https://web.archive.org/web/20161130152359/http://www.sonos.com:80/documents/productguides/en/Play1Guide_EN.pdf)（2016-11-30）、[更新の手順の記事](https://web.archive.org/web/20171206120020/https://www.sonos.com/en-us/support/troubleshooting/updating-sonos)（2017-12-06）、[リリースノート 8.4](https://web.archive.org/web/20180409200324/https://www.sonos.com/en-us/software/release/8-4)（2018-04-09）も前回読んだ。更新の手順と要件だけで、暗号化の記述はない。暗号化の技術的な記述は、[SonosNet の記事](https://web.archive.org/web/20160117044645/https://sonos.custhelp.com/app/answers/detail/a_id/126/~/information-about-sonosnet)（スピーカー同士の無線、AES）だけ。
+- 探していない：開発者向けの文書（developer.sonos.com、パートナー向けの API）。Sonos One の製品ガイドの PDF は、2019〜2022 年の旧パスに記録がない。
+
 ## 観測
 
 ### 識別子の中身（2018 年と 2021 年で同じ結果）
@@ -111,6 +130,7 @@
   - 2021 年の別の機種では、更新の確認は TLS に移っていた。一方で、ファームウェアの取得の URL には同じ識別子が平文で残っていた。
   - どちらも、復号も機器の操作もせず、パッシブな観測だけで確かめられる。
 - **言えないこと（未確認）**
+  - 更新の通信の仕様と違ったこと。比べたのはプライバシー文書の一般的な説明で、2017 年のサポート記事は TCP 80 を更新に使うと書いていた。
   - 識別子を第三者が見たときに何ができるか。試していない。
   - 今の製品の動き。2026 年の第三者の解析（frankensonos、S1 の版 57.23）は、目録のファームウェアの URL は今も `http://` だが、機器は Sonos のホスト名に HTTPS を使う、と書く。S2 の今の版は分からない。
   - 更新の確認が TLS に移った時期と、その理由。
