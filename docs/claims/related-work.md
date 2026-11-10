@@ -7,7 +7,7 @@
 **Subahi & Theodorakopoulos, "Ensuring Compliance of IoT Devices with Their Privacy Policy Agreement", IEEE FiCloud 2018, pp.100–107, doi:10.1109/FiCloud.2018.00022**（Crossref で書誌を確認）
 
 - IoT 機器の**プライバシーポリシー**と、自前のテストベッドで取った通信（機器とクラウド、アプリとクラウド）を比べた。
-- 対象は 11 社のポリシーと 2 機器（TP-Link のプラグ、Belkin NetCam）。2 機器とも、ポリシーと通信が食い違っていたとしている。（要確認：機器名と件数）
+- 対象は 11 社のポリシーと 2 機器（TP-Link HS110、Belkin NetCam）。NetCam は 3 つ（基準 1、3、8）、TP-Link は 1 つ（基準 8、サーバーの場所）で、ポリシーと食い違っていたとする（2026-11-10、[ORCA の受理版](https://web.archive.org/web/20220709115639/https://orca.cardiff.ac.uk/id/eprint/123089/1/Ensuring%20compliance%20of%20IoT%20devices%20with%20their%20Privacy%20Policy%20Agreement.pdf)の §IV-D と §V で確認）。TP-Link のアプリとプラグの LAN の通信は、アプリの暗号の関数で戻して平文で読めた（p.105）が、ポリシーは暗号化に触れていないとして、食い違いには数えていない。[known-reports.md](known-reports.md)
 - 博士論文（Cardiff University, 2020, https://orca.cardiff.ac.uk/140023/ ）で、GDPR から作った基準と、暗号化された通信から送ったデータの種類を推定する方法に広げている。
 - 本研究との違い：対象はプライバシーで、セキュリティの主張ではない。機器を操作しながら計測していて、公開データセットもアーカイブの文書も使っていない。
 
@@ -62,6 +62,5 @@ Ring Video Doorbell は [ring-prior-work.md](ring-prior-work.md)（Nick 2016、K
 
 ## 要確認
 
-- Subahi らの機器名（TP-Link のプラグ、Belkin NetCam）と、食い違いの件数。本研究の試しの機器と重なるので、本文で確かめる。
 - IoTPrivComp の会議名と年。
 - 各論文の規模の数字。
