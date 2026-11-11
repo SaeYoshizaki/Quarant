@@ -291,13 +291,13 @@ Deakin は Linux cooked の形式で、パケットに宛先の MAC がない。
 | 機種不明の Withings（`wbs04-ws.withings.net`） | `18-05-28.pcap` フレーム 3737208〜3737235 | 自己署名の証明書（`*.withings.net`）、`TLS_RSA_WITH_AES_128_CBC_SHA256` |
 
 - Chromecast の `shardbypass=yes` は認証情報ではない（外す）。
-- 文書との比べ合わせは、2018 年の文書が集まってから [compare-sweep.md](compare-sweep.md) に足す。
+- 文書との比べ合わせは [compare-sweep.md](compare-sweep.md)、先行研究は [sweep/prior-claims.tsv](sweep/prior-claims.tsv) の最後の 4 行。
 
 ## 限界
 
 - 値は記録していないので、値の一致は、機器が LAN で名乗った値と MAC とだけ比べている。
 - TCP は順序をそろえるが、欠けた区間は埋めない。HTTP の本文は 32 KB まで。
-- UNSW 2018 と IoT-23 は、保存先へのリンクが切れていて使っていない。
+- IoT-23 は使っていない。UNSW 2018 は 2026-11-11 に正常な日の 27 本を加えた（上）。
 - 先行研究の検索は製品ごとに 3〜5 回。読めなかった資料は prior-ids.tsv の notes に未確認と書いた。分類は人がまだ確かめていない。
 
 ## 次
