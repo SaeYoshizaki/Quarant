@@ -6,8 +6,9 @@ Usage: check_quotes.py <snapshots dir> <claims.tsv>...
 A snapshot file's first line is "SOURCE <archive url>"; rows are matched to
 files by that URL. Whitespace is normalised and typographic quotes and dashes
 are folded before comparing. "***" in a quote stands for a masked value (a
-credential written in the source) and matches any short text. Prints every row
-that does not match.
+credential written in the source) and matches any short text. "…" marks words
+left out of the quote and matches up to 600 characters. Prints every row that
+does not match.
 """
 import csv
 import re
@@ -23,9 +24,10 @@ def norm(s):
 
 def found(quote, bodies):
     q = norm(quote)
-    if "***" not in q:
+    if "***" not in q and "…" not in q:
         return any(q in b for b in bodies)
-    pattern = re.compile(r"[^ ]{0,40}".join(re.escape(part) for part in q.split("***")))
+    gap = lambda part: r"[^ ]{0,40}".join(re.escape(x) for x in part.strip().split("***"))
+    pattern = re.compile(r".{0,600}?".join(gap(part) for part in q.split("…")), re.S)
     return any(pattern.search(b) for b in bodies)
 
 
