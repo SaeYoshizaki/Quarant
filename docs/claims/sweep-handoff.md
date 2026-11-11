@@ -60,6 +60,8 @@
 4. **済み**：食い違いの候補の先行研究（[sweep/prior-claims.tsv](sweep/prior-claims.tsv)）。同じ食い違いの指摘は見つからなかった。Deakin のやり直しで出た TLS の 4 件（Echo Show 8、M80B、TOPERSUN、Perfk）は、まだ候補ごとに探していない。
 5. **済み**：文書にした（compare-sweep.md、sweep-results.md、E17）。
 
+6. **作業中（2026-11-11、利用者の依頼）**：データセットを広げる。UNSW 2018（SOSR 2019 のデータ、正常な 27 日、38.4 GB、MIT-0）を `~/datasets/raw/unsw-iot-2018/benign/` に落とし、洗い出しにかける（`run_all.sh unsw2018`）。2018 年の文書はエージェント U1〜U4 が `~/datasets/claims/collect/U1〜U4/` に集めている。ほかの候補：IoT-23 の正常な 3 本（メール不要）、CICIoT2023（フォームが要る）、南開大学の 77 機器（2024〜25、メールでの依頼が要る）、Mon(IoT)r と PingPong（約束への同意とメールが要る）。
+
 次にやること：判断待ち（下の 4）への返事を受けて、候補の判定と区分を直す。人が確かめる表 [review-sweep.md](review-sweep.md)（18 行）の「確認」の欄を利用者が埋める。Deakin のやり直しで出た TLS の 4 件の先行研究を探す。
 
 ## 4. 判断待ち（利用者が戻ったときにまとめて聞く）
