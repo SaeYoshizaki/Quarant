@@ -17,13 +17,13 @@
 ## 数
 
 - 候補：74 製品、166 件（[sweep/candidates.tsv](sweep/candidates.tsv)）。
-- 識別子など 61 件：除く 1、論文で一部 40、ブログ等のみ 9、見つからず 11。
-- TLS 105 件：除く 20、論文で一部 42、対応表の論文にない 35、未確認 8。
+- 識別子など 61 件：除く 0、論文で一部 41、ブログ等のみ 9、見つからず 11。
+- TLS 105 件：除く 7、論文で一部 55、対応表の論文にない 35、未確認 8。
 
-区分は教授の基準に合わせた。
+区分（2026-11-11 に基準を変えた。以前は IMC と PETS も「除く」にしていて、識別子 1 件と TLS 13 件がそれで除かれていた）。
 
-- **除く**：S&P、USENIX Security、CCS、NDSS、IMC、PETS で、同じ機器の同じ問題が示されている。
-- **論文で一部**：ほかの会議、集計だけ、同じメーカーの別の機種、または問題の別の面。
+- **除く**：IEEE S&P、USENIX Security、ACM CCS、NDSS の論文が、同じ機器（または同じ系列）の同じ問題を詳しく示している。除いたものには理由（論文、表か節、ページ）を書く。
+- **論文で一部**：IMC、PETS、ほかの会議の論文、集計だけ、同じメーカーの別の機種、または問題の別の面。
 - **ブログ等のみ**：ブログ、勧告、CVE、講演、GitHub。
 - **見つからず**：探した範囲で報告がない。**新しいという意味ではない。**
 
@@ -66,6 +66,7 @@
 | Bose SoundTouch 10 | 識別子（平文の HTTP） | yourthings | 37 | q:mac=named q:mac -> bose.vtuner.com:80; q:lat=named q:lat -> api2.iheart.com:80 | yourthings:eth1-20180320.2155.1521600900 フレーム 86524 | SoK: Security Evaluation of Home-Based IoT Deployments（2019） | 論文で一部 |
 | D-Link Water Sensor DCH-S161 | 識別子（平文の HTTP） | cic2022 | 32 | q:device_id=MAC -> mp-us-fwd.auto.mydlink.com:80 | cic2022:2-Idle__2021_11_24_Idle.pcap フレーム 470005 | Bradley & Barrera, 'Towards Characterizing IoT Software Update Practic（2022） | 論文で一部 |
 | Insteon Camera | 識別子（平文の HTTP） | unsw2016 | 8112 | q:mac=MAC -> connect.insteon.com:80; q:sn=MAC -> connect.insteon.com:80 | unsw2016:16-09-28.pcap フレーム 1005362 | Information Exposure From Consumer IoT Devices（2019） | 論文で一部 |
+| Insteon Hub Pro | 識別子（平文の HTTP） | yourthings | 197 | q:mac=named q:mac -> connect.insteon.com:80 | yourthings:eth1-20180411.1935.1523493300 フレーム 52663 | Information Exposure From Consumer IoT Devices（2019） | 論文で一部 |
 | Logitech Harmony Hub | 識別子（平文の HTTP） | yourthings | 5647 | q:uuid=named q:uuid -> pubsub.pubnub.com:80; q:uuid=named q:uuid -> ps-145.pubnub.com:80 | yourthings:eth1-20180320.0000.1521522000 フレーム 63191 | SoK: Security Evaluation of Home-Based IoT Deployments（2019） | 論文で一部 |
 | NVIDIA Shield TV | HTTP でのファームウェア取得 | yourthings | 3 | ota-downloads.nvidia.com/ota/data/posted-roms_romuploader/external/{id} (1191918991 B); ota-downloads.nvidia.com/ota/data/posted-roms_romuploader/external/{id} (1166754831 B) | yourthings:eth1-20180411.2015.1523495700 フレーム 148952 | Alrawi et al., 'SoK: Security Evaluation of Home-Based IoT Deployments（2019） | 論文で一部 |
 | Philips Hue Bridge | 認証情報らしい値（平文） | cic2022,iotraffic,yourthings | 19584 | q:auth -> 130.211.93.93:80; h:authorization:cbauth -> dcp.cpp.philips.com:80 | cic2022:1-Power__Home Automation__Philips Hue Bridge__POWER__philipshuePOWER_1.pcap フレーム 133 | Blocking Without Breaking（2021） | 論文で一部 |
@@ -93,9 +94,8 @@
 | Withings Smart Baby Monitor | 識別子（平文の HTTP） | iotraffic,unsw2016 | 1088 | form:auth=MAC -> babyws.withings.net:80 | iotraffic:pcaps__WithingsBabyMonitor_0024e41118a8.pcapng フレーム 543 | Network-Level Security and Privacy Control for Smart-Home IoT Devices（2015） | 論文で一部 |
 | Withings Smart Scale | 識別子（平文の HTTP） | iotraffic | 1 | form:mac_address=MAC -> wbs02-ws.withings.net:80 | iotraffic:pcaps__WithingsSmartScale_0024e41b6f96.pcap フレーム 28301 | Network-Level Security and Privacy Control for Smart-Home IoT Devices（2015） | 論文で一部 |
 | unknown webcam | MAC（HTTP 以外） | yourthings | 28 | aabbccddeeff in udp/8765 payload | yourthings:eth1-20180320.0250.1521532200 フレーム 544406 | Alrawi, Lever, Antonakakis, Monrose, 'SoK: Security Evaluation of Home（2019） | 論文で一部 |
-| Insteon Hub Pro | 識別子（平文の HTTP） | yourthings | 197 | q:mac=named q:mac -> connect.insteon.com:80 | yourthings:eth1-20180411.1935.1523493300 フレーム 52663 | Information Exposure From Consumer IoT Devices（2019） | 除く（トップ会議） |
 
-- **Insteon Hub Pro（除く）**：Ren ほか（IMC 2019、§6.2）が、Insteon のハブが MAC を平文で送ると報告している。Hub と Hub Pro が同じ型かは未確認。
+- **Insteon Hub Pro（論文で一部）**：Ren ほか（IMC 2019、§6.2、PDF p.10）が、Insteon のハブが MAC を平文で送ると報告している。IMC なので「論文で一部」にした（2026-11-11）。Alrawi ほか（IEEE S&P 2019、Table VII p.18）は Insteon Hub と クラウドの間を暗号化なしとするが、MAC は示していない。Hub と Hub Pro が同じ型かは未確認。
 - **同じ研究室の評価と合わないもの**：Loi ほか（2017、UNSW）は、Pix-Star、Withings の睡眠センサー、Samsung SmartCam を「平文なし」と評価している。こちらはどれも平文の送信を観測した。同じ個体かは未確認。
 - **項目名だけで拾ったもの**（Bose の `q:mac`、Amazon Echo の `q:serial` など）は、値が本当にその識別子かを確かめていない。
 
@@ -148,12 +148,23 @@
 
 | 種類 | 除く | 論文で一部 | 対応表にない | 未確認 |
 |---|---|---|---|---|
-| 1.0/1.1 を選んだ、または 1.1 までしか提示しない | 3 | 13 | 8 | 3 |
-| RC4、DES、export、NULL、匿名の暗号（3DES だけは数えない） | 9 | 15 | 9 | 3 |
-| 前方秘匿性のある握手がない | 1 | 8 | 12 | 1 |
+| 1.0/1.1 を選んだ、または 1.1 までしか提示しない | 0 | 16 | 8 | 3 |
+| RC4、DES、export、NULL、匿名の暗号（3DES だけは数えない） | 0 | 24 | 9 | 3 |
+| 前方秘匿性のある握手がない | 0 | 9 | 12 | 1 |
 | サーバー証明書（RSA 2048 ビット未満、SHA-1/MD5、自己署名、期限切れ） | 7 | 6 | 6 | 1 |
 
-- **除く**：Amazon Echo Spot、Fire TV、Harman Kardon Invoke、LG webOS TV、Hue、Ring、Samsung Smart TV、SmartThings Hub、Roku TV（IoTLS、IMC 2021）。証明書は August、LIFX、Nest Cam、Nest Cam IQ、Roku 4、Roku TV、SmartThings Hub（Alrawi ほか、S&P 2019、Table V の自己署名）。ただし証明書の 7 件は、論文が自己署名、こちらは SHA-1 や RSA 1024 で、性質が違う。
+- **論文で一部に移したもの（2026-11-11）**：Amazon Echo Spot（2 件）、Fire TV（2 件）、Harman Kardon Invoke、LG webOS TV、Hue（2 件）、Ring（2 件）、Samsung Smart TV、SmartThings Hub、Roku TV の 13 件。根拠は IoTLS（Paracha ほか、IMC 2021、Table 6 p.169、Fig. 2・3 p.171、§5.1 p.172）と Bradley ほか（FPS 2022、Fig. 3 p.8）だけで、どちらも 4 会議ではない。
+- **除く（7 件）**：下の表。どれも YourThings と同じ試験環境の同じ機器を、Alrawi ほかが扱っている。ただし、論文の印は自己署名と「vuln SSL」（Nessus で端点を調べた結果）で、こちらの観測は SHA-1 や RSA 1024 の証明書。「vuln SSL」に SHA-1 が含まれるかは論文に書かれておらず未確認。性質が違えば「論文で一部」に移す（判断待ち）。
+
+| 製品 | こちらの観測（サーバー証明書） | 理由 |
+|---|---|---|
+| August Doorbell Cam | SHA-1（発行者 August Home Inc）241 回 | Alrawi ほか, SoK: Security Evaluation of Home-Based IoT Deployments, IEEE S&P 2019, Table V p.17（August Doorbell：self-signed ✓、vuln SSL ✓） |
+| LIFX Color 1000 | SHA-1（LIFX Labs）25 回 | 同 Table V p.17（LIFX Virtual Bulb：self-signed ✓、vuln SSL ✓） |
+| Nest Cam | SHA-1（Dropcam）117 回 | 同 Table V p.17（Nest Camera：self-signed ✓、vuln SSL ✓） |
+| Nest Cam IQ | SHA-1（Dropcam）336 回 | 同 Table V p.17（Nest Cam IQ：self-signed ✓） |
+| Roku 4 | SHA-1（Roku, Inc.）84 回 | 同 Table V p.17（Roku 4：self-signed ✓、vuln SSL ✓） |
+| Roku TV（TCL） | SHA-1（Roku, Inc.）58 回 | 同 Table V p.17（Roku TV：self-signed ✓、vuln SSL ✓） |
+| SmartThings Hub | RSA 1024・SHA-1（SmartThings、Physical Graph）3,443 回 | 同 Table V p.17（Samsung SmartThings：self-signed ✓、vuln SSL ✓）。IoTLS Table 7 p.172 も |
 - **対応表の論文にない製品**：Arlo Q、Atomi、Awair、BlipCare、D-Link DCH-S161、Dropcam、Globe、Gosund、HP ENVY、HeimVision の電球、Invoxia Triby、Netatmo Welcome、Pix-Star、Samsung のカメラ 2 機種、TP-Link NC220、Teckin、Withings Smart Scale、Yutron、iHome。
 - **論文と合わないもの**：Samsung Smart TV は 13 回の握手で 3DES が選ばれていた（IoTLS は、安全でない暗号が選ばれたのは Wink Hub 2 と LG TV だけとする。p.172）。Harman Kardon Invoke は 2018-03 に TLS 1.0 が選ばれていた（IoTLS は 1.2 未満に対応しないとする）。
 
@@ -166,6 +177,6 @@
 
 ## 次
 
-- 分類を人が確かめる。特に「除く」と「論文で一部」の境目（Insteon、Roku、証明書）。
+- 分類を人が確かめる。特に「除く」と「論文で一部」の境目（証明書の 7 件、Insteon、Roku）。
 - 「論文で一部」の候補（40 件）をパケットで確かめる。**途中（2026-11-10）**：1 回目で Withings の 4 製品（`auth` や `mac_address` が MAC）、D-Link DCH-S161、Belkin NetCam、Sonos 2 機種のファームウェアの取得を確認した。根拠のファイルの選び方を直した `verify_all.py` で、全件をやり直す。YourThings の 04-11 と 04-12 のファイルを先に取り出す（tgz の中のパスは `11/…`、`12/…` で、ほかの日の `2018/03/20/…` と違う）。
 - SimCam の「機器の中で処理する」という説明の時期と範囲を、当時の文書で確かめる（食い違いの候補）。
