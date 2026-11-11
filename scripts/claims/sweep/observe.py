@@ -5,6 +5,7 @@ usage: observe.py <report dir> <dataset> <product>...
 
 <report dir> holds the report.py output (findings.tsv, ids.tsv, tls.tsv, dl.tsv, flows.tsv).
 <product> is the catalog name ("vendor product", as in claims.tsv catalog_product); several may be given.
+The report tables add the model to the name ("D-Link Water Sensor DCH-S161"), so a name matches as a prefix.
 Prints, per device of the product: payload bytes to public addresses by kind, the findings with their
 first evidence, the plaintext identifier fields, the TLS summary and the plaintext downloads.
 """
@@ -20,7 +21,8 @@ def rows(p):
 def main():
     rep, ds, *products = sys.argv[1:]
     want = {p.lower() for p in products}
-    pick = lambda name: [r for r in rows(Path(rep) / name) if r["dataset"] == ds and r["product"].lower() in want]
+    match = lambda p: any(p.lower() == w or p.lower().startswith(w + " ") for w in want)
+    pick = lambda name: [r for r in rows(Path(rep) / name) if r["dataset"] == ds and match(r["product"])]
     for r in pick("flows.tsv"):
         kinds = {k: int(v) for k, v in r.items() if k not in ("dataset", "product", "mac") and v and v != "0"}
         total = sum(kinds.values())
