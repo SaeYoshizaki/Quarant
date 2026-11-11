@@ -54,13 +54,13 @@
 ## 3. 作業の順番と進み具合（2026-11-11 の終わり）
 
 0. **済み**：先行研究の区分を新しい基準で直した（D42）。
-1. **ほぼ済み**：UNSW 2016、UNSW-IoTraffic、CIC IoT 2022、Deakin 2023 の 64 製品の公式文書を集めた（[claims.tsv](claims.tsv) 1,841 行）。残り：UNSW の Nest Protect、Hello Barbie、SmartThings Hub と、YourThings と重なる製品の 2016〜17 年の版（エージェント G10 が作業中。終わったら `merge_collect.py` で入れて判定する）。YourThings と重なる Ring、Belkin NetCam、Hue、WeMo の 2016〜17 年の版は未着手。
+1. **済み**：UNSW 2016、UNSW-IoTraffic、CIC IoT 2022、Deakin 2023 の製品（68 の製品とデータの組）の公式文書を集めた（[claims.tsv](claims.tsv) 2,112 行）。YourThings と重なる製品は 2016〜17 年の版を集め直した。
 2. **済み**：主張ごとに判定した（[compare-sweep.md](compare-sweep.md)）。
 3. **済み**：「論文で一部」の 41 件、TLS の 109 件、取りこぼしていたダウンロード 11 件をパケットで確かめた（[sweep-results.md](sweep-results.md)）。
 4. **済み**：食い違いの候補の先行研究（[sweep/prior-claims.tsv](sweep/prior-claims.tsv)）。同じ食い違いの指摘は見つからなかった。Deakin のやり直しで出た TLS の 4 件（Echo Show 8、M80B、TOPERSUN、Perfk）は、まだ候補ごとに探していない。
 5. **済み**：文書にした（compare-sweep.md、sweep-results.md、E17）。
 
-次にやること：G10 の結果を入れる。判断待ち（下の 4）への返事を受けて、候補の判定と区分を直す。人が確かめる用の表（候補ごとに引用、観測、根拠のフレーム）を作る。
+次にやること：判断待ち（下の 4）への返事を受けて、候補の判定と区分を直す。人が確かめる表 [review-sweep.md](review-sweep.md)（18 行）の「確認」の欄を利用者が埋める。Deakin のやり直しで出た TLS の 4 件の先行研究を探す。
 
 ## 4. 判断待ち（利用者が戻ったときにまとめて聞く）
 
