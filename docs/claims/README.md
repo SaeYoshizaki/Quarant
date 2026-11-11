@@ -19,8 +19,9 @@
 | [sonos-paper.md](sonos-paper.md) | Sonos の論文に向けた整理：収録の前後の文書の版、2018 年と 2021 年（CIC）の観測、先行研究の表 |
 | [deep-checks.md](deep-checks.md) | 深掘り 2〜4（Withings Home、Wink Hub 2、TP-Link）の短い確認と判定の案 |
 | [known-reports.md](known-reports.md) | 食い違いの候補ごとに、同じ観測を先に報告していた論文・発表・ブログと、説明との食い違いとして指摘していたか |
+| [compare-sweep.md](compare-sweep.md) | 公式文書と通信の食い違い：UNSW 2016、UNSW-IoTraffic、CIC IoT 2022、Deakin 2023 の文書を集めて比べた結果（候補、文書に主張がない重い問題、見えないもの） |
 | [sweep-results.md](sweep-results.md) | 5 つのデータセットの自動の洗い出し（識別子、認証情報、ファームウェア、TLS）と、先行研究での振り分け。表は [sweep/](sweep/) |
-| [sweep-handoff.md](sweep-handoff.md) | 洗い出しの引き継ぎ：残りの作業（論文で一部の 40 件の確認、SimCam の説明）、手順、守ること、はまりどころ |
+| [sweep-handoff.md](sweep-handoff.md) | 洗い出しの引き継ぎ：目的、手順、守ること、判断待ち、はまりどころ |
 | [review-yourthings.md](review-yourthings.md) | 人が確かめる 23 件（食い違いの候補、文言の上で食い違い、確かめが要る一致）の確認用の表。各項目の「確認」に結果を書く |
 | [results-yourthings.md](results-yourthings.md) | 結果：YourThings 2018 の 44 製品。暗号化の主張に絞った結果が中心 |
 | [encryption-yourthings.md](encryption-yourthings.md) | 暗号化の主張と観測の表、44 製品の観測した暗号化、すべてのフロー、中間者の検査への反応（スクリプトで作る） |
