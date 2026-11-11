@@ -89,6 +89,9 @@
   - Triby の候補：airable（Invoxia の取引先として airable のサイトに載っている）が「unaffiliated」に当たるか。
   - Ring Alarm のポートの記事（「HTTP は Base Station には当てはまらない」）と接続確認の GET を、文言の上での食い違いとして数えるか。
 - メーカーへの連絡（SimCam、Samsung など）。
+- UNSW 2018 で出たもの（2026-11-11）。
+  - SmartCam 2018：映像の宛先は UNSW の別のアドレス（129.94.5.83）で、クラウドではない。仕様の「Security SSL (AES 256bit)」がこの経路まで含むか。比べた仕様は SNH-C6417BN と SNH-V6414BN のもので、UNSW の機器（MAC 00:16:6c:ab:6b:88）の機種は分からない。今は候補。
+  - データセットのメールでの依頼（南開大学、Mon(IoT)r、PingPong）と、CICIoT2023 のフォームへの入力。利用者が決める。
 
 （作業中に判断が要るものが出たら、ここに書き足す。）
 
