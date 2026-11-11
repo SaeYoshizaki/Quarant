@@ -1115,7 +1115,7 @@
    "model": "",
    "model_basis": "",
    "category": "voice-assistant",
-   "note": "",
+   "note": "the IoT-23 README says Amazon Echo Dot (generation unknown)",
    "runs_seen": 1,
    "first_seen": "2018-09-21",
    "last_seen": "2018-09-21"
@@ -1123,16 +1123,16 @@
   {
    "dataset": "iot23",
    "label": "CTU-Honeypot-Capture-7-1 (Somfy door lock)",
-   "mac": "",
+   "mac": "5c:cf:7f:1e:76:54",
    "vendor": "Somfy",
    "product": "Door Lock",
    "model": "",
    "model_basis": "",
    "category": "lock",
-   "note": "not analysed by Quarant yet; MAC not taken",
-   "runs_seen": 0,
-   "first_seen": "",
-   "last_seen": ""
+   "note": "MAC of 192.168.1.158 (Espressif OUI); the first capture is named first_start_somfy_gateway, so this may be the lock's gateway; model unknown",
+   "runs_seen": 6,
+   "first_seen": "2019-07-03",
+   "last_seen": "2019-07-08"
   },
   {
    "dataset": "yourthings",
@@ -4308,7 +4308,13 @@
    "product": "Door Lock",
    "category": "lock",
    "models": [],
-   "datasets": {}
+   "datasets": {
+    "iot23": {
+     "first_seen": "2019-07-03",
+     "last_seen": "2019-07-08",
+     "units": 1
+    }
+   }
   },
   {
    "vendor": "Sonos",

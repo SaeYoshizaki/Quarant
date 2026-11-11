@@ -80,7 +80,8 @@ def main():
         f["files"].add(rec["file"])
         f["ev"] = first(f["ev"], rec)
 
-    for dsdir in sorted(p for p in Path(sweep).iterdir() if p.is_dir()):
+    # only datasets listed in devices.tsv (old runs such as deakin-v1 sit in the same folder)
+    for dsdir in sorted(p for p in Path(sweep).iterdir() if p.is_dir() and any(ds == p.name for ds, _ in labels)):
         ds = dsdir.name
         idx = collections.defaultdict(dict)   # dev -> hash -> kind
         recs = []

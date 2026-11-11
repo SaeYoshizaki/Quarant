@@ -78,8 +78,8 @@ unsw2018	(no list; MAC of TP-Link camera)	f4:f2:6d:93:51:f1	TP-Link	Day/Night Cl
 unsw2018	(no list; Google OUI)	f4:f5:d8:8f:0a:3c	Google	Chromecast Ultra		dhcp hostname Chromecast-Ultra	tv-streaming	not in any list; identified by self-description only
 unsw2018	(no list; Google OUI)	f4:f5:d8:d4:eb:12	Google	Google Home		dhcp hostname Google-Home	voice-assistant	not in any list; identified by self-description only
 iot23	CTU-Honeypot-Capture-4-1 (Philips Hue)	00:17:88:75:b3:82	Philips	Hue Bridge			hub	
-iot23	CTU-Honeypot-Capture-5-1 (Amazon Echo)	4c:ef:c0:27:56:1e	Amazon	Echo			voice-assistant	
-iot23	CTU-Honeypot-Capture-7-1 (Somfy door lock)		Somfy	Door Lock			lock	not analysed by Quarant yet; MAC not taken
+iot23	CTU-Honeypot-Capture-5-1 (Amazon Echo)	4c:ef:c0:27:56:1e	Amazon	Echo			voice-assistant	the IoT-23 README says Amazon Echo Dot (generation unknown)
+iot23	CTU-Honeypot-Capture-7-1 (Somfy door lock)	5c:cf:7f:1e:76:54	Somfy	Door Lock			lock	MAC of 192.168.1.158 (Espressif OUI); the first capture is named first_start_somfy_gateway, so this may be the lock's gateway; model unknown
 yourthings	SamsungSmartThingsHub	d0:52:a8:63:47:9e	Samsung	SmartThings Hub			hub	
 yourthings	PhilipsHUEHub	00:17:88:21:f7:e4	Philips	Hue Bridge			hub	
 yourthings	InsteonHub	54:4a:16:f9:54:18	Insteon	Hub Pro	Hub Pro	dhcp hostname HubPro	hub	

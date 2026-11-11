@@ -16,9 +16,9 @@
 
 ## 数
 
-- 候補：79 製品、181 件（[sweep/candidates.tsv](sweep/candidates.tsv)）。2026-11-11 に、取りこぼしていたダウンロードの 11 件と、Deakin のやり直しで出た TLS の 4 件を足した。
+- 候補：85 製品、194 件（[sweep/candidates.tsv](sweep/candidates.tsv)）。2026-11-11 に、取りこぼしていたダウンロードの 11 件、Deakin のやり直しで出た TLS の 4 件、UNSW 2018 の 12 件、IoT-23 の 1 件を足した。
 - 識別子など 61 件：除く 0、論文で一部 42、ブログ等のみ 9、見つからず 10。
-- TLS 109 件：除く 7、論文で一部 57、対応表の論文にない 37、未確認 8。
+- TLS 110 件：除く 7、論文で一部 59、ブログ等のみ 2、対応表の論文にない 34、未確認 8（2026-11-11 に Deakin の 4 件を候補ごとに探し、IoT-23 の Somfy を足した）。
 - 2026-11-11 の追加：Wannigama ほか（IEEE WoWMoM 2024、arXiv:2404.07408 の Table I p.2、§II）が UNSW のデータで Awair と Samsung SmartCam の TLS、Triby の Basic 認証を扱っていたので、この 3 件を「論文で一部」に移した。
 - 公式文書との食い違いの候補と、取りこぼしていたダウンロードの先行研究は [sweep/prior-claims.tsv](sweep/prior-claims.tsv)。
 
@@ -262,6 +262,11 @@
 Deakin は Linux cooked の形式で、パケットに宛先の MAC がない。`expose.py` はこれまで、サーバーから機器への通信をすべて捨てていた（ServerHello、証明書、HTTP の応答、ダウンロードが見えていなかった）。機器が送ったパケットから機器の IP アドレスを覚え、その宛先の通信を機器に結びつけるように直し、Deakin の 34 日分をやり直した。2023-07-26 の 1 日分では、選ばれた暗号が分かる握手が 1 から 327 に増えた。
 
 - 新しい候補（`verify.py tls` で確かめた）：Echo Show 8（`2023-08-15.pcap` フレーム 1135020、`api.amazonvideo.com` のサーバーが TLS 1.0 の `TLS_RSA_WITH_AES_256_CBC_SHA` を選んだ。YourThings の Samsung Smart TV、CIC の Echo Spot と同じ形）、Samsung Smart Monitor M80B（`2023-07-26.pcap` フレーム 1322042、`*.samsungcloudsolution.net` の証明書が SHA-1、発行者 Samsung Hubsite CA）、TOPERSUN と Perfk（どちらも Tuya の OUI、ポート 8886 で `TLS_PSK_WITH_AES_128_CBC_SHA256` だけ）。
+- この 4 件の先行研究（[sweep/prior-tls.tsv](sweep/prior-tls.tsv)）：
+  - Echo Show 8：論文で一部。Moghaddam ほか（ACM CCS 2019、付録 D p.16）が、Roku と Fire TV の Amazon Prime Video が amazonvideo.com に TLS 1.0 でつなぐと書く。機器が違い、付録の集計で、ClientHello の指紋の話なので「除く」にはしない。
+  - M80B：論文で一部。OS3 の学生報告（2013、Fig. 9 p.16）に、Samsung TV の `www.samsungotn.net` の証明書の発行者が Samsung Hubsite CA とある（署名の方式は書いていない）。SHA-1 と `*.samsungcloudsolution.net` の報告は見つからなかった。
+  - TOPERSUN、Perfk：ブログ等のみ。heise（2019-11-18）と tuya-convert が、Tuya のクラウドとの PSK-AES128-CBC-SHA256 と、PSK を握手の値から計算できた古い方式を書く。前方秘匿性がないことを文章で書いた資料は見つからなかった。Jia ほか（S&P 2020、Table I p.474）は ClientId とセッションの問題で、TLS-PSK は扱っていない。
+  - パケットでの確認（`2023-07-26.pcap` の最初の 300,000 フレーム）：ポート 8886 の ClientKeyExchange 21 回（TOPERSUN 19、Perfk の 2 台が 1 回ずつ。例 フレーム 4398）の PSK ID は、どれも 49 バイトで先頭が 0x02。サーバーの hint は `1dHRsc2NjbHltbGx3eWh5` と `0000000000000000`（tuya-cloudcutter の既定の値と同じ）。tuya-convert の issue #483 によると 0x02 は機器ごとの鍵を使う新しい方式で、古い方式の弱さは当てはまらない（こちらの読み）。ポート 8886 の中身が MQTT かは確かめていない。
 - Withings Body+ と BPM Connect は TLS 1.3（`TLS_CHACHA20_POLY1305_SHA256`）が選ばれていた。主張の判定（[compare-sweep.md](compare-sweep.md)）を直した。
 - ほかの 4 つのデータセットは Ethernet の形式で、影響はない。
 
@@ -293,11 +298,32 @@ Deakin は Linux cooked の形式で、パケットに宛先の MAC がない。
 - Chromecast の `shardbypass=yes` は認証情報ではない（外す）。
 - 文書との比べ合わせは [compare-sweep.md](compare-sweep.md)、先行研究は [sweep/prior-claims.tsv](sweep/prior-claims.tsv) の最後の 4 行。
 
+## IoT-23 の正常な 3 シナリオを足した（2026-11-11）
+
+IoT-23（Stratosphere Lab、プラハ工科大学。Garcia ほか 2020、Zenodo doi:10.5281/zenodo.4743746、CC BY 4.0）の正常なシナリオ 3 つを `mcfp.felk.cvut.cz` から落とした（約 510 MB、`~/datasets/raw/iot-23-benign/`）。1 シナリオに 1 台。
+
+| シナリオ | 機器（README） | 期間 | MAC |
+|---|---|---|---|
+| CTU-Honeypot-Capture-4-1 | Philips Hue Bridge | 2018-10-25〜26（1 本、21,664 パケット） | 00:17:88:75:b3:82 |
+| CTU-Honeypot-Capture-5-1 | Amazon Echo Dot（世代は不明） | 2018-09-21（約 5.5 時間、398,313 パケット。ファイルの最後が切れている） | 4c:ef:c0:27:56:1e |
+| CTU-Honeypot-Capture-7-1 | Somfy のドアロック（機種は不明） | 2019-07-03〜08（6 本。Somfy-03 の最後が切れている） | 5c:cf:7f:1e:76:54（Espressif の OUI。最初のファイル名は `first_start_somfy_gateway`） |
+
+候補は 194 件・85 製品になった。新しいのは Somfy の 1 件で、Echo と Hue は既存の候補に IoT-23 が加わった。
+
+| 機器 | 根拠 | 中身 |
+|---|---|---|
+| Hue Bridge | `2018-10-25-14-06-32-192.168.1.132.pcap` フレーム 869〜20655、19618〜19654、3835〜20992 | 公開のアドレスへの通信の 71.5%（205,735 バイト中 147,181）が平文の HTTP。`dcp.dc1.philips.com:80`（43 回）と `www.ecdinterface.philips.com:80`（5 回）への POST の `Authorization: CBAuth` に、MAC から作った `Client="001788fffe75b382"` と SSO トークン。`diagnostics.meethue.com:80/bridges/ws/stats` の問い合わせ文字列に `sso` と `auth`（8 回）。YourThings、CIC、UNSW の Hue と同じ形。値は quarant-results |
+| Echo Dot | `2018-09-21-capture.pcap` フレーム 215、1405、1493 ほか | 99.9% が TLS。86 回の握手すべてで TLS 1.2（ECDHE）が選ばれた。機器は RC4（75 回）、3DES（9 回）、DES・export・MD5（8 回）も提示した。平文 0.1% は `prod.amazoncrl.com` の失効リストの取得。UNSW 2018 の Echo（第 1 世代）とは機種が違う |
+| Somfy | `Somfy-01/…first_start_somfy_gateway.pcap` フレーム 440〜447 ほか、握手 4 回 | 機器が提示したのは RSA 鍵交換の暗号だけ（`TLS_RSA_*` と `TLS_RSA_PSK_*` の 8 種類。SNI なし）。サーバーは 4 回とも `TLS_RSA_WITH_AES_128_CBC_SHA256` を選んだ（前方秘匿性なし）。証明書は `*.opendoors.net`（GoDaddy）。通信の大半は、1 日続く 1 本の TLS 接続（18.195.134.106:443） |
+
+- Hue の `/bridges/fullconfig` への POST（フレーム 12413）の本文は 16 進の文字列で、中身は読めない。
+- 文書との比べ合わせは [compare-sweep.md](compare-sweep.md)。Hue と Echo は UNSW 2018 で集めた 2018 年の文書を使った（収録はチェコで、地域の版は未確認）。
+
 ## 限界
 
 - 値は記録していないので、値の一致は、機器が LAN で名乗った値と MAC とだけ比べている。
 - TCP は順序をそろえるが、欠けた区間は埋めない。HTTP の本文は 32 KB まで。
-- IoT-23 は使っていない。UNSW 2018 は 2026-11-11 に正常な日の 27 本を加えた（上）。
+- UNSW 2018 の正常な日の 27 本と、IoT-23 の正常な 3 シナリオは、2026-11-11 に加えた（上）。IoT-23 の README には「Stratosphere Lab の許可が要る」とあるが、Zenodo の記録は CC BY 4.0。
 - 先行研究の検索は製品ごとに 3〜5 回。読めなかった資料は prior-ids.tsv の notes に未確認と書いた。分類は人がまだ確かめていない。
 
 ## 次
