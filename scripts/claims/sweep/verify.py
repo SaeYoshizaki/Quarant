@@ -243,6 +243,7 @@ def cmd_dl(cap, mac, frame):
     for h, uri, dst in req[:1]:
         path = "/".join("{id}" if len(s) >= 6 and re.search(r"\d", s) else s for s in urllib.parse.urlsplit(uri).path.split("/"))
         print(f"stream {st}: request to {h}{path}; peer {dst}, DNS names {names_for(cap, dst) or 'none'}")
+        print(f"  request URI: {uri[:300]}")
     for fr, code, ln, ctype, lines, data in resp[:2]:
         disp = re.search(r"filename=\"?[^\";]*?(\.[A-Za-z0-9]{1,8})\"?", lines)
         body = unhex(data.split("\x1f")[0]) if data else b""
