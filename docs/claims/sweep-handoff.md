@@ -53,7 +53,7 @@
 
 ## 3. 作業の順番
 
-0. **先行研究の区分を新しい基準で直す。** これまで IMC と PETS も「除く」にしていた。直すもの：Insteon Hub Pro（Ren ほか、IMC 2019）、TLS の 20 件のうち IoTLS（Paracha ほか、IMC 2021）を理由にしたもの。Alrawi ほか（IEEE S&P 2019）を理由にしたものは「除く」のままで、理由を明記する。[sweep/prior-ids.tsv](sweep/prior-ids.tsv)、[sweep/prior-tls.tsv](sweep/prior-tls.tsv)、[sweep-results.md](sweep-results.md) の数と表を直す。
+0. **（2026-11-11 済み、PR #30、D42）先行研究の区分を新しい基準で直す。** これまで IMC と PETS も「除く」にしていた。直すもの：Insteon Hub Pro（Ren ほか、IMC 2019）、TLS の 20 件のうち IoTLS（Paracha ほか、IMC 2021）を理由にしたもの。Alrawi ほか（IEEE S&P 2019）を理由にしたものは「除く」のままで、理由を明記する。[sweep/prior-ids.tsv](sweep/prior-ids.tsv)、[sweep/prior-tls.tsv](sweep/prior-tls.tsv)、[sweep-results.md](sweep-results.md) の数と表を直す。
 1. **主張を集める。** YourThings の 44 製品は [claims.tsv](claims.tsv) にある（687 件）。UNSW 2016、UNSW-IoTraffic、CIC IoT 2022、Deakin 2023 の製品（[devices.tsv](devices.tsv)）は、収録の時期の公式文書を集める。候補のある製品（[sweep/candidates.tsv](sweep/candidates.tsv)）を先にする。
 2. **主張と通信を比べる。** 主張の種類ごとに、洗い出しの記録（`~/datasets/claims/sweep/`）から当てはまる観測を引いて判定する。足りない見方があれば `expose.py` か `verify.py` に足す。
 3. **食い違いの候補をパケットで確かめる。** `verify.py`、`verify_all.py`。前の会話の途中の作業（「論文で一部」の 40 件の確認）はここに含める。分かっていること：Withings の 4 製品（`auth` や `mac_address` が MAC）、D-Link DCH-S161（`/fw-upgrade` の `device_id` が MAC）、Belkin NetCam（ログのパスが UPnP の MAC）、Sonos 2 機種（ファームウェアを HTTP で取得）は確認済み。Bose の `mac`（32 文字）、Amazon Echo の `sid`（4 文字）、Samsung TV の 4 KB のファイルは、識別子や認証情報とは言えない。Harmony、Hue、Ring、Sonos の識別子、TP-Link NC220、Insteon Camera、Belkin WeMo の 4 製品、Roku の 2 製品はやり直しが要る。
@@ -67,10 +67,13 @@
 - アプリストアの説明を公式文書に含めるか。[method.md](method.md) では見ないことにしているが、製造者が書いた文書でもある。決まるまでは、集めて別に記録する。
 - 分類（先行研究の区分）の、人による確認。
 - メーカーへの連絡。実機を使う能動的な検証。
+- Alrawi ほか（S&P 2019、Table V p.17）を理由に除いた証明書の 7 件。論文の印は自己署名と「vuln SSL」、こちらの観測は SHA-1 や RSA 1024 の証明書で、性質が違うかもしれない。「論文で一部」に移すか（2026-11-11、[sweep-results.md](sweep-results.md) の TLS の節）。
 
 （作業中に判断が要るものが出たら、ここに書き足す。）
 
 ## 5. 環境とはまりどころ
+
+- 道具（2026-11-11 に追加）：`verify.py` は値をそのまま出す（出力に認証情報が入るので、公開のリポジトリに置かない）。`verify.py tls` と `verify_tls_all.py` で TLS の候補をパケットで確かめる。文書集めのエージェントへの共通の指示は `~/datasets/claims/collect/BRIEF.md`、結果は `~/datasets/claims/collect/G1〜G5/`。洗い出しの製品ごとの表（report.py の出力）は `~/datasets/claims/sweep/report/`、パケットの確認の出力は `~/datasets/claims/sweep/verify/`。
 
 - 外付けディスク QuarantData（`~/datasets` はここへのリンク）。つながっていないときは、ディスクの要らない作業（文書集め、先行研究）を進め、判断待ちに「ディスクをつなぐ」と書く。
 - 外付けディスクから同時に読むのは 3 本まで。多いと詰まる。
