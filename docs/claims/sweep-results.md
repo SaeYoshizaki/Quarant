@@ -12,7 +12,7 @@
   - HTTP でのファームウェアの取得。
   - TLS の版、暗号、前方秘匿性、サーバー証明書。YourThings の作成者の中間者の検査（発行者 `thing-catcher.gtisc.gatech.edu`、04-10〜13）は除いた。
 - **先行研究**：論文 11 本の機器ごとの対応表と、候補ごとの検索（CVE、ブログ、論文）。本文を読めたものだけを根拠にした。結果は [sweep/prior-ids.tsv](sweep/prior-ids.tsv) と [sweep/prior-tls.tsv](sweep/prior-tls.tsv)。
-- **確かめ方**：Sonos の既知の結果（YourThings 2018-03-20 のフレーム 60977 の serial と householdid、フレーム 4429 の UPnP のシリアル）を自動で再現した。「見つからず」と「ブログ等のみ」の 20 件（2026-11-10）と「論文で一部」の 41 件（2026-11-11）は、パケットで確かめた（下）。**TLS の候補は自動の検出のままで、パケットでは確かめていない。**
+- **確かめ方**：Sonos の既知の結果（YourThings 2018-03-20 のフレーム 60977 の serial と householdid、フレーム 4429 の UPnP のシリアル）を自動で再現した。「見つからず」と「ブログ等のみ」の 20 件（2026-11-10）と「論文で一部」の 41 件（2026-11-11）は、パケットで確かめた（下）。TLS の 105 件も、根拠の握手をパケットで確かめた（2026-11-11、TLS の節）。
 
 ## 数
 
@@ -225,6 +225,15 @@
 | SmartThings Hub | RSA 1024・SHA-1（SmartThings、Physical Graph）3,443 回 | 同 Table V p.17（Samsung SmartThings：self-signed ✓、vuln SSL ✓）。IoTLS Table 7 p.172 も |
 - **対応表の論文にない製品**：Arlo Q、Atomi、Awair、BlipCare、D-Link DCH-S161、Dropcam、Globe、Gosund、HP ENVY、HeimVision の電球、Invoxia Triby、Netatmo Welcome、Pix-Star、Samsung のカメラ 2 機種、TP-Link NC220、Teckin、Withings Smart Scale、Yutron、iHome。
 - **論文と合わないもの**：Samsung Smart TV は 13 回の握手で 3DES が選ばれていた（IoTLS は、安全でない暗号が選ばれたのは Wink Hub 2 と LG TV だけとする。p.172）。Harman Kardon Invoke は 2018-03 に TLS 1.0 が選ばれていた（IoTLS は 1.2 未満に対応しないとする）。
+
+### TLS のパケットでの確認（2026-11-11）
+
+`verify.py tls` と `verify_tls_all.py` で、候補ごとに最初の根拠のフレームの握手を tshark で開き直した（ClientHello の版と暗号の一覧、ServerHello の版と暗号、証明書の鍵・署名・発行者・期限）。出力は `~/datasets/claims/sweep/verify/tls.txt`、`tls-2.txt`。
+
+- 105 件すべてで、根拠の握手に自動の検出と同じ性質があった（版 27、暗号 36、前方秘匿性 22、証明書 20）。確かめたのは握手 1 つずつで、回数は洗い出しの集計による。
+- 例：Amazon Echo（iotraffic `AmazonEcho_44650d56ccd3.pcap` フレーム 173、177）は TLS 1.0 までしか提示せず RC4、DES、3DES も並べ、サーバーは TLS 1.0 の `TLS_RSA_WITH_AES_256_CBC_SHA` を選んだ。August Doorbell Cam（同 `AugustDoorBell_e076d03f00ae.pcap` フレーム 39〜59）のサーバー証明書は SHA-1 で、発行者は August の私設の CA。機器も同じ CA のクライアント証明書（`CN=August Doorbell Cam`）を出していた。Samsung Smart TV（yourthings `eth1-20180418.0945.1524062700` フレーム 134983）は、Amazon Video のサーバーが TLS 1.0 の `TLS_RSA_WITH_3DES_EDE_CBC_SHA` を選んだ。
+- Awair（iotraffic `AwairAirQuality_70886b100fc6.pcap` フレーム 22、24）は、機器は DHE の暗号を提示したが、サーバーが RSA 鍵交換を選んだ。前方秘匿性がないのはサーバーの選択による。
+- Netatmo Smart Indoor Camera（deakin `2024-04-14.pcap` フレーム 3113917）は SSL 3.0 の ClientHello を 3 回送った。サーバーの応答はない。
 
 ## 限界
 
