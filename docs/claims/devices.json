@@ -710,9 +710,9 @@
    "model_basis": "",
    "category": "camera",
    "note": "label taken from the 2016 list by MAC",
-   "runs_seen": 6,
-   "first_seen": "2018-06-01",
-   "last_seen": "2018-10-25"
+   "runs_seen": 27,
+   "first_seen": "2018-05-28",
+   "last_seen": "2018-10-29"
   },
   {
    "dataset": "unsw2018",
@@ -724,9 +724,9 @@
    "model_basis": "",
    "category": "hub",
    "note": "label taken from UNSW-IoTraffic by MAC",
-   "runs_seen": 4,
-   "first_seen": "2018-10-21",
-   "last_seen": "2018-10-25"
+   "runs_seen": 12,
+   "first_seen": "2018-10-10",
+   "last_seen": "2018-10-29"
   },
   {
    "dataset": "unsw2018",
@@ -738,9 +738,9 @@
    "model_basis": "",
    "category": "unknown",
    "note": "not in any list; product unknown",
-   "runs_seen": 6,
-   "first_seen": "2018-06-01",
-   "last_seen": "2018-10-24"
+   "runs_seen": 18,
+   "first_seen": "2018-05-28",
+   "last_seen": "2018-10-19"
   },
   {
    "dataset": "unsw2018",
@@ -752,9 +752,9 @@
    "model_basis": "",
    "category": "sensor",
    "note": "label taken from the 2016 list by MAC",
-   "runs_seen": 5,
-   "first_seen": "2018-06-01",
-   "last_seen": "2018-10-25"
+   "runs_seen": 27,
+   "first_seen": "2018-05-28",
+   "last_seen": "2018-10-29"
   },
   {
    "dataset": "unsw2018",
@@ -766,9 +766,9 @@
    "model_basis": "",
    "category": "speaker",
    "note": "label taken from the 2016 list by MAC",
-   "runs_seen": 4,
-   "first_seen": "2018-10-21",
-   "last_seen": "2018-10-25"
+   "runs_seen": 16,
+   "first_seen": "2018-06-14",
+   "last_seen": "2018-10-29"
   },
   {
    "dataset": "unsw2018",
@@ -780,9 +780,9 @@
    "model_basis": "",
    "category": "toy",
    "note": "label taken from UNSW-IoTraffic by MAC",
-   "runs_seen": 2,
-   "first_seen": "2018-06-01",
-   "last_seen": "2018-06-02"
+   "runs_seen": 7,
+   "first_seen": "2018-05-28",
+   "last_seen": "2018-10-12"
   },
   {
    "dataset": "unsw2018",
@@ -794,9 +794,9 @@
    "model_basis": "",
    "category": "camera",
    "note": "label taken from the 2016 list by MAC",
-   "runs_seen": 6,
-   "first_seen": "2018-06-01",
-   "last_seen": "2018-10-25"
+   "runs_seen": 27,
+   "first_seen": "2018-05-28",
+   "last_seen": "2018-10-29"
   },
   {
    "dataset": "unsw2018",
@@ -808,9 +808,9 @@
    "model_basis": "",
    "category": "voice-assistant",
    "note": "label taken from the 2016 list by MAC",
-   "runs_seen": 5,
-   "first_seen": "2018-06-01",
-   "last_seen": "2018-10-25"
+   "runs_seen": 20,
+   "first_seen": "2018-05-28",
+   "last_seen": "2018-10-29"
   },
   {
    "dataset": "unsw2018",
@@ -822,9 +822,9 @@
    "model_basis": "dhcp hostname",
    "category": "plug",
    "note": "label taken from the 2016 list by MAC",
-   "runs_seen": 6,
-   "first_seen": "2018-06-01",
-   "last_seen": "2018-10-25"
+   "runs_seen": 27,
+   "first_seen": "2018-05-28",
+   "last_seen": "2018-10-29"
   },
   {
    "dataset": "unsw2018",
@@ -836,9 +836,9 @@
    "model_basis": "dhcp hostname hpenvyprinter1",
    "category": "printer",
    "note": "label taken from the 2016 list by MAC",
-   "runs_seen": 6,
-   "first_seen": "2018-06-01",
-   "last_seen": "2018-10-25"
+   "runs_seen": 27,
+   "first_seen": "2018-05-28",
+   "last_seen": "2018-10-29"
   },
   {
    "dataset": "unsw2018",
@@ -850,9 +850,9 @@
    "model_basis": "",
    "category": "sensor",
    "note": "label taken from UNSW-IoTraffic by MAC",
-   "runs_seen": 2,
-   "first_seen": "2018-06-01",
-   "last_seen": "2018-06-02"
+   "runs_seen": 15,
+   "first_seen": "2018-05-28",
+   "last_seen": "2018-06-19"
   },
   {
    "dataset": "unsw2018",
@@ -864,9 +864,9 @@
    "model_basis": "",
    "category": "sensor",
    "note": "label taken from the 2016 list by MAC",
-   "runs_seen": 4,
-   "first_seen": "2018-10-21",
-   "last_seen": "2018-10-25"
+   "runs_seen": 12,
+   "first_seen": "2018-10-10",
+   "last_seen": "2018-10-29"
   },
   {
    "dataset": "unsw2018",
@@ -878,9 +878,9 @@
    "model_basis": "",
    "category": "camera",
    "note": "label taken from the 2016 list by MAC",
-   "runs_seen": 2,
-   "first_seen": "2018-06-01",
-   "last_seen": "2018-06-02"
+   "runs_seen": 10,
+   "first_seen": "2018-05-28",
+   "last_seen": "2018-06-14"
   },
   {
    "dataset": "unsw2018",
@@ -892,9 +892,9 @@
    "model_basis": "",
    "category": "plug",
    "note": "label taken from the 2016 list by MAC",
-   "runs_seen": 6,
-   "first_seen": "2018-06-01",
-   "last_seen": "2018-10-25"
+   "runs_seen": 27,
+   "first_seen": "2018-05-28",
+   "last_seen": "2018-10-29"
   },
   {
    "dataset": "unsw2018",
@@ -906,9 +906,9 @@
    "model_basis": "",
    "category": "camera",
    "note": "label taken from UNSW-IoTraffic by MAC",
-   "runs_seen": 6,
-   "first_seen": "2018-06-01",
-   "last_seen": "2018-10-25"
+   "runs_seen": 27,
+   "first_seen": "2018-05-28",
+   "last_seen": "2018-10-29"
   },
   {
    "dataset": "unsw2018",
@@ -920,9 +920,9 @@
    "model_basis": "",
    "category": "unknown",
    "note": "ESP_ hostname only; product unknown",
-   "runs_seen": 4,
-   "first_seen": "2018-10-21",
-   "last_seen": "2018-10-25"
+   "runs_seen": 12,
+   "first_seen": "2018-10-10",
+   "last_seen": "2018-10-29"
   },
   {
    "dataset": "unsw2018",
@@ -934,9 +934,9 @@
    "model_basis": "",
    "category": "doorbell",
    "note": "label taken from UNSW-IoTraffic by MAC",
-   "runs_seen": 6,
-   "first_seen": "2018-06-01",
-   "last_seen": "2018-10-25"
+   "runs_seen": 27,
+   "first_seen": "2018-05-28",
+   "last_seen": "2018-10-29"
   },
   {
    "dataset": "unsw2018",
@@ -948,9 +948,9 @@
    "model_basis": "dhcp hostname NetCamHD",
    "category": "camera",
    "note": "label taken from UNSW-IoTraffic by MAC",
-   "runs_seen": 4,
-   "first_seen": "2018-10-21",
-   "last_seen": "2018-10-25"
+   "runs_seen": 12,
+   "first_seen": "2018-10-10",
+   "last_seen": "2018-10-29"
   },
   {
    "dataset": "unsw2018",
@@ -962,9 +962,9 @@
    "model_basis": "",
    "category": "hub",
    "note": "label taken from the 2016 list by MAC",
-   "runs_seen": 6,
-   "first_seen": "2018-06-01",
-   "last_seen": "2018-10-25"
+   "runs_seen": 27,
+   "first_seen": "2018-05-28",
+   "last_seen": "2018-10-29"
   },
   {
    "dataset": "unsw2018",
@@ -976,9 +976,9 @@
    "model_basis": "",
    "category": "bulb",
    "note": "label taken from the 2016 list by MAC",
-   "runs_seen": 4,
-   "first_seen": "2018-10-21",
-   "last_seen": "2018-10-25"
+   "runs_seen": 19,
+   "first_seen": "2018-05-28",
+   "last_seen": "2018-10-29"
   },
   {
    "dataset": "unsw2018",
@@ -990,9 +990,9 @@
    "model_basis": "",
    "category": "photo-frame",
    "note": "label taken from the 2016 list by MAC",
-   "runs_seen": 6,
-   "first_seen": "2018-06-01",
-   "last_seen": "2018-10-25"
+   "runs_seen": 27,
+   "first_seen": "2018-05-28",
+   "last_seen": "2018-10-29"
   },
   {
    "dataset": "unsw2018",
@@ -1004,9 +1004,9 @@
    "model_basis": "",
    "category": "doorbell",
    "note": "label taken from UNSW-IoTraffic by MAC",
-   "runs_seen": 6,
-   "first_seen": "2018-06-01",
-   "last_seen": "2018-10-25"
+   "runs_seen": 27,
+   "first_seen": "2018-05-28",
+   "last_seen": "2018-10-29"
   },
   {
    "dataset": "unsw2018",
@@ -1018,9 +1018,9 @@
    "model_basis": "",
    "category": "plug",
    "note": "label taken from the 2016 list by MAC",
-   "runs_seen": 2,
-   "first_seen": "2018-06-01",
-   "last_seen": "2018-06-02"
+   "runs_seen": 15,
+   "first_seen": "2018-05-28",
+   "last_seen": "2018-06-19"
   },
   {
    "dataset": "unsw2018",
@@ -1032,9 +1032,9 @@
    "model_basis": "",
    "category": "unknown",
    "note": "not in any list; product unknown",
-   "runs_seen": 4,
-   "first_seen": "2018-10-21",
-   "last_seen": "2018-10-25"
+   "runs_seen": 12,
+   "first_seen": "2018-10-10",
+   "last_seen": "2018-10-29"
   },
   {
    "dataset": "unsw2018",
@@ -1046,9 +1046,9 @@
    "model_basis": "",
    "category": "sensor",
    "note": "label taken from the 2016 list by MAC",
-   "runs_seen": 6,
-   "first_seen": "2018-06-01",
-   "last_seen": "2018-10-25"
+   "runs_seen": 27,
+   "first_seen": "2018-05-28",
+   "last_seen": "2018-10-29"
   },
   {
    "dataset": "unsw2018",
@@ -1060,9 +1060,9 @@
    "model_basis": "dhcp hostname NC220 1.0",
    "category": "camera",
    "note": "label taken from the 2016 list by MAC",
-   "runs_seen": 4,
-   "first_seen": "2018-10-21",
-   "last_seen": "2018-10-25"
+   "runs_seen": 12,
+   "first_seen": "2018-10-10",
+   "last_seen": "2018-10-29"
   },
   {
    "dataset": "unsw2018",
@@ -1074,9 +1074,9 @@
    "model_basis": "dhcp hostname Chromecast-Ultra",
    "category": "tv-streaming",
    "note": "not in any list; identified by self-description only",
-   "runs_seen": 4,
-   "first_seen": "2018-10-21",
-   "last_seen": "2018-10-25"
+   "runs_seen": 12,
+   "first_seen": "2018-10-10",
+   "last_seen": "2018-10-29"
   },
   {
    "dataset": "unsw2018",
@@ -1088,9 +1088,9 @@
    "model_basis": "dhcp hostname Google-Home",
    "category": "voice-assistant",
    "note": "not in any list; identified by self-description only",
-   "runs_seen": 6,
-   "first_seen": "2018-06-01",
-   "last_seen": "2018-10-25"
+   "runs_seen": 27,
+   "first_seen": "2018-05-28",
+   "last_seen": "2018-10-29"
   },
   {
    "dataset": "iot23",
@@ -2860,8 +2860,8 @@
      "units": 1
     },
     "unsw2018": {
-     "first_seen": "2018-06-01",
-     "last_seen": "2018-10-25",
+     "first_seen": "2018-05-28",
+     "last_seen": "2018-10-29",
      "units": 1
     },
     "iot23": {
@@ -3097,8 +3097,8 @@
      "units": 1
     },
     "unsw2018": {
-     "first_seen": "2018-06-01",
-     "last_seen": "2018-10-25",
+     "first_seen": "2018-05-28",
+     "last_seen": "2018-10-29",
      "units": 1
     },
     "yourthings": {
@@ -3127,8 +3127,8 @@
      "units": 1
     },
     "unsw2018": {
-     "first_seen": "2018-06-01",
-     "last_seen": "2018-06-02",
+     "first_seen": "2018-05-28",
+     "last_seen": "2018-06-19",
      "units": 1
     }
    }
@@ -3152,8 +3152,8 @@
      "units": 1
     },
     "unsw2018": {
-     "first_seen": "2018-10-21",
-     "last_seen": "2018-10-25",
+     "first_seen": "2018-10-10",
+     "last_seen": "2018-10-29",
      "units": 1
     },
     "yourthings": {
@@ -3193,8 +3193,8 @@
      "units": 1
     },
     "unsw2018": {
-     "first_seen": "2018-06-01",
-     "last_seen": "2018-10-25",
+     "first_seen": "2018-05-28",
+     "last_seen": "2018-10-29",
      "units": 1
     },
     "yourthings": {
@@ -3221,8 +3221,8 @@
      "units": 1
     },
     "unsw2018": {
-     "first_seen": "2018-06-01",
-     "last_seen": "2018-06-02",
+     "first_seen": "2018-05-28",
+     "last_seen": "2018-06-19",
      "units": 1
     },
     "yourthings": {
@@ -3303,8 +3303,8 @@
      "units": 1
     },
     "unsw2018": {
-     "first_seen": "2018-06-01",
-     "last_seen": "2018-10-25",
+     "first_seen": "2018-05-28",
+     "last_seen": "2018-10-29",
      "units": 1
     },
     "yourthings": {
@@ -3389,8 +3389,8 @@
      "units": 1
     },
     "unsw2018": {
-     "first_seen": "2018-06-01",
-     "last_seen": "2018-10-25",
+     "first_seen": "2018-05-28",
+     "last_seen": "2018-10-29",
      "units": 1
     }
    }
@@ -3442,8 +3442,8 @@
    "models": [],
    "datasets": {
     "unsw2018": {
-     "first_seen": "2018-10-21",
-     "last_seen": "2018-10-25",
+     "first_seen": "2018-10-10",
+     "last_seen": "2018-10-29",
      "units": 1
     }
    }
@@ -3455,8 +3455,8 @@
    "models": [],
    "datasets": {
     "unsw2018": {
-     "first_seen": "2018-06-01",
-     "last_seen": "2018-10-25",
+     "first_seen": "2018-05-28",
+     "last_seen": "2018-10-29",
      "units": 1
     },
     "yourthings": {
@@ -3583,8 +3583,8 @@
      "units": 1
     },
     "unsw2018": {
-     "first_seen": "2018-06-01",
-     "last_seen": "2018-10-25",
+     "first_seen": "2018-05-28",
+     "last_seen": "2018-10-29",
      "units": 1
     },
     "deakin": {
@@ -3611,8 +3611,8 @@
      "units": 1
     },
     "unsw2018": {
-     "first_seen": "2018-06-01",
-     "last_seen": "2018-10-25",
+     "first_seen": "2018-05-28",
+     "last_seen": "2018-10-29",
      "units": 1
     }
    }
@@ -3662,8 +3662,8 @@
      "units": 1
     },
     "unsw2018": {
-     "first_seen": "2018-10-21",
-     "last_seen": "2018-10-25",
+     "first_seen": "2018-06-14",
+     "last_seen": "2018-10-29",
      "units": 1
     }
    }
@@ -3746,8 +3746,8 @@
      "units": 1
     },
     "unsw2018": {
-     "first_seen": "2018-10-21",
-     "last_seen": "2018-10-25",
+     "first_seen": "2018-05-28",
+     "last_seen": "2018-10-29",
      "units": 1
     }
    }
@@ -3816,8 +3816,8 @@
      "units": 1
     },
     "unsw2018": {
-     "first_seen": "2018-06-01",
-     "last_seen": "2018-06-02",
+     "first_seen": "2018-05-28",
+     "last_seen": "2018-10-12",
      "units": 1
     }
    }
@@ -3905,8 +3905,8 @@
      "units": 1
     },
     "unsw2018": {
-     "first_seen": "2018-06-01",
-     "last_seen": "2018-10-25",
+     "first_seen": "2018-05-28",
+     "last_seen": "2018-10-29",
      "units": 1
     },
     "yourthings": {
@@ -3953,8 +3953,8 @@
      "units": 1
     },
     "unsw2018": {
-     "first_seen": "2018-10-21",
-     "last_seen": "2018-10-25",
+     "first_seen": "2018-10-10",
+     "last_seen": "2018-10-29",
      "units": 1
     },
     "cic2022": {
@@ -3986,8 +3986,8 @@
      "units": 1
     },
     "unsw2018": {
-     "first_seen": "2018-06-01",
-     "last_seen": "2018-06-02",
+     "first_seen": "2018-05-28",
+     "last_seen": "2018-06-14",
      "units": 1
     },
     "cic2022": {
@@ -4035,8 +4035,8 @@
      "units": 1
     },
     "unsw2018": {
-     "first_seen": "2018-10-21",
-     "last_seen": "2018-10-25",
+     "first_seen": "2018-10-10",
+     "last_seen": "2018-10-29",
      "units": 1
     },
     "iot23": {
@@ -4101,8 +4101,8 @@
      "units": 1
     },
     "unsw2018": {
-     "first_seen": "2018-06-01",
-     "last_seen": "2018-10-25",
+     "first_seen": "2018-05-28",
+     "last_seen": "2018-10-29",
      "units": 1
     }
    }
@@ -4139,8 +4139,8 @@
      "units": 1
     },
     "unsw2018": {
-     "first_seen": "2018-06-01",
-     "last_seen": "2018-10-25",
+     "first_seen": "2018-05-28",
+     "last_seen": "2018-10-29",
      "units": 1
     },
     "yourthings": {
@@ -4243,8 +4243,8 @@
      "units": 1
     },
     "unsw2018": {
-     "first_seen": "2018-06-01",
-     "last_seen": "2018-10-25",
+     "first_seen": "2018-05-28",
+     "last_seen": "2018-10-29",
      "units": 1
     }
    }
@@ -4266,8 +4266,8 @@
      "units": 1
     },
     "unsw2018": {
-     "first_seen": "2018-06-01",
-     "last_seen": "2018-10-25",
+     "first_seen": "2018-05-28",
+     "last_seen": "2018-10-29",
      "units": 1
     },
     "yourthings": {
@@ -4405,8 +4405,8 @@
      "units": 1
     },
     "unsw2018": {
-     "first_seen": "2018-10-21",
-     "last_seen": "2018-10-25",
+     "first_seen": "2018-10-10",
+     "last_seen": "2018-10-29",
      "units": 1
     }
    }
@@ -4430,8 +4430,8 @@
      "units": 1
     },
     "unsw2018": {
-     "first_seen": "2018-06-01",
-     "last_seen": "2018-10-25",
+     "first_seen": "2018-05-28",
+     "last_seen": "2018-10-29",
      "units": 1
     }
    }
