@@ -1,5 +1,6 @@
 vendor	product	kind	datasets	count	detail	evidence
 Amazon	Echo	cred-plain	iotraffic,unsw2016	3	q:sid -> opml.radiotime.com:80 (3)	iotraffic:pcaps__AmazonEcho_44650d56ccd3.pcap#4526692; unsw2016:16-09-28.pcap#1161079
+Amazon	Echo	dl-http	iotraffic,unsw2016	24	amzdigitaldownloads.edgesuite.net/{id}/{id}/{id} (1399132 B, text/plain) (2); amzdigitaldownloads.edgesuite.net/{id}/{id}/{id} (1015210 B, text/plain) (1); amzdigitaldownloads.edgesuite.net/{id}/{id}/{id} (1341836 B, text/plain) (1); amzdigitaldownloads.edgesuite.net/{id}/{id}/{id} (1058962 B, text/plain) (1); amzdigitaldownloads.edgesuite.net/{id}/{id}/{id} (73841162 B, text/plain) (1); amzdigitaldownloads.edgesuite.net/{id}/{id}/{id} (1903186 B, text/plain) (1)	iotraffic:pcaps__AmazonEcho_44650d56ccd3.pcap#1450399; iotraffic:pcaps__AmazonEcho_44650d56ccd3.pcap#1452334; iotraffic:pcaps__AmazonEcho_44650d56ccd3.pcap#1458544
 Amazon	Echo	id-plain	iotraffic,unsw2016	4	q:serial=named q:serial -> opml.radiotime.com:80 (4)	iotraffic:pcaps__AmazonEcho_44650d56ccd3.pcap#3450200; unsw2016:16-09-28.pcap#1161079
 Amazon	Echo	tls-old	iotraffic,unsw2016	20972	offered at most TLS1.0 (11168); TLS1.0 chosen (9804)	iotraffic:pcaps__AmazonEcho_44650d56ccd3.pcap#173; unsw2016:16-09-23.pcap#2871
 Amazon	Echo	tls-weak	iotraffic,unsw2016	15042	offered 3des+des+md5+rc4 (15042)	iotraffic:pcaps__AmazonEcho_44650d56ccd3.pcap#173; unsw2016:16-09-23.pcap#2871
@@ -12,6 +13,7 @@ Amazon	Fire TV	tls-weak	yourthings	2153	offered rc4 (2153)	yourthings:eth1-20180
 Amcrest	camera	id-plain	cic2022	64	path[2]=mdns_name -> 54.205.158.199:8802 (37); text=mdns_name -> 34.238.41.119:8800 (18); text=mdns_name -> 54.205.158.199:8802 (9)	cic2022:1-Power__Cameras__Amcrest__POWER__amcrestcamPOWER_1.pcap#137; cic2022:1-Power__Cameras__Amcrest__POWER__amcrestcamPOWER_1.pcap#143; cic2022:2-Idle__2021_11_02_Idle.pcap#22
 Amcrest	camera	tls-cert	cic2022	10	self-signed (Camcloud) (9); expired (GoDaddy.com, Inc.) (1)	cic2022:1-Power__Cameras__Amcrest__POWER__amcrestcamPOWER_1.pcap#96; cic2022:2-Idle__2021_12_23_Idle.pcap#106919
 Apple	HomePod	cred-plain	yourthings	3	h:x-playback-session-id -> streamingaudio.itunes.apple.com:80 (3)	yourthings:eth1-20180321.2015.1521681300#61634; yourthings:eth1-20180321.2015.1521681300#72907
+Apple	HomePod	dl-http	yourthings	1	appldnld.apple.com/{id}/{id}/com_apple_MobileAsset_VoiceSer/{id} (595567472 B, application/zip) (1)	yourthings:eth1-20180328.0620.1522236000#132221
 Arlo (Netgear)	Arlo Q	tls-weak	cic2022	46	offered 3des+des+md5+rc4 (46)	cic2022:2-Idle__2021_11_19_Idle.pcap#616476
 Arlo (Netgear)	Arlo base station VMB3010	tls-cert	yourthings	4	sha1, self-signed (Netgear, Inc.) (4)	yourthings:eth1-20180411.2000.1523494800#67759
 Arlo (Netgear)	Arlo base station VMB3010	tls-weak	yourthings	111	offered 3des+des+md5+rc4 (111)	yourthings:eth1-20180410.0015.1523337300#126591
@@ -27,20 +29,24 @@ Belkin	NetCam HD	id-plain	iotraffic,yourthings	13	path[3]=upnp:macAddress -> dev
 Belkin	NetCam HD	tls-nofs	yourthings	848	TLS_RSA_WITH_AES_256_CBC_SHA:845; TLS_RSA_WITH_AES_128_CBC_SHA:2 (848)	yourthings:eth1-20180321.1915.1521677700#943
 Belkin	NetCam HD	tls-old	iotraffic,yourthings	522	TLS1.0 chosen (278); offered at most TLS1.0 (244)	iotraffic:pcaps__BelkinCamera_b4750eece5a9.pcap#19819; yourthings:eth1-20180413.1620.1523654400#51075
 Belkin	NetCam HD	tls-weak	iotraffic	296	offered 3des+des+export+md5+rc4 (296)	iotraffic:pcaps__BelkinCamera_b4750eece5a9.pcap#19819
+Belkin	WeMo Link	fw-http	yourthings	1	fw.xbcs.net/wemo/owrt/{id} (4770906 B) (1)	yourthings:eth1-20180321.1855.1521676500#10387
 Belkin	WeMo Link	id-plain	yourthings	1	q:mac=upnp:macAddress -> fw.xbcs.net:80 (1)	yourthings:eth1-20180321.1855.1521676500#10293
 Belkin	WeMo Link	tls-nofs	yourthings	94	TLS_RSA_WITH_AES_256_CBC_SHA:94 (94)	yourthings:eth1-20180320.0625.1521545100#7599
 Belkin	WeMo Link	tls-old	yourthings	188	TLS1.0 chosen (94); offered at most TLS1.0 (94)	yourthings:eth1-20180320.0625.1521545100#7599
 Belkin	WeMo Link	tls-weak	yourthings	10	offered 3des+des+export+md5+rc4 (10)	yourthings:eth1-20180320.0625.1521545100#7599
+Belkin	WeMo Motion Sensor	fw-http	yourthings	3	fw.xbcs.net/wemo/owrt/{id} (4371511 B) (2); fw.xbcs.net/wemo/owrt/{id} (4371159 B) (1)	yourthings:eth1-20180321.1855.1521676500#6946; yourthings:eth1-20180415.1545.1523825100#51083
 Belkin	WeMo Motion Sensor	id-plain	yourthings	3	q:mac=upnp:macAddress -> fw.xbcs.net:80 (3)	yourthings:eth1-20180321.1855.1521676500#6908; yourthings:eth1-20180415.1545.1523825100#51038
 Belkin	WeMo Motion Sensor	tls-cert	iotraffic,unsw2016	1008	expired (GoDaddy.com, Inc.) (1008)	iotraffic:pcaps__BelkinWemoMotionSensor_ec1a59832811.pcap#39014; unsw2016:16-09-23.pcap#341174
 Belkin	WeMo Motion Sensor	tls-nofs	yourthings	204	TLS_RSA_WITH_AES_256_CBC_SHA:203 (204)	yourthings:eth1-20180320.1535.1521578100#81215
 Belkin	WeMo Motion Sensor	tls-old	iotraffic,unsw2016,yourthings	11500	offered at most TLS1.0 (5753); TLS1.0 chosen (5747)	iotraffic:pcaps__BelkinWemoMotionSensor_ec1a59832811.pcap#39014; unsw2016:16-09-23.pcap#341174; yourthings:eth1-20180320.1535.1521578100#81215
 Belkin	WeMo Motion Sensor	tls-weak	iotraffic,unsw2016	5549	offered 3des+des+export+md5+rc4 (5548); offered des+export+md5+null+rc4 (1)	iotraffic:pcaps__BelkinWemoMotionSensor_ec1a59832811.pcap#39014; iotraffic:pcaps__BelkinWemoMotionSensor_ec1a59832811.pcap#4928475; unsw2016:16-09-23.pcap#341174
+Belkin	WeMo Switch	fw-http	yourthings	3	fw.xbcs.net/wemo/owrt/{id} (4371511 B) (2); fw.xbcs.net/wemo/owrt/{id} (4371159 B) (1)	yourthings:eth1-20180321.1855.1521676500#6712; yourthings:eth1-20180415.1545.1523825100#51127
 Belkin	WeMo Switch	id-plain	yourthings	3	q:mac=upnp:macAddress -> fw.xbcs.net:80 (3)	yourthings:eth1-20180321.1855.1521676500#6614; yourthings:eth1-20180415.1545.1523825100#51095
 Belkin	WeMo Switch	tls-cert	iotraffic,unsw2016	130	expired (GoDaddy.com, Inc.) (130)	iotraffic:pcaps__BelkinWemoSwitch_ec1a5979f489.pcap#37841; unsw2016:16-09-23.pcap#778618
 Belkin	WeMo Switch	tls-nofs	yourthings	32	TLS_RSA_WITH_AES_256_CBC_SHA:32 (32)	yourthings:eth1-20180321.1815.1521674100#25023
 Belkin	WeMo Switch	tls-old	iotraffic,unsw2016,yourthings	846	TLS1.0 chosen (423); offered at most TLS1.0 (423)	iotraffic:pcaps__BelkinWemoSwitch_ec1a5979f489.pcap#37841; unsw2016:16-09-23.pcap#778618; yourthings:eth1-20180321.1815.1521674100#25023
 Belkin	WeMo Switch	tls-weak	iotraffic,unsw2016	391	offered 3des+des+export+md5+rc4 (391)	iotraffic:pcaps__BelkinWemoSwitch_ec1a5979f489.pcap#37841; unsw2016:16-09-23.pcap#778618
+Belkin (Crock-Pot)	WeMo Crock-Pot	fw-http	yourthings	1	fw.xbcs.net/wemo/owrt/{id} (4436078 B) (1)	yourthings:eth1-20180321.1855.1521676500#6786
 Belkin (Crock-Pot)	WeMo Crock-Pot	id-plain	yourthings	8	path[3]=upnp:macAddress -> devices.xbcs.net:8899 (7); q:mac=upnp:macAddress -> fw.xbcs.net:80 (1)	yourthings:eth1-20180320.0155.1521528900#86249; yourthings:eth1-20180321.1855.1521676500#6636
 Belkin (Crock-Pot)	WeMo Crock-Pot	tls-nofs	yourthings	1193	TLS_RSA_WITH_AES_256_CBC_SHA:1191 (1193)	yourthings:eth1-20180320.0000.1521522000#15248
 Belkin (Crock-Pot)	WeMo Crock-Pot	tls-old	yourthings	2384	offered at most TLS1.0 (1193); TLS1.0 chosen (1191)	yourthings:eth1-20180320.0000.1521522000#15248
@@ -86,6 +92,7 @@ LIFX	Smart Bulb	tls-weak	iotraffic,unsw2016	152	offered md5+rc4 (152)	iotraffic:
 Logitech	Harmony Hub	id-plain	yourthings	5647	q:uuid=named q:uuid -> pubsub.pubnub.com:80 (2422); q:uuid=named q:uuid -> ps-145.pubnub.com:80 (2263); q:uuid=named q:uuid -> ps-181.pubnub.com:80 (544); q:uuid=named q:uuid -> ps-679.pubnub.com:80 (394); q:uuid=named q:uuid -> ps-409.pubnub.com:80 (20); json:clientId=MAC -> svcs.myharmony.com:80 (3)	yourthings:eth1-20180320.0000.1521522000#63191; yourthings:eth1-20180320.2030.1521595800#39395; yourthings:eth1-20180320.2030.1521595800#39698
 Logitech	Harmony Hub	tls-nofs	yourthings	193	TLS_RSA_WITH_AES_128_CBC_SHA256:193 (193)	yourthings:eth1-20180320.0040.1521524400#23918
 Logitech	Logi Circle	tls-weak	yourthings	8	offered 3des+md5+rc4 (8)	yourthings:eth1-20180320.2155.1521600900#92421
+Lutron	Caseta Smart Bridge	dl-http	yourthings	4	s3.amazonaws.com/caseta/final/{id}/{id} (2977678 B, binary/octet-stream) (1); 54.231.81.51None (2977678 B, binary/octet-stream) (1); s3.amazonaws.com/caseta/final/{id}/{id} (2977710 B, binary/octet-stream) (1); 52.216.133.53None (2977710 B, binary/octet-stream) (1)	yourthings:eth1-20180414.0610.1523704200#119161; yourthings:eth1-20180419.0840.1524145200#35151
 MiCasaVerde	VeraLite VeraLite	tls-old	yourthings	13	TLS1.0 chosen (13)	yourthings:eth1-20180320.2020.1521595200#58783
 NVIDIA	Shield TV	fw-http	yourthings	3	ota-downloads.nvidia.com/ota/data/posted-roms_romuploader/external/{id} (1191918991 B) (1); ota-downloads.nvidia.com/ota/data/posted-roms_romuploader/external/{id} (1166754831 B) (1); ota-downloads.nvidia.com/ota/data/posted-roms_romuploader/external/{id} (1062295130 B) (1)	yourthings:eth1-20180411.2015.1523495700#148952; yourthings:eth1-20180411.2015.1523495700#449006; yourthings:eth1-20180411.2015.1523495700#92198
 NVIDIA	Shield TV	tls-weak	yourthings	1464	offered rc4 (1464)	yourthings:eth1-20180320.0000.1521522000#12841
@@ -112,15 +119,18 @@ Pix-Star	Photo Frame	tls-cert	iotraffic,unsw2016	2154	sha1, expired (Thawte, Inc
 Pix-Star	Photo Frame	tls-old	iotraffic,unsw2016	2154	TLS1.0 chosen (2154)	iotraffic:pcaps__PixStarPhotoFrame_e076d033bb85.pcap#41; unsw2016:16-09-23.pcap#2275
 Pix-Star	Photo Frame	tls-weak	iotraffic,unsw2016	2154	offered 3des+des+export+md5+rc4 (2154)	iotraffic:pcaps__PixStarPhotoFrame_e076d033bb85.pcap#41; unsw2016:16-09-23.pcap#2275
 Ring	Video Doorbell	cred-plain	iotraffic,yourthings	14063	h:authorization:basic -> vod.ring.com:80 (13985); h:authorization:basic -> 52.202.14.79:80 (29); h:authorization:basic -> 52.5.243.24:80 (25); h:authorization:basic -> 52.205.114.210:80 (15); h:authorization:basic -> fw.ring.com:80 (9)	iotraffic:pcaps__RingDoorBell_884aea31669d.pcap#4483; yourthings:eth1-20180320.0000.1521522000#1864; yourthings:eth1-20180320.0020.1521523200#95242
+Ring	Video Doorbell	fw-http	yourthings	2	fw.ring.com/doorbots_api/{id}/1550/download (0 B) (2)	yourthings:eth1-20180413.1545.1523652300#359933
 Ring	Video Doorbell	id-other	iotraffic,yourthings	62	aabbccddeeff in udp/15063 payload (62)	iotraffic:pcaps__RingDoorBell_884aea31669d.pcap#34254; iotraffic:pcaps__RingDoorBell_884aea31669d.pcap#4505; yourthings:eth1-20180321.1750.1521672600#7667
 Ring	Video Doorbell	tls-nofs	yourthings	6866	TLS_RSA_WITH_AES_128_CBC_SHA:6866 (6866)	yourthings:eth1-20180321.0850.1521640200#26086
 Ring	Video Doorbell	tls-weak	iotraffic,yourthings	6958	offered 3des+md5+rc4 (6855); offered md5+rc4 (103)	iotraffic:pcaps__RingDoorBell_884aea31669d.pcap#42; yourthings:eth1-20180321.0850.1521640200#26086
+Roku	Roku 4 Roku 4	dl-http	yourthings	2	index.ehub.netflix.com/item/SpeedTest (12500000 B, text/plain) (2)	yourthings:eth1-20180415.1550.1523825400#104156
 Roku	Roku 4 Roku 4	id-plain	yourthings	2	h:x-roku-reserved-serial-number=upnp:serialNumber -> cloudservices.roku.com:80 (2)	yourthings:eth1-20180415.1640.1523828400#21849
 Roku	Roku 4 Roku 4	tls-cert	yourthings	84	sha1 (Roku, Inc.) (84)	yourthings:eth1-20180320.0210.1521529800#74702
 Roku	Roku 4 Roku 4	tls-weak	yourthings	1738	offered 3des+rc4 (1735); offered 3des+des+export+md5+rc4 (2); offered rc4 (1)	yourthings:eth1-20180320.0005.1521522300#12167; yourthings:eth1-20180411.2010.1523495400#175457; yourthings:eth1-20180415.1605.1523826300#117149
 Samsung	Pan/Tilt 1080P Wi-Fi Camera	id-plain	deakin	68	form:serial=mdns_txt:sn -> www.samsungsmartcam.com:80 (68)	deakin:pcapFull__2023-07-26.pcap#278764
 Samsung	Pan/Tilt 1080P Wi-Fi Camera	tls-weak	deakin	16	offered 3des+anon+rc4 (16)	deakin:pcapFull__2023-07-31.pcap#179688
 Samsung	Smart TV	cred-plain	yourthings	1	q:mboxSession -> nflenterprises.tt.omtrdc.net:80 (1)	yourthings:eth1-20180410.0025.1523337900#118613
+Samsung	Smart TV	dl-http	yourthings	2	apps.samsungcloudcdn.com/files/widget/{id}/{id}/{id}/widget/{id} (2736128 B, application/binary) (1); apps.samsungcloudcdn.com/files/widget/{id}/{id}/{id}/widget/{id} (14843904 B, application/binary) (1)	yourthings:eth1-20180413.1545.1523652300#74095; yourthings:eth1-20180418.0945.1524062700#91538
 Samsung	Smart TV	fw-http	yourthings	12	otn.samsungcloudcdn.com/firmware/tv/487/{id}/OUITHeaders.dat (4224 B) (12)	yourthings:eth1-20180410.1855.1523404500#203105
 Samsung	Smart TV	id-plain	yourthings	2	q:d_uuid=named q:d_uuid -> cm.everesttech.net:80 (1); q:location=named q:location -> nflenterprises.tt.omtrdc.net:80 (1)	yourthings:eth1-20180410.0025.1523337900#118613; yourthings:eth1-20180410.0025.1523337900#124972
 Samsung	Smart TV	tls-cert	yourthings	1127	sha1 (Samsung Electronics) (703); expired (COMODO CA Limited) (290); sha1 (GeoTrust Inc.) (98); RSA 1024, sha1 (Samsung Electronics) (36)	yourthings:eth1-20180320.0000.1521522000#67057; yourthings:eth1-20180320.0010.1521522600#32367; yourthings:eth1-20180320.0110.1521526200#26705
@@ -157,6 +167,7 @@ Withings	Home	id-plain	yourthings	4	form:mac_address=MAC -> scalews.withings.net
 Withings	Smart Baby Monitor	cred-plain	iotraffic,unsw2016	10068	form:sessionid -> babyws.withings.net:80 (8980); form:auth -> babyws.withings.net:80 (1088)	iotraffic:pcaps__WithingsBabyMonitor_0024e41118a8.pcapng#1132; iotraffic:pcaps__WithingsBabyMonitor_0024e41118a8.pcapng#50; iotraffic:pcaps__WithingsBabyMonitor_0024e41118a8.pcapng#543
 Withings	Smart Baby Monitor	id-other	iotraffic,unsw2016	10	aa:bb:cc:dd:ee:ff in tcp/1935 payload (10)	iotraffic:pcaps__WithingsBabyMonitor_0024e41118a8.pcapng#276068; iotraffic:pcaps__WithingsBabyMonitor_0024e41118a8.pcapng#583210; iotraffic:pcaps__WithingsBabyMonitor_0024e41118a8.pcapng#60706
 Withings	Smart Baby Monitor	id-plain	iotraffic,unsw2016	1088	form:auth=MAC -> babyws.withings.net:80 (1088)	iotraffic:pcaps__WithingsBabyMonitor_0024e41118a8.pcapng#543; unsw2016:16-09-23.pcap#6874
+Withings	Smart Scale	fw-http	iotraffic	2	cdnfw.withings.net/wbs02/{id} (752636 B) (2)	iotraffic:pcaps__WithingsSmartScale_0024e41b6f96.pcap#27228
 Withings	Smart Scale	id-plain	iotraffic	1	form:mac_address=MAC -> wbs02-ws.withings.net:80 (1)	iotraffic:pcaps__WithingsSmartScale_0024e41b6f96.pcap#28301
 Withings	Smart Scale	tls-cert	iotraffic	101	self-signed (Withings) (101)	iotraffic:pcaps__WithingsSmartScale_0024e41b6f96.pcap#28292
 Withings	Smart Scale	tls-nofs	iotraffic	101	TLS_RSA_WITH_AES_128_CBC_SHA256:101 (101)	iotraffic:pcaps__WithingsSmartScale_0024e41b6f96.pcap#28292

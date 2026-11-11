@@ -16,7 +16,7 @@
 
 ## 数
 
-- 候補：74 製品、166 件（[sweep/candidates.tsv](sweep/candidates.tsv)）。
+- 候補：75 製品、177 件（[sweep/candidates.tsv](sweep/candidates.tsv)）。2026-11-11 に、取りこぼしていたダウンロードの 11 件を足した（下の「取りこぼしていたダウンロード」）。
 - 識別子など 61 件：除く 0、論文で一部 41、ブログ等のみ 9、見つからず 11。
 - TLS 105 件：除く 7、論文で一部 55、対応表の論文にない 35、未確認 8。
 
@@ -158,6 +158,26 @@
 - **SimCam**：製造元は Simshine（深圳または武漢。アプリ SIMCAM AI）。データセットの機種名は SIMCAM 1S（Kostas ほか, arXiv 2307.08679 の表による）。
 - **SimCam のメーカーの説明**：TechCrunch（2019-09-10）、App Store、a&s（2019）、Digital Trends は、映像を機器の中で処理すると紹介している。人物検知の画像をクラウドに平文で送る観測とは食い違う可能性がある。ただし、説明の時期（収録の 2021-11 より前か）と、範囲（検知の画像を含むか）は未確認。
 - 見えているのはアクセスキー ID だけで、秘密鍵は見えていない。同じキーがほかの機器でも使われているか、署名つきの要求を再送できるかは、パッシブでは確かめられない。
+
+## 取りこぼしていたダウンロード（2026-11-11）
+
+候補を選ぶ規則が、ファームウェアの取得をパス（`{id}` に置き換えた形）だけで見ていたため、ホスト名でしか分からない取得と、パスに手がかりのない取得を落としていた。規則を直し（ホスト名も見る。ほかの 1 MB 以上の平文のダウンロードは、音声・動画・画像を除いて「中身を確かめる」候補にする）、`verify.py dl` で確かめた。
+
+| 製品 | 根拠 | 要求と応答 | 判定 |
+|---|---|---|---|
+| Belkin WeMo Link | yourthings `eth1-20180321.1855.1521676500` ストリーム 76 | `fw.xbcs.net/wemo/owrt/WeMo_WW_2.00.11054.OWRT.PVT_LED_Light.bin.gpg?mac=94103ECC6794`、200、4,770,906 バイト、エントロピー 8.00 | ファームウェアを HTTP で取得（ファイルは GPG の形式） |
+| Belkin WeMo Motion Sensor | 同 ストリーム 73 | `.../WeMo_WW_2.00.11054.OWRT.PVT_SNS.bin.gpg?mac=08863B6F7A14`、200、4,371,159 バイト | 同上 |
+| Belkin WeMo Switch | 同 ストリーム 70 | `.../WeMo_WW_2.00.11054.OWRT.PVT_SNS.bin.gpg?mac=08863B70D738`、200、4,371,159 バイト | 同上 |
+| Belkin WeMo Crock-Pot | 同 ストリーム 71 | `.../WeMo_WW_2.00.10926.OWRT.PVT_Jarden-trans.bin.gpg?mac=94103E5C2E30`、200、4,436,078 バイト | 同上 |
+| Withings Smart Scale | iotraffic `WithingsSmartScale_0024e41b6f96.pcap` ストリーム 168 | `cdnfw.withings.net/wbs02/wbs02_1701.bin`、200、752,636 バイト、エントロピー 7.10 | ファームウェアを HTTP で取得 |
+| Amazon Echo | iotraffic `AmazonEcho_44650d56ccd3.pcap` ストリーム 28111、28488 | `amzdigitaldownloads.edgesuite.net/obfuscated-otav3-9/.../libc6-4172.ipk`（1,399,132 バイト）、`.../doppler-4172.ipk`（200、56,637,742 バイト、2016-10-27）など 16 回 | ソフトウェアの更新のパッケージを HTTP で取得 |
+| Lutron Caseta Smart Bridge | yourthings `eth1-20180414.0610.1523704200` ストリーム 366、`eth1-20180419.0840.1524145200` ストリーム 193 | `s3.amazonaws.com/caseta/final/06.05.09f000/kernel-4.4.001.deb`（200、2,977,678 バイト）、`06.05.10f000` の同じ名前（2,977,710 バイト） | ファームウェアの部品を HTTP で取得 |
+| Ring Video Doorbell | yourthings `eth1-20180413.1545.1523652300` ストリーム 576 | `fw.ring.com/doorbots_api/v2_firmwares/1550/download?component=flash`（Basic 認証つき） | 既に [ring-prior-work.md](ring-prior-work.md) で確認済み |
+| Samsung Smart TV | yourthings `eth1-20180413.1545.1523652300` ストリーム 233 | `apps.samsungcloudcdn.com/files/widget/.../enc_111477000528_3.3.65.tmg?AWSAccessKeyId=...&Signature=...`、200、4,481,024 バイト（squashfs） | アプリのパッケージ。URL に S3 の署名（認証情報、値は quarant-results） |
+| Apple HomePod | yourthings `eth1-20180328.0620.1522236000` ストリーム 273 | `appldnld.apple.com/ios11.0/.../com_apple_MobileAsset_VoiceServices_GryphonVoice/....zip`（595,567,472 バイト） | Siri の音声データ。ファームウェアではない |
+| Roku 4 | yourthings `eth1-20180415.1550.1523825400` ストリーム 638 | `index.ehub.netflix.com/item/SpeedTest?size=12500000` | 速度の測定。外す |
+
+- 先行研究の区分はまだ付けていない（次の作業）。
 
 ## パケットでの確認（「論文で一部」の 41 件、2026-11-11）
 
