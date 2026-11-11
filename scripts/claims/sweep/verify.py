@@ -17,7 +17,8 @@ dl       the HTTP response in the TCP stream of <frame>: status, length, type, f
          and the first bytes and entropy of the body
 tls      the TLS handshake in the TCP stream of <frame> (versions and suites the device offered, server
          name, version and suite chosen, every certificate: key, signature hash, issuer, subject, validity),
-         then all handshakes of the device in the capture by server, chosen version and suite
+         reading only up to 20000 packets after <frame>; with VERIFY_TLS_ALL=1 also all handshakes of the
+         device in the capture by server, chosen version and suite (report.py's tls.tsv has the same count)
 Values are printed as they are (2026-11-11): the most common values of the field, the decoded
 Authorization parts, and the bytes around the MAC. The output can hold credentials, so keep it out of
 the public repository (credentials go to quarant-results/claims). The peer's name is taken from DNS
@@ -37,10 +38,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import expose  # noqa: E402  (HTTP field parsing and shapes)
 
 
-def tshark(cap, filt, fields, *extra):
-    # VERIFY_DECODE="tcp.port==8802,http" reads a non-standard port as HTTP
+def tshark(cap, filt, fields, *extra, upto=None):
+    # VERIFY_DECODE="tcp.port==8802,http" reads a non-standard port as HTTP; upto stops after that many packets
     decode = ["-d", os.environ["VERIFY_DECODE"]] if os.environ.get("VERIFY_DECODE") else []
-    cmd = ["tshark", "-r", cap, *decode, "-Y", filt, "-T", "fields", "-E", "separator=\t", "-E", "occurrence=a",
+    cmd = ["tshark", "-r", cap, *decode, *(["-c", str(upto)] if upto else []), "-Y", filt, "-T", "fields", "-E", "separator=\t", "-E", "occurrence=a",
            "-E", "aggregator=\x1f", *extra]
     for f in fields:
         cmd += ["-e", f]
@@ -116,7 +117,7 @@ def cmd_http(cap, mac, host, key, lan_kind=None):
                   "http.host", "http.request.method", "http.request.uri", "http.request.line", "http.file_data"])
     hits, frames, peers = [], [], collections.Counter()
     for fr, st, dst, port, h, method, uri, lines, data in rows:
-        if host not in (h, dst):
+        if host not in (h, dst, h.removesuffix(":80")):   # some devices write the port into the Host header
             continue
         heads = "".join(x for x in lines.split("\x1f")).replace("\\r\\n", "\r\n")   # tshark prints CRLF as \r\n
         msg = f"{method} {uri} HTTP/1.1\r\n".encode("latin-1") + heads.encode("latin-1", "replace") + b"\r\n"
@@ -277,8 +278,9 @@ def suite_names(codes):
 
 
 def cmd_tls(cap, mac, frame):
-    (st,) = tshark(cap, f"frame.number == {frame}", ["tcp.stream"])[0]
-    rows = tshark(cap, f"tcp.stream == {st} && tls.handshake", ["frame.number", "frame.time_epoch", "ip.src", "ip.dst",
+    upto = int(frame) + 20000
+    (st,) = tshark(cap, f"frame.number == {frame}", ["tcp.stream"], upto=int(frame))[0]
+    rows = tshark(cap, f"tcp.stream == {st} && tls.handshake", upto=upto, fields=["frame.number", "frame.time_epoch", "ip.src", "ip.dst",
                   "tcp.dstport", "tls.handshake.type", "tls.handshake.version", "tls.handshake.extensions.supported_version",
                   "tls.handshake.ciphersuite", "tls.handshake.extensions_server_name", "tls.handshake.certificate"])
     print(f"stream {st} of {Path(cap).name}")
@@ -297,6 +299,8 @@ def cmd_tls(cap, mac, frame):
         if "11" in types and certs:
             for i, c in enumerate(certs.split("\x1f")):
                 print(f"  frame {fr} certificate {i}: {cert_line(unhex(c), float(t))}")
+    if not os.environ.get("VERIFY_TLS_ALL"):
+        return
     # an ICMP error quoting a packet gives a second ip.src; keep plain IPv4 addresses only
     ips = {a for r in tshark(cap, f"{src(mac)} && tls.handshake.type == 1", ["ip.src"]) for a in r[0].split("\x1f")
            if re.fullmatch(r"[0-9.]+", a)}
