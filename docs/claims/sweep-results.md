@@ -18,7 +18,7 @@
 
 - 候補：85 製品、194 件（[sweep/candidates.tsv](sweep/candidates.tsv)）。2026-11-11 に、取りこぼしていたダウンロードの 11 件、Deakin のやり直しで出た TLS の 4 件、UNSW 2018 の 12 件、IoT-23 の 1 件を足した。
 - 識別子など 61 件：除く 0、論文で一部 42、ブログ等のみ 9、見つからず 10。
-- TLS 110 件：除く 7、論文で一部 59、ブログ等のみ 2、対応表の論文にない 34、未確認 8（2026-11-11 に Deakin の 4 件を候補ごとに探し、IoT-23 の Somfy を足した）。
+- TLS 110 件：除く 7、論文で一部 59、ブログ等のみ 2、見つからず 1、対応表の論文にない 33、未確認 8（2026-11-11 に Deakin の 4 件と IoT-23 の Somfy を候補ごとに探した）。
 - 2026-11-11 の追加：Wannigama ほか（IEEE WoWMoM 2024、arXiv:2404.07408 の Table I p.2、§II）が UNSW のデータで Awair と Samsung SmartCam の TLS、Triby の Basic 認証を扱っていたので、この 3 件を「論文で一部」に移した。
 - 公式文書との食い違いの候補と、取りこぼしていたダウンロードの先行研究は [sweep/prior-claims.tsv](sweep/prior-claims.tsv)。
 
