@@ -19,6 +19,7 @@
 | [sonos-paper.md](sonos-paper.md) | Sonos の論文に向けた整理：収録の前後の文書の版、2018 年と 2021 年（CIC）の観測、先行研究の表 |
 | [deep-checks.md](deep-checks.md) | 深掘り 2〜4（Withings Home、Wink Hub 2、TP-Link）の短い確認と判定の案 |
 | [known-reports.md](known-reports.md) | 食い違いの候補ごとに、同じ観測を先に報告していた論文・発表・ブログと、説明との食い違いとして指摘していたか |
+| [review-sweep.md](review-sweep.md) | 人が確かめる表：4 つのデータセットの食い違いの候補を 1 行ずつ（引用、版、観測の根拠、確認の欄） |
 | [compare-sweep.md](compare-sweep.md) | 公式文書と通信の食い違い：UNSW 2016、UNSW-IoTraffic、CIC IoT 2022、Deakin 2023 の文書を集めて比べた結果（候補、文書に主張がない重い問題、見えないもの） |
 | [sweep-results.md](sweep-results.md) | 5 つのデータセットの自動の洗い出し（識別子、認証情報、ファームウェア、TLS）と、先行研究での振り分け。表は [sweep/](sweep/) |
 | [sweep-handoff.md](sweep-handoff.md) | 洗い出しの引き継ぎ：目的、手順、守ること、判断待ち、はまりどころ |
