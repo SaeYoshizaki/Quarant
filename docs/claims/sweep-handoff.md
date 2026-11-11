@@ -78,7 +78,9 @@
 - 外付けディスク QuarantData（`~/datasets` はここへのリンク）。つながっていないときは、ディスクの要らない作業（文書集め、先行研究）を進め、判断待ちに「ディスクをつなぐ」と書く。
 - 外付けディスクから同時に読むのは 3 本まで。多いと詰まる。
 - `tarfile` に大きな bufsize を渡さない。gzip は別のプロセスで展開する（`expose.py`）。
-- YourThings の tgz の中のパスは日によって違う（03-20、03-21、04-15 は `2018/MM/DD/eth1-…`、04-11 は `11/eth1-…`、04-12 は `12/eth1-…`）。分からなければ `tar tzf … | grep`（数分）。03-20 と 04-10 は `/Volumes/QuarantData/yt-extract/` に展開済み。UNSW 2016 は `~/datasets/raw/unsw-iot-traces/16-MM-DD.tar.gz`。
+- YourThings の tgz の中のパスは日によって違う（03-20、03-21、03-28、04-15 は `2018/MM/DD/eth1-…`、04-10〜14 と 04-18 は `DD/eth1-…`）。`tar -xzf <tgz> -C <先> '*eth1-…'` のように名前の型で取り出せる（1 日分で 5〜10 分）。03-20 と 04-10 は全部、ほかの日は確認に使ったファイルだけが `/Volumes/QuarantData/yt-extract/<日付>/` にある。前の会話で取り出した UNSW 2016 の 09-28、09-30 と YourThings の一部は `~/datasets/claims/sweep/verify-prev/`。UNSW 2016 の元は `~/datasets/raw/unsw-iot-traces/16-MM-DD.tar.gz`。
+- シェルは zsh。`ROOTS="a b"` のような変数は空白で分けられず、1 つの引数になる（`verify_all.py` が全件「ファイルなし」になった）。複数のパスは bash のスクリプトの配列で渡す。
+- `verify.py tls` は根拠のフレームから 20,000 パケットまでしか読まない。全体の数は `VERIFY_TLS_ALL=1`。
 - Deakin は Linux cooked の形式（送信元の MAC は `sll.src.eth`。`verify.py` の `src()` で対応済み）。
 - devices.tsv で製品を探すときは label で引く。名前の一部で探すと取り違える（TP-Link Tapo と Samsung の Pan/Tilt）。
 - tshark は CRLF を `\r\n` の文字で出す（`verify.py` で対応済み）。非標準のポートの HTTP は `VERIFY_DECODE="tcp.port==8802,http"` のように指定する。
