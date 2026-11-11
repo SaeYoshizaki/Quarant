@@ -69,6 +69,15 @@
 - メーカーへの連絡。実機を使う能動的な検証。
 - Alrawi ほか（S&P 2019、Table V p.17）を理由に除いた証明書の 7 件。論文の印は自己署名と「vuln SSL」、こちらの観測は SHA-1 や RSA 1024 の証明書で、性質が違うかもしれない。「論文で一部」に移すか（2026-11-11、[sweep-results.md](sweep-results.md) の TLS の節）。
 
+- 主張の読み方（2026-11-11）。どれも claims.tsv の note に書いた。
+  - SimCam：「video」を対象にした文（「processes and stores video locally」）が、人物検知の静止画の送信まで含むか。製品ページ（「Everything is processed and stored locally」）と、同じ会社のアプリのポリシー（「image data will be transferred ... via the server」）が食い違っている。
+  - D-Link DCH-S161：「SSL ... for better securing all logs of settings and Services of your devices」に、平文のファームウェアの確認（`/fw-upgrade?device_id=<MAC>`）が入るか。今は弱い候補。
+  - Awair：「encrypts and stores all information over TLS and AES 256 bit encryption」の AES 256 が、通信のことか保存のことか。今は候補（握手の 9 割が AES-128）。
+- 機種が分からない製品（Amcrest、Globe、Gosund、Atomi、HeimVision、Insteon Camera、HP ENVY、iHome）で、どの製品ページを使うか。今は共通の文書（プライバシーなど）だけで判定した。
+- 地域の版：CIC はカナダ、UNSW と Deakin はオーストラリアの収録だが、集めた文書の多くは米国版。
+- 製造者でない会社の文書（Borun の V380 アプリ、Amcrest Cloud を運営する Camcloud、BlipCare に対する Carematix）を含めるか。
+- 収録よりかなり古い文書（dropcam.com の 2015 年の版、収録の約 21 か月前）を比べる対象に入れるか。
+
 （作業中に判断が要るものが出たら、ここに書き足す。）
 
 ## 5. 環境とはまりどころ
