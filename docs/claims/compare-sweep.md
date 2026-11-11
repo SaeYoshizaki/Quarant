@@ -15,11 +15,9 @@
 |---|---|---|---|---|---|---|
 | YourThings 2018 | 44 | 10 | 0 | 50 | 16 | 749 |
 | UNSW 2016 | 3 | 0 | 0 | 6 | 20 | 31 |
-| UNSW-IoTraffic | 20 | 3 | 1 | 47 | 151 | 174 |
+| UNSW-IoTraffic | 25 | 4 | 1 | 50 | 184 | 255 |
 | CIC IoT 2022 | 26 | 9 | 2 | 45 | 187 | 205 |
 | Deakin 2023 | 14 | 2 | 0 | 39 | 130 | 117 |
-## 食い違いの候補（今回の 4 つのデータセット）
-
 | 製品 | 主張（文書、版の日付） | 観測 | 先行研究 |
 |---|---|---|---|
 | SimCam 1S（CIC） | 「Everything is processed and stored locally on the device」（製品ページ、2020-08-08）。「Because the Simshine ® Simcam 1S uses entirely local AI processing, we never have access to your data.」（FAQ、2021-10-24） | 人物検知の JPEG（22〜25 KB）を平文の HTTP で S3 のバケットに 15 回 PUT（`2021_11_02_Active.pcap` フレーム 1234〜631073、パス `/SimCam/<id>/PersonDetect/<id>`）。カメラは TLS を一度も使っていない | 食い違い：見つからず。画像の送信：見つからず |
@@ -29,6 +27,7 @@
 | D-Link DCH-S161（CIC、弱い） | 「The SSL protocol is also implemented for ... better securing all logs of settings and Services of your devices」（US のプライバシー、2021-11-28） | `GET mp-us-fwd.auto.mydlink.com/fw-upgrade?device_id=F0B4D2F96095`（機器の MAC）が平文、32 回 | 食い違い：見つからず。更新の確認：論文で一部（Bradley & Barrera, FPS 2022） |
 | iRobot Roomba（CIC） | 「Currently, we use AES 256-bit encryption and Transport Layer Security (TLS v1.2).」（データセキュリティのページ、2021-12-06、すべての製品が対象） | 34 回の握手はすべて AES-128-GCM（TLS 1.3 の `TLS_AES_128_GCM_SHA256` が 20、TLS 1.2 の `TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256` が 14）。AES-256 は一度も選ばれていない | 食い違い：見つからず。暗号の選択：見つからず |
 | Philips Hue Bridge（CIC） | 「Hue only connects to the internet securely via a dedicated cloud so your devices cannot be seen from the open internet.」（FAQ、2021-12-22） | ブリッジの通信の 27% が平文の HTTP：`diagnostics.meethue.com/v2/diagnostics/report?...&sso=<トークン>`（4,760 回、本文は 16 進の暗号文）、`dcp.dc1.philips.com:80` への POST の `Authorization: CBAuth` にブリッジ ID と SSO トークン（1,017 回） | 食い違い：見つからず。平文の HTTP：論文で一部（Mandalari ほか, PoPETs 2021, §5.5 p.379）。トークンとブリッジ ID の平文：見つからず |
+| Philips Hue Bridge（IoTraffic、2016-17） | 「Philips Lighting, transfers data securely (using SSL) and will encrypt some data, such as your MAC address when it is stored.」（プライバシー、2016-10-17 と 2017-03-01 の版、収録の期間に有効） | ブリッジの通信の 70%（36.5 MB）が平文の HTTP：`dcp.cpp.philips.com:80` などへの POST に `Authorization: CBAuth`（4,810 回）、`bridge.meethue.com:80/queue/getmessage` に `auth`（8,370 回）（`PhilipsHue_0017882b9a25.pcap` フレーム 1586〜3925289） | 食い違い：見つからず（この文を名指しした検索はしていない）。平文の HTTP：論文で一部（PoPETs 2021）、ブログ（AV-TEST 2017） |
 | Invoxia Triby（IoTraffic、弱い） | 「we will not disclose the personal information you provide via the Site or Products to parties unaffiliated with invoxia」（プライバシー、2017-02-11） | 機器の MAC を `8937406324.airable.io/authentication?device=<MAC>` に平文で送る | 食い違い：見つからず。Basic 認証：論文で一部（WoWMoM 2024） |
 
 - **SimCam**：同じ会社のアプリ（SimHome）のプライバシーポリシー（2021-10-06）は「your image data will be transferred to your mobile device via the server」と開示している。製品ページと FAQ の説明が、同じ会社の別の文書と合っていない。S3 のバケットと `www.luuka.fun` の持ち主は未確認。
