@@ -612,6 +612,7 @@ def forms(m):
 def scan(stream, name, macs, out_path):
     u = Unit(macs, name)
     macb = {bytes.fromhex(m.replace(":", "")): m for m in macs}
+    ipdev = {}   # Linux cooked captures have no destination MAC: the devices' own addresses, from what they sent
     n = 0
     last_sweep = None
     for ts, lt, fr in frames(stream):
@@ -621,12 +622,18 @@ def scan(stream, name, macs, out_path):
             continue
         smac, dmac, et, off = x
         sdev, ddev = macb.get(smac), macb.get(dmac)
-        if not sdev and not ddev:
+        if not sdev and not ddev and lt != 113:
             continue
         p = l4(et, fr, off)
         if not p:
             continue
         src, dst, proto, sp, dp, seq, flags, pl = p
+        if lt == 113:
+            if sdev:
+                ipdev[src] = sdev
+            ddev = ipdev.get(dst) if dst != src else None
+            if not sdev and not ddev:
+                continue
         handle(u, ts, n, sdev, ddev, src, dst, proto, sp, dp, seq, flags, pl)
         if last_sweep is None:
             last_sweep = ts
