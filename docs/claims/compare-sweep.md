@@ -16,11 +16,10 @@
 | YourThings 2018 | 44 | 10 | 0 | 50 | 16 | 749 |
 | UNSW 2016 | 3 | 0 | 0 | 6 | 20 | 31 |
 | UNSW-IoTraffic | 15 | 3 | 0 | 25 | 86 | 109 |
-| CIC IoT 2022 | 20 | 9 | 1 | 27 | 143 | 160 |
-| Deakin 2023 | 8 | 2 | 0 | 17 | 74 | 52 |
-
+| CIC IoT 2022 | 26 | 9 | 2 | 45 | 187 | 205 |
+| Deakin 2023 | 14 | 2 | 0 | 39 | 130 | 117 |
 - 「判定できない」には、セキュリティの主張がない文書の行（none）と、保存時の暗号化など通信で見えない主張を含む。
-- 文書が見つからなかった製品：Borun カメラ、Home Eye カメラ、Yutron プラグ（公式サイトが見つからない）。
+- 文書が見つからなかった製品：Borun カメラ、Home Eye カメラ、Yutron プラグ、TOPERSUN プラグ、Perfk センサー、Luohe カメラ（公式サイトが見つからないか、収録の時期の版に主張がない）。
 
 ## 食い違いの候補（今回の 4 つのデータセット）
 
@@ -39,6 +38,7 @@
 - **Hue**：送り先が Philips/Signify のホストだけという点（dedicated cloud）は一致。食い違いは「securely」の部分で、AV-TEST（2017）は本文が別に AES で暗号化されているとして「十分に安全」と評価している。食い違いの根拠は、平文で見えるブリッジ ID と SSO トークン。YourThings の Hue は、文書の時期と範囲の理由で利用者が除いた（D40）。今回は 2021 年の文書と CIC の通信で別に比べた。
 - **Roomba**：TLS 1.3 は書かれた TLS 1.2 より新しく、弱くはない。食い違いは AES-256 の部分だけ。機種は未確認。
 - **Nest Mini（文言の上で食い違い）**：NCC Group の ioXt 評価報告（2021-06、Google が公開）の「all BLE and WLAN communication was secured using ... up-to-date TLS」に対し、平文は中身のない HEAD の接続確認（`connectivitycheck.gstatic.com`）だけ。報告を製造者の文書として数えるかは判断待ち。
+- **Ring Alarm Base Station（文言の上で食い違い）**：Ring のポートの記事（2021-10-24）は「HTTP (port 80) ( Note : Not applicable to Ring Alarm Base Station)」とするが、Base Station は `st.rings.solutions:80/online/check.html` に中身のない GET を送っていた（`ringbasestationPOWER_1.pcap` フレーム 50、64）。
 - **弱い候補**：D-Link は、ファームウェアの確認が「設定のログとサービス」に入るかの読み方による。Triby は、airable が「unaffiliated」に当たるかと、MAC が「personal information you provide」に当たるかによる。どちらも判断待ち（[sweep-handoff.md](sweep-handoff.md) の 4）。
 - YourThings の候補（Sonos、Withings Home、August、HomePod、TP-Link HS105・LB130、Wink Hub 2）は [results-yourthings.md](results-yourthings.md) と [known-reports.md](known-reports.md)。
 
@@ -52,6 +52,9 @@
 | Withings Aura、Baby Monitor、Smart Scale（UNSW） | MAC を認証の値として、セッション ID とともに平文の HTTP で送る | 当時の Withings の文書に暗号化の主張は見つからなかった |
 | Amazon Echo 第 1 世代（UNSW） | 更新のパッケージ（`doppler-4172.ipk`、56,637,742 バイト）を HTTP で取得 | 更新の転送の保護についての記述なし |
 | Belkin WeMo 4 製品、Lutron Caseta（YourThings）、Withings Smart Scale（UNSW） | ファームウェアを HTTP で取得（WeMo は `.bin.gpg`） | 更新の転送の保護についての記述なし |
+| Nest Cam（CIC、2021） | 48 回の握手すべてで TLS 1.0 までしか提示しない（38 回で TLS 1.0 が選ばれた） | 「128-bit AES encryption with TLS/SSL」などの主張とは一致する。版についての主張はない |
+| Samsung Smart Monitor M80B（Deakin） | Netflix のアプリが `nrdp52-appboot.netflix.com:80` に `NetflixId`、`nfvdid` のクッキーを平文の HTTP で送る（27 回）。サーバー証明書が SHA-1（Samsung Hubsite CA） | Samsung の文書に送信の具体的な主張はない。クッキーの値は quarant-results |
+| Amazon Video のサーバー（YourThings の Samsung TV、CIC の Echo Spot、Deakin の Echo Show 8） | `api.amazonvideo.com` などのサーバーが、2018・2021・2023 年のどれでも、一部の握手で TLS 1.0 を選んだ | Amazon の「interactions are encrypted in transit」とは一致する（TLS 1.0 も暗号化）。版についての主張はない |
 | Amcrest カメラ（CIC） | 公開のアドレスへの通信の 99% が、UDP の上の HTTP の形の P2P の制御（mDNS の名前を含む） | 暗号化の具体的な主張なし |
 
 ## 見えないもの
