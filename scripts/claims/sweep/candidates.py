@@ -8,7 +8,9 @@ Kinds:
              like an identifier whose value stayed the same) sent in plaintext to a public address
   id-other   the device's MAC inside a payload that is not HTTP (custom protocols, SIP, UDP)
   cred-plain a credential-like field (Authorization, auth, token, password) sent in plaintext
-  fw-http    a download of 1 MB or more, or of a binary type, over plaintext HTTP from a firmware-like path
+  fw-http    a download of 1 MB or more, or of a binary type, over plaintext HTTP from a firmware-like host or path
+  dl-http    any other download of 1 MB or more over plaintext HTTP that is not audio, video or an image
+             (what it is must be checked in the packets; the path is kept only in its {id} form)
   tls-old    TLS 1.0/1.1 chosen with a public server, or the device offered nothing newer
   tls-weak   RC4, DES, export, NULL or anonymous suites offered or chosen (3DES alone is left out)
   tls-nofs   no handshake with a public server used forward secrecy
@@ -21,7 +23,8 @@ import re
 import sys
 from pathlib import Path
 
-FW = re.compile(r"(?i)fw|firm|update|upgrade|ota|\.bin|\.img|\.upd|\.pkg|\.pup|\.rom|\.hex|\.tar|\.gz|\.zip|/image")
+FW = re.compile(r"(?i)fw|firm|update|upgrade|ota|\.bin|\.img|\.upd|\.pkg|\.pup|\.rom|\.hex|\.tar|\.gz|\.zip|\.ipk|/image")
+MEDIA = re.compile(r"(?i)^(audio|video|image)/")
 REQ_ID = re.compile(r"(?i)request|session|playback|nonce|guid$|^q:guid|cookie:")
 
 
@@ -60,8 +63,11 @@ def main():
             add(r["dataset"], r["mac"], "id-other", re.sub(r" -> .*", "", r["detail"]), r["count"], f'{r["first_file"]}#{r["first_frame"]}')
     for r in rows(Path(rdir) / "dl.tsv"):
         size = int(r["size"] or 0)
-        if FW.search(r["path"] or "") and (size >= 1_000_000 or "octet" in r["ctype"]):
-            add(r["dataset"], r["mac"], "fw-http", f'{r["host"]}{r["path"]} ({size} B)', r["count"], f'{r["first_file"]}#{r["first_frame"]}')
+        where = f'{r["host"]}{r["path"]}'
+        if FW.search(where) and (size >= 1_000_000 or "octet" in r["ctype"]):
+            add(r["dataset"], r["mac"], "fw-http", f'{where} ({size} B)', r["count"], f'{r["first_file"]}#{r["first_frame"]}')
+        elif size >= 1_000_000 and not MEDIA.match(r["ctype"] or ""):
+            add(r["dataset"], r["mac"], "dl-http", f'{where} ({size} B, {r["ctype"] or "no type"})', r["count"], f'{r["first_file"]}#{r["first_frame"]}')
     for r in rows(Path(rdir) / "findings.tsv"):
         if not r["cat"].startswith("tls-") or not r["detail"].startswith("client-public"):
             continue
