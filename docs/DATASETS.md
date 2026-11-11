@@ -137,3 +137,5 @@
 | UNSW IoT attack traces | ARP スプーフィングを含む 5 日分（約 9.5GB）と注釈 | 済み（E1-3） |
 | IoT-23 | 悪性 6 シナリオと正常 2 シナリオ（PCAP、ラベル、README のみ。マルウェア本体は取得していない） | 済み（E1-1） |
 | CIC IoT 2022 | 未取得（登録フォームが必要） | 未実施 |
+
+2026-11-11 の追加（公式文書との比べ合わせ、[EXPERIMENTS.md](EXPERIMENTS.md) E17）：UNSW IoT attack traces の正常な日の 27 本（38.4 GB、`~/datasets/raw/unsw-iot-2018/benign/`）と、IoT-23 の正常な 3 シナリオ（4-1 Hue、5-1 Echo Dot、7-1 Somfy。約 510 MB、`~/datasets/raw/iot-23-benign/`）を外付けディスクに落とした。IoT-23 の README には「Stratosphere Lab の許可が要る」とあるが、Zenodo の記録は CC BY 4.0。

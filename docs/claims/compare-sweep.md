@@ -1,10 +1,10 @@
-# 公式文書と通信の食い違い（6 つのデータセット、2026-11-11）
+# 公式文書と通信の食い違い（7 つのデータセット、2026-11-11）
 
-製造者の公式文書に書いてあることと、データセットの実際の通信を比べた結果（[D42](../DECISIONS.md)、[sweep-handoff.md](sweep-handoff.md)）。YourThings 2018 の 44 製品は以前の作業（[results-yourthings.md](results-yourthings.md)）、ほかの 5 つのデータセット（UNSW 2018 は 2026-11-11 に追加）は今回集めた文書による。主張の 1 行ずつは [claims.tsv](claims.tsv)、探した文書は [coverage.tsv](coverage.tsv)。
+製造者の公式文書に書いてあることと、データセットの実際の通信を比べた結果（[D42](../DECISIONS.md)、[sweep-handoff.md](sweep-handoff.md)）。YourThings 2018 の 44 製品は以前の作業（[results-yourthings.md](results-yourthings.md)）、ほかの 6 つのデータセット（UNSW 2018 と IoT-23 は 2026-11-11 に追加）は今回集めた文書による。主張の 1 行ずつは [claims.tsv](claims.tsv)、探した文書は [coverage.tsv](coverage.tsv)。
 
 ## やったこと
 
-- **文書**：UNSW 2016、UNSW-IoTraffic、UNSW 2018、CIC IoT 2022、Deakin 2023 の製品について、収録の時期の公式文書（製品ページ、セキュリティ、プライバシー、サポート、マニュアル、リリースノート）を Wayback から集めた（[method.md](method.md) の D1〜D6）。引用はすべて保存した本文と照合した（`check_quotes.py`）。
+- **文書**：UNSW 2016、UNSW-IoTraffic、UNSW 2018、IoT-23（正常な 3 シナリオ）、CIC IoT 2022、Deakin 2023 の製品について、収録の時期の公式文書（製品ページ、セキュリティ、プライバシー、サポート、マニュアル、リリースノート）を Wayback から集めた（[method.md](method.md) の D1〜D6）。引用はすべて保存した本文と照合した（`check_quotes.py`）。
 - **主張の型**：暗号化（T1）、暗号の性質（T2）、認証情報（T3）、映像・音声（T4）、更新（T5）、送るデータ（T6）、機器の中での処理（T7）、送り先（T8）。開示（「MAC を集める」）も記録した。
 - **比べ方**：主張ごとに、洗い出し（[sweep-results.md](sweep-results.md)）の観測と、パケットでの確認（`verify.py`）を当てた。判定は「食い違いの候補」「一致（見えた範囲で）」「見えない」「判定できない」。
 - **先行研究**：同じ食い違いを指摘した資料と、通信の問題そのものの報告を分けて探した（[sweep/prior-claims.tsv](sweep/prior-claims.tsv)）。
@@ -17,6 +17,7 @@
 | UNSW 2016 | 3 | 0 | 0 | 6 | 20 | 31 |
 | UNSW-IoTraffic | 25 | 4 | 1 | 50 | 184 | 255 |
 | UNSW 2018 | 26 | 4 | 1 | 50 | 253 | 264 |
+| IoT-23 | 3 | 1 | 0 | 2 | 39 | 30 |
 | CIC IoT 2022 | 26 | 9 | 2 | 45 | 187 | 205 |
 | Deakin 2023 | 14 | 2 | 0 | 39 | 130 | 117 |
 
@@ -36,6 +37,7 @@
 | Philips Hue Bridge（CIC） | 「Hue only connects to the internet securely via a dedicated cloud so your devices cannot be seen from the open internet.」（FAQ、2021-12-22） | ブリッジの通信の 27% が平文の HTTP：`diagnostics.meethue.com/v2/diagnostics/report?...&sso=<トークン>`（4,760 回、本文は 16 進の暗号文）、`dcp.dc1.philips.com:80` への POST の `Authorization: CBAuth` にブリッジ ID と SSO トークン（1,017 回） | 食い違い：見つからず。平文の HTTP：論文で一部（Mandalari ほか, PoPETs 2021, §5.5 p.379）。トークンとブリッジ ID の平文：見つからず |
 | Philips Hue Bridge（IoTraffic、2016-17） | 「Philips Lighting, transfers data securely (using SSL) and will encrypt some data, such as your MAC address when it is stored.」（プライバシー、2016-10-17 と 2017-03-01 の版、収録の期間に有効） | ブリッジの通信の 70%（36.5 MB）が平文の HTTP：`dcp.cpp.philips.com:80` などへの POST に `Authorization: CBAuth`（4,810 回）、`bridge.meethue.com:80/queue/getmessage` に `auth`（8,370 回）（`PhilipsHue_0017882b9a25.pcap` フレーム 1586〜3925289） | 食い違い：見つからず（この文を名指しした検索はしていない）。平文の HTTP：論文で一部（PoPETs 2021）、ブログ（AV-TEST 2017） |
 | Samsung SmartCam（UNSW 2018） | 「Security SSL (AES 256bit)」（wisenetlife の SmartCam の仕様、2018-10-10・2018-10-22、収録の期間中） | カメラ（tcp/40000）から UNSW の別のアドレスへ、STUN のあと RTP に載せた H.264 の映像を暗号化せずに送っていた（`benign__18-05-28.pcap` の TCP ストリーム 19412、RTP 3,772 パケット、SPS 16 回、IDR の FU-A）。クラウドとの TLS は AES-128 だけ | 食い違い：見つからず。暗号化しない映像：SmartCam については見つからず（他社の Ring、TP-Link だけ）。暗号化されていない通信：ブログ・CVE（CVE-2018-6295、Kaspersky 2018。別の機種の報告で、通信路は書いていない）。同じ研究室の SmartCam を調べた Loi 2017 は機器→サーバーを平文でないとしており、今回とは逆（機器→アプリは試していない）。Hanwha 自身の勧告（2021 年の保存）も「Unencrypted way of remote control and communications」と書く |
+| Somfy スマートロックのゲートウェイ（IoT-23、弱い） | 「• Connexion sécurisée par cryptage normé AES 256」（Somfy の直営店の、ロックとゲートウェイのセットのページ、2017-04-03、収録の 27 か月前） | ゲートウェイ（MAC 5c:cf:7f:1e:76:54）と `somfykeys.opendoors.net` の TLS は、4 回の握手すべてで `TLS_RSA_WITH_AES_128_CBC_SHA256`。機器は AES-256 の暗号を先に提示し、AES-128 はサーバーの選択（`Somfy-01/…first_start_somfy_gateway.pcap` フレーム 440〜447）。どの接続かは書いておらず、ロック単体のページとマニュアルでは同じ AES 256 がスマートフォンとロックの間（Bluetooth）と書かれている | 探している最中 |
 | Invoxia Triby（IoTraffic、弱い） | 「we will not disclose the personal information you provide via the Site or Products to parties unaffiliated with invoxia」（プライバシー、2017-02-11） | 機器の MAC を `8937406324.airable.io/authentication?device=<MAC>` に平文で送る | 食い違い：見つからず。Basic 認証：論文で一部（WoWMoM 2024） |
 
 - **SimCam**：同じ会社のアプリ（SimHome）のプライバシーポリシー（2021-10-06）は「your image data will be transferred to your mobile device via the server」と開示している。製品ページと FAQ の説明が、同じ会社の別の文書と合っていない。S3 のバケットと `www.luuka.fun` の持ち主は未確認。
@@ -80,6 +82,6 @@ UNSW 2018 の 3 件の先行研究（[sweep/prior-claims.tsv](sweep/prior-claims
 ## 限界
 
 - 機種が分からない製品（Amcrest、Globe、Gosund、Atomi、HeimVision、Insteon Camera、HP ENVY、iHome、SmartCam）は、共通の文書（プライバシーなど）だけで判定した。
-- 文書の多くは米国版で、収録した国（カナダ、オーストラリア）の版は確かめていない。
+- 文書の多くは米国版で、収録した国（カナダ、オーストラリア、チェコ）の版は確かめていない。IoT-23 の Somfy はフランス語版と英語版の文書による。
 - Deakin は、洗い出しのやり直し（2026-11-11、[sweep-results.md](sweep-results.md) の「Deakin のやり直し」）までサーバーからの応答が見えていなかった。判定はやり直したあとの観測による。
 - 先行研究の区分は人がまだ確かめていない。

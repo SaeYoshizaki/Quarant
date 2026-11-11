@@ -52,7 +52,7 @@ def merge(shared, name, dirs, key):
 def main():
     claims, coverage, *dirs = sys.argv[1:]
     merge(claims, "claims.tsv", dirs, lambda r: (r["dataset"], r["product"], r["doc"], r["url"].strip(), r["quote"].strip(), r["type"]))
-    merge(coverage, "coverage.tsv", dirs, lambda r: (r["dataset"], r["product"], r["doc"], r["url"].strip(), r["status"]))
+    merge(coverage, "coverage.tsv", dirs, lambda r: (r["dataset"], r["product"], r["doc"], r["url"].strip(), r["status"], r["searched"].strip()))
 
 
 if __name__ == "__main__":

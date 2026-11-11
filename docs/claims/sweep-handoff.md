@@ -61,7 +61,9 @@
 5. **済み**：文書にした（compare-sweep.md、sweep-results.md、E17）。
 
 6. **済み（2026-11-11、利用者の依頼）**：データセットを広げる。UNSW 2018（SOSR 2019 のデータ、正常な 27 日、38.4 GB、MIT-0）を `~/datasets/raw/unsw-iot-2018/benign/` に落とし、洗い出しにかける（`run_all.sh unsw2018`）。2018 年の文書はエージェント U1〜U4 が `~/datasets/claims/collect/U1〜U4/` に集めている。**状態（2026-11-11 夜）**：済み。洗い出し、2018 年の文書（U1〜U4）の判定、パケットでの確認、[compare-sweep.md](compare-sweep.md) への反映まで終えた。devices.json の UNSW 2018 の期間は正常な日のデータで直した。先行研究（SmartCam の映像、Google の更新、HP、Tuya）も済み（[sweep/prior-claims.tsv](sweep/prior-claims.tsv) の最後の 4 行）。同じ食い違いの指摘は見つからなかった。Jia ほか（S&P 2020）の本文は読めていない（未確認）。
-ほかの候補：IoT-23 の正常な 3 本（メール不要）、CICIoT2023（フォームが要る）、南開大学の 77 機器（2024〜25、メールでの依頼が要る）、Mon(IoT)r と PingPong（約束への同意とメールが要る）。
+7. **済み（2026-11-11）**：IoT-23 の正常な 3 シナリオ（Hue、Echo Dot、Somfy）を `~/datasets/raw/iot-23-benign/` に落とし、洗い出し（`run_all.sh iot23`）、文書の判定（Hue と Echo は UNSW 2018 の文書を写した。Somfy はエージェント I1）、[compare-sweep.md](compare-sweep.md) への反映まで終えた。Somfy の候補の先行研究はエージェント P5 が探している（`~/datasets/claims/collect/P5/`）。Deakin の TLS 4 件の先行研究（P4）も済んだ。
+
+ほかの候補：CICIoT2023（フォームが要る）、南開大学の 77 機器（2024〜25、メールでの依頼が要る）、Mon(IoT)r と PingPong（約束への同意とメールが要る）。
 
 次にやること：判断待ち（下の 4）への返事を受けて、候補の判定と区分を直す。人が確かめる表 [review-sweep.md](review-sweep.md)（18 行）の「確認」の欄を利用者が埋める。Deakin のやり直しで出た TLS の 4 件の先行研究を探す。
 
@@ -89,6 +91,10 @@
   - Triby の候補：airable（Invoxia の取引先として airable のサイトに載っている）が「unaffiliated」に当たるか。
   - Ring Alarm のポートの記事（「HTTP は Base Station には当てはまらない」）と接続確認の GET を、文言の上での食い違いとして数えるか。
 - メーカーへの連絡（SimCam、Samsung など）。
+- IoT-23 で出たもの（2026-11-11）。
+  - Somfy：直営店のロックとゲートウェイのセットのページの「Connexion sécurisée par cryptage normé AES 256」が、ゲートウェイとサーバーの TLS まで含むか。ロック単体のページとマニュアルでは、同じ AES 256 がスマートフォンとロックの間（Bluetooth）と書かれている。今は弱い候補。
+  - Somfy：App Store の Somfy Keys のプライバシーのリンク先は opendoors の CGS（documents.opendoors.net）。Somfy のドメインではないので主張に入れていない。含めるか。Somfy のフォーラムの社員（「Equipe」）の回答を公式文書に含めるか。
+  - IoT-23 の README には「Stratosphere Lab の許可が要る」とあるが、Zenodo の記録は CC BY 4.0。CC BY として扱った。
 - UNSW 2018 で出たもの（2026-11-11）。
   - SmartCam 2018：映像の宛先は UNSW の別のアドレス（129.94.5.83）で、クラウドではない。仕様の「Security SSL (AES 256bit)」がこの経路まで含むか。比べた仕様は SNH-C6417BN と SNH-V6414BN のもので、UNSW の機器（MAC 00:16:6c:ab:6b:88）の機種は分からない。今は候補。
   - データセットのメールでの依頼（南開大学、Mon(IoT)r、PingPong）と、CICIoT2023 のフォームへの入力。利用者が決める。
