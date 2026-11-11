@@ -124,6 +124,21 @@
 | August Doorbell Cam | iotraffic `AugustDoorBell_e076d03f00ae.pcap` フレーム 5122643、5490378 | その位置のパケットに MAC が見つからない（1 つはペイロードなし）。自動の検出の誤り | 外す |
 | Smart Board | cic `2-Idle/2021_12_20_Idle.pcap` フレーム 9926 | Chrome の部品の差分更新（CRX diff）。署名つきの設計どおりの動き（Chromium の Omaha 3.1 の文書） | 外す |
 
+**値（2026-11-11 に読み直し。認証情報は quarant-results の `claims/sweep-credentials.md`）**：
+
+| 製品 | 値 |
+|---|---|
+| Invoxia Triby | `mac` と `device` は機器の MAC `18b79e022044`。tcp/5228 の SIP（フレーム 10）は `User-Agent: invoxia KTP1 10.48.1 [18:B7:9E:02:20:44]`、`Contact: "Triby-2044" <sip:smarthomeunsw.gmail.com.triby_18b79e022044@sip.invoxia.com>` で、MAC と、収録した研究室のアカウントのメールアドレスが出ている |
+| Nest Guard | tcp/11095 のフレーム 49432 に、`07AA01AD501706SQ`（Nest の製品のシリアル番号の形）と MAC 18:b4:30:40:1e:c5 の 6 バイト。前後のバイトは Weave の TLV の形で、機器の証明書の一部と見られる（推定、未確認） |
+| HeimVision カメラ | `device_id=xxxxS_4401bbec104a`（MAC 44:01:bb:ec:10:4a を含む。cic `2-Idle/2021_11_08_Idle.pcap` フレーム 799778〜873811） |
+| Samsung SmartCam | `serial=KHNL6V2H20003LX`（UPnP のシリアル番号と一致、13,310 回） |
+| Samsung Pan/Tilt 1080P カメラ | `serial=ZDZ56V2K100594B`（mDNS の `sn` と一致。deakin `2024-05-19.pcap` フレーム 531351〜2246513） |
+| Pix-Star フォトフレーム | `usr=e076d033bb85`（2016〜17 年、23 回）、`usr=b002476f6337`（deakin `2023-08-18.pcap` フレーム 256204）。どちらも機器の MAC |
+| Netatmo 気象計 | tcp/25050 に `70:ee:50:03:b8:ac`（iotraffic `NetatmoWeatherStation_70ee5003b8ac.pcap` フレーム 1992） |
+| Borun カメラ | udp/8877 に `49833595.nvdvr.net` と MAC の文字 `C0E7BF0A79D1`（cic `2-Idle/2021_11_26_Idle.pcap` フレーム 805）。HTTP の `deviceid=49833595` |
+| TP-Link NC220（弱い） | udp/40043 のフレーム 504251 は、16 バイトの頭のあとに `HTTP/1.0 200 OK`、`Server: Streamd,F4F26D9351F1` が続く。宛先 129.94.5.88 は UNSW の範囲で、アプリの端末かは未確認 |
+| Apple HomePod（外す） | `X-Playback-Session-Id` は `9ACA8A33-A82B-4C49-8B91-8115C0764A07` など再生ごとの UUID |
+
 - 16 件を確認、1 件は弱い、3 件は外す。
 - Home Eye と SimCam は、識別子より重い。カメラの画像そのものが平文で送られていた。
 - 「見つからず」は探した範囲の話で、新しいとは言わない。
