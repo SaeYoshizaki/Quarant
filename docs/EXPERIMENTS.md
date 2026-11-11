@@ -1180,3 +1180,12 @@ python3 scripts/accuracy/compare_misses.py docs/assessment/evidence-map.json ~/d
 - **確かめ方**：Sonos の既知の結果（YourThings 2018-03-20 のフレーム 60977 と 4429）を自動で再現した。
 - **途中の誤り**：(1) 外付けディスクに 8 プロセスで読ませて詰まった。(2) tarfile に大きなバッファを渡して CPU を使い切った。(3) 暗号化された本文をフォームとして読み、値の一部がキー名に入った（表から除く処理を足し、ツールの出力に一度出たことを利用者に報告）。(4) 確認で、Deakin の Linux cooked の形式と、製品名の取り違え（Tapo と Samsung）。どれも結論の前に直した。
 - **限界**：値の一致は、機器が LAN で名乗った値と MAC とだけ。UNSW 2018 と IoT-23 は使っていない。「論文で一部」と TLS の候補はパケットで確かめていない。先行研究の分類は人がまだ確かめていない。
+
+## E17：公式文書と通信の比べ合わせ（YourThings 以外の 4 つのデータセット、2026-11-11）
+
+- **目的**：D42 の目的（公式文書と通信の食い違い）で、UNSW 2016、UNSW-IoTraffic、CIC IoT 2022、Deakin 2023 の製品の公式文書を集め、E16 の洗い出しの観測と比べる。
+- **文書**：エージェント 9 組（1 組 6〜9 製品）が Wayback から D1〜D6 を集めた（共通の指示は外付けディスクの `claims/collect/BRIEF.md`）。claims.tsv は 1,841 行（YourThings 以外 1,016 行）、coverage.tsv は 1,105 行。引用はすべて保存した本文と照合した（`check_quotes.py`、1,610 件、不一致 0）。判定は主張ごとに手で付けた（観測は `observe.py`、`verify.py`）。
+- **パケットでの確認**：「論文で一部」の識別子など 41 件（29 確認、7 弱い、5 外す）、TLS の 109 件（すべて根拠の握手で確認）、取りこぼしていたダウンロード 11 件。値は伏せずに読み、認証情報は quarant-results にだけ書いた。
+- **結果**：[claims/compare-sweep.md](claims/compare-sweep.md)。4 つのデータセットで食い違いの候補は 14 件（9 製品）、文言の上での食い違い 2 件。SimCam（ローカル処理の主張と人物検知の画像の平文の送信）、Awair・Samsung SmartCam・iRobot（AES-256 の主張と AES-128）、Samsung Pan/Tilt と Hue（暗号化・安全な接続の主張と、シリアル番号やトークンの平文）。先行研究で同じ食い違いを指摘した資料は見つからなかった（[claims/sweep/prior-claims.tsv](claims/sweep/prior-claims.tsv)）。
+- **道具の誤りと直したこと**：(1) Deakin の Linux cooked の形式で、`expose.py` がサーバーからの通信をすべて捨てていた。機器の IP で結びつけるように直して Deakin をやり直し、TLS の候補が 4 件増えた。(2) 候補を選ぶ規則が、ファームウェアの取得をパスだけで見ていて、WeMo、Lutron、Echo などの HTTP での更新を落としていた。(3) `verify.py` が Host ヘッダーの `:80` で Hue の要求を取りこぼしていた。(4) zsh が変数の中のパスを分けず、確認の 1 回目が全件「ファイルなし」になった。どれも結論の前に直した。
+- **限界**：機種が分からない製品は共通の文書だけで判定した。文書の多くは米国版。主張の読み方（SimCam、D-Link、Awair、Triby、Nest Mini の報告）と先行研究の区分は、人がまだ確かめていない。
