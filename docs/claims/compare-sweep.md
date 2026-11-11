@@ -1,10 +1,10 @@
-# 公式文書と通信の食い違い（5 つのデータセット、2026-11-11）
+# 公式文書と通信の食い違い（6 つのデータセット、2026-11-11）
 
-製造者の公式文書に書いてあることと、データセットの実際の通信を比べた結果（[D42](../DECISIONS.md)、[sweep-handoff.md](sweep-handoff.md)）。YourThings 2018 の 44 製品は以前の作業（[results-yourthings.md](results-yourthings.md)）、ほかの 4 つのデータセットは今回集めた文書による。主張の 1 行ずつは [claims.tsv](claims.tsv)、探した文書は [coverage.tsv](coverage.tsv)。
+製造者の公式文書に書いてあることと、データセットの実際の通信を比べた結果（[D42](../DECISIONS.md)、[sweep-handoff.md](sweep-handoff.md)）。YourThings 2018 の 44 製品は以前の作業（[results-yourthings.md](results-yourthings.md)）、ほかの 5 つのデータセット（UNSW 2018 は 2026-11-11 に追加）は今回集めた文書による。主張の 1 行ずつは [claims.tsv](claims.tsv)、探した文書は [coverage.tsv](coverage.tsv)。
 
 ## やったこと
 
-- **文書**：UNSW 2016、UNSW-IoTraffic、CIC IoT 2022、Deakin 2023 の製品について、収録の時期の公式文書（製品ページ、セキュリティ、プライバシー、サポート、マニュアル、リリースノート）を Wayback から集めた（[method.md](method.md) の D1〜D6）。引用はすべて保存した本文と照合した（`check_quotes.py`）。
+- **文書**：UNSW 2016、UNSW-IoTraffic、UNSW 2018、CIC IoT 2022、Deakin 2023 の製品について、収録の時期の公式文書（製品ページ、セキュリティ、プライバシー、サポート、マニュアル、リリースノート）を Wayback から集めた（[method.md](method.md) の D1〜D6）。引用はすべて保存した本文と照合した（`check_quotes.py`）。
 - **主張の型**：暗号化（T1）、暗号の性質（T2）、認証情報（T3）、映像・音声（T4）、更新（T5）、送るデータ（T6）、機器の中での処理（T7）、送り先（T8）。開示（「MAC を集める」）も記録した。
 - **比べ方**：主張ごとに、洗い出し（[sweep-results.md](sweep-results.md)）の観測と、パケットでの確認（`verify.py`）を当てた。判定は「食い違いの候補」「一致（見えた範囲で）」「見えない」「判定できない」。
 - **先行研究**：同じ食い違いを指摘した資料と、通信の問題そのものの報告を分けて探した（[sweep/prior-claims.tsv](sweep/prior-claims.tsv)）。
@@ -16,8 +16,15 @@
 | YourThings 2018 | 44 | 10 | 0 | 50 | 16 | 749 |
 | UNSW 2016 | 3 | 0 | 0 | 6 | 20 | 31 |
 | UNSW-IoTraffic | 25 | 4 | 1 | 50 | 184 | 255 |
+| UNSW 2018 | 26 | 4 | 1 | 50 | 253 | 264 |
 | CIC IoT 2022 | 26 | 9 | 2 | 45 | 187 | 205 |
 | Deakin 2023 | 14 | 2 | 0 | 39 | 130 | 117 |
+
+- 「判定できない」には、セキュリティの主張がない文書の行（none）と、保存時の暗号化など通信で見えない主張を含む。
+- 文書が見つからなかった製品：Borun カメラ、Home Eye カメラ、Yutron プラグ、TOPERSUN プラグ、Perfk センサー、Luohe カメラ（公式サイトが見つからないか、収録の時期の版に主張がない）。
+
+## 食い違いの候補（YourThings 以外）
+
 | 製品 | 主張（文書、版の日付） | 観測 | 先行研究 |
 |---|---|---|---|
 | SimCam 1S（CIC） | 「Everything is processed and stored locally on the device」（製品ページ、2020-08-08）。「Because the Simshine ® Simcam 1S uses entirely local AI processing, we never have access to your data.」（FAQ、2021-10-24） | 人物検知の JPEG（22〜25 KB）を平文の HTTP で S3 のバケットに 15 回 PUT（`2021_11_02_Active.pcap` フレーム 1234〜631073、パス `/SimCam/<id>/PersonDetect/<id>`）。カメラは TLS を一度も使っていない | 食い違い：見つからず。画像の送信：見つからず |
@@ -28,13 +35,15 @@
 | iRobot Roomba（CIC） | 「Currently, we use AES 256-bit encryption and Transport Layer Security (TLS v1.2).」（データセキュリティのページ、2021-12-06、すべての製品が対象） | 34 回の握手はすべて AES-128-GCM（TLS 1.3 の `TLS_AES_128_GCM_SHA256` が 20、TLS 1.2 の `TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256` が 14）。AES-256 は一度も選ばれていない | 食い違い：見つからず。暗号の選択：見つからず |
 | Philips Hue Bridge（CIC） | 「Hue only connects to the internet securely via a dedicated cloud so your devices cannot be seen from the open internet.」（FAQ、2021-12-22） | ブリッジの通信の 27% が平文の HTTP：`diagnostics.meethue.com/v2/diagnostics/report?...&sso=<トークン>`（4,760 回、本文は 16 進の暗号文）、`dcp.dc1.philips.com:80` への POST の `Authorization: CBAuth` にブリッジ ID と SSO トークン（1,017 回） | 食い違い：見つからず。平文の HTTP：論文で一部（Mandalari ほか, PoPETs 2021, §5.5 p.379）。トークンとブリッジ ID の平文：見つからず |
 | Philips Hue Bridge（IoTraffic、2016-17） | 「Philips Lighting, transfers data securely (using SSL) and will encrypt some data, such as your MAC address when it is stored.」（プライバシー、2016-10-17 と 2017-03-01 の版、収録の期間に有効） | ブリッジの通信の 70%（36.5 MB）が平文の HTTP：`dcp.cpp.philips.com:80` などへの POST に `Authorization: CBAuth`（4,810 回）、`bridge.meethue.com:80/queue/getmessage` に `auth`（8,370 回）（`PhilipsHue_0017882b9a25.pcap` フレーム 1586〜3925289） | 食い違い：見つからず（この文を名指しした検索はしていない）。平文の HTTP：論文で一部（PoPETs 2021）、ブログ（AV-TEST 2017） |
+| Samsung SmartCam（UNSW 2018） | 「Security SSL (AES 256bit)」（wisenetlife の SmartCam の仕様、2018-10-10・2018-10-22、収録の期間中） | カメラ（tcp/40000）から UNSW の別のアドレスへ、STUN のあと RTP に載せた H.264 の映像を暗号化せずに送っていた（`benign__18-05-28.pcap` の TCP ストリーム 19412、RTP 3,772 パケット、SPS 16 回、IDR の FU-A）。クラウドとの TLS は AES-128 だけ | 食い違い：探している最中。暗号化されていない通信：ブログ・CVE（CVE-2018-6295、Kaspersky 2018。別の機種の報告）。Hanwha 自身の勧告（2021 年の保存）も「Unencrypted way of remote control and communications」と書く |
 | Invoxia Triby（IoTraffic、弱い） | 「we will not disclose the personal information you provide via the Site or Products to parties unaffiliated with invoxia」（プライバシー、2017-02-11） | 機器の MAC を `8937406324.airable.io/authentication?device=<MAC>` に平文で送る | 食い違い：見つからず。Basic 認証：論文で一部（WoWMoM 2024） |
 
 - **SimCam**：同じ会社のアプリ（SimHome）のプライバシーポリシー（2021-10-06）は「your image data will be transferred to your mobile device via the server」と開示している。製品ページと FAQ の説明が、同じ会社の別の文書と合っていない。S3 のバケットと `www.luuka.fun` の持ち主は未確認。
 - **Hue**：送り先が Philips/Signify のホストだけという点（dedicated cloud）は一致。食い違いは「securely」の部分で、AV-TEST（2017）は本文が別に AES で暗号化されているとして「十分に安全」と評価している。食い違いの根拠は、平文で見えるブリッジ ID と SSO トークン。YourThings の Hue は、文書の時期と範囲の理由で利用者が除いた（D40）。今回は 2021 年の文書と CIC の通信で別に比べた。
 - **Roomba**：TLS 1.3 は書かれた TLS 1.2 より新しく、弱くはない。食い違いは AES-256 の部分だけ。機種は未確認。
 - **Nest Mini（文言の上で食い違い）**：NCC Group の ioXt 評価報告（2021-06、Google が公開）の「all BLE and WLAN communication was secured using ... up-to-date TLS」に対し、平文は中身のない HEAD の接続確認（`connectivitycheck.gstatic.com`）だけ。報告を製造者の文書として数えるかは判断待ち。
-- **Canary（UNSW-IoTraffic、文言の上で食い違い）**：ヘルプ（2016-08-22）の「All communication between your Canary device, the Canary Cloud, and your smartphone is encrypted over TLS/SSL (HTTPS)」に対し、平文は中身のない接続確認（`h.canaryis.com:80` への HEAD 53 回、`ipv4.connman.net` への GET 3 回）だけ。「AES 256-bit」は 5,843 回のうち 5,834 回の握手で一致（AES-128 は 9 回）。
+- **Awair（UNSW 2018、弱い）**：2018 年の握手の 32% が AES-128。「TLS and AES 256」の記事（2016-07）が 2018 年にも出ていたかは未確認。
+- **Canary（UNSW-IoTraffic と UNSW 2018、文言の上で食い違い）**：2018 年の FAQ（2018-08-18）も同じ文で、平文は接続確認だけ。2016〜17 年は：ヘルプ（2016-08-22）の「All communication between your Canary device, the Canary Cloud, and your smartphone is encrypted over TLS/SSL (HTTPS)」に対し、平文は中身のない接続確認（`h.canaryis.com:80` への HEAD 53 回、`ipv4.connman.net` への GET 3 回）だけ。「AES 256-bit」は 5,843 回のうち 5,834 回の握手で一致（AES-128 は 9 回）。
 - **Ring Alarm Base Station（文言の上で食い違い）**：Ring のポートの記事（2021-10-24）は「HTTP (port 80) ( Note : Not applicable to Ring Alarm Base Station)」とするが、Base Station は `st.rings.solutions:80/online/check.html` に中身のない GET を送っていた（`ringbasestationPOWER_1.pcap` フレーム 50、64）。
 - **弱い候補**：D-Link は、ファームウェアの確認が「設定のログとサービス」に入るかの読み方による。Triby は、airable が「unaffiliated」に当たるかと、MAC が「personal information you provide」に当たるかによる。どちらも判断待ち（[sweep-handoff.md](sweep-handoff.md) の 4）。
 - YourThings の候補（Sonos、Withings Home、August、HomePod、TP-Link HS105・LB130、Wink Hub 2）は [results-yourthings.md](results-yourthings.md) と [known-reports.md](known-reports.md)。
@@ -52,7 +61,14 @@
 | Nest Cam（CIC、2021） | 48 回の握手すべてで TLS 1.0 までしか提示しない（38 回で TLS 1.0 が選ばれた） | 「128-bit AES encryption with TLS/SSL」などの主張とは一致する。版についての主張はない |
 | Samsung Smart Monitor M80B（Deakin） | Netflix のアプリが `nrdp52-appboot.netflix.com:80` に `NetflixId`、`nfvdid` のクッキーを平文の HTTP で送る（27 回）。サーバー証明書が SHA-1（Samsung Hubsite CA） | Samsung の文書に送信の具体的な主張はない。クッキーの値は quarant-results |
 | Amazon Video のサーバー（YourThings の Samsung TV、CIC の Echo Spot、Deakin の Echo Show 8） | `api.amazonvideo.com` などのサーバーが、2018・2021・2023 年のどれでも、一部の握手で TLS 1.0 を選んだ | Amazon の「interactions are encrypted in transit」とは一致する（TLS 1.0 も暗号化）。版についての主張はない |
+| Google Home、Chromecast Ultra（UNSW 2018） | ファームウェアの更新（`gvt1.com/edgedl/googletv-eureka/stable-channel/ota.137090....zip`、78〜89 MB）を平文の HTTP で取得 | Google の「encryption keeps your data private while in transit」は利用者のデータについての文で、更新の転送についての主張はない |
+| HP ENVY（UNSW 2018） | `chat.hpeprint.com` への平文の POST に、末尾が MAC の `printerUuid` | HP は機器の固有 ID を集めると開示している |
+| 機種不明の Tuya の機器（UNSW 2018） | `a.tuyaus.com/gw.json` への平文の POST と、ポート 1883 の平文の MQTT に、MAC を含む `gwId` | 機種が分からず、製造者の文書がない |
 | Amcrest カメラ（CIC） | 公開のアドレスへの通信の 99% が、UDP の上の HTTP の形の P2P の制御（mDNS の名前を含む） | 暗号化の具体的な主張なし |
+
+## 同じ機器の時期による変化（UNSW 2016 → 2016-17 → 2018）
+
+平文の割合は、TP-Link NC220 が 91.9% → 10.9% → 0.3%、Samsung SmartCam が 24.1% → 8.4% → 0.0%（ただし 2018 年は暗号化されていない映像を TCP で送っていた。上の表）、Amazon Echo が 86.8% → 73.7% → 30.5% と減った。Hue は 70.9% → 86.3% と増えた。文書の側では、Hue の「transfers data securely (using SSL)」が 2017-11 の改訂で消え、TP-Link の「encryption and SSL technology」が 2018 年の版から加わった。詳細は [sweep-results.md](sweep-results.md) の「UNSW 2018 を足した」。
 
 ## 見えないもの
 
