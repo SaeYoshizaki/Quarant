@@ -1,6 +1,6 @@
 # 引き継ぎ：製造者の暗号化の主張と通信の食い違い（YourThings 2018）
 
-**2026-11-10 に方針を変えた（[../DECISIONS.md](../DECISIONS.md) の D41）。次の会話は [sweep-results.md](sweep-results.md) から始める。** 5 つのデータセットの自動の洗い出しの結果、先行研究での振り分け、パケットでの確認がある。道具は `scripts/claims/sweep/`、出力は `~/datasets/claims/sweep/<データセット>/`（記録ごとの JSONL。値は鍵付きのハッシュだけ。鍵は `~/datasets/claims/sweep/.key`）。以下は 2026-11-02 時点の YourThings の内容。
+**2026-11-10 に方針を変えた（[../DECISIONS.md](../DECISIONS.md) の D41）。次の会話は [sweep-handoff.md](sweep-handoff.md) から始める（残りの作業と手順）。** 5 つのデータセットの自動の洗い出しの結果、先行研究での振り分け、パケットでの確認がある。道具は `scripts/claims/sweep/`、出力は `~/datasets/claims/sweep/<データセット>/`（記録ごとの JSONL。値は鍵付きのハッシュだけ。鍵は `~/datasets/claims/sweep/.key`）。以下は 2026-11-02 時点の YourThings の内容。
 
 2026-11-02。次の会話はここから始める。全体の結果は [results-yourthings.md](results-yourthings.md)、人が確かめる 23 件は [review-yourthings.md](review-yourthings.md)、決めたことは [../DECISIONS.md](../DECISIONS.md) の D31〜D39。Ring の先行研究との比較と検証のやり直しは [ring-prior-work.md](ring-prior-work.md)（下の 2 節の 1 行目と 3 節はこの結果で直した）。
 
