@@ -17,8 +17,10 @@
 ## 数
 
 - 候補：75 製品、177 件（[sweep/candidates.tsv](sweep/candidates.tsv)）。2026-11-11 に、取りこぼしていたダウンロードの 11 件を足した（下の「取りこぼしていたダウンロード」）。
-- 識別子など 61 件：除く 0、論文で一部 41、ブログ等のみ 9、見つからず 11。
-- TLS 105 件：除く 7、論文で一部 55、対応表の論文にない 35、未確認 8。
+- 識別子など 61 件：除く 0、論文で一部 42、ブログ等のみ 9、見つからず 10。
+- TLS 105 件：除く 7、論文で一部 57、対応表の論文にない 33、未確認 8。
+- 2026-11-11 の追加：Wannigama ほか（IEEE WoWMoM 2024、arXiv:2404.07408 の Table I p.2、§II）が UNSW のデータで Awair と Samsung SmartCam の TLS、Triby の Basic 認証を扱っていたので、この 3 件を「論文で一部」に移した。
+- 公式文書との食い違いの候補と、取りこぼしていたダウンロードの先行研究は [sweep/prior-claims.tsv](sweep/prior-claims.tsv)。
 
 区分（2026-11-11 に基準を変えた。以前は IMC と PETS も「除く」にしていて、識別子 1 件と TLS 13 件がそれで除かれていた）。
 
@@ -36,7 +38,6 @@
 | August Doorbell Cam | MAC（HTTP 以外） | iotraffic | 2 | raw bytes in tcp/443 payload; raw bytes in tcp/68 payload | iotraffic:pcaps__AugustDoorBell_e076d03f00ae.pcap フレーム 5122643 | ― | 見つからず |
 | HeimVision camera | 識別子（平文の HTTP） | cic2022 | 28 | form:device_id=MAC -> esd.closeli.com:80 | cic2022:1-Power__Cameras__HeimVision Camera__POWER__heimvisioncamPOWER_1.pcap フレーム 62 | ― | 見つからず |
 | Home Eye camera | 認証情報らしい値（平文） | cic2022 | 82 | h:authorization:oss -> xyxcamera.oss-cn-hongkong.aliyuncs.com:80 | cic2022:1-Power__Cameras__Home Eye Camera__POWER__homeeyecamPOWER_1.pcap フレーム 25 | ― | 見つからず |
-| Invoxia Triby | 認証情報らしい値（平文） | iotraffic,unsw2016 | 23 | h:authorization:basic -> 8937406324.airable.io:80 | iotraffic:pcaps__TribySpeaker_18B79E022044.pcap フレーム 60097 | ― | 見つからず |
 | Invoxia Triby | HTTP でのファームウェア取得 | iotraffic | 22 | developer.invoxia.com/update/triby/update.pup (4064478 B); developer.invoxia.com/update/triby/update.pup (4064439 B) | iotraffic:pcaps__TribySpeaker_18B79E022044.pcap フレーム 514528 | ― | 見つからず |
 | Invoxia Triby | MAC（HTTP 以外） | iotraffic,unsw2016 | 27442 | aa:bb:cc:dd:ee:ff in tcp/5228 payload; aabbccddeeff in tcp/8090 payload | iotraffic:pcaps__TribySpeaker_18B79E022044.pcap フレーム 10 | ― | 見つからず |
 | Invoxia Triby | 識別子（平文の HTTP） | iotraffic,unsw2016 | 561 | text=MAC -> 46.105.38.79:5228; q:mac=MAC -> developer.invoxia.com:80 | iotraffic:pcaps__TribySpeaker_18B79E022044.pcap フレーム 2 | ― | 見つからず |
@@ -67,6 +68,7 @@
 | D-Link Water Sensor DCH-S161 | 識別子（平文の HTTP） | cic2022 | 32 | q:device_id=MAC -> mp-us-fwd.auto.mydlink.com:80 | cic2022:2-Idle__2021_11_24_Idle.pcap フレーム 470005 | Bradley & Barrera, 'Towards Characterizing IoT Software Update Practic（2022） | 論文で一部 |
 | Insteon Camera | 識別子（平文の HTTP） | unsw2016 | 8112 | q:mac=MAC -> connect.insteon.com:80; q:sn=MAC -> connect.insteon.com:80 | unsw2016:16-09-28.pcap フレーム 1005362 | Information Exposure From Consumer IoT Devices（2019） | 論文で一部 |
 | Insteon Hub Pro | 識別子（平文の HTTP） | yourthings | 197 | q:mac=named q:mac -> connect.insteon.com:80 | yourthings:eth1-20180411.1935.1523493300 フレーム 52663 | Information Exposure From Consumer IoT Devices（2019） | 論文で一部 |
+| Invoxia Triby | 認証情報らしい値（平文） | iotraffic,unsw2016 | 23 | h:authorization:basic -> 8937406324.airable.io:80 | iotraffic:pcaps__TribySpeaker_18B79E022044.pcap フレーム 60097 | Unveiling Behavioral Transparency of Protocols Communicated by IoT Net（2024） | 論文で一部 |
 | Logitech Harmony Hub | 識別子（平文の HTTP） | yourthings | 5647 | q:uuid=named q:uuid -> pubsub.pubnub.com:80; q:uuid=named q:uuid -> ps-145.pubnub.com:80 | yourthings:eth1-20180320.0000.1521522000 フレーム 63191 | SoK: Security Evaluation of Home-Based IoT Deployments（2019） | 論文で一部 |
 | NVIDIA Shield TV | HTTP でのファームウェア取得 | yourthings | 3 | ota-downloads.nvidia.com/ota/data/posted-roms_romuploader/external/{id} (1191918991 B); ota-downloads.nvidia.com/ota/data/posted-roms_romuploader/external/{id} (1166754831 B) | yourthings:eth1-20180411.2015.1523495700 フレーム 148952 | Alrawi et al., 'SoK: Security Evaluation of Home-Based IoT Deployments（2019） | 論文で一部 |
 | Philips Hue Bridge | 認証情報らしい値（平文） | cic2022,iotraffic,yourthings | 19584 | q:auth -> 130.211.93.93:80; h:authorization:cbauth -> dcp.cpp.philips.com:80 | cic2022:1-Power__Home Automation__Philips Hue Bridge__POWER__philipshuePOWER_1.pcap フレーム 133 | Blocking Without Breaking（2021） | 論文で一部 |
@@ -226,9 +228,9 @@
 
 | 種類 | 除く | 論文で一部 | 対応表にない | 未確認 |
 |---|---|---|---|---|
-| 1.0/1.1 を選んだ、または 1.1 までしか提示しない | 0 | 16 | 8 | 3 |
+| 1.0/1.1 を選んだ、または 1.1 までしか提示しない | 0 | 17 | 7 | 3 |
 | RC4、DES、export、NULL、匿名の暗号（3DES だけは数えない） | 0 | 24 | 9 | 3 |
-| 前方秘匿性のある握手がない | 0 | 9 | 12 | 1 |
+| 前方秘匿性のある握手がない | 0 | 10 | 11 | 1 |
 | サーバー証明書（RSA 2048 ビット未満、SHA-1/MD5、自己署名、期限切れ） | 7 | 6 | 6 | 1 |
 
 - **論文で一部に移したもの（2026-11-11）**：Amazon Echo Spot（2 件）、Fire TV（2 件）、Harman Kardon Invoke、LG webOS TV、Hue（2 件）、Ring（2 件）、Samsung Smart TV、SmartThings Hub、Roku TV の 13 件。根拠は IoTLS（Paracha ほか、IMC 2021、Table 6 p.169、Fig. 2・3 p.171、§5.1 p.172）と Bradley ほか（FPS 2022、Fig. 3 p.8）だけで、どちらも 4 会議ではない。
