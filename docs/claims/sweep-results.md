@@ -16,9 +16,9 @@
 
 ## 数
 
-- 候補：75 製品、177 件（[sweep/candidates.tsv](sweep/candidates.tsv)）。2026-11-11 に、取りこぼしていたダウンロードの 11 件を足した（下の「取りこぼしていたダウンロード」）。
+- 候補：79 製品、181 件（[sweep/candidates.tsv](sweep/candidates.tsv)）。2026-11-11 に、取りこぼしていたダウンロードの 11 件と、Deakin のやり直しで出た TLS の 4 件を足した。
 - 識別子など 61 件：除く 0、論文で一部 42、ブログ等のみ 9、見つからず 10。
-- TLS 105 件：除く 7、論文で一部 57、対応表の論文にない 33、未確認 8。
+- TLS 109 件：除く 7、論文で一部 57、対応表の論文にない 37、未確認 8。
 - 2026-11-11 の追加：Wannigama ほか（IEEE WoWMoM 2024、arXiv:2404.07408 の Table I p.2、§II）が UNSW のデータで Awair と Samsung SmartCam の TLS、Triby の Basic 認証を扱っていたので、この 3 件を「論文で一部」に移した。
 - 公式文書との食い違いの候補と、取りこぼしていたダウンロードの先行研究は [sweep/prior-claims.tsv](sweep/prior-claims.tsv)。
 
@@ -228,10 +228,10 @@
 
 | 種類 | 除く | 論文で一部 | 対応表にない | 未確認 |
 |---|---|---|---|---|
-| 1.0/1.1 を選んだ、または 1.1 までしか提示しない | 0 | 17 | 7 | 3 |
+| 1.0/1.1 を選んだ、または 1.1 までしか提示しない | 0 | 17 | 8 | 3 |
 | RC4、DES、export、NULL、匿名の暗号（3DES だけは数えない） | 0 | 24 | 9 | 3 |
-| 前方秘匿性のある握手がない | 0 | 10 | 11 | 1 |
-| サーバー証明書（RSA 2048 ビット未満、SHA-1/MD5、自己署名、期限切れ） | 7 | 6 | 6 | 1 |
+| 前方秘匿性のある握手がない | 0 | 10 | 13 | 1 |
+| サーバー証明書（RSA 2048 ビット未満、SHA-1/MD5、自己署名、期限切れ） | 7 | 6 | 7 | 1 |
 
 - **論文で一部に移したもの（2026-11-11）**：Amazon Echo Spot（2 件）、Fire TV（2 件）、Harman Kardon Invoke、LG webOS TV、Hue（2 件）、Ring（2 件）、Samsung Smart TV、SmartThings Hub、Roku TV の 13 件。根拠は IoTLS（Paracha ほか、IMC 2021、Table 6 p.169、Fig. 2・3 p.171、§5.1 p.172）と Bradley ほか（FPS 2022、Fig. 3 p.8）だけで、どちらも 4 会議ではない。
 - **除く（7 件）**：下の表。どれも YourThings と同じ試験環境の同じ機器を、Alrawi ほかが扱っている。ただし、論文の印は自己署名と「vuln SSL」（Nessus で端点を調べた結果）で、こちらの観測は SHA-1 や RSA 1024 の証明書。「vuln SSL」に SHA-1 が含まれるかは論文に書かれておらず未確認。性質が違えば「論文で一部」に移す（判断待ち）。
@@ -256,6 +256,14 @@
 - 例：Amazon Echo（iotraffic `AmazonEcho_44650d56ccd3.pcap` フレーム 173、177）は TLS 1.0 までしか提示せず RC4、DES、3DES も並べ、サーバーは TLS 1.0 の `TLS_RSA_WITH_AES_256_CBC_SHA` を選んだ。August Doorbell Cam（同 `AugustDoorBell_e076d03f00ae.pcap` フレーム 39〜59）のサーバー証明書は SHA-1 で、発行者は August の私設の CA。機器も同じ CA のクライアント証明書（`CN=August Doorbell Cam`）を出していた。Samsung Smart TV（yourthings `eth1-20180418.0945.1524062700` フレーム 134983）は、Amazon Video のサーバーが TLS 1.0 の `TLS_RSA_WITH_3DES_EDE_CBC_SHA` を選んだ。
 - Awair（iotraffic `AwairAirQuality_70886b100fc6.pcap` フレーム 22、24）は、機器は DHE の暗号を提示したが、サーバーが RSA 鍵交換を選んだ。前方秘匿性がないのはサーバーの選択による。
 - Netatmo Smart Indoor Camera（deakin `2024-04-14.pcap` フレーム 3113917）は SSL 3.0 の ClientHello を 3 回送った。サーバーの応答はない。
+
+### Deakin のやり直し（2026-11-11）
+
+Deakin は Linux cooked の形式で、パケットに宛先の MAC がない。`expose.py` はこれまで、サーバーから機器への通信をすべて捨てていた（ServerHello、証明書、HTTP の応答、ダウンロードが見えていなかった）。機器が送ったパケットから機器の IP アドレスを覚え、その宛先の通信を機器に結びつけるように直し、Deakin の 34 日分をやり直した。2023-07-26 の 1 日分では、選ばれた暗号が分かる握手が 1 から 327 に増えた。
+
+- 新しい候補（`verify.py tls` で確かめた）：Echo Show 8（`2023-08-15.pcap` フレーム 1135020、`api.amazonvideo.com` のサーバーが TLS 1.0 の `TLS_RSA_WITH_AES_256_CBC_SHA` を選んだ。YourThings の Samsung Smart TV、CIC の Echo Spot と同じ形）、Samsung Smart Monitor M80B（`2023-07-26.pcap` フレーム 1322042、`*.samsungcloudsolution.net` の証明書が SHA-1、発行者 Samsung Hubsite CA）、TOPERSUN と Perfk（どちらも Tuya の OUI、ポート 8886 で `TLS_PSK_WITH_AES_128_CBC_SHA256` だけ）。
+- Withings Body+ と BPM Connect は TLS 1.3（`TLS_CHACHA20_POLY1305_SHA256`）が選ばれていた。主張の判定（[compare-sweep.md](compare-sweep.md)）を直した。
+- ほかの 4 つのデータセットは Ethernet の形式で、影響はない。
 
 ## 限界
 
