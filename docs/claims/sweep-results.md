@@ -12,7 +12,7 @@
   - HTTP でのファームウェアの取得。
   - TLS の版、暗号、前方秘匿性、サーバー証明書。YourThings の作成者の中間者の検査（発行者 `thing-catcher.gtisc.gatech.edu`、04-10〜13）は除いた。
 - **先行研究**：論文 11 本の機器ごとの対応表と、候補ごとの検索（CVE、ブログ、論文）。本文を読めたものだけを根拠にした。結果は [sweep/prior-ids.tsv](sweep/prior-ids.tsv) と [sweep/prior-tls.tsv](sweep/prior-tls.tsv)。
-- **確かめ方**：Sonos の既知の結果（YourThings 2018-03-20 のフレーム 60977 の serial と householdid、フレーム 4429 の UPnP のシリアル）を自動で再現した。「見つからず」と「ブログ等のみ」の 20 件は、パケットで確かめた（下）。**「論文で一部」と TLS の候補は自動の検出のままで、パケットでは確かめていない。**
+- **確かめ方**：Sonos の既知の結果（YourThings 2018-03-20 のフレーム 60977 の serial と householdid、フレーム 4429 の UPnP のシリアル）を自動で再現した。「見つからず」と「ブログ等のみ」の 20 件（2026-11-10）と「論文で一部」の 41 件（2026-11-11）は、パケットで確かめた（下）。**TLS の候補は自動の検出のままで、パケットでは確かめていない。**
 
 ## 数
 
@@ -144,6 +144,49 @@
 - **SimCam のメーカーの説明**：TechCrunch（2019-09-10）、App Store、a&s（2019）、Digital Trends は、映像を機器の中で処理すると紹介している。人物検知の画像をクラウドに平文で送る観測とは食い違う可能性がある。ただし、説明の時期（収録の 2021-11 より前か）と、範囲（検知の画像を含むか）は未確認。
 - 見えているのはアクセスキー ID だけで、秘密鍵は見えていない。同じキーがほかの機器でも使われているか、署名つきの要求を再送できるかは、パッシブでは確かめられない。
 
+## パケットでの確認（「論文で一部」の 41 件、2026-11-11）
+
+`verify.py`（値をそのまま出す版）と `verify_all.py` で、根拠のキャプチャを tshark で開き直した。出力は外付けディスクの `~/datasets/claims/sweep/verify/ids-partial.txt`。認証情報の値は非公開のリポジトリ quarant-results の `claims/sweep-credentials.md` にだけ書いた。
+
+| 製品 | 確かめた根拠 | 値と結果 | 判定 |
+|---|---|---|---|
+| TP-Link NC220 | unsw2016 `16-09-28.pcap` フレーム 567700、567706、`16-09-30.pcap` フレーム 493448、493482 | `aps1-relay.tplinkcloud.com:80/relayservice?deviceid=FFFF47A2F522CCC6D520571EDEDD61460000E7B2&type=video` への POST。本文は multipart で、部品の型は `video/x-h264`。最初の 500 KB に H.264 の SPS、PPS、IDR（NAL の型 7、8、5）がそのまま入っている。`type=audio`（AAC）の POST もある。`X-token` は 4 回とも同じ値（認証情報）。本文の中の応答に `Server: Streamd,F4F26D9351F1`（機器の MAC） | **確認（映像と音声が平文）** |
+| Roku 4 | yourthings `eth1-20180415.1640.1523828400` フレーム 21853、21895 | `cloudservices.roku.com` への GET の `X-Roku-Reserved-Serial-Number: YY007G478132`。UPnP のシリアル番号（`eth1-20180320.1550.1521579000`）と一致 | 確認 |
+| Roku TV（TCL） | yourthings `eth1-20180415.1550.1523825400` フレーム 73456 | 同じヘッダーに `2N004E596344`。UPnP のシリアル番号と一致 | 確認 |
+| Belkin NetCam HD | iotraffic `BelkinCamera_b4750eece5a9.pcap` フレーム 38222〜661844 | `devices.xbcs.net:8899/ToolService/log/uploadWdLogFile/B4750EECE5A8` への PUT 8 回（本文は JSON、800〜6,274 バイト）。パスの値は UPnP の macAddress と一致（Ethernet の MAC は b4:75:0e:ec:e5:a9） | 確認 |
+| Belkin WeMo Link | yourthings `eth1-20180321.1855.1521676500` フレーム 10293 | `fw.xbcs.net/wemo/owrt/...?mac=94103ECC6794`。UPnP の macAddress と一致 | 確認 |
+| Belkin WeMo Motion Sensor | 同 フレーム 6908 | `mac=08863B6F7A14`。UPnP の macAddress と一致 | 確認 |
+| Belkin WeMo Switch | 同 フレーム 6614 | `mac=08863B70D738`。UPnP の macAddress と一致 | 確認 |
+| Belkin WeMo Crock-Pot | yourthings `eth1-20180320.0755.1521550500` フレーム 89570 | `devices.xbcs.net:8899/ToolService/log/uploadWdLogFile/94103E5C2E30` への PUT。UPnP の macAddress と一致 | 確認 |
+| Withings Aura Sleep Sensor | iotraffic `WithingsSleepSensor_0024e42028c6.pcap` フレーム 1099〜1554793 | `scalews.withings.net/cgi-bin/session` への POST 3,020 回の `auth` が `00:24:e4:20:28:c6`（機器の MAC、1,506 回）と `00:24:e4:20:69:6c`（1,514 回。Withings の OUI の別の MAC、どの機器かは未確認）。`sessionid` は 3,033 種類（認証情報） | 確認 |
+| Withings Smart Baby Monitor | iotraffic `WithingsBabyMonitor_0024e41118a8.pcapng` フレーム 543〜684917、60706 | `babyws.withings.net/cgi-bin/session` の `auth` が機器の MAC `00:24:e4:11:18:a8`（544 回）。tcp/1935 のフレーム 60706 に `_Withings_` と `00:24:e4:11:18:a8-50cfb6f0b78335f2f00fba3751674775`（77,531 パケット中 3）。`sessionid` は 544 種類（認証情報） | 確認 |
+| Withings Smart Scale | iotraffic `WithingsSmartScale_0024e41b6f96.pcap` フレーム 28301 | `wbs02-ws.withings.net/cgi-bin/v2/certificate` の `mac_address=00:24:e4:1b:6f:96`（機器の MAC） | 確認 |
+| Withings Home | yourthings `eth1-20180411.2025.1523496300` フレーム 56153、59581 | `scalews.withings.net/cgi-bin/v2/certificate` の `mac_address=00:24:e4:2b:a5:34`（機器の MAC） | 確認 |
+| Insteon Camera | unsw2016 `16-09-28.pcap` フレーム 1005362 | `connect.insteon.com/setinfo.asp?mac=00626E51272E`。UNSW の一覧の有線の Insteon Camera の MAC（00:62:6e:51:27:2e）。このフレームは無線の Insteon Camera（e8:ab:fa:19:de:4f）から送られていた | 確認 |
+| Insteon Hub Pro | yourthings `eth1-20180414.1925.1523751900` フレーム 141168 | `connect.insteon.com/SetInfo.asp?mac=544A162CC9E3`。ハブの MAC（54:4a:16:f9:54:18）とは違う。同じ OUI の値で、どの機器のものかは未確認 | 弱い |
+| D-Link DCH-S161 | cic `2-Idle/2021_12_16_Idle.pcap` フレーム 462331〜466813 | `mp-us-fwd.auto.mydlink.com/fw-upgrade?device_id=F0B4D2F96095`（機器の MAC）3 回 | 確認 |
+| Philips Hue Bridge | yourthings `eth1-20180320.0250.1521532200` フレーム 123004〜299497 | `dcp.cpp.philips.com:80` への POST 4 回の `Authorization: CBAuth` に `Client="001788fffe21f7e4"`（MAC 00:17:88:21:f7:e4 から作るブリッジ ID）と SSOToken（認証情報） | 確認 |
+| Philips Hue Bridge | iotraffic `PhilipsHue_0017882b9a25.pcap` フレーム 30241〜3925289 | `bridge.meethue.com:80/queue/getmessage`（130.211.93.93）への POST 8,370 回の `auth`（40 桁、8,368 種類。認証情報） | 確認 |
+| Philips Hue Bridge | yourthings `eth1-20180412.0210.1523517000` ストリーム 63、応答フレーム 23594 | `fds.cpp.philips.com:80/firmware/...` を HTTP で取得（200、7,632,617 バイト、エントロピー 8.00） | 確認 |
+| Ring Video Doorbell | yourthings `eth1-20180320.0145.1521528300` フレーム 3774〜95081 | `vod.ring.com` への GET 29 回の Basic 認証。ユーザー名は機器の MAC（001dc923f600）、パスワードは 1 種類（認証情報） | 確認 |
+| Ring Video Doorbell | iotraffic `RingDoorBell_884aea31669d.pcap` フレーム 4505 | udp/15063 の SIP の `From: <sip:884aea31669d@ring.com>`（機器の MAC） | 確認 |
+| August Doorbell Cam | yourthings `eth1-20180411.2030.1523496600` フレーム 89263 | `august.pubnub.com/publish/...` の `auth` が `sec-c-` で始まる 54 文字（PubNub の秘密鍵の形。認証情報） | 確認 |
+| August Doorbell Cam | iotraffic `AugustDoorBell_e076d03f00ae.pcap` フレーム 374〜50423 | `pubsub.pubnub.com` の `uuid` が `27a1dc6b490f`（33 回）と `39f80d0b29c3`（2 回）。機器の MAC ではない | 弱い |
+| Sonos PLAY:1 | yourthings `eth1-20180413.1730.1523658600` フレーム 87608〜103971 | `legato.radiotime.com/Radio.asmx` への POST 14 回の `deviceId` が `5C-AA-FD-6C-E0-D4:F`（MAC を含む） | 確認 |
+| Sonos PLAY:1 | yourthings `eth1-20180413.1630.1523655000` ストリーム 771、応答フレーム 162738 | `update-firmware.sonos.com/firmware/Gold/...` を HTTP で取得（200、8,826,617 バイト） | 確認 |
+| Sonos One | cic `2-Idle/2021_11_17_Idle.pcap` ストリーム 6321、応答フレーム 640534 | `update-firmware.sonos.com/firmware/Prod/...` を HTTP で取得（200、47,489,420 バイト） | 確認 |
+| Sonos One | cic `4-Scenarios/6-IoT and Non-IoT/IoTNonIoT_1.pcap` フレーム 39444、41352 | `opml.radiotime.com/Tune.ashx` の `serial=AFRUKRYCPGTZ6HTUTBQIYEJY662A`。機器の識別子との関係は未確認。`sid=s189577` は TuneIn の局の ID の形で、認証情報ではない | 弱い（serial）、外す（sid） |
+| Amazon Echo | iotraffic `AmazonEcho_44650d56ccd3.pcap` フレーム 3450200〜4526692 | 同じ宛先の `serial=AGOKDHJPYEPDDGQQLVJWAZQD6LLA`（関係は未確認）、`sid=p212`（番組の ID の形） | 弱い（serial）、外す（sid） |
+| NVIDIA Shield TV | yourthings `eth1-20180411.2015.1523495700` ストリーム 249、フレーム 92152、92198 | `ota-downloads.nvidia.com` から `productionBL-droid-signed-foster_e-full_ota-1915764_910.7870.20170601125901.zip` を HTTP で取得（206、1,191,918,991 バイト、ZIP） | 確認 |
+| unknown webcam | yourthings `eth1-20180320.0250.1521532200` フレーム 544406 | udp/8765 の 128 バイト目に MAC の文字 `001216abc022`（20 パケット中 2） | 確認 |
+| Samsung Smart TV | yourthings `eth1-20180410.0025.1523337900` フレーム 124972 | `cm.everesttech.net/cm/dd` の `d_uuid=89322744661981446711498655573062532140`（38 桁）。機器の識別子との関係は未確認。`mboxSession`（フレーム 118613）は分析のセッションで機器の認証情報ではない。4 KB の `OUITHeaders.dat` はファームウェアそのものではない | 弱い（d_uuid）、外す（ほか 2 件） |
+| Bose SoundTouch 10 | yourthings `eth1-20180413.1930.1523665800` フレーム 78408〜110279 | `bose.vtuner.com` の `mac=92b1b3329e7608a4b608d4773d09f9da`（32 桁で固定）。MAC でも MAC の MD5 でもない。`token=0` は認証情報ではない | 弱い（mac）、外す（token） |
+| Logitech Harmony Hub | yourthings `eth1-20180321.2320.1521692400` フレーム 1176、83129 | `pubsub.pubnub.com` の `uuid=v1ggtg3a-uz30-4f7d-8v71-qysw68jvg8hs`。機器の識別子との関係は未確認 | 弱い |
+
+- 41 件のうち 29 件を確認、7 件は弱い、5 件は外す。
+- **新しく分かった重いもの**：TP-Link NC220 は、遠隔での視聴のときに、映像（H.264）と音声（AAC）を平文の HTTP で TP-Link の中継に送っていた。識別子の候補として拾ったものの中身だった。
+- 値の一致は、機器が LAN で名乗った値（UPnP、mDNS）と MAC とで確かめた。「弱い」は、値は出ているが、機器の識別子だと示せていないもの。
+
 ## TLS（105 件）
 
 | 種類 | 除く | 論文で一部 | 対応表にない | 未確認 |
@@ -178,5 +221,5 @@
 ## 次
 
 - 分類を人が確かめる。特に「除く」と「論文で一部」の境目（証明書の 7 件、Insteon、Roku）。
-- 「論文で一部」の候補（40 件）をパケットで確かめる。**途中（2026-11-10）**：1 回目で Withings の 4 製品（`auth` や `mac_address` が MAC）、D-Link DCH-S161、Belkin NetCam、Sonos 2 機種のファームウェアの取得を確認した。根拠のファイルの選び方を直した `verify_all.py` で、全件をやり直す。YourThings の 04-11 と 04-12 のファイルを先に取り出す（tgz の中のパスは `11/…`、`12/…` で、ほかの日の `2018/03/20/…` と違う）。
+- 「論文で一部」の 41 件のパケットでの確認は済んだ（2026-11-11、上）。
 - SimCam の「機器の中で処理する」という説明の時期と範囲を、当時の文書で確かめる（食い違いの候補）。
