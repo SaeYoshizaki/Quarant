@@ -265,6 +265,34 @@ Deakin は Linux cooked の形式で、パケットに宛先の MAC がない。
 - Withings Body+ と BPM Connect は TLS 1.3（`TLS_CHACHA20_POLY1305_SHA256`）が選ばれていた。主張の判定（[compare-sweep.md](compare-sweep.md)）を直した。
 - ほかの 4 つのデータセットは Ethernet の形式で、影響はない。
 
+## UNSW 2018 を足した（2026-11-11）
+
+データセットを広げるため、UNSW の SOSR 2019 のデータ（[iotanalytics.unsw.edu.au/attack-data.html](https://iotanalytics.unsw.edu.au/attack-data.html)、MIT-0）のうち、正常な日の 27 本（2018-05-28〜10-29、38.4 GB）を落として洗い出しにかけた。攻撃を含む日は使っていない。機器は UNSW 2016・UNSW-IoTraffic と同じ研究室のもの（MAC で照らした）に、Google Home、Chromecast Ultra、機種の分からない 3 台が加わる。候補は全部で 193 件・84 製品になり、UNSW 2018 を含むものは 57 件。
+
+**同じ機器の時期による変化**（公開のアドレスへの通信のうち、平文の HTTP・テキストの割合）：
+
+| 製品 | UNSW 2016 | UNSW-IoTraffic（2016-17） | UNSW 2018 |
+|---|---|---|---|
+| TP-Link NC220 | 91.9% | 10.9% | 0.3% |
+| Samsung SmartCam | 24.1% | 8.4% | 0.0%（シリアル番号つきのイベントの平文の POST がなくなった） |
+| Amazon Echo | 86.8% | 73.7% | 30.5% |
+| Belkin WeMo Switch | 4.3% | 3.8% | 0.0% |
+| Philips Hue Bridge | ― | 70.9% | 86.3% |
+| Invoxia Triby | 90.0% | 84.8% | 81.3% |
+
+**UNSW 2018 だけで見えたもの**（`verify.py` で確かめた）：
+
+| 機器 | 根拠 | 中身 |
+|---|---|---|
+| Google Home | `18-10-16.pcap` ストリーム 27039、応答フレーム 3782705 | `r4---sn-55goxu-ntqe.gvt1.com/edgedl/googletv-eureka/stable-channel/ota.137090.tz_stable-channel.chirp-b4....zip` を HTTP で取得（200、78,939,722 バイト、ZIP） |
+| Chromecast Ultra | 同 ストリーム 24067、応答フレーム 3231884 | 同じ場所から `ota.137090.tz_stable-channel.luther-b4....zip`（200、89,409,130 バイト） |
+| HP ENVY | `18-05-28.pcap` フレーム 2199381〜2931413 | `chat.hpeprint.com/chat/shortReport` への POST 16 回の `printerUuid=1c852a4d-b800-1f08-abcd-705a0fe49bc0`（末尾が機器の MAC） |
+| 機種不明（Espressif の MAC 84:f3:eb:52:42:db） | `18-10-11.pcap` フレーム 102253〜3514587、1006965 | Tuya のクラウド：`a.tuyaus.com/gw.json` への POST 101 回の `gwId=7050050484f3eb5242db`（MAC を含む）。ポート 1883 の平文の MQTT（MQIsdp）の clientId も同じ値（3,698 パケット中 253 に MAC） |
+| 機種不明の Withings（`wbs04-ws.withings.net`） | `18-05-28.pcap` フレーム 3737208〜3737235 | 自己署名の証明書（`*.withings.net`）、`TLS_RSA_WITH_AES_128_CBC_SHA256` |
+
+- Chromecast の `shardbypass=yes` は認証情報ではない（外す）。
+- 文書との比べ合わせは、2018 年の文書が集まってから [compare-sweep.md](compare-sweep.md) に足す。
+
 ## 限界
 
 - 値は記録していないので、値の一致は、機器が LAN で名乗った値と MAC とだけ比べている。
