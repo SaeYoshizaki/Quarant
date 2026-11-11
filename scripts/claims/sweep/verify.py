@@ -5,6 +5,7 @@ usage:
   verify.py http    <capture> <device mac> <host> <key> [<lan kind>]
   verify.py payload <capture> <device mac> <frame>
   verify.py dl      <capture> <device mac> <frame>
+  verify.py tls     <capture> <device mac> <frame>
 
 http     every HTTP request the device sent to <host>: whether it has the field <key> (q:name, form:name,
          json:path, xml:tag, h:header, path[i], h:authorization:<scheme>), and for its values the length,
@@ -14,6 +15,9 @@ payload  the packet <frame>: where the device's MAC sits in the payload, what th
          whether it is the first data of the flow, how many packets to the same port hold the MAC
 dl       the HTTP response in the TCP stream of <frame>: status, length, type, file name extension,
          and the first bytes and entropy of the body
+tls      the TLS handshake in the TCP stream of <frame> (versions and suites the device offered, server
+         name, version and suite chosen, every certificate: key, signature hash, issuer, subject, validity),
+         then all handshakes of the device in the capture by server, chosen version and suite
 Values are printed as they are (2026-11-11): the most common values of the field, the decoded
 Authorization parts, and the bytes around the MAC. The output can hold credentials, so keep it out of
 the public repository (credentials go to quarant-results/claims). The peer's name is taken from DNS
@@ -250,9 +254,66 @@ def cmd_dl(cap, mac, frame):
               f"{disp.group(1) if disp else 'none'}; body read {len(body)} bytes, starts as {kind}, entropy {ent:.2f} bits/byte")
 
 
+def cert_line(der, when):
+    from cryptography import x509
+    try:
+        c = x509.load_der_x509_certificate(der)
+    except Exception as e:
+        return f"unreadable ({e.__class__.__name__})"
+    k = c.public_key()
+    try:
+        sig = c.signature_hash_algorithm.name if c.signature_hash_algorithm else "none"
+    except Exception:
+        sig = "unknown"
+    after, before = c.not_valid_after_utc, c.not_valid_before_utc
+    state = "expired" if when > after.timestamp() else "not yet valid" if when < before.timestamp() else "valid"
+    return (f"{k.__class__.__name__.replace('_', '').replace('PublicKey', '')} {getattr(k, 'key_size', '')}, sig {sig}, "
+            f"issuer {c.issuer.rfc4514_string()[:120]}, subject {c.subject.rfc4514_string()[:120]}, "
+            f"{before:%Y-%m-%d}..{after:%Y-%m-%d} ({state} at capture time){', self-signed' if c.issuer == c.subject else ''}")
+
+
+def suite_names(codes):
+    return [expose.SUITES.get(int(c, 0) if c.startswith("0x") else int(c), c) for c in codes if c]
+
+
+def cmd_tls(cap, mac, frame):
+    (st,) = tshark(cap, f"frame.number == {frame}", ["tcp.stream"])[0]
+    rows = tshark(cap, f"tcp.stream == {st} && tls.handshake", ["frame.number", "frame.time_epoch", "ip.src", "ip.dst",
+                  "tcp.dstport", "tls.handshake.type", "tls.handshake.version", "tls.handshake.extensions.supported_version",
+                  "tls.handshake.ciphersuite", "tls.handshake.extensions_server_name", "tls.handshake.certificate"])
+    print(f"stream {st} of {Path(cap).name}")
+    for fr, t, a, b, port, types, ver, sv, suites, sni, certs in rows:
+        types = types.split("\x1f")
+        if "1" in types:
+            print(f"  frame {fr} ClientHello {a} -> {b}:{port}: version field {ver}, supported_versions {sv.split(chr(31)) if sv else 'none'}, "
+                  f"server name {sni or 'none'}")
+            names = suite_names(suites.split("\x1f"))
+            weak = [n for n in names if expose.suite_flags(n)]
+            print(f"    {len(names)} suites offered; weak ones: {weak or 'none'}")
+            print(f"    first suites: {names[:6]}")
+        if "2" in types:
+            v = sv.split("\x1f")[-1] if sv else ver.split("\x1f")[0]
+            print(f"  frame {fr} ServerHello {a} -> {b}: version {v}, suite {suite_names(suites.split(chr(31))[:1])}")
+        if "11" in types and certs:
+            for i, c in enumerate(certs.split("\x1f")):
+                print(f"  frame {fr} certificate {i}: {cert_line(unhex(c), float(t))}")
+    ips = {r[0] for r in tshark(cap, f"{src(mac)} && tls.handshake.type == 1", ["ip.src"]) if r[0]}
+    if not ips:
+        return
+    shs = tshark(cap, f"tls.handshake.type == 2 && ip.dst in {{{' '.join(sorted(ips))}}}",
+                 ["ip.src", "tls.handshake.version", "tls.handshake.extensions.supported_version", "tls.handshake.ciphersuite"])
+    c = collections.Counter()
+    for a, ver, sv, suite in shs:
+        v = sv.split("\x1f")[-1] if sv else ver.split("\x1f")[0]
+        c[(a, v, suite_names(suite.split("\x1f")[:1])[0] if suite else "")] += 1
+    print(f"  all ServerHellos to the device in the capture: {sum(c.values())}")
+    for (a, v, n), k in c.most_common(8):
+        print(f"    {k} from {a}: {v} {n}")
+
+
 def main():
     cmd, *a = sys.argv[1:]
-    {"http": cmd_http, "payload": cmd_payload, "dl": cmd_dl}[cmd](*a)
+    {"http": cmd_http, "payload": cmd_payload, "dl": cmd_dl, "tls": cmd_tls}[cmd](*a)
 
 
 if __name__ == "__main__":
