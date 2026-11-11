@@ -297,7 +297,9 @@ def cmd_tls(cap, mac, frame):
         if "11" in types and certs:
             for i, c in enumerate(certs.split("\x1f")):
                 print(f"  frame {fr} certificate {i}: {cert_line(unhex(c), float(t))}")
-    ips = {r[0] for r in tshark(cap, f"{src(mac)} && tls.handshake.type == 1", ["ip.src"]) if r[0]}
+    # an ICMP error quoting a packet gives a second ip.src; keep plain IPv4 addresses only
+    ips = {a for r in tshark(cap, f"{src(mac)} && tls.handshake.type == 1", ["ip.src"]) for a in r[0].split("\x1f")
+           if re.fullmatch(r"[0-9.]+", a)}
     if not ips:
         return
     shs = tshark(cap, f"tls.handshake.type == 2 && ip.dst in {{{' '.join(sorted(ips))}}}",
