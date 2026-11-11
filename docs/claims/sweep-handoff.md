@@ -51,16 +51,16 @@
 - **根拠**：PCAP にはファイル名、フレーム番号、フィールド。文献には資料名、著者、年、URL、ページか節。読めないものは「未確認」。ホスト名やポートだけで目的を決めない。
 - **文書**：短く平易に。教授が読む文書に「Claude がやった」と書かない。
 
-## 3. 作業の順番
+## 3. 作業の順番と進み具合（2026-11-11 の終わり）
 
-0. **（2026-11-11 済み、PR #30、D42）先行研究の区分を新しい基準で直す。** これまで IMC と PETS も「除く」にしていた。直すもの：Insteon Hub Pro（Ren ほか、IMC 2019）、TLS の 20 件のうち IoTLS（Paracha ほか、IMC 2021）を理由にしたもの。Alrawi ほか（IEEE S&P 2019）を理由にしたものは「除く」のままで、理由を明記する。[sweep/prior-ids.tsv](sweep/prior-ids.tsv)、[sweep/prior-tls.tsv](sweep/prior-tls.tsv)、[sweep-results.md](sweep-results.md) の数と表を直す。
-1. **主張を集める。** YourThings の 44 製品は [claims.tsv](claims.tsv) にある（687 件）。UNSW 2016、UNSW-IoTraffic、CIC IoT 2022、Deakin 2023 の製品（[devices.tsv](devices.tsv)）は、収録の時期の公式文書を集める。候補のある製品（[sweep/candidates.tsv](sweep/candidates.tsv)）を先にする。
-2. **主張と通信を比べる。** 主張の種類ごとに、洗い出しの記録（`~/datasets/claims/sweep/`）から当てはまる観測を引いて判定する。足りない見方があれば `expose.py` か `verify.py` に足す。
-3. **食い違いの候補をパケットで確かめる。** `verify.py`、`verify_all.py`。前の会話の途中の作業（「論文で一部」の 40 件の確認）はここに含める。分かっていること：Withings の 4 製品（`auth` や `mac_address` が MAC）、D-Link DCH-S161（`/fw-upgrade` の `device_id` が MAC）、Belkin NetCam（ログのパスが UPnP の MAC）、Sonos 2 機種（ファームウェアを HTTP で取得）は確認済み。Bose の `mac`（32 文字）、Amazon Echo の `sid`（4 文字）、Samsung TV の 4 KB のファイルは、識別子や認証情報とは言えない。Harmony、Hue、Ring、Sonos の識別子、TP-Link NC220、Insteon Camera、Belkin WeMo の 4 製品、Roku の 2 製品はやり直しが要る。
-4. **食い違いの先行研究を探す。** 上の基準で分ける。
-5. **まとめる。** 結果を文書にし、小さな PR に分けて出す。1〜5 を、候補がなくなるまで繰り返す。
+0. **済み**：先行研究の区分を新しい基準で直した（D42）。
+1. **ほぼ済み**：UNSW 2016、UNSW-IoTraffic、CIC IoT 2022、Deakin 2023 の 64 製品の公式文書を集めた（[claims.tsv](claims.tsv) 1,841 行）。残り：UNSW の Nest Protect、Hello Barbie、SmartThings Hub と、YourThings と重なる製品の 2016〜17 年の版（エージェント G10 が作業中。終わったら `merge_collect.py` で入れて判定する）。YourThings と重なる Ring、Belkin NetCam、Hue、WeMo の 2016〜17 年の版は未着手。
+2. **済み**：主張ごとに判定した（[compare-sweep.md](compare-sweep.md)）。
+3. **済み**：「論文で一部」の 41 件、TLS の 109 件、取りこぼしていたダウンロード 11 件をパケットで確かめた（[sweep-results.md](sweep-results.md)）。
+4. **済み**：食い違いの候補の先行研究（[sweep/prior-claims.tsv](sweep/prior-claims.tsv)）。同じ食い違いの指摘は見つからなかった。Deakin のやり直しで出た TLS の 4 件（Echo Show 8、M80B、TOPERSUN、Perfk）は、まだ候補ごとに探していない。
+5. **済み**：文書にした（compare-sweep.md、sweep-results.md、E17）。
 
-最初に取りかかりやすい候補：**SimCam**。メーカーは「映像は機器の中で処理する」と紹介している（[sweep/prior-images.tsv](sweep/prior-images.tsv)）のに、2021-11-02 の収録では人物検知の画像を平文の HTTP で S3 に送っていた。収録より前の公式文書（メーカーのサイト、説明書）で、時期と範囲を確かめる。
+次にやること：G10 の結果を入れる。判断待ち（下の 4）への返事を受けて、候補の判定と区分を直す。人が確かめる用の表（候補ごとに引用、観測、根拠のフレーム）を作る。
 
 ## 4. 判断待ち（利用者が戻ったときにまとめて聞く）
 
@@ -77,6 +77,15 @@
 - 地域の版：CIC はカナダ、UNSW と Deakin はオーストラリアの収録だが、集めた文書の多くは米国版。
 - 製造者でない会社の文書（Borun の V380 アプリ、Amcrest Cloud を運営する Camcloud、BlipCare に対する Carematix）を含めるか。
 - 収録よりかなり古い文書（dropcam.com の 2015 年の版、収録の約 21 か月前）を比べる対象に入れるか。
+
+- 2026-11-11 の文書集めで出たもの。
+  - 製造者以外が書いた文書：Nest Mini の ioXt の評価報告（NCC Group が作り、Google が公開）。今は製造者の文書として判定した（文言の上で食い違い）。
+  - 範囲が狭いかもしれない文書：Withings の Data Security のページ（「専門家との活動だけが対象」と要約に書いてある）。今は一致として判定した。
+  - 収録の後にしか保存がない文書（Tapo の FAQ 671、Nest のヘルプ、Samsung の PSTI 宣言など）を判定に使うか。今は使い、note に書いた。
+  - 文書のない製品（TOPERSUN、Perfk は Tuya の OUI）で、Tuya のプラットフォームの文書を使うか。Luohe を「文書なし」としてよいか。
+  - Triby の候補：airable（Invoxia の取引先として airable のサイトに載っている）が「unaffiliated」に当たるか。
+  - Ring Alarm のポートの記事（「HTTP は Base Station には当てはまらない」）と接続確認の GET を、文言の上での食い違いとして数えるか。
+- メーカーへの連絡（SimCam、Samsung など）。
 
 （作業中に判断が要るものが出たら、ここに書き足す。）
 
