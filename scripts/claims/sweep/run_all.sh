@@ -1,5 +1,6 @@
 #!/bin/bash
-# Run expose.py over the five datasets kept on the external disk, one dataset after another.
+# Run expose.py over the datasets kept on the external disk, one dataset after another.
+# UNSW 2018: the benign daily captures of the SOSR 2019 data (iotanalytics.unsw.edu.au/attack-data.html), 27 days.
 # CIC IoT 2022: the 6-Attacks captures are left out (devices under attack).
 # usage: run_all.sh [dataset...]   (default: all five)
 set -u
@@ -15,6 +16,7 @@ sources() {
     iotraffic) echo $R/unsw-iotraffic/pcaps ;;
     cic2022) echo $R/cic-iot-2022/1-Power $R/cic-iot-2022/2-Idle $R/cic-iot-2022/3-Interactions $R/cic-iot-2022/4-Scenarios $R/cic-iot-2022/2021_11_02_Active.pcap ;;
     deakin) echo $R/deakin-iot/pcapFull ;;
+    unsw2018) echo $R/unsw-iot-2018/benign ;;
   esac
 }
 for ds in ${@:-yourthings cic2022 deakin iotraffic unsw2016}; do
