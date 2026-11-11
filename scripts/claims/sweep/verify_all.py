@@ -34,7 +34,7 @@ def finder(roots):
 
 def path_of(index, ds, name):
     base = {"cic2022": name.split("__")[-1], "iotraffic": name.replace("pcaps__", ""),
-            "deakin": name.replace("pcapFull__", "")}.get(ds, name)
+            "deakin": name.replace("pcapFull__", ""), "unsw2018": name.replace("benign__", "")}.get(ds, name)
     return index.get(base)
 
 
