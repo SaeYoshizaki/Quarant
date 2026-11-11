@@ -5,7 +5,7 @@ usage: merge_collect.py <claims.tsv> <coverage.tsv> <collect dir>...
 
 Each collect dir may hold claims.tsv and coverage.tsv with the same columns as the shared tables
 (timing, offsets and capture dates may be missing; claim_offsets.py fills them afterwards). Rows
-already in the shared table (same dataset, product, doc, url and quote, or url and status for
+already in the shared table (same dataset, product, doc, url, quote and type, or url and status for
 coverage) are skipped. The dataset code cic-iot-2022 is written as cic2022, the code of devices.json.
 """
 import csv
@@ -51,7 +51,7 @@ def merge(shared, name, dirs, key):
 
 def main():
     claims, coverage, *dirs = sys.argv[1:]
-    merge(claims, "claims.tsv", dirs, lambda r: (r["dataset"], r["product"], r["doc"], r["url"].strip(), r["quote"].strip()))
+    merge(claims, "claims.tsv", dirs, lambda r: (r["dataset"], r["product"], r["doc"], r["url"].strip(), r["quote"].strip(), r["type"]))
     merge(coverage, "coverage.tsv", dirs, lambda r: (r["dataset"], r["product"], r["doc"], r["url"].strip(), r["status"]))
 
 
