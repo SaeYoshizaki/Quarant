@@ -14,9 +14,10 @@ payload  the packet <frame>: where the device's MAC sits in the payload, what th
          whether it is the first data of the flow, how many packets to the same port hold the MAC
 dl       the HTTP response in the TCP stream of <frame>: status, length, type, file name extension,
          and the first bytes and entropy of the body
-For credentials (Authorization), only the scheme, the parts' lengths and whether the identifying
-part repeats are shown. Values stay in memory and are never printed. The peer's name is taken from
-DNS answers in the same capture.
+Values are printed as they are (2026-11-11): the most common values of the field, the decoded
+Authorization parts, and the bytes around the MAC. The output can hold credentials, so keep it out of
+the public repository (credentials go to quarant-results/claims). The peer's name is taken from DNS
+answers in the same capture.
 """
 import base64
 import collections
@@ -94,6 +95,14 @@ def lan_values(cap, mac, kind):
     return out
 
 
+def show(v):
+    return (v.decode("latin-1") if isinstance(v, bytes) else str(v))[:200]
+
+
+def top_values(vals, n=5):
+    return "; ".join(f"{show(v)} ({c})" for v, c in collections.Counter(vals).most_common(n))
+
+
 def shape_list(vals):
     return ", ".join(f"{s} ({n})" for s, n in collections.Counter(f'{expose.shape(v)}/len {len(v)}' for v in vals).most_common(3))
 
@@ -131,6 +140,7 @@ def cmd_http(cap, mac, host, key, lan_kind=None):
         auth(vals, mac)
         return
     print(f"  values: {len(set(vals))} distinct over {len(vals)}; shapes: {shape_list(set(vals))}")
+    print(f"  most common values: {top_values(vals)}")
     print(f"  relation to the device's MAC: {dict(collections.Counter(mac_relation(v, mac) for v in vals))}")
     if lan_kind:
         kind, _, other = lan_kind.partition("@")
@@ -141,11 +151,13 @@ def cmd_http(cap, mac, host, key, lan_kind=None):
         eq = sum(1 for v in vals if v in lan)
         inside = sum(1 for v in vals if any(x and x in v for x in lan))
         print(f"  LAN values ({lan_kind}) announced in this capture: {len(lan)}; requests whose value equals one: {eq}; holds one: {inside}")
+        print(f"  LAN values: {'; '.join(sorted(show(x) for x in lan)[:5])}")
 
 
 def auth(vals, mac):
     schemes = collections.Counter(v.split(b" ")[0].decode("latin-1") for v in vals)
     print(f"  Authorization schemes: {dict(schemes)}; {len(set(vals))} distinct header values over {len(vals)}")
+    print(f"  most common header values: {top_values(vals, 3)}")
     v0 = vals[0]
     scheme, _, rest = v0.partition(b" ")
     if scheme.lower() == b"basic":
@@ -156,6 +168,7 @@ def auth(vals, mac):
             except Exception:
                 continue
             users.append((u, p))
+        print(f"  Basic user:password, most common: {top_values([u + b':' + p for u, p in users], 3)}")
         us, ps = {u for u, _ in users}, {p for _, p in users}
         print(f"  Basic: user names {len(us)} distinct ({shape_list(us)}), relation to MAC {dict(collections.Counter(mac_relation(u, mac) for u, _ in users))}; "
               f"passwords {len(ps)} distinct, lengths {sorted({len(p) for p in ps})}, relation to MAC {dict(collections.Counter(mac_relation(p, mac) for p in ps))}")
@@ -164,12 +177,14 @@ def auth(vals, mac):
         sigs = [v.split(b" ", 1)[1].split(b":")[-1] for v in vals]
         print(f"  OSS: access key id {len(set(ids))} distinct over {len(ids)} (lengths {sorted({len(i) for i in ids})}); "
               f"signatures {len(set(sigs))} distinct (lengths {sorted({len(s) for s in sigs})})")
+        print(f"  OSS access key ids: {top_values(ids, 3)}")
     elif scheme.upper().startswith(b"AWS4"):
         cred = [re.search(rb"Credential=([^/,]+)/([^,]*)", v) for v in vals]
         ids = [m.group(1) for m in cred if m]
         scopes = {m.group(2).split(b"/", 1)[-1] for m in cred if m}
         print(f"  AWS4: access key id {len(set(ids))} distinct over {len(ids)} (lengths {sorted({len(i) for i in ids})}, "
               f"shape {shape_list(set(ids))}); credential scopes without the date: {sorted(s.decode('latin-1') for s in scopes)}")
+        print(f"  AWS4 access key ids: {top_values(ids, 3)}")
     else:
         print(f"  {scheme.decode('latin-1')}: lengths {sorted({len(v) for v in vals})}")
 
@@ -198,6 +213,7 @@ def cmd_payload(cap, mac, frame, lan_kind=None):
     for off, how in found:
         before = re.search(rb"([A-Za-z_\-]{2,24})[\"'=: ]{0,3}$", pl[max(0, off - 28):off])
         print(f"  MAC as {how} at offset {off}; name just before it: {before.group(1).decode() if before else 'none'}")
+        print(f"  bytes around it: {pl[max(0, off - 48):off + 60]!r}")
     if not found:
         print("  MAC not found in this packet")
     if lan_kind:
