@@ -57,7 +57,7 @@
 1. **済み**：UNSW 2016、UNSW-IoTraffic、CIC IoT 2022、Deakin 2023 の製品（68 の製品とデータの組）の公式文書を集めた（[claims.tsv](claims.tsv) 2,112 行）。YourThings と重なる製品は 2016〜17 年の版を集め直した。
 2. **済み**：主張ごとに判定した（[compare-sweep.md](compare-sweep.md)）。
 3. **済み**：「論文で一部」の 41 件、TLS の 109 件、取りこぼしていたダウンロード 11 件をパケットで確かめた（[sweep-results.md](sweep-results.md)）。
-4. **済み**：食い違いの候補の先行研究（[sweep/prior-claims.tsv](sweep/prior-claims.tsv)）。同じ食い違いの指摘は見つからなかった。Deakin のやり直しで出た TLS の 4 件（Echo Show 8、M80B、TOPERSUN、Perfk）は、まだ候補ごとに探していない。
+4. **済み**：食い違いの候補の先行研究（[sweep/prior-claims.tsv](sweep/prior-claims.tsv)）。同じ食い違いの指摘は見つからなかった。Deakin のやり直しで出た TLS の 4 件（Echo Show 8、M80B、TOPERSUN、Perfk）は 7 で済んだ。
 5. **済み**：文書にした（compare-sweep.md、sweep-results.md、E17）。
 
 6. **済み（2026-11-11、利用者の依頼）**：データセットを広げる。UNSW 2018（SOSR 2019 のデータ、正常な 27 日、38.4 GB、MIT-0）を `~/datasets/raw/unsw-iot-2018/benign/` に落とし、洗い出しにかける（`run_all.sh unsw2018`）。2018 年の文書はエージェント U1〜U4 が `~/datasets/claims/collect/U1〜U4/` に集めている。**状態（2026-11-11 夜）**：済み。洗い出し、2018 年の文書（U1〜U4）の判定、パケットでの確認、[compare-sweep.md](compare-sweep.md) への反映まで終えた。devices.json の UNSW 2018 の期間は正常な日のデータで直した。先行研究（SmartCam の映像、Google の更新、HP、Tuya）も済み（[sweep/prior-claims.tsv](sweep/prior-claims.tsv) の最後の 4 行）。同じ食い違いの指摘は見つからなかった。Jia ほか（S&P 2020）の本文は読めていない（未確認）。
@@ -65,7 +65,9 @@
 
 ほかの候補：CICIoT2023（フォームが要る）、南開大学の 77 機器（2024〜25、メールでの依頼が要る）、Mon(IoT)r と PingPong（約束への同意とメールが要る）。
 
-次にやること：判断待ち（下の 4）への返事を受けて、候補の判定と区分を直す。人が確かめる表 [review-sweep.md](review-sweep.md)（18 行）の「確認」の欄を利用者が埋める。Deakin のやり直しで出た TLS の 4 件の先行研究を探す。
+次にやること：判断待ち（下の 4）への返事を受けて、候補の判定と区分を直す。人が確かめる表 [review-sweep.md](review-sweep.md)（24 行）の「確認」の欄を利用者が埋める。メールやフォームが要るデータセットは、依頼するかを利用者が決める。
+
+2026-11-13：候補 34 行（YourThings を含む）の引用元を見直した。製造者以外の文書は Nest Mini の 1 件（NCC Group の報告書）だけ。FAQ・Q&A は 9 行。あいまいな言い方（方法を書かない、help・designed to などのぼかし、AES-256 が通信か保存か分からない、対象が個人情報だけ）の行も多い。表に列は足さず、一旦このままにする（利用者）。
 
 ## 4. 判断待ち（利用者が戻ったときにまとめて聞く）
 
