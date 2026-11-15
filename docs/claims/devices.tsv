@@ -3,14 +3,14 @@ unsw2016	Smart Things	d0:52:a8:00:67:5e	Samsung	SmartThings Hub			hub
 unsw2016	Amazon Echo	44:65:0d:56:cc:d3	Amazon	Echo			voice-assistant	
 unsw2016	Netatmo Welcome	70:ee:50:18:34:43	Netatmo	Welcome			camera	
 unsw2016	TP-Link Day Night Cloud camera	f4:f2:6d:93:51:f1	TP-Link	Day/Night Cloud Camera	NC220	mdns hostname NC220-…	camera	
-unsw2016	Samsung SmartCam	00:16:6c:ab:6b:88	Samsung	SmartCam			camera	
+unsw2016	Samsung SmartCam	00:16:6c:ab:6b:88	Samsung	SmartCam	SNH-P6410BN	same MAC as the IoTraffic and UNSW 2018 unit, whose UPnP modelName is SNH-P6410BN; lan_models.py 2026-11-15	camera	
 unsw2016	Dropcam	30:8c:fb:2f:e4:b2	Dropcam (Nest)	Dropcam			camera	
 unsw2016	Insteon Camera (wired)	00:62:6e:51:27:2e	Insteon	Camera			camera	same product as the wireless entry, other interface
 unsw2016	Insteon Camera (wireless)	e8:ab:fa:19:de:4f	Insteon	Camera			camera	
 unsw2016	Withings Smart Baby Monitor	00:24:e4:11:18:a8	Withings	Smart Baby Monitor			camera	
 unsw2016	Belkin Wemo switch	ec:1a:59:79:f4:89	Belkin	WeMo Switch			plug	
 unsw2016	TP-Link Smart plug	50:c7:bf:00:56:39	TP-Link	Smart Plug	HS110(US)	dhcp hostname	plug	
-unsw2016	iHome	74:c6:3b:29:d7:1d	iHome	Smart Plug			plug	HomeKit (hap-) hostname; model not named
+unsw2016	iHome	74:c6:3b:29:d7:1d	iHome	Smart Plug	iSP5	same MAC as the IoTraffic and UNSW 2018 unit (mdns txt md=iSP5); lan_models.py 2026-11-15	plug	HomeKit (hap-) hostname; model not named
 unsw2016	Belkin wemo motion sensor	ec:1a:59:83:28:11	Belkin	WeMo Motion Sensor			sensor	
 unsw2016	NEST Protect smoke alarm	18:b4:30:25:be:e4	Nest (Google)	Protect			sensor	
 unsw2016	Netatmo weather station	70:ee:50:03:b8:ac	Netatmo	Weather Station			sensor	
@@ -20,7 +20,7 @@ unsw2016	Withings Aura smart sleep sensor	00:24:e4:20:28:c6	Withings	Aura Sleep 
 unsw2016	Light Bulbs LiFX Smart Bulb	d0:73:d5:01:83:08	LIFX	Smart Bulb			bulb	
 unsw2016	Triby Speaker	18:b7:9e:02:20:44	Invoxia	Triby			speaker	
 unsw2016	PIX-STAR Photo-frame	e0:76:d0:33:bb:85	Pix-Star	Photo Frame			photo-frame	
-unsw2016	HP Printer	70:5a:0f:e4:9b:c0	HP	Printer (ENVY)		dhcp hostname hpenvyprinter1 (2018 captures)	printer	
+unsw2016	HP Printer	70:5a:0f:e4:9b:c0	HP	Printer (ENVY)	ENVY 5540 series	dhcp hostname hpenvyprinter1 (2018 captures); same MAC as the IoTraffic and UNSW 2018 unit (mdns ipp HP ENVY 5540 series); lan_models.py 2026-11-15	printer	
 unsw2016	Nest Dropcam	30:8c:fb:b6:ea:45	Dropcam (Nest)	Dropcam			camera	second unit
 iotraffic	AmazonEcho	44:65:0d:56:cc:d3	Amazon	Echo			voice-assistant	
 iotraffic	AugustDoorBell	e0:76:d0:3f:00:ae	August	Doorbell Cam			doorbell	
@@ -31,17 +31,17 @@ iotraffic	BelkinWemoSwitch	ec:1a:59:79:f4:89	Belkin	WeMo Switch			plug
 iotraffic	BlipCareBPMeter	74:6a:89:00:2e:25	BlipCare	Blood Pressure Meter			health	
 iotraffic	CanaryCamera	7c:70:bc:5d:5e:dc	Canary	Canary			camera	
 iotraffic	HelloBarbie	28:c2:dd:ff:a5:2d	Mattel	Hello Barbie			toy	
-iotraffic	HPPrinter	70:5a:0f:e4:9b:c0	HP	Printer (ENVY)			printer	
-iotraffic	iHome	74:c6:3b:29:d7:1d	iHome	Smart Plug			plug	
+iotraffic	HPPrinter	70:5a:0f:e4:9b:c0	HP	Printer (ENVY)	ENVY 5540 series	mdns ipp service name HP ENVY 5540 series [E49BC0]; lan_models.py 2026-11-15	printer	
+iotraffic	iHome	74:c6:3b:29:d7:1d	iHome	Smart Plug	iSP5	mdns txt md=iSP5 (HomeKit); lan_models.py 2026-11-15	plug	
 iotraffic	LiFXBulb	d0:73:d5:01:83:08	LIFX	Smart Bulb			bulb	
 iotraffic	NestDropCam	30:8c:fb:2f:e4:b2	Dropcam (Nest)	Dropcam			camera	
 iotraffic	NestProtectSmokeAlarm	18:b4:30:25:be:e4	Nest (Google)	Protect			sensor	
 iotraffic	NetatmoWeatherStation	70:ee:50:03:b8:ac	Netatmo	Weather Station			sensor	
 iotraffic	NetatmoWelcome	70:ee:50:18:34:43	Netatmo	Welcome			camera	
-iotraffic	PhilipsHue	00:17:88:2b:9a:25	Philips	Hue Bridge			hub	
+iotraffic	PhilipsHue	00:17:88:2b:9a:25	Philips	Hue Bridge	BSB002	mdns txt md=BSB002; lan_models.py 2026-11-15	hub	
 iotraffic	PixStarPhotoFrame	e0:76:d0:33:bb:85	Pix-Star	Photo Frame			photo-frame	
 iotraffic	RingDoorBell	88:4a:ea:31:66:9d	Ring	Video Doorbell			doorbell	
-iotraffic	SamsungCamera	00:16:6c:ab:6b:88	Samsung	SmartCam			camera	
+iotraffic	SamsungCamera	00:16:6c:ab:6b:88	Samsung	SmartCam	SNH-P6410BN	upnp modelName (BelkinCamera_b4750eece5a9.pcap frame 26), mdns name SAMSUNG-SNH-P6410BN-00166CAB6B88; lan_models.py 2026-11-15	camera	
 iotraffic	SamsungSmartThings	d0:52:a8:00:67:5e	Samsung	SmartThings Hub			hub	
 iotraffic	TPLinkCamera	f4:f2:6d:93:51:f1	TP-Link	Day/Night Cloud Camera	NC220	mdns hostname NC220-…	camera	
 iotraffic	TPLinkSmartPlug	50:c7:bf:00:56:39	TP-Link	Smart Plug	HS110(US)	dhcp hostname	plug	
@@ -49,8 +49,8 @@ iotraffic	TribySpeaker	18:b7:9e:02:20:44	Invoxia	Triby			speaker
 iotraffic	WithingsBabyMonitor	00:24:e4:11:18:a8	Withings	Smart Baby Monitor			camera	
 iotraffic	WithingsSleepSensor	00:24:e4:20:28:c6	Withings	Aura Sleep Sensor			health	
 iotraffic	WithingsSmartScale	00:24:e4:1b:6f:96	Withings	Smart Scale			health	
-unsw2018	(no list; MAC of Samsung SmartCam)	00:16:6c:ab:6b:88	Samsung	SmartCam			camera	label taken from the 2016 list by MAC
-unsw2018	(no list; MAC of Philips Hue)	00:17:88:2b:9a:25	Philips	Hue Bridge			hub	label taken from UNSW-IoTraffic by MAC
+unsw2018	(no list; MAC of Samsung SmartCam)	00:16:6c:ab:6b:88	Samsung	SmartCam	SNH-P6410BN	upnp modelName, mdns name SAMSUNG-SNH-P6410BN-00166CAB6B88; lan_models.py 2026-11-15	camera	label taken from the 2016 list by MAC
+unsw2018	(no list; MAC of Philips Hue)	00:17:88:2b:9a:25	Philips	Hue Bridge	BSB002	upnp modelNumber BSB002 (modelName Philips hue bridge 2015); lan_models.py 2026-11-15	hub	label taken from UNSW-IoTraffic by MAC
 unsw2018	(no list; Withings OUI)	00:24:e4:44:68:44	Withings	unknown			unknown	not in any list; product unknown
 unsw2018	(no list; MAC of Nest Protect)	18:b4:30:25:be:e4	Nest (Google)	Protect			sensor	label taken from the 2016 list by MAC
 unsw2018	(no list; MAC of Triby)	18:b7:9e:02:20:44	Invoxia	Triby			speaker	label taken from the 2016 list by MAC
@@ -58,11 +58,11 @@ unsw2018	(no list; MAC of Hello Barbie)	28:c2:dd:ff:a5:2d	Mattel	Hello Barbie			
 unsw2018	(no list; MAC of Dropcam)	30:8c:fb:2f:e4:b2	Dropcam (Nest)	Dropcam			camera	label taken from the 2016 list by MAC
 unsw2018	(no list; MAC of Amazon Echo)	44:65:0d:56:cc:d3	Amazon	Echo			voice-assistant	label taken from the 2016 list by MAC
 unsw2018	(no list; MAC of TP-Link plug)	50:c7:bf:00:56:39	TP-Link	Smart Plug	HS110(US)	dhcp hostname	plug	label taken from the 2016 list by MAC
-unsw2018	(no list; MAC of HP Printer)	70:5a:0f:e4:9b:c0	HP	Printer (ENVY)		dhcp hostname hpenvyprinter1	printer	label taken from the 2016 list by MAC
+unsw2018	(no list; MAC of HP Printer)	70:5a:0f:e4:9b:c0	HP	Printer (ENVY)	ENVY 5540 series	dhcp hostname hpenvyprinter1; mdns ipp txt ty=ENVY 5540 series; lan_models.py 2026-11-15	printer	label taken from the 2016 list by MAC
 unsw2018	(no list; MAC of Awair)	70:88:6b:10:0f:c6	Awair	Air Quality Monitor			sensor	label taken from UNSW-IoTraffic by MAC
 unsw2018	(no list; MAC of Netatmo weather station)	70:ee:50:03:b8:ac	Netatmo	Weather Station			sensor	label taken from the 2016 list by MAC
 unsw2018	(no list; MAC of Netatmo Welcome)	70:ee:50:18:34:43	Netatmo	Welcome			camera	label taken from the 2016 list by MAC
-unsw2018	(no list; MAC of iHome)	74:c6:3b:29:d7:1d	iHome	Smart Plug			plug	label taken from the 2016 list by MAC
+unsw2018	(no list; MAC of iHome)	74:c6:3b:29:d7:1d	iHome	Smart Plug	iSP5	mdns txt md=iSP5 (HomeKit); lan_models.py 2026-11-15	plug	label taken from the 2016 list by MAC
 unsw2018	(no list; MAC of Canary)	7c:70:bc:5d:5e:dc	Canary	Canary			camera	label taken from UNSW-IoTraffic by MAC
 unsw2018	(no list; Espressif OUI)	84:f3:eb:52:42:db	unknown	unknown			unknown	ESP_ hostname only; product unknown
 unsw2018	(no list; MAC of Ring doorbell)	88:4a:ea:31:66:9d	Ring	Video Doorbell			doorbell	label taken from UNSW-IoTraffic by MAC
@@ -149,7 +149,7 @@ cic2022	Amazon Echo Dot 1	1c:fe:2b:98:16:dd	Amazon	Echo Dot			voice-assistant	ge
 cic2022	Amazon Echo Dot 2	a0:d0:dc:c4:08:ff	Amazon	Echo Dot			voice-assistant	generation not named
 cic2022	Amazon Echo Spot	1c:12:b0:9b:0c:ec	Amazon	Echo Spot			voice-assistant	
 cic2022	Amazon Echo Studio	08:7c:39:ce:6e:2a	Amazon	Echo Studio			speaker	
-cic2022	Eufy Homebase	8c:85:80:6c:b6:47	Eufy (Anker)	HomeBase			hub	
+cic2022	Eufy Homebase	8c:85:80:6c:b6:47	Eufy (Anker)	HomeBase	T8010 (HomeBase 2)	mdns txt md=T8010, mdns name eufy HomeBase2-1DEF; lan_models.py 2026-11-15	hub	
 cic2022	Globe Lamp	50:02:91:b1:68:0c	Globe	Smart Lamp			bulb	Espressif module
 cic2022	Gosund Plug - Center	b8:f0:09:03:9a:af	Gosund	Smart Plug			plug	
 cic2022	Gosund Plug - Lower	b8:f0:09:03:29:79	Gosund	Smart Plug			plug	
@@ -161,13 +161,13 @@ cic2022	Gosund Plug - Upper	50:02:91:10:ac:d8	Gosund	Smart Plug			plug
 cic2022	HeimVision Camera	44:01:bb:ec:10:4a	HeimVision	camera			camera	model not named
 cic2022	HeimVision Lamp	d4:a6:51:30:64:b7	HeimVision	Smart Lamp			bulb	Tuya OUI
 cic2022	Home Eye Camera	34:75:63:73:f3:36	Home Eye	camera			camera	model not named
-cic2022	LG TV	ac:f1:08:4e:00:82	LG	webOS TV			tv-streaming	
+cic2022	LG TV	ac:f1:08:4e:00:82	LG	webOS TV	OLED77GXPUA	mdns txt model=OLED77GXPUA (AirPlay); lan_models.py 2026-11-15	tv-streaming	
 cic2022	Luohe Camera	7c:a7:b0:cd:18:32	Luohe	camera			camera	model not named
 cic2022	Nest Camera	44:bb:3b:00:39:07	Nest (Google)	Nest Cam			camera	
 cic2022	Google Nest Mini	cc:f4:11:9c:d0:00	Google	Nest Mini			voice-assistant	
 cic2022	Netatmo Camera	70:ee:50:68:0e:32	Netatmo	Welcome		dhcp hostname Netatmo-Welcome	camera	
 cic2022	Netatmo Weather Station	70:ee:50:6b:a8:1a	Netatmo	Weather Station			sensor	
-cic2022	Philips Hue Bridge	00:17:88:60:d6:4f	Philips	Hue Bridge			hub	
+cic2022	Philips Hue Bridge	00:17:88:60:d6:4f	Philips	Hue Bridge	BSB002	upnp modelNumber BSB002 (modelName Philips hue bridge 2015); lan_models.py 2026-11-15	hub	
 cic2022	Ring Basestation	b0:09:da:3e:82:6c	Ring	Alarm Base Station			hub	
 cic2022	Roomba Vacuum	50:14:79:37:80:18	iRobot	Roomba			appliance	
 cic2022	SimCam	10:2c:6b:1b:43:be	SimCam	camera			camera	model not named
@@ -182,7 +182,7 @@ deakin	Aeotec Smart Hub	68:3a:48:0d:d4:1c	Aeotec	Smart Home Hub (SmartThings)			
 deakin	Netatmo Smart Indoor Security Camera	70:ee:50:57:95:29	Netatmo	Smart Indoor Camera (Welcome)			camera	
 deakin	TP-Link Tapo Pan/Tilt Wi-Fi Camera	54:af:97:bb:8d:8f	TP-Link	Tapo Pan/Tilt Camera	C210	dhcp hostname C210_…	camera	
 deakin	32' Smart Monitor M80B UHD	70:09:71:9d:ad:10	Samsung	Smart Monitor M80B	M80B	dataset label	tv-streaming	
-deakin	SAMSUNG Pan/Tilt 1080P Wi-Fi Camera	00:16:6c:d7:d5:f9	Samsung	Pan/Tilt 1080P Wi-Fi Camera			camera	
+deakin	SAMSUNG Pan/Tilt 1080P Wi-Fi Camera	00:16:6c:d7:d5:f9	Samsung	Pan/Tilt 1080P Wi-Fi Camera	SNH-V6410PN	mdns name SNH-V6410PN-SAMSUNG-SNH-V6410PN-00166CD7D5F9, upnp modelName; lan_models.py 2026-11-15	camera	
 deakin	EZVIZ Security Camera	40:ac:bf:29:04:d4	EZVIZ	Security Camera			camera	model not named
 deakin	TOPERSUN Smart Plug	10:5a:17:b8:a2:0b	TOPERSUN	Smart Plug			plug	Tuya OUI
 deakin	TOPERSUN Smart Plug	10:5a:17:b8:9f:70	TOPERSUN	Smart Plug			plug	Tuya OUI
@@ -196,7 +196,7 @@ deakin	Withings Connect (Blood Pressure)	00:24:e4:f6:91:38	Withings	BPM Connect	
 deakin	Withings Connect (Blood Pressure)	00:24:e4:f7:ee:ac	Withings	BPM Connect	BPM Connect	dataset label	health	
 deakin	TUYA Smartdoor Bell	70:3a:2d:4a:48:e2	Tuya	Smart Doorbell			doorbell	model not named
 deakin	Pix-Star Easy Digital Photo Frame	b0:02:47:6f:63:37	Pix-Star	Easy Digital Photo Frame			photo-frame	
-deakin	HP Envy	84:69:93:27:ad:35	HP	Printer (ENVY)			printer	
+deakin	HP Envy	84:69:93:27:ad:35	HP	Printer (ENVY)	ENVY 6400 series	mdns ipp txt ty and usb_MDL; lan_models.py 2026-11-15	printer	
 deakin	Echo Show 8	18:48:be:31:4b:49	Amazon	Echo Show 8	Echo Show 8	dataset label	voice-assistant	
 deakin	Echo Show 8	74:d4:23:32:a2:d7	Amazon	Echo Show 8	Echo Show 8	dataset label	voice-assistant	
 deakin	GALAXY Watch5 Pro	6e:fe:2f:5a:d7:7e	Samsung	Galaxy Watch5 Pro	Galaxy Watch5 Pro	dataset label	wearable	

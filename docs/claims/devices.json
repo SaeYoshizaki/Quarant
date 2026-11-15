@@ -62,8 +62,8 @@
    "mac": "00:16:6c:ab:6b:88",
    "vendor": "Samsung",
    "product": "SmartCam",
-   "model": "",
-   "model_basis": "",
+   "model": "SNH-P6410BN",
+   "model_basis": "same MAC as the IoTraffic and UNSW 2018 unit, whose UPnP modelName is SNH-P6410BN; lan_models.py 2026-11-15",
    "category": "camera",
    "note": "",
    "runs_seen": 20,
@@ -160,8 +160,8 @@
    "mac": "74:c6:3b:29:d7:1d",
    "vendor": "iHome",
    "product": "Smart Plug",
-   "model": "",
-   "model_basis": "",
+   "model": "iSP5",
+   "model_basis": "same MAC as the IoTraffic and UNSW 2018 unit (mdns txt md=iSP5); lan_models.py 2026-11-15",
    "category": "plug",
    "note": "HomeKit (hap-) hostname; model not named",
    "runs_seen": 9,
@@ -300,8 +300,8 @@
    "mac": "70:5a:0f:e4:9b:c0",
    "vendor": "HP",
    "product": "Printer (ENVY)",
-   "model": "",
-   "model_basis": "dhcp hostname hpenvyprinter1 (2018 captures)",
+   "model": "ENVY 5540 series",
+   "model_basis": "dhcp hostname hpenvyprinter1 (2018 captures); same MAC as the IoTraffic and UNSW 2018 unit (mdns ipp HP ENVY 5540 series); lan_models.py 2026-11-15",
    "category": "printer",
    "note": "",
    "runs_seen": 20,
@@ -454,8 +454,8 @@
    "mac": "70:5a:0f:e4:9b:c0",
    "vendor": "HP",
    "product": "Printer (ENVY)",
-   "model": "",
-   "model_basis": "",
+   "model": "ENVY 5540 series",
+   "model_basis": "mdns ipp service name HP ENVY 5540 series [E49BC0]; lan_models.py 2026-11-15",
    "category": "printer",
    "note": "",
    "runs_seen": 3,
@@ -468,8 +468,8 @@
    "mac": "74:c6:3b:29:d7:1d",
    "vendor": "iHome",
    "product": "Smart Plug",
-   "model": "",
-   "model_basis": "",
+   "model": "iSP5",
+   "model_basis": "mdns txt md=iSP5 (HomeKit); lan_models.py 2026-11-15",
    "category": "plug",
    "note": "",
    "runs_seen": 1,
@@ -552,8 +552,8 @@
    "mac": "00:17:88:2b:9a:25",
    "vendor": "Philips",
    "product": "Hue Bridge",
-   "model": "",
-   "model_basis": "",
+   "model": "BSB002",
+   "model_basis": "mdns txt md=BSB002; lan_models.py 2026-11-15",
    "category": "hub",
    "note": "",
    "runs_seen": 5,
@@ -594,8 +594,8 @@
    "mac": "00:16:6c:ab:6b:88",
    "vendor": "Samsung",
    "product": "SmartCam",
-   "model": "",
-   "model_basis": "",
+   "model": "SNH-P6410BN",
+   "model_basis": "upnp modelName (BelkinCamera_b4750eece5a9.pcap frame 26), mdns name SAMSUNG-SNH-P6410BN-00166CAB6B88; lan_models.py 2026-11-15",
    "category": "camera",
    "note": "",
    "runs_seen": 8,
@@ -706,8 +706,8 @@
    "mac": "00:16:6c:ab:6b:88",
    "vendor": "Samsung",
    "product": "SmartCam",
-   "model": "",
-   "model_basis": "",
+   "model": "SNH-P6410BN",
+   "model_basis": "upnp modelName, mdns name SAMSUNG-SNH-P6410BN-00166CAB6B88; lan_models.py 2026-11-15",
    "category": "camera",
    "note": "label taken from the 2016 list by MAC",
    "runs_seen": 27,
@@ -720,8 +720,8 @@
    "mac": "00:17:88:2b:9a:25",
    "vendor": "Philips",
    "product": "Hue Bridge",
-   "model": "",
-   "model_basis": "",
+   "model": "BSB002",
+   "model_basis": "upnp modelNumber BSB002 (modelName Philips hue bridge 2015); lan_models.py 2026-11-15",
    "category": "hub",
    "note": "label taken from UNSW-IoTraffic by MAC",
    "runs_seen": 12,
@@ -832,8 +832,8 @@
    "mac": "70:5a:0f:e4:9b:c0",
    "vendor": "HP",
    "product": "Printer (ENVY)",
-   "model": "",
-   "model_basis": "dhcp hostname hpenvyprinter1",
+   "model": "ENVY 5540 series",
+   "model_basis": "dhcp hostname hpenvyprinter1; mdns ipp txt ty=ENVY 5540 series; lan_models.py 2026-11-15",
    "category": "printer",
    "note": "label taken from the 2016 list by MAC",
    "runs_seen": 27,
@@ -888,8 +888,8 @@
    "mac": "74:c6:3b:29:d7:1d",
    "vendor": "iHome",
    "product": "Smart Plug",
-   "model": "",
-   "model_basis": "",
+   "model": "iSP5",
+   "model_basis": "mdns txt md=iSP5 (HomeKit); lan_models.py 2026-11-15",
    "category": "plug",
    "note": "label taken from the 2016 list by MAC",
    "runs_seen": 27,
@@ -2106,8 +2106,8 @@
    "mac": "8c:85:80:6c:b6:47",
    "vendor": "Eufy (Anker)",
    "product": "HomeBase",
-   "model": "",
-   "model_basis": "",
+   "model": "T8010 (HomeBase 2)",
+   "model_basis": "mdns txt md=T8010, mdns name eufy HomeBase2-1DEF; lan_models.py 2026-11-15",
    "category": "hub",
    "note": "",
    "runs_seen": 46,
@@ -2274,8 +2274,8 @@
    "mac": "ac:f1:08:4e:00:82",
    "vendor": "LG",
    "product": "webOS TV",
-   "model": "",
-   "model_basis": "",
+   "model": "OLED77GXPUA",
+   "model_basis": "mdns txt model=OLED77GXPUA (AirPlay); lan_models.py 2026-11-15",
    "category": "tv-streaming",
    "note": "",
    "runs_seen": 9,
@@ -2358,8 +2358,8 @@
    "mac": "00:17:88:60:d6:4f",
    "vendor": "Philips",
    "product": "Hue Bridge",
-   "model": "",
-   "model_basis": "",
+   "model": "BSB002",
+   "model_basis": "upnp modelNumber BSB002 (modelName Philips hue bridge 2015); lan_models.py 2026-11-15",
    "category": "hub",
    "note": "",
    "runs_seen": 69,
@@ -2568,8 +2568,8 @@
    "mac": "00:16:6c:d7:d5:f9",
    "vendor": "Samsung",
    "product": "Pan/Tilt 1080P Wi-Fi Camera",
-   "model": "",
-   "model_basis": "",
+   "model": "SNH-V6410PN",
+   "model_basis": "mdns name SNH-V6410PN-SAMSUNG-SNH-V6410PN-00166CD7D5F9, upnp modelName; lan_models.py 2026-11-15",
    "category": "camera",
    "note": "",
    "runs_seen": 34,
@@ -2764,8 +2764,8 @@
    "mac": "84:69:93:27:ad:35",
    "vendor": "HP",
    "product": "Printer (ENVY)",
-   "model": "",
-   "model_basis": "",
+   "model": "ENVY 6400 series",
+   "model_basis": "mdns ipp txt ty and usb_MDL; lan_models.py 2026-11-15",
    "category": "printer",
    "note": "",
    "runs_seen": 34,
@@ -3399,7 +3399,9 @@
    "vendor": "Eufy (Anker)",
    "product": "HomeBase",
    "category": "hub",
-   "models": [],
+   "models": [
+    "T8010 (HomeBase 2)"
+   ],
    "datasets": {
     "cic2022": {
      "first_seen": "2021-09-23",
@@ -3570,7 +3572,10 @@
    "vendor": "HP",
    "product": "Printer (ENVY)",
    "category": "printer",
-   "models": [],
+   "models": [
+    "ENVY 5540 series",
+    "ENVY 6400 series"
+   ],
    "datasets": {
     "unsw2016": {
      "first_seen": "2016-09-22",
@@ -3598,7 +3603,9 @@
    "vendor": "iHome",
    "product": "Smart Plug",
    "category": "plug",
-   "models": [],
+   "models": [
+    "iSP5"
+   ],
    "datasets": {
     "unsw2016": {
      "first_seen": "2016-09-28",
@@ -3705,7 +3712,9 @@
    "vendor": "LG",
    "product": "webOS TV",
    "category": "tv-streaming",
-   "models": [],
+   "models": [
+    "OLED77GXPUA"
+   ],
    "datasets": {
     "cic2022": {
      "first_seen": "2021-09-28",
@@ -4027,7 +4036,9 @@
    "vendor": "Philips",
    "product": "Hue Bridge",
    "category": "hub",
-   "models": [],
+   "models": [
+    "BSB002"
+   ],
    "datasets": {
     "iotraffic": {
      "first_seen": "2016-11-14",
@@ -4189,7 +4200,9 @@
    "vendor": "Samsung",
    "product": "Pan/Tilt 1080P Wi-Fi Camera",
    "category": "camera",
-   "models": [],
+   "models": [
+    "SNH-V6410PN"
+   ],
    "datasets": {
     "deakin": {
      "first_seen": "2023-07-25",
@@ -4230,7 +4243,9 @@
    "vendor": "Samsung",
    "product": "SmartCam",
    "category": "camera",
-   "models": [],
+   "models": [
+    "SNH-P6410BN"
+   ],
    "datasets": {
     "unsw2016": {
      "first_seen": "2016-09-22",

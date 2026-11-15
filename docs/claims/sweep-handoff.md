@@ -80,7 +80,7 @@
   - SimCam：「video」を対象にした文（「processes and stores video locally」）が、人物検知の静止画の送信まで含むか。製品ページ（「Everything is processed and stored locally」）と、同じ会社のアプリのポリシー（「image data will be transferred ... via the server」）が食い違っている。
   - D-Link DCH-S161：「SSL ... for better securing all logs of settings and Services of your devices」に、平文のファームウェアの確認（`/fw-upgrade?device_id=<MAC>`）が入るか。今は弱い候補。
   - Awair：「encrypts and stores all information over TLS and AES 256 bit encryption」の AES 256 が、通信のことか保存のことか。今は候補（握手の 9 割が AES-128）。
-- 機種が分からない製品（Amcrest、Globe、Gosund、Atomi、HeimVision、Insteon Camera、HP ENVY、iHome）で、どの製品ページを使うか。今は共通の文書（プライバシーなど）だけで判定した。
+- 機種が分からない製品（Amcrest、Globe、Gosund、Atomi、HeimVision、Insteon Camera、HP ENVY、iHome）で、どの製品ページを使うか。今は共通の文書（プライバシーなど）だけで判定した。（2026-11-15：HP ENVY は 5540 series と 6400 series、iHome は iSP5 と、機器の mDNS の名乗りで分かった。製品ページを集め直すかを決める。）
 - 地域の版：CIC はカナダ、UNSW と Deakin はオーストラリアの収録だが、集めた文書の多くは米国版。
 - 製造者でない会社の文書（Borun の V380 アプリ、Amcrest Cloud を運営する Camcloud、BlipCare に対する Carematix）を含めるか。
 - 収録よりかなり古い文書（dropcam.com の 2015 年の版、収録の約 21 か月前）を比べる対象に入れるか。
@@ -101,8 +101,9 @@
   - SmartCam 2018：映像の宛先は UNSW の別のアドレス（129.94.5.83）で、クラウドではない。仕様の「Security SSL (AES 256bit)」がこの経路まで含むか。比べた仕様は SNH-C6417BN と SNH-V6414BN のもので、UNSW の機器（MAC 00:16:6c:ab:6b:88）の機種は分からない。今は候補。
   - データセットのメールでの依頼（南開大学、Mon(IoT)r、PingPong）と、CICIoT2023 のフォームへの入力。利用者が決める。
 - 根拠の補強で出たもの（2026-11-15、[sweep-results.md](sweep-results.md) の「根拠の補強」）。
-  - SmartCam 2018：機種は SNH-P6410BN と分かった（UPnP）。比べた仕様は別の機種のもの。SNH-P6410BN の仕様の表を探している。見つからなければ、同じシリーズの表で比べてよいか。
-  - SmartCam 2018：アプリの説明書（2022 年の版）に「Image encrypting : This encrypts the image transmitted.」という設定がある。映像が平文だったのは、この設定を切っていたからかもしれない。初期値が分からない場合、候補として残すか。
+  - SmartCam：機種は SNH-P6410BN（UPnP）。SNH-P6410BN 自身のデータシート（Wayback 2016-06-23）にも「Security SSL ( AES 256bit )」があり、候補の行として加えた。これまでの別機種の仕様の行（productId 6502、SNH-C6417BN、SNH-V6414BN）を残すか、外すか。
+  - SmartCam：映像の暗号化は「Image encrypting」という任意の設定で、SNH-P6410BN だけにある（マニュアル p.22、Android のガイド 2015-11）。初期値は書いていないが、画面の写真ではオフ。平文の映像を食い違いとして数えるか、「初期値で暗号化されない」として別に数えるか。
+  - SmartCam：マニュアルの本文は 2024 年のコピーしか読めない（2016〜2017 年のサポートページが同じファイル名にリンク）。同じ文書として扱ってよいか。
   - SimCam：中国語版の SimHome のポリシー（本文は 2021-09-06 の版、アーカイブは 2022-06-25）を、収録期間の文書として使うか。App Store の「5MP snapshot」付きの通知の説明を比べる対象にするか。別の機種（Ango）のクラウド保存の売り物を文脈に使うか。
   - Nest Cam（CIC 2021）は TLS 1.0 だけだった（RFC 8996 で廃止された後）。Nest の FAQ（2022-01-31）の「fully encrypted using the state-of-the-art security tools」と比べて、文言の上での食い違いとするか。今は一致。
   - 取り出した画像・映像・音声（`~/datasets/claims/dig/`）を、報告や論文に載せてよいか。人や実験室が写っている（公開データセットの中身）。

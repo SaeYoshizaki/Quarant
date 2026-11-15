@@ -62,7 +62,7 @@
 | D-Link | DCS-8000LH | DCS-8000LH | camera |  |  |  |  |  | 2021-09-22〜2021-12-24 |  |
 | D-Link | Water Sensor | DCH-S161 | sensor |  |  |  |  |  | 2021-09-29〜2021-12-24 |  |
 | Dropcam (Nest) | Dropcam |  | camera | 2016-09-22〜2016-10-12（2 台） | 2017-01-01〜2017-04-13 | 2018-06-01〜2018-10-25 |  |  |  |  |
-| Eufy (Anker) | HomeBase |  | hub |  |  |  |  |  | 2021-09-23〜2021-12-24 |  |
+| Eufy (Anker) | HomeBase | T8010 (HomeBase 2) | hub |  |  |  |  |  | 2021-09-23〜2021-12-24 |  |
 | EZVIZ | Security Camera |  | camera |  |  |  |  |  |  |  |
 | Facebook | Portal |  | voice-assistant |  |  |  |  |  |  |  |
 | Globe | Smart Lamp |  | bulb |  |  |  |  |  | 2021-09-28〜2021-12-24 |  |
@@ -76,14 +76,14 @@
 | HeimVision | camera |  | camera |  |  |  |  |  | 2021-09-22〜2021-12-24 |  |
 | HeimVision | Smart Lamp |  | bulb |  |  |  |  |  | 2021-09-22〜2021-12-24 |  |
 | Home Eye | camera |  | camera |  |  |  |  |  | 2021-09-22〜2021-12-24 |  |
-| HP | Printer (ENVY) |  | printer | 2016-09-22〜2016-10-12 | 2016-09-30〜2017-04-13 | 2018-06-01〜2018-10-25 |  |  |  | 2023-07-25〜2024-05-19 |
-| iHome | Smart Plug |  | plug | 2016-09-28〜2016-10-07 | 2016-10-05〜2017-02-24 | 2018-06-01〜2018-10-25 |  |  |  |  |
+| HP | Printer (ENVY) | ENVY 5540 series, ENVY 6400 series | printer | 2016-09-22〜2016-10-12 | 2016-09-30〜2017-04-13 | 2018-06-01〜2018-10-25 |  |  |  | 2023-07-25〜2024-05-19 |
+| iHome | Smart Plug | iSP5 | plug | 2016-09-28〜2016-10-07 | 2016-10-05〜2017-02-24 | 2018-06-01〜2018-10-25 |  |  |  |  |
 | Insteon | Camera |  | camera | 2016-09-28〜2016-10-12（2 台） |  |  |  |  |  |  |
 | Insteon | Hub Pro | Hub Pro | hub |  |  |  |  | 2018-03-20〜2018-04-19 |  |  |
 | Invoxia | Triby |  | speaker | 2016-09-22〜2016-10-12 | 2016-09-30〜2017-04-07 | 2018-10-21〜2018-10-25 |  |  |  |  |
 | iRobot | Roomba |  | appliance |  |  |  |  | 2018-03-20〜2018-04-19 | 2021-09-29〜2021-12-24 |  |
 | Koogeek | Smart Bulb | LB1 | bulb |  |  |  |  | 2018-03-20〜2018-04-19 |  |  |
-| LG | webOS TV |  | tv-streaming |  |  |  |  |  | 2021-09-28〜2021-11-03 |  |
+| LG | webOS TV | OLED77GXPUA | tv-streaming |  |  |  |  |  | 2021-09-28〜2021-11-03 |  |
 | LIFX | Color 1000 | Color 1000 | bulb |  |  |  |  | 2018-03-20〜2018-04-19 |  |  |
 | LIFX | Smart Bulb |  | bulb | 2016-09-28〜2016-10-12 | 2016-09-30〜2017-04-13 | 2018-10-21〜2018-10-25 |  |  |  |  |
 | Logitech | Harmony Hub |  | hub |  |  |  |  | 2018-03-20〜2018-04-19 |  |  |
@@ -103,7 +103,7 @@
 | Netatmo | Welcome |  | camera | 2016-09-22〜2016-10-12 | 2016-09-30〜2017-03-26 | 2018-06-01〜2018-06-02 |  |  | 2021-09-22〜2021-12-24 |  |
 | NVIDIA | Shield TV |  | tv-streaming |  |  |  |  | 2018-03-20〜2018-04-19 |  |  |
 | Perfk | Motion Sensor |  | sensor |  |  |  |  |  |  | 2023-07-25〜2024-05-19（2 台） |
-| Philips | Hue Bridge |  | hub |  | 2016-11-14〜2017-04-13 | 2018-10-21〜2018-10-25 | 2018-10-25〜2018-10-26 | 2018-03-20〜2018-04-19 | 2021-09-23〜2021-12-24 |  |
+| Philips | Hue Bridge | BSB002 | hub |  | 2016-11-14〜2017-04-13 | 2018-10-21〜2018-10-25 | 2018-10-25〜2018-10-26 | 2018-03-20〜2018-04-19 | 2021-09-23〜2021-12-24 |  |
 | Piper | Piper nv | Piper nv | camera |  |  |  |  | 2018-03-20〜2018-04-19 |  |  |
 | Pix-Star | Easy Digital Photo Frame |  | photo-frame |  |  |  |  |  |  | 2023-07-25〜2024-05-19 |
 | Pix-Star | Photo Frame |  | photo-frame | 2016-09-22〜2016-10-05 | 2016-09-30〜2017-04-06 | 2018-06-01〜2018-10-25 |  |  |  |  |
@@ -112,10 +112,10 @@
 | Ring | Video Doorbell |  | doorbell |  | 2017-03-07〜2017-04-13 | 2018-06-01〜2018-10-25 |  | 2018-03-20〜2018-04-19 |  | 2023-07-25〜2023-09-06 |
 | Roku | Roku 4 | Roku 4 | tv-streaming |  |  |  |  | 2018-03-20〜2018-04-19 |  |  |
 | Samsung | Galaxy Watch5 Pro | Galaxy Watch5 Pro | wearable |  |  |  |  |  |  | 2024-05-13〜2024-05-19 |
-| Samsung | Pan/Tilt 1080P Wi-Fi Camera |  | camera |  |  |  |  |  |  | 2023-07-25〜2024-05-19 |
+| Samsung | Pan/Tilt 1080P Wi-Fi Camera | SNH-V6410PN | camera |  |  |  |  |  |  | 2023-07-25〜2024-05-19 |
 | Samsung | Smart Monitor M80B | M80B | tv-streaming |  |  |  |  |  |  | 2023-07-26〜2024-05-19 |
 | Samsung | Smart TV |  | tv-streaming |  |  |  |  | 2018-03-20〜2018-04-18 |  |  |
-| Samsung | SmartCam |  | camera | 2016-09-22〜2016-10-12 | 2016-09-30〜2017-04-13 | 2018-06-01〜2018-10-25 |  |  |  |  |
+| Samsung | SmartCam | SNH-P6410BN | camera | 2016-09-22〜2016-10-12 | 2016-09-30〜2017-04-13 | 2018-06-01〜2018-10-25 |  |  |  |  |
 | Samsung | SmartThings Hub |  | hub | 2016-09-22〜2016-10-12 | 2016-09-30〜2017-04-13 | 2018-06-01〜2018-10-25 |  | 2018-03-20〜2018-04-19 |  |  |
 | Securifi | Almond |  | hub |  |  |  |  | 2018-03-20〜2018-04-19 |  |  |
 | SimCam | camera |  | camera |  |  |  |  |  | 2021-09-22〜2021-12-24 |  |

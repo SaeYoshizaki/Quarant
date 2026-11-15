@@ -381,9 +381,37 @@ IoT-23（Stratosphere Lab、プラハ工科大学。Garcia ほか 2020、Zenodo 
 - 送り先のバケット（AWS アカウント 793503604989）と `luuka.fun` の持ち主は、検索しても分からなかった（未確認）。
 - 読み：観測した画像は、通知のための人物検知の画像だと推定する。ただし、「Everything is processed and stored locally」「we never have access to your data」は、機能を限っていない。
 
-### 設定（SmartCam）
+### SNH-P6410BN 自身の文書（SmartCam）
 
-- SmartCam のアプリの説明書（Android、samsungsmartcam.com、Wayback 2022-02-25）のカメラの設定に「• Image encrypting : This encrypts the image transmitted.」がある。映像の暗号化は利用者が選ぶ設定だった可能性がある。2018 年に SNH-P6410BN でこの設定があったか、初期値が何かは未確認（調べている）。
+SNH-P6410BN の公式文書を探した（集めた 11 行は `~/datasets/claims/collect/S2/`。判定を付けて claims.tsv に入れた）。
+
+- **データシート**（Samsung Techwin、PDF の作成 2014-02-28、Wayback 2016-06-23、p.1）：「Security SSL ( AES 256bit )」。Protocol の欄に STUN、TURN、RTP、XMPP、uPNP。UNSW-IoTraffic（収録の 3 か月前）と UNSW 2018 の両方に当てはまる版。これを候補の行として加えた（T2）。
+- **ユーザーマニュアル** Web-1113（PDF の作成 2015-11-13）p.33 にも「Security SSL (AES 256bit)」。本文が読めるのは 2024-06-27 のコピーだけ。2016〜2017 年のサポートページが同じファイル名にリンクしているが、中身が同じかは未確認。
+- **映像の暗号化は別の設定**：マニュアル p.22「Image encrypting … This encrypts the image transmitted. … The image encryption function may affect the image transmission」。Android のガイド Web-1120（2015-11-20）には「This function is only supported for SNH-P6410BN model.」とある。
+  - 初期値は文書に書いていない。ただし、画面の写真では 3 つの文書すべてでオフになっている。
+  - オンを勧める文はない。
+- **遠隔視聴**：通常は P2P、不安定なときはリレー（Samsung のサーバーを通り、7 分まで）。観測は P2P（STUN のあと視聴者から直接の接続）で、説明と合う。
+- **Hanwha の脆弱性の報告**（2018-03-21、対象「All Hanwha Techwin SmartCams」）：CVE-2018-6295「Unencrypted way of remote control and communications」を「Resolved」とし、「fixed in the firmware updates released from March」。UNSW の機器のファームウェアの版と、この CVE が何の通信を指すかは未確認。判定はしていない。
+- **読み**：平文の映像は、利用者が「Image encrypting」を入れていなかったことで説明できてしまう。強く言えるのは次の 2 点。
+  - 仕様の「SSL (AES 256bit)」が条件なしに書かれているのに、映像は初期のままでは暗号化されない（写真では初期値がオフ）。
+  - TLS は AES-128 だった（サーバーの選択）。
+
+### 機器が名乗った機種（全データセット）
+
+洗い出しが見つけた LAN の名乗り（UPnP の説明、mDNS の名前と TXT、DHCP のホスト名）を読み直した（`scripts/claims/sweep/lan_models.py`、5 データセット、84 機器、157 フレーム。YourThings と UNSW 2016 は除く）。機種が空だった 16 行に機種を入れた（devices.tsv の model_basis に根拠）。
+
+| 製品 | 機種 | 根拠 |
+|---|---|---|
+| Samsung SmartCam（UNSW 2016、IoTraffic、UNSW 2018） | SNH-P6410BN | UPnP の modelName、mDNS の名前 |
+| Samsung Pan/Tilt（Deakin） | SNH-V6410PN | mDNS の名前、UPnP の modelName |
+| Philips Hue Bridge（IoTraffic、UNSW 2018、CIC） | BSB002 | UPnP の modelNumber、mDNS の TXT md |
+| HP ENVY（UNSW 2016、IoTraffic、UNSW 2018） | ENVY 5540 series | mDNS（IPP）のサービス名と TXT ty |
+| HP ENVY（Deakin） | ENVY 6400 series | mDNS（IPP）の TXT ty、usb_MDL |
+| iHome Smart Plug（UNSW 2016、IoTraffic、UNSW 2018） | iSP5 | mDNS（HomeKit）の TXT md |
+| Eufy HomeBase（CIC） | T8010（HomeBase 2） | mDNS（HomeKit）の TXT md |
+| LG webOS TV（CIC） | OLED77GXPUA | mDNS（AirPlay）の TXT model |
+
+- 分からないまま：Roomba（CIC、ホスト名 `iRobot-<BLID>` だけ）、Somfy（`ESP_1E7654`）、Gosund と Globe（`ESP_…`）、Amcrest（`AMC017CB_892FAB`、mDNS は `IPC_DM368`）、Canary（`C100F1615229`）。
 
 ## 限界
 
