@@ -1,0 +1,108 @@
+# 同じ製品を年をまたいで見る
+
+2 つ以上のデータセットにある製品の、公開のアドレスへの通信（`scripts/claims/sweep/longitudinal.py` で作る）。平文は HTTP の割合（バイト）、TLS は機器側の握手でサーバーが選んだ版と暗号（多い順に 2 つ）。同じ MAC は同じ個体。MAC が違う行は、同じ製品の別の個体（機種が違うこともある）。
+
+| 製品 | データ（年） | MAC | 公開への量 | 平文の HTTP | TLS の版 | 選ばれた暗号 |
+|---|---|---|---|---|---|---|
+| Amazon Echo | UNSW 2016（2016） | 44:65:0d:56:cc:d3 | 276.7 MB | 79.8% | TLS1.0:1895; TLS1.2:777 | TLS_RSA_WITH_AES_256_CBC_SHA:1858; TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384:390 |
+| Amazon Echo | UNSW-IoTraffic（2016-17） | 44:65:0d:56:cc:d3 | 566.7 MB | 61.6% | TLS1.0:7909; TLS1.2:3095 | TLS_RSA_WITH_AES_256_CBC_SHA:7427; TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384:1559 |
+| Amazon Echo | UNSW 2018（2018） | 44:65:0d:56:cc:d3 | 62.4 MB | 3.2% | TLS1.0:2308; TLS1.2:509 | TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA:2310; TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256:507 |
+| Amazon Echo | IoT-23（2018-19） | 4c:ef:c0:27:56:1e | 347.5 MB | 0.1% | TLS1.2:86 | TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256:44; TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA:42 |
+| Arlo (Netgear) Arlo base station（VMB3010） | YourThings（2018） | b0:7f:b9:a6:47:4d | 92.4 MB | 0.0% | TLS1.2:505 | TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256:379; TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384:126 |
+| Arlo (Netgear) Arlo base station（VMB5000） | CIC IoT 2022（2021） | 3c:37:86:6f:b9:51 | 106.2 MB | 0.0% | TLS1.2:4483 | TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256:4405; TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384:72 |
+| August Doorbell Cam | UNSW-IoTraffic（2016-17） | e0:76:d0:3f:00:ae | 4235.3 MB | 0.0% | TLS1.2:641589; TLS1.0:192 | TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384:638304; TLS_RSA_WITH_AES_128_CBC_SHA:1713 |
+| August Doorbell Cam | YourThings（2018） | cc:b8:a8:ad:4d:04 | 261.8 MB | 0.0% | TLS1.2:26856; TLS1.0:36 | TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384:25851; TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256:732 |
+| August Doorbell Cam | UNSW 2018（2018） | e0:76:d0:3f:00:ae | 643.8 MB | 0.0% | TLS1.2:143202 | TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384:141369; TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256:1466 |
+| Awair Air Quality Monitor | UNSW-IoTraffic（2016-17） | 70:88:6b:10:0f:c6 | 122.8 MB | 0.0% | TLS1.2:826 | TLS_RSA_WITH_AES_128_CBC_SHA256:744; TLS_RSA_WITH_AES_256_CBC_SHA256:82 |
+| Awair Air Quality Monitor | UNSW 2018（2018） | 70:88:6b:10:0f:c6 | 60.5 MB | 0.0% | TLS1.2:1116 | TLS_RSA_WITH_AES_256_CBC_SHA256:705; TLS_RSA_WITH_AES_128_CBC_SHA256:353 |
+| Belkin NetCam HD | UNSW-IoTraffic（2016-17） | b4:75:0e:ec:e5:a9 | 23.8 MB | 0.1% | TLS1.0:275; TLS1.2:41 | TLS_RSA_WITH_AES_256_CBC_SHA:295; TLS_DHE_RSA_WITH_AES_256_GCM_SHA384:21 |
+| Belkin NetCam HD | YourThings（2018） | c0:56:27:53:09:6d | 534.0 MB | 0.0% | TLS1.2:844; TLS1.0:3 | TLS_RSA_WITH_AES_256_CBC_SHA:845; TLS_RSA_WITH_AES_128_CBC_SHA:2 |
+| Belkin NetCam HD | UNSW 2018（2018） | b4:75:0e:ec:e5:a9 | 32.9 MB | 0.2% | TLS1.2:1407 | TLS_DHE_RSA_WITH_AES_256_GCM_SHA384:958; TLS_RSA_WITH_AES_256_CBC_SHA:449 |
+| Belkin WeMo Motion Sensor | UNSW 2016（2016） | ec:1a:59:83:28:11 | 13.6 MB | 0.2% | TLS1.0:621 | TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA:621 |
+| Belkin WeMo Motion Sensor | UNSW-IoTraffic（2016-17） | ec:1a:59:83:28:11 | 104.1 MB | 0.1% | TLS1.0:4923 | TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA:4923 |
+| Belkin WeMo Motion Sensor | YourThings（2018） | 08:86:3b:6f:7a:15 | 54.4 MB | 16.1% | TLS1.0:203 | TLS_RSA_WITH_AES_256_CBC_SHA:203 |
+| Belkin WeMo Motion Sensor | UNSW 2018（2018） | ec:1a:59:83:28:11 | 1676.3 MB | 0.2% | TLS1.0:198284 | TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA:198284 |
+| Belkin WeMo Switch | UNSW 2016（2016） | ec:1a:59:79:f4:89 | 2.0 MB | 4.3% | TLS1.0:51 | TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA:51 |
+| Belkin WeMo Switch | UNSW-IoTraffic（2016-17） | ec:1a:59:79:f4:89 | 11.0 MB | 3.8% | TLS1.0:340 | TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA:340 |
+| Belkin WeMo Switch | YourThings（2018） | 08:86:3b:70:d7:39 | 11.2 MB | 78.4% | TLS1.0:32 | TLS_RSA_WITH_AES_256_CBC_SHA:32 |
+| Belkin WeMo Switch | UNSW 2018（2018） | ec:1a:59:79:f4:89 | 10.2 MB | 0.0% | TLS1.0:123 | TLS_RSA_WITH_AES_256_CBC_SHA:123 |
+| BlipCare Blood Pressure Meter | UNSW 2016（2016） | 74:6a:89:00:2e:25 | 0.0 MB | 0.0% | TLS1.0:4 | TLS_RSA_WITH_AES_128_CBC_SHA:4 |
+| BlipCare Blood Pressure Meter | UNSW-IoTraffic（2016-17） | 74:6a:89:00:2e:25 | 0.0 MB | 0.0% | TLS1.0:10 | TLS_RSA_WITH_AES_128_CBC_SHA:10 |
+| Canary Canary | UNSW-IoTraffic（2016-17） | 7c:70:bc:5d:5e:dc | 5443.7 MB | 0.0% | TLS1.2:5843 | TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384:5831; TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256:9 |
+| Canary Canary | YourThings（2018） | 7c:70:bc:5d:09:d1 | 2401.8 MB | 0.0% | TLS1.2:26356 | TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384:26346; TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384:6 |
+| Canary Canary | UNSW 2018（2018） | 7c:70:bc:5d:5e:dc | 432.2 MB | 0.0% | TLS1.2:41075 | TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384:41035; TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256:23 |
+| Dropcam (Nest) Dropcam | UNSW 2016（2016） | 30:8c:fb:2f:e4:b2 | 304.9 MB | 0.0% | TLS1.0:10 | TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA:10 |
+| Dropcam (Nest) Dropcam | UNSW 2016（2016） | 30:8c:fb:b6:ea:45 | 144.7 MB | 0.0% | TLS1.0:12; SSL3.0:5 | TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA:12; TLS_DHE_RSA_WITH_AES_128_CBC_SHA:5 |
+| Dropcam (Nest) Dropcam | UNSW-IoTraffic（2016-17） | 30:8c:fb:2f:e4:b2 | 1618.8 MB | 0.0% | TLS1.0:104; SSL3.0:1 | TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA:104; TLS_DHE_RSA_WITH_AES_128_CBC_SHA:1 |
+| Dropcam (Nest) Dropcam | UNSW 2018（2018） | 30:8c:fb:2f:e4:b2 | 9660.2 MB | 0.0% | TLS1.0:34 | TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA:34 |
+| Google Google Home | YourThings（2018） | 48:d6:d5:98:53:84 | 80.4 MB | 3.4% | TLS1.2:9305 | TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256:9250; TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256:55 |
+| Google Google Home | UNSW 2018（2018） | f4:f5:d8:d4:eb:12 | 314.8 MB | 25.1% | TLS1.2:16077 | TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256:15971; TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256:82 |
+| HP Printer (ENVY) | UNSW 2016（2016） | 70:5a:0f:e4:9b:c0 | 1.9 MB | 0.1% | TLS1.0:38 | TLS_DHE_RSA_WITH_AES_128_CBC_SHA:38 |
+| HP Printer (ENVY) | UNSW-IoTraffic（2016-17） | 70:5a:0f:e4:9b:c0 | 7.1 MB | 0.1% | TLS1.0:97 | TLS_DHE_RSA_WITH_AES_128_CBC_SHA:97 |
+| HP Printer (ENVY) | UNSW 2018（2018） | 70:5a:0f:e4:9b:c0 | 2.6 MB | 1.2% | TLS1.0:26 | TLS_DHE_RSA_WITH_AES_128_CBC_SHA:26 |
+| HP Printer (ENVY) | Deakin（2023-24） | 84:69:93:27:ad:35 | 284.2 MB | 0.2% | TLS1.2:136 | TLS_RSA_WITH_AES_256_GCM_SHA384:63; TLS_RSA_WITH_AES_128_GCM_SHA256:39 |
+| Invoxia Triby | UNSW 2016（2016） | 18:b7:9e:02:20:44 | 10.2 MB | 10.1% | TLS1.2:73 | TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384:73 |
+| Invoxia Triby | UNSW-IoTraffic（2016-17） | 18:b7:9e:02:20:44 | 141.6 MB | 61.5% | TLS1.2:3667 | TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384:3667 |
+| Invoxia Triby | UNSW 2018（2018） | 18:b7:9e:02:20:44 | 76.5 MB | 72.0% | TLS1.2:2370 | TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384:2370 |
+| LG webOS TV | YourThings（2018） | - | ― | ― | ― | ― |
+| LG webOS TV | CIC IoT 2022（2021） | ac:f1:08:4e:00:82 | 356.0 MB | 0.0% | TLS1.2:158 | TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384:89; TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256:55 |
+| LIFX Smart Bulb | UNSW 2016（2016） | d0:73:d5:01:83:08 | 4.6 MB | 0.0% | TLS1.0:19 | TLS_RSA_WITH_AES_128_CBC_SHA:19 |
+| LIFX Smart Bulb | UNSW-IoTraffic（2016-17） | d0:73:d5:01:83:08 | 36.7 MB | 0.0% | TLS1.0:131 | TLS_RSA_WITH_AES_128_CBC_SHA:131 |
+| LIFX Smart Bulb | UNSW 2018（2018） | d0:73:d5:01:83:08 | 10.3 MB | 0.0% | TLS1.0:39 | TLS_RSA_WITH_AES_256_CBC_SHA:24; TLS_RSA_WITH_AES_128_CBC_SHA:15 |
+| Mattel Hello Barbie | UNSW-IoTraffic（2016-17） | 28:c2:dd:ff:a5:2d | 1.4 MB | 0.0% | TLS1.2:80 | TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256:80 |
+| Mattel Hello Barbie | UNSW 2018（2018） | 28:c2:dd:ff:a5:2d | 0.0 MB | 0.0% | TLS1.2:6 | TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256:6 |
+| Nest (Google) Nest Cam | YourThings（2018） | 18:b4:30:58:3d:6c | 40041.3 MB | 0.0% | TLS1.0:117 | TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA:117 |
+| Nest (Google) Nest Cam | CIC IoT 2022（2021） | 44:bb:3b:00:39:07 | 65.0 MB | 0.0% | TLS1.0:38 | TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA:38 |
+| Nest (Google) Protect | UNSW 2016（2016） | 18:b4:30:25:be:e4 | 0.7 MB | 0.0% | ― | ― |
+| Nest (Google) Protect | UNSW-IoTraffic（2016-17） | 18:b4:30:25:be:e4 | 5.3 MB | 0.0% | ― | ― |
+| Nest (Google) Protect | YourThings（2018） | 18:b4:30:31:04:b9 | 1.0 MB | 0.0% | ― | ― |
+| Nest (Google) Protect | UNSW 2018（2018） | 18:b4:30:25:be:e4 | 1.1 MB | 0.0% | ― | ― |
+| Nest (Google) Protect | Deakin（2023-24） | cc:a7:c1:6a:b5:78 | ― | ― | ― | ― |
+| Netatmo Weather Station | UNSW 2016（2016） | 70:ee:50:03:b8:ac | 1.2 MB | 0.0% | ― | ― |
+| Netatmo Weather Station | UNSW-IoTraffic（2016-17） | 70:ee:50:03:b8:ac | 8.4 MB | 0.0% | ― | ― |
+| Netatmo Weather Station | UNSW 2018（2018） | 70:ee:50:03:b8:ac | 0.9 MB | 0.0% | ― | ― |
+| Netatmo Weather Station | CIC IoT 2022（2021） | 70:ee:50:6b:a8:1a | 1.1 MB | 0.0% | ― | ― |
+| Netatmo Weather Station | Deakin（2023-24） | 70:ee:50:96:bb:dc | 2.7 MB | 0.0% | ― | ― |
+| Netatmo Welcome | UNSW 2016（2016） | 70:ee:50:18:34:43 | 166.2 MB | 0.0% | TLS1.2:2597; TLS1.0:49 | TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384:2597; TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA:49 |
+| Netatmo Welcome | UNSW-IoTraffic（2016-17） | 70:ee:50:18:34:43 | 1523.1 MB | 0.0% | TLS1.2:25488; TLS1.0:286 | TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384:25479; TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA:286 |
+| Netatmo Welcome | UNSW 2018（2018） | 70:ee:50:18:34:43 | 531.8 MB | 0.0% | TLS1.2:5694; TLS1.0:55 | TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384:5694; TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA:55 |
+| Netatmo Welcome | CIC IoT 2022（2021） | 70:ee:50:68:0e:32 | 28.5 MB | 0.0% | TLS1.2:629; TLS1.0:93 | TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384:629; TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA:93 |
+| Philips Hue Bridge | UNSW-IoTraffic（2016-17） | 00:17:88:2b:9a:25 | 52.0 MB | 70.3% | TLS1.2:7 | TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256:7 |
+| Philips Hue Bridge | YourThings（2018） | 00:17:88:21:f7:e4 | 17.7 MB | 91.5% | TLS1.2:5; TLS1.0:1 | TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256:5; TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA:1 |
+| Philips Hue Bridge | UNSW 2018（2018） | 00:17:88:2b:9a:25 | 5.7 MB | 86.3% | TLS1.2:6 | TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256:6 |
+| Philips Hue Bridge | IoT-23（2018-19） | 00:17:88:75:b3:82 | 0.2 MB | 71.5% | ― | ― |
+| Philips Hue Bridge | CIC IoT 2022（2021） | 00:17:88:60:d6:4f | 9.6 MB | 26.9% | TLS1.2:1068; TLS1.3:20; TLS1.0:3 | TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256:1068; TLS_CHACHA20_POLY1305_SHA256:20 |
+| Pix-Star Photo Frame | UNSW 2016（2016） | e0:76:d0:33:bb:85 | 7.6 MB | 0.1% | TLS1.0:1105 | TLS_DHE_RSA_WITH_AES_256_CBC_SHA:1105 |
+| Pix-Star Photo Frame | UNSW-IoTraffic（2016-17） | e0:76:d0:33:bb:85 | 6.0 MB | 0.3% | TLS1.0:1049 | TLS_DHE_RSA_WITH_AES_256_CBC_SHA:1049 |
+| Pix-Star Photo Frame | UNSW 2018（2018） | e0:76:d0:33:bb:85 | 7.1 MB | 0.3% | TLS1.0:758; TLS1.2:567 | TLS_DHE_RSA_WITH_AES_256_CBC_SHA:758; TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384:567 |
+| Ring Video Doorbell | UNSW-IoTraffic（2016-17） | 88:4a:ea:31:66:9d | 20.4 MB | 0.0% | TLS1.2:103 | TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256:103 |
+| Ring Video Doorbell | YourThings（2018） | 00:1d:c9:23:f6:00 | 333.4 MB | 1.6% | TLS1.2:6866 | TLS_RSA_WITH_AES_128_CBC_SHA:6866 |
+| Ring Video Doorbell | UNSW 2018（2018） | 88:4a:ea:31:66:9d | 14.6 MB | 0.0% | TLS1.2:1140 | TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256:1140 |
+| Ring Video Doorbell | Deakin（2023-24） | 90:48:6c:08:da:8a | 304.4 MB | 0.0% | TLS1.2:727 | TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256:687; TLS_RSA_WITH_AES_128_GCM_SHA256:40 |
+| Samsung SmartCam | UNSW 2016（2016） | 00:16:6c:ab:6b:88 | 20.3 MB | 24.0% | TLS1.0:12 | TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA:12 |
+| Samsung SmartCam | UNSW-IoTraffic（2016-17） | 00:16:6c:ab:6b:88 | 87.4 MB | 8.3% | TLS1.0:65 | TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA:65 |
+| Samsung SmartCam | UNSW 2018（2018） | 00:16:6c:ab:6b:88 | 68.9 MB | 0.0% | TLS1.0:21 | TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA:21 |
+| Samsung SmartThings Hub | UNSW 2016（2016） | d0:52:a8:00:67:5e | 7.1 MB | 0.0% | TLS1.2:6 | TLS_DHE_RSA_WITH_AES_128_CBC_SHA:6 |
+| Samsung SmartThings Hub | UNSW-IoTraffic（2016-17） | d0:52:a8:00:67:5e | 72.0 MB | 0.0% | TLS1.2:46 | TLS_DHE_RSA_WITH_AES_128_CBC_SHA:46 |
+| Samsung SmartThings Hub | YourThings（2018） | d0:52:a8:63:47:9e | 105.5 MB | 0.0% | TLS1.2:3391 | TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256:3391 |
+| Samsung SmartThings Hub | UNSW 2018（2018） | d0:52:a8:00:67:5e | 27.9 MB | 0.0% | TLS1.2:36 | TLS_DHE_RSA_WITH_AES_128_CBC_SHA:36 |
+| TP-Link Day/Night Cloud Camera（NC220） | UNSW 2016（2016） | f4:f2:6d:93:51:f1 | 95.6 MB | 91.9% | TLS1.0:10 | TLS_RSA_WITH_AES_128_CBC_SHA:10 |
+| TP-Link Day/Night Cloud Camera（NC220） | UNSW-IoTraffic（2016-17） | f4:f2:6d:93:51:f1 | 12.9 MB | 10.9% | TLS1.0:26 | TLS_RSA_WITH_AES_128_CBC_SHA:26 |
+| TP-Link Day/Night Cloud Camera（NC220） | UNSW 2018（2018） | f4:f2:6d:93:51:f1 | 3.6 MB | 0.3% | TLS1.0:29 | TLS_RSA_WITH_AES_128_CBC_SHA:29 |
+| TP-Link Smart Plug（HS110(US)） | UNSW 2016（2016） | 50:c7:bf:00:56:39 | 2.1 MB | 0.0% | TLS1.0:216 | TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA:216 |
+| TP-Link Smart Plug（HS110(US)） | UNSW-IoTraffic（2016-17） | 50:c7:bf:00:56:39 | 4.0 MB | 0.0% | TLS1.0:415 | TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA:415 |
+| TP-Link Smart Plug（HS105） | YourThings（2018） | b0:4e:26:20:15:8a | 1.4 MB | 36.4% | TLS1.2:45 | TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256:45 |
+| TP-Link Smart Plug（HS110(US)） | UNSW 2018（2018） | 50:c7:bf:00:56:39 | 4.5 MB | 0.0% | TLS1.0:530 | TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA:530 |
+| Withings Aura Sleep Sensor | UNSW 2016（2016） | 00:24:e4:20:28:c6 | 43.1 MB | 43.1% | ― | ― |
+| Withings Aura Sleep Sensor | UNSW-IoTraffic（2016-17） | 00:24:e4:20:28:c6 | 223.0 MB | 27.0% | TLS1.2:4428 | TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256:4428 |
+| Withings Smart Baby Monitor | UNSW 2016（2016） | 00:24:e4:11:18:a8 | 7.3 MB | 99.6% | ― | ― |
+| Withings Smart Baby Monitor | UNSW-IoTraffic（2016-17） | 00:24:e4:11:18:a8 | 7.3 MB | 99.6% | ― | ― |
+| Withings Smart Scale | UNSW 2016（2016） | 00:24:e4:1b:6f:96 | 0.8 MB | 100.0% | ― | ― |
+| Withings Smart Scale | UNSW-IoTraffic（2016-17） | 00:24:e4:1b:6f:96 | 8.5 MB | 64.7% | TLS1.2:101 | TLS_RSA_WITH_AES_128_CBC_SHA256:101 |
+| iHome Smart Plug | UNSW 2016（2016） | 74:c6:3b:29:d7:1d | 2.0 MB | 1.9% | TLS1.2:81 | TLS_RSA_WITH_AES_128_CBC_SHA256:81 |
+| iHome Smart Plug | UNSW-IoTraffic（2016-17） | 74:c6:3b:29:d7:1d | 277.2 MB | 0.0% | TLS1.2:59082 | TLS_RSA_WITH_AES_128_CBC_SHA256:59082 |
+| iHome Smart Plug | UNSW 2018（2018） | 74:c6:3b:29:d7:1d | 5.7 MB | 7.9% | TLS1.2:13 | TLS_RSA_WITH_AES_128_CBC_SHA256:13 |
+| iRobot Roomba | YourThings（2018） | 40:9f:38:92:40:13 | 1.1 MB | 0.0% | TLS1.2:52 | TLS_RSA_WITH_AES_128_CBC_SHA256:32; TLS_DHE_RSA_WITH_AES_256_CBC_SHA:20 |
+| iRobot Roomba | CIC IoT 2022（2021） | 50:14:79:37:80:18 | 2.8 MB | 0.0% | TLS1.3:20; TLS1.2:14 | TLS_AES_128_GCM_SHA256:20; TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256:14 |
+
+32 製品。

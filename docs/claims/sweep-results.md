@@ -319,6 +319,59 @@ IoT-23（Stratosphere Lab、プラハ工科大学。Garcia ほか 2020、Zenodo 
 - Hue の `/bridges/fullconfig` への POST（フレーム 12413）の本文は 16 進の文字列で、中身は読めない。
 - 文書との比べ合わせは [compare-sweep.md](compare-sweep.md)。Hue と Echo は UNSW 2018 で集めた 2018 年の文書を使った（収録はチェコで、地域の版は未確認）。
 
+## 根拠の補強（2026-11-15）
+
+強い候補について、足りなかった根拠（機種、中身、送り先、設定、暗号を選んだ側）をパケットで確かめた。取り出した画像・映像・音声は公開のリポジトリに入れず、`~/datasets/claims/dig/` に置いた。
+
+### 機種
+
+| 機器（データ） | 根拠 | 分かったこと |
+|---|---|---|
+| Samsung SmartCam（UNSW 2016・IoTraffic・2018、MAC 00:16:6c:ab:6b:88） | IoTraffic `BelkinCamera_b4750eece5a9.pcap` フレーム 26（2017-02-21）、UNSW 2018 `18-05-28.pcap` の UPnP の説明（1,098 回） | 機器自身の UPnP の説明に `modelName` **SNH-P6410BN**、`friendlyName` SAMSUNG-SNH-P6410BN-00166CAB6B88、`serialNumber` KHNL6V2H20003LX。2017 年と 2018 年で同じ。**これまで比べた仕様の表（productId 6502 = SNH-C6417BN、SNH-V6414BN）は別の機種のもの** |
+| Samsung Pan/Tilt（Deakin、MAC 00:16:6c:d7:d5:f9） | `2023-08-16.pcap` フレーム 1244505（mDNS）、`2024-05-19.pcap` の UPnP の説明（48 回） | **SNH-V6410PN**（mDNS の名前 SNH-V6410PN-SAMSUNG-SNH-V6410PN-00166CD7D5F9、`modelName` SNH-V6410PN、`serialNumber` ZDZ56V2K100594B）。CVE-2018-6295 と Kaspersky 2018 が名指しした機種そのもの |
+
+### 中身
+
+| 機器 | 根拠 | 分かったこと |
+|---|---|---|
+| SmartCam（UNSW 2018） | `18-05-28.pcap` の、外の相手 129.94.5.83 から機器の tcp/40000 への接続（20 回、各 15〜20 秒）。ポート 48041 の 1 回（約 5.1 MB）を復元 | RFC 4571 の 2 バイトの長さの後に STUN（25）と RTP（3,953）。RTP の PT 97 が H.264（High、1920×1080、471 フレーム）、PT 0 が G.711 μ-law の音声（15.8 秒）。暗号化はなく、**映像はそのまま絵として、音声もそのまま音として再生できた**（実験室の机の上が写っている） |
+| SmartCam（UNSW 2018）の相手 | 同じファイルの STUN（フレーム 14339 ほか） | STUN サーバーが返した機器の外側のアドレスは 149.171.37.10。映像の相手 129.94.5.83 は別のアドレスで、ICE の確認は相手の私設アドレス 192.168.111.239 にも出ている。**映像は実験室の LAN の外（別のネットワークの視聴者）へ送られていた**（視聴者が誰かは未確認） |
+| SimCam（CIC） | `2021_11_02_Active.pcap` の S3 への PUT 15 回（`tshark --export-objects http`） | 15 個すべてが JPEG（480×270）として開け、**15 枚すべてに人が写っている**（暗い室内、赤外線の白黒）。毎回、`www.luuka.fun` への `/event/event/saveEvents` の約 0.4 秒後に PUT、その約 0.3 秒後に `/push/push/pushMessage`。通知用の画像と推定（推定。通知の本文は暗号文で読めない） |
+| SimCam（CIC） | 同じファイル、1 時間ごと | `ipinfo.io`、`myip.ipip.net`、`icanhazip.com`、`ip.cip.cc` に平文の HTTP で自分の公開アドレスを問い合わせている（各 1 時間に 1 回）。送り先の主張（T8）との関係は未判定 |
+
+### 暗号を選んだのはどちらか（「AES 256」の主張がある製品）
+
+機器が最初に提示した暗号と、サーバーが選んだ暗号。どの製品も、機器は AES-256 を最初に出し、サーバーが AES-128 を選んでいた。
+
+| 機器（データ） | 根拠（ClientHello） | 機器が提示した順（先頭） | サーバーが選んだもの |
+|---|---|---|---|
+| Awair（IoTraffic） | `AwairAirQuality_70886b100fc6.pcap` フレーム 22 | DHE_RSA_AES256_SHA256 が 1 番目（17 種類） | TLS_RSA_WITH_AES_128_CBC_SHA256（744/826。前方秘匿性もなくなる） |
+| Roomba（CIC） | `roombaPOWER_1.pcap` フレーム 75 | TLS 1.3 の AES_256_GCM が 1 番目（31 種類） | TLS_AES_128_GCM_SHA256、TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256（34/34） |
+| SmartCam SNH-P6410BN（UNSW 2018） | `18-05-28.pcap` の 1 回目の ClientHello | ECDHE_RSA_AES256_SHA が 1 番目、AES-128 は 26 番目（49 種類） | TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA（21/21、TLS 1.0） |
+| SNH-V6410PN（Deakin） | `2023-07-31.pcap` フレーム 179541、ServerHello 179700 | ECDHE_RSA_AES256_GCM が 1 番目、AES-128 は 40 番目（78 種類） | TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256（16/16、サーバー 3.114.109.73） |
+| Somfy ゲートウェイ（IoT-23） | `…first_start_somfy_gateway.pcap` フレーム 440 | RSA_AES256_SHA256 が 1 番目（9 種類） | TLS_RSA_WITH_AES_128_CBC_SHA256（4/4） |
+
+- 「AES 256」と書いた製造者の機器は AES-256 を使えたが、製造者側のサーバーの設定で AES-128 になっていた。食い違いはサーバーの設定から来ている（機器の能力の問題ではない）。
+- Withings Home（YourThings）は同じ確認をしていない（未確認）。
+
+### 新しい主張の行
+
+- SNH-V6410PN の製品ページ（wisenetlife.com/en-us/product/SmartCam/SNH-V6410PN_W/feature、Wayback 2023-12-01、Deakin の収録期間中）の Specs の表に「Security SSL (AES 256bit)」。同じページの Product summary の表には「Security HTTPS (SSL) Login Authentication, Digest Login Authentication」もある（生の HTML で、どちらもコメントの外にある）。これまでの行は後者だけを記録していた。観測：上の表のとおり AES-128、イベントの通知 `POST www.samsungsmartcam.com/web/event.stw`（`serial=ZDZ56V2K100594B&…&time=May-18-2024 13:14:09`）が平文。tcp/5222 の通信は高エントロピーで、平文の XMPP ではない。
+
+### 同じ製品を年をまたいで見る
+
+2 つ以上のデータセットにある 32 製品を [longitudinal.md](longitudinal.md) に並べた（`scripts/claims/sweep/longitudinal.py`）。同じ MAC（同じ個体）で読めること：
+
+- **平文が減った**：Amazon Echo（44:65:0d:56:cc:d3）80% → 62% → 3%（2016 → 2018）。TP-Link NC220 92% → 11% → 0.3%。Samsung SmartCam 24% → 8% → 0%（ただし 2018 年は映像が平文。上）。
+- **平文が続いた**：Philips Hue Bridge（00:17:88:2b:9a:25）70%（2016-17）→ 86%（2018）。別の個体も 92%（YourThings 2018）、72%（IoT-23 2018）、27%（CIC 2021）。
+- **平文が増えた**：Invoxia Triby（18:b7:9e:02:20:44）10% → 62% → 72%（2016 → 2018）。
+- **TLS 1.0 が続いた**：Belkin WeMo Motion、LIFX、TP-Link HS110、Samsung SmartCam、Dropcam（2016〜2018 の同じ個体）。Nest Cam は CIC（2021-09〜12、RFC 8996 で TLS 1.0 が廃止された 2021-03 より後）でも TLS 1.0 だけだった。Nest の文書（AES-128 と TLS）とは一致と判定している。2022-01 の Nest の FAQ の「state-of-the-art security tools」と比べるかは判断待ち。
+- 文書の版（Wayback）と並べれば、説明と通信のどちらが先に変わったかを見られる。まだ並べていない。
+
+### 設定（SmartCam）
+
+- SmartCam のアプリの説明書（Android、samsungsmartcam.com、Wayback 2022-02-25）のカメラの設定に「• Image encrypting : This encrypts the image transmitted.」がある。映像の暗号化は利用者が選ぶ設定だった可能性がある。2018 年に SNH-P6410BN でこの設定があったか、初期値が何かは未確認（調べている）。
+
 ## 限界
 
 - 値は記録していないので、値の一致は、機器が LAN で名乗った値と MAC とだけ比べている。
