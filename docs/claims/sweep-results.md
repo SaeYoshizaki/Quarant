@@ -355,6 +355,14 @@ IoT-23（Stratosphere Lab、プラハ工科大学。Garcia ほか 2020、Zenodo 
 - 「AES 256」と書いた製造者の機器は AES-256 を使えたが、製造者側のサーバーの設定で AES-128 になっていた。食い違いはサーバーの設定から来ている（機器の能力の問題ではない）。
 - 逆の例：Canary（「AES 256-bit data encryption」）は、サーバーが AES-256-GCM を選んでいた（IoTraffic 5,831/5,843、UNSW 2018 41,035/41,075）。
 - AES-128 自体は弱くない。問題は説明が正確でないこと。弱さとして意味があるのは、前方秘匿性のない RSA 鍵交換をサーバーが選んだ Awair と Somfy。
+- **先行研究**（[sweep/prior-claims.tsv](sweep/prior-claims.tsv) の最後の 6 行）：
+  - 「AES 256」と書いた文書と、サーバーが選んだ暗号を比べた資料は見つからなかった（どの製造者についても）。
+  - サーバーが機器より弱い選択をすること自体は、論文で一部知られている：
+    - Paracha ほか、IoTLS（IMC 2021）§1 p.166、§5.1 p.172 と Fig.3、§6 p.173。前方秘匿性についての集計。
+    - Wannigama ほか（WoWMoM 2024）§II-A p.3。Awair と Samsung のカメラ。注 3 は Ring の例で、AES-256 を先に出したのに AES-128 が選ばれた。
+  - 4 会議（S&P、USENIX Security、CCS、NDSS）の本会議で、同じことを示したものはない（NG-top なし）。
+  - Withings Home は AV-TEST（2017-01-06）の画面に、同じ暗号の Server Hello が写っている（ブログ等）。
+  - 読めなかったもの（未確認）：IoTLS 2.0（EuroSec 2026）、Akgul ほか（WPES 2021）。
 
 ### 新しい主張の行
 
