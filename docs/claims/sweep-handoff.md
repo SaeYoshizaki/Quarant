@@ -100,6 +100,12 @@
 - UNSW 2018 で出たもの（2026-11-11）。
   - SmartCam 2018：映像の宛先は UNSW の別のアドレス（129.94.5.83）で、クラウドではない。仕様の「Security SSL (AES 256bit)」がこの経路まで含むか。比べた仕様は SNH-C6417BN と SNH-V6414BN のもので、UNSW の機器（MAC 00:16:6c:ab:6b:88）の機種は分からない。今は候補。
   - データセットのメールでの依頼（南開大学、Mon(IoT)r、PingPong）と、CICIoT2023 のフォームへの入力。利用者が決める。
+- 根拠の補強で出たもの（2026-11-15、[sweep-results.md](sweep-results.md) の「根拠の補強」）。
+  - SmartCam 2018：機種は SNH-P6410BN と分かった（UPnP）。比べた仕様は別の機種のもの。SNH-P6410BN の仕様の表を探している。見つからなければ、同じシリーズの表で比べてよいか。
+  - SmartCam 2018：アプリの説明書（2022 年の版）に「Image encrypting : This encrypts the image transmitted.」という設定がある。映像が平文だったのは、この設定を切っていたからかもしれない。初期値が分からない場合、候補として残すか。
+  - SimCam：中国語版の SimHome のポリシー（本文は 2021-09-06 の版、アーカイブは 2022-06-25）を、収録期間の文書として使うか。App Store の「5MP snapshot」付きの通知の説明を比べる対象にするか。別の機種（Ango）のクラウド保存の売り物を文脈に使うか。
+  - Nest Cam（CIC 2021）は TLS 1.0 だけだった（RFC 8996 で廃止された後）。Nest の FAQ（2022-01-31）の「fully encrypted using the state-of-the-art security tools」と比べて、文言の上での食い違いとするか。今は一致。
+  - 取り出した画像・映像・音声（`~/datasets/claims/dig/`）を、報告や論文に載せてよいか。人や実験室が写っている（公開データセットの中身）。
 
 （作業中に判断が要るものが出たら、ここに書き足す。）
 

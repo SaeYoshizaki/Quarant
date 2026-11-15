@@ -350,9 +350,11 @@ IoT-23（Stratosphere Lab、プラハ工科大学。Garcia ほか 2020、Zenodo 
 | SmartCam SNH-P6410BN（UNSW 2018） | `18-05-28.pcap` の 1 回目の ClientHello | ECDHE_RSA_AES256_SHA が 1 番目、AES-128 は 26 番目（49 種類） | TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA（21/21、TLS 1.0） |
 | SNH-V6410PN（Deakin） | `2023-07-31.pcap` フレーム 179541、ServerHello 179700 | ECDHE_RSA_AES256_GCM が 1 番目、AES-128 は 40 番目（78 種類） | TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256（16/16、サーバー 3.114.109.73） |
 | Somfy ゲートウェイ（IoT-23） | `…first_start_somfy_gateway.pcap` フレーム 440 | RSA_AES256_SHA256 が 1 番目（9 種類） | TLS_RSA_WITH_AES_128_CBC_SHA256（4/4） |
+| Withings Home（YourThings） | `eth1-20180320.0005.1521522300`（MAC 00:24:e4:2b:a5:34 の切り出し）フレーム 35 | 古い ChaCha20（0xcc14 ほか）の次、4 番目に ECDHE_RSA_AES256_GCM。AES-128 は 33 番目（68 種類） | TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256（89.30.121.150、54.231.177.22。全体で 5,248/5,259） |
 
 - 「AES 256」と書いた製造者の機器は AES-256 を使えたが、製造者側のサーバーの設定で AES-128 になっていた。食い違いはサーバーの設定から来ている（機器の能力の問題ではない）。
-- Withings Home（YourThings）は同じ確認をしていない（未確認）。
+- 逆の例：Canary（「AES 256-bit data encryption」）は、サーバーが AES-256-GCM を選んでいた（IoTraffic 5,831/5,843、UNSW 2018 41,035/41,075）。
+- AES-128 自体は弱くない。問題は説明が正確でないこと。弱さとして意味があるのは、前方秘匿性のない RSA 鍵交換をサーバーが選んだ Awair と Somfy。
 
 ### 新しい主張の行
 
@@ -367,6 +369,17 @@ IoT-23（Stratosphere Lab、プラハ工科大学。Garcia ほか 2020、Zenodo 
 - **平文が増えた**：Invoxia Triby（18:b7:9e:02:20:44）10% → 62% → 72%（2016 → 2018）。
 - **TLS 1.0 が続いた**：Belkin WeMo Motion、LIFX、TP-Link HS110、Samsung SmartCam、Dropcam（2016〜2018 の同じ個体）。Nest Cam は CIC（2021-09〜12、RFC 8996 で TLS 1.0 が廃止された 2021-03 より後）でも TLS 1.0 だけだった。Nest の文書（AES-128 と TLS）とは一致と判定している。2022-01 の Nest の FAQ の「state-of-the-art security tools」と比べるかは判断待ち。
 - 文書の版（Wayback）と並べれば、説明と通信のどちらが先に変わったかを見られる。まだ並べていない。
+
+### 設定（SimCam）
+
+画像を送る機能が利用者の選んだものかを、当時の公式文書で探した（集めた 17 行は `~/datasets/claims/collect/S1/`、まだ claims.tsv に入れていない）。
+
+- 1S の比較表（simshine.ai/simcam-1s/compare.html、2020-12-05）は「AI Technology Local AI … Storage Local」。FAQ（2021-10-24）は「You can enable or disable the notifications for people, individual face IDs, pets, or vehicles using the APP.」。通知は種類ごとに選べるが、通知に画像が付くとはどの公式文書にも書いていない。初期値も書いていない。
+- 初代 SimCam のファームウェア 20190923 の説明（simcam.ai/support/simcam、2019-10-15）に「now by default person detection is switch on」。1S の初期値は未確認。
+- 画像付きの通知と書いてあるのは App Store の説明だけ（SIMCAM AI：「Instant push notification of relevant events with a 5MP snapshot and a 30-sec video clip.」）。App Store を使うかは判断待ち。
+- 中国語版の SimHome のポリシー（本文は 2021-09-06 の版、アーカイブは 2022-06-25 だけ）には「将数据上传至服务器（仅适用于部分功能/服务）」と「您可以在设置中关闭推送功能」。英語版（2021-10-06）にはこの 2 文がない。
+- 送り先のバケット（AWS アカウント 793503604989）と `luuka.fun` の持ち主は、検索しても分からなかった（未確認）。
+- 読み：観測した画像は、通知のための人物検知の画像だと推定する。ただし、「Everything is processed and stored locally」「we never have access to your data」は、機能を限っていない。
 
 ### 設定（SmartCam）
 
