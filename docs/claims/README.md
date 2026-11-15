@@ -23,6 +23,7 @@
 | [compare-sweep.md](compare-sweep.md) | 公式文書と通信の食い違い：UNSW 2016、UNSW-IoTraffic、CIC IoT 2022、Deakin 2023 の文書を集めて比べた結果（候補、文書に主張がない重い問題、見えないもの） |
 | [sweep-results.md](sweep-results.md) | 5 つのデータセットの自動の洗い出し（識別子、認証情報、ファームウェア、TLS）と、先行研究での振り分け。表は [sweep/](sweep/) |
 | [sweep-handoff.md](sweep-handoff.md) | 洗い出しの引き継ぎ：目的、手順、守ること、判断待ち、はまりどころ |
+| [longitudinal.md](longitudinal.md) | 2 つ以上のデータセットにある 32 製品の、年ごとの平文の割合と TLS（スクリプトで作る） |
 | [review-yourthings.md](review-yourthings.md) | 人が確かめる 23 件（食い違いの候補、文言の上で食い違い、確かめが要る一致）の確認用の表。各項目の「確認」に結果を書く |
 | [results-yourthings.md](results-yourthings.md) | 結果：YourThings 2018 の 44 製品。暗号化の主張に絞った結果が中心 |
 | [encryption-yourthings.md](encryption-yourthings.md) | 暗号化の主張と観測の表、44 製品の観測した暗号化、すべてのフロー、中間者の検査への反応（スクリプトで作る） |
@@ -51,6 +52,8 @@
 | `scripts/claims/sweep.py` | `python3 scripts/claims/sweep.py ~/datasets/claims/snapshots docs/claims/claims.tsv ~/datasets/claims/sweep.tsv`：保存した文書から、セキュリティの言葉を含むのに主張の表にない文を取り出す（読み落としの確認。出力は製造者の文章なのでリポジトリの外に置く） |
 | `scripts/claims/encryption_view.py` | `python3 scripts/claims/encryption_view.py docs/claims/claims.tsv ~/datasets/claims/obs-yourthings.json yourthings docs/claims/encryption-yourthings.md ~/datasets/claims/flows-yourthings.json docs/claims/yourthings-scorecards.tsv ~/datasets/claims/mitm-yourthings.tsv`：暗号化の主張に絞った表、製品ごとの観測した暗号化、すべてのフロー、中間者の検査への反応 |
 | `scripts/claims/summarize.py` | `python3 scripts/claims/summarize.py docs/claims/claims.tsv yourthings`：判定の集計 |
+| `scripts/claims/sweep/longitudinal.py` | `python3 scripts/claims/sweep/longitudinal.py docs/claims/devices.json ~/datasets/claims/sweep/report docs/claims/longitudinal.md`：同じ製品を年をまたいで並べる |
+| `scripts/claims/sweep/lan_models.py` | `python3 scripts/claims/sweep/lan_models.py docs/claims/devices.tsv ~/datasets/claims/sweep ~/datasets/raw <out.tsv> [データセット…]`：機器が LAN で名乗った機種（UPnP、mDNS、DHCP）。洗い出しが見つけたフレームだけを読む |
 | `scripts/claims/collect_hints.py` | 解析結果から型番の手がかりを集める。シリアル番号や人の名前が入るので、出力はリポジトリの外（`~/datasets/claims/`）に置く |
 
 ## リポジトリの外にあるもの
