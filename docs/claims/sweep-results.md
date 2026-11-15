@@ -334,25 +334,30 @@ IoT-23（Stratosphere Lab、プラハ工科大学。Garcia ほか 2020、Zenodo 
 
 | 機器 | 根拠 | 分かったこと |
 |---|---|---|
-| SmartCam（UNSW 2018） | `18-05-28.pcap` の、外の相手 129.94.5.83 から機器の tcp/40000 への接続（20 回、各 15〜20 秒）。ポート 48041 の 1 回（約 5.1 MB）を復元 | RFC 4571 の 2 バイトの長さの後に STUN（25）と RTP（3,953）。RTP の PT 97 が H.264（High、1920×1080、471 フレーム）、PT 0 が G.711 μ-law の音声（15.8 秒）。暗号化はなく、**映像はそのまま絵として、音声もそのまま音として再生できた**（実験室の机の上が写っている） |
-| SmartCam（UNSW 2018）の相手 | 同じファイルの STUN（フレーム 14339 ほか） | STUN サーバーが返した機器の外側のアドレスは 149.171.37.10。映像の相手 129.94.5.83 は別のアドレスで、ICE の確認は相手の私設アドレス 192.168.111.239 にも出ている。**映像は実験室の LAN の外（別のネットワークの視聴者）へ送られていた**（視聴者が誰かは未確認） |
+| SmartCam（UNSW 2018） | `18-05-28.pcap` の、外の相手 129.94.5.83 から機器の tcp/40000 への接続（20 回、各 15〜20 秒）。ポート 48041 の 1 回（フレーム 3194834〜3201825、約 5.1 MB）を復元 | RFC 4571 の 2 バイトの長さの後に STUN（25）と RTP（3,953）。RTP の PT 97 が H.264（High、1920×1080、471 フレーム）、PT 0 が G.711 μ-law の音声（15.8 秒）。暗号化はなく、**映像はそのまま絵として、音声もそのまま音として再生できた**（実験室の机の上が写っている） |
+| SmartCam（UNSW 2018）の相手 | 同じファイルの STUN（STUN サーバー 13.56.104.1 の応答のフレーム 815596。ICE の確認はフレーム 815712 ほか） | STUN サーバーが返した機器の外側のアドレスは 149.171.37.10。映像の相手 129.94.5.83 は別のアドレスで、ICE の確認は相手の私設アドレス 192.168.111.239 にも出ている。**映像は実験室の LAN の外（別のネットワークの視聴者）へ送られていた**（視聴者が誰かは未確認） |
 | SimCam（CIC） | `2021_11_02_Active.pcap` の S3 への PUT 15 回（`tshark --export-objects http`） | 15 個すべてが JPEG（480×270）として開け、**15 枚すべてに人が写っている**（暗い室内、赤外線の白黒）。毎回、`www.luuka.fun` への `/event/event/saveEvents` の約 0.4 秒後に PUT、その約 0.3 秒後に `/push/push/pushMessage`。通知用の画像と推定（推定。通知の本文は暗号文で読めない） |
 | SimCam（CIC） | 同じファイル、1 時間ごと | `ipinfo.io`、`myip.ipip.net`、`icanhazip.com`、`ip.cip.cc` に平文の HTTP で自分の公開アドレスを問い合わせている（各 1 時間に 1 回）。送り先の主張（T8）との関係は未判定 |
 
 ### 暗号を選んだのはどちらか（「AES 256」の主張がある製品）
 
-機器が最初に提示した暗号と、サーバーが選んだ暗号。どの製品も、機器は AES-256 を最初に出し、サーバーが AES-128 を選んでいた。
+機器が最初に提示した暗号と、サーバーが選んだ暗号。どの製品も、機器は AES-256 を最初に出し、サーバーが AES-128 を選んでいた。ただし Samsung の 2 機種は、XMPP のサーバーが AES-256 を選んでいた（下の訂正）。
 
 | 機器（データ） | 根拠（ClientHello） | 機器が提示した順（先頭） | サーバーが選んだもの |
 |---|---|---|---|
 | Awair（IoTraffic） | `AwairAirQuality_70886b100fc6.pcap` フレーム 22 | DHE_RSA_AES256_SHA256 が 1 番目（17 種類） | TLS_RSA_WITH_AES_128_CBC_SHA256（744/826。前方秘匿性もなくなる） |
 | Roomba（CIC） | `roombaPOWER_1.pcap` フレーム 75 | TLS 1.3 の AES_256_GCM が 1 番目（31 種類） | TLS_AES_128_GCM_SHA256、TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256（34/34） |
-| SmartCam SNH-P6410BN（UNSW 2018） | `18-05-28.pcap` の 1 回目の ClientHello | ECDHE_RSA_AES256_SHA が 1 番目、AES-128 は 26 番目（49 種類） | TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA（21/21、TLS 1.0） |
-| SNH-V6410PN（Deakin） | `2023-07-31.pcap` フレーム 179541、ServerHello 179700 | ECDHE_RSA_AES256_GCM が 1 番目、AES-128 は 40 番目（78 種類） | TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256（16/16、サーバー 3.114.109.73） |
+| SmartCam SNH-P6410BN（UNSW 2018） | `18-05-28.pcap` フレーム 1139891（443）、1139786（5222） | ECDHE_RSA_AES256_SHA が 1 番目、AES-128 は 26 番目（49 種類） | HTTPS（443）は TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA（全日で 21、05-28 は 10/10）。**XMPP（5222）は TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA（05-28 で 10/10）**。どれも TLS 1.0 |
+| SNH-V6410PN（Deakin） | `2023-07-31.pcap` フレーム 179541（5222 の ClientHello） | ECDHE_RSA_AES256_GCM が 1 番目、AES-128 は 40 番目（78 種類） | HTTPS（443）は TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256（16/16。ServerHello の例 179700、3.114.109.73）。**XMPP（5222）は TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384（17/17。例 179547）** |
 | Somfy ゲートウェイ（IoT-23） | `…first_start_somfy_gateway.pcap` フレーム 440 | RSA_AES256_SHA256 が 1 番目（9 種類） | TLS_RSA_WITH_AES_128_CBC_SHA256（4/4） |
 | Withings Home（YourThings） | `eth1-20180320.0005.1521522300`（MAC 00:24:e4:2b:a5:34 の切り出し）フレーム 35 | 古い ChaCha20（0xcc14 ほか）の次、4 番目に ECDHE_RSA_AES256_GCM。AES-128 は 33 番目（68 種類） | TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256（89.30.121.150、54.231.177.22。全体で 5,248/5,259） |
 
 - 「AES 256」と書いた製造者の機器は AES-256 を使えたが、製造者側のサーバーの設定で AES-128 になっていた。食い違いはサーバーの設定から来ている（機器の能力の問題ではない）。
+- **訂正（2026-11-15）**：Samsung の 2 機種は、XMPP（tcp/5222）で STARTTLS のあとに TLS を始める。洗い出し（`expose.py`）は接続の先頭が TLS のときだけ握手を読むので、この握手を数えていなかった。tshark で数え直すと、XMPP のサーバー（DNS の名前は xmpp.samsungsmartcam.com。UNSW 2018 `18-05-28.pcap` フレーム 1139722、UNSW-IoTraffic フレーム 147184）は AES-256 を選んでいた。
+  - SNH-P6410BN：UNSW 2018 の 2018-05-28 で 10/10 が TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA（例 `18-05-28.pcap` フレーム 1139786/1139793）。UNSW-IoTraffic では 89 回のうち 84 回が同じ暗号、5 回が TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA（`SamsungCamera_00166cab6b88.pcap` フレーム 147222〜1173960）。UNSW 2018 のほかの日と UNSW 2016 は数えていない。
+  - SNH-V6410PN：新しい接続のある 7 日で 17/17 が TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384（例 `2023-07-31.pcap` フレーム 179541/179547）。
+  - したがって、Samsung の「SSL (AES 256bit)」は XMPP の接続には合う。合わないのは HTTPS（443）の AES-128 と、平文の HTTP（イベントの通知、SmartCam の映像）。「サーバーが AES-128 を選ぶ」形がすべての接続で言えるのは Awair、iRobot、Somfy、Withings Home の 4 製品。
+  - 洗い出しの全体では、STARTTLS で始まる接続（tcp/5222 で先頭が平文）は、Samsung のカメラのほかに Withings Aura（2 本）と HP ENVY（1 本）だけだった。
 - 逆の例：Canary（「AES 256-bit data encryption」）は、サーバーが AES-256-GCM を選んでいた（IoTraffic 5,831/5,843、UNSW 2018 41,035/41,075）。
 - AES-128 自体は弱くない。問題は説明が正確でないこと。弱さとして意味があるのは、前方秘匿性のない RSA 鍵交換をサーバーが選んだ Awair と Somfy。
 - **先行研究**（[sweep/prior-claims.tsv](sweep/prior-claims.tsv) の最後の 6 行）：
@@ -366,7 +371,7 @@ IoT-23（Stratosphere Lab、プラハ工科大学。Garcia ほか 2020、Zenodo 
 
 ### 新しい主張の行
 
-- SNH-V6410PN の製品ページ（wisenetlife.com/en-us/product/SmartCam/SNH-V6410PN_W/feature、Wayback 2023-12-01、Deakin の収録期間中）の Specs の表に「Security SSL (AES 256bit)」。同じページの Product summary の表には「Security HTTPS (SSL) Login Authentication, Digest Login Authentication」もある（生の HTML で、どちらもコメントの外にある）。これまでの行は後者だけを記録していた。観測：上の表のとおり AES-128、イベントの通知 `POST www.samsungsmartcam.com/web/event.stw`（`serial=ZDZ56V2K100594B&…&time=May-18-2024 13:14:09`）が平文。tcp/5222 の通信は高エントロピーで、平文の XMPP ではない。
+- SNH-V6410PN の製品ページ（wisenetlife.com/en-us/product/SmartCam/SNH-V6410PN_W/feature、Wayback 2023-12-01、Deakin の収録期間中）の Specs の表に「Security SSL (AES 256bit)」。同じページの Product summary の表には「Security HTTPS (SSL) Login Authentication, Digest Login Authentication」もある（生の HTML で、どちらもコメントの外にある）。これまでの行は後者だけを記録していた。観測：HTTPS は AES-128、XMPP（tcp/5222、STARTTLS のあとの TLS）は AES-256（上の表と訂正）。イベントの通知 `POST www.samsungsmartcam.com/web/event.stw`（`serial=ZDZ56V2K100594B&…&time=May-18-2024 13:14:09`）が平文。
 
 ### 同じ製品を年をまたいで見る
 
@@ -402,7 +407,7 @@ SNH-P6410BN の公式文書を探した（集めた 11 行は `~/datasets/claims
 - **Hanwha の脆弱性の報告**（2018-03-21、対象「All Hanwha Techwin SmartCams」）：CVE-2018-6295「Unencrypted way of remote control and communications」を「Resolved」とし、「fixed in the firmware updates released from March」。UNSW の機器のファームウェアの版と、この CVE が何の通信を指すかは未確認。判定はしていない。
 - **読み**：平文の映像は、利用者が「Image encrypting」を入れていなかったことで説明できてしまう。強く言えるのは次の 2 点。
   - 仕様の「SSL (AES 256bit)」が条件なしに書かれているのに、映像は初期のままでは暗号化されない（写真では初期値がオフ）。
-  - TLS は AES-128 だった（サーバーの選択）。
+  - HTTPS（443）の TLS は AES-128 だった（サーバーの選択）。XMPP（5222）の TLS は AES-256 で、仕様と合う（2026-11-15 の訂正）。
 
 ### 機器が名乗った機種（全データセット）
 
@@ -424,6 +429,7 @@ SNH-P6410BN の公式文書を探した（集めた 11 行は `~/datasets/claims
 ## 限界
 
 - 値は記録していないので、値の一致は、機器が LAN で名乗った値と MAC とだけ比べている。
+- TLS の握手は、接続の先頭が TLS のものだけを読む。STARTTLS（XMPP など）のあとの握手は数えていない（2026-11-15 に分かった。影響は Samsung のカメラ、Withings Aura、HP ENVY）。
 - TCP は順序をそろえるが、欠けた区間は埋めない。HTTP の本文は 32 KB まで。
 - UNSW 2018 の正常な日の 27 本と、IoT-23 の正常な 3 シナリオは、2026-11-11 に加えた（上）。IoT-23 の README には「Stratosphere Lab の許可が要る」とあるが、Zenodo の記録は CC BY 4.0。
 - 先行研究の検索は製品ごとに 3〜5 回。読めなかった資料は prior-ids.tsv の notes に未確認と書いた。分類は人がまだ確かめていない。
