@@ -356,7 +356,7 @@ IoT-23（Stratosphere Lab、プラハ工科大学。Garcia ほか 2020、Zenodo 
 - **訂正（2026-11-15）**：Samsung の 2 機種は、XMPP（tcp/5222）で STARTTLS のあとに TLS を始める。洗い出し（`expose.py`）は接続の先頭が TLS のときだけ握手を読むので、この握手を数えていなかった。tshark で数え直すと、XMPP のサーバー（DNS の名前は xmpp.samsungsmartcam.com。UNSW 2018 `18-05-28.pcap` フレーム 1139722、UNSW-IoTraffic フレーム 147184）は AES-256 を選んでいた。
   - SNH-P6410BN：UNSW 2018 の 2018-05-28 で 10/10 が TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA（例 `18-05-28.pcap` フレーム 1139786/1139793）。UNSW-IoTraffic では 89 回のうち 84 回が同じ暗号、5 回が TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA（`SamsungCamera_00166cab6b88.pcap` フレーム 147222〜1173960）。UNSW 2018 のほかの日と UNSW 2016 は数えていない。
   - SNH-V6410PN：新しい接続のある 7 日で 17/17 が TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384（例 `2023-07-31.pcap` フレーム 179541/179547）。
-  - したがって、Samsung の「SSL (AES 256bit)」は XMPP の接続には合う。合わないのは HTTPS（443）の AES-128 と、平文の HTTP（イベントの通知、SmartCam の映像）。「サーバーが AES-128 を選ぶ」形がすべての接続で言えるのは Awair、iRobot、Somfy、Withings Home の 4 製品。
+  - したがって、Samsung の「SSL (AES 256bit)」は XMPP の接続には合う。合わないのは HTTPS（443）の AES-128 と、平文の HTTP（イベントの通知、SmartCam の映像）。接続の種類で分かれず、主に AES-128 が選ばれていたのは Awair（UNSW-IoTraffic で 744/826。UNSW 2018 では AES-256 が 763/1,116 で多い）、iRobot、Somfy、Withings Home の 4 製品。
   - 洗い出しの全体では、STARTTLS で始まる接続（tcp/5222 で先頭が平文）は、Samsung のカメラのほかに Withings Aura（2 本）と HP ENVY（1 本）だけだった。
 - 逆の例：Canary（「AES 256-bit data encryption」）は、サーバーが AES-256-GCM を選んでいた（IoTraffic 5,831/5,843、UNSW 2018 41,035/41,075）。
 - AES-128 自体は弱くない。問題は説明が正確でないこと。弱さとして意味があるのは、前方秘匿性のない RSA 鍵交換をサーバーが選んだ Awair と Somfy。
