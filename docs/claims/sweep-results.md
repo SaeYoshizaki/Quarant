@@ -426,11 +426,18 @@ SNH-P6410BN の公式文書を探した（集めた 11 行は `~/datasets/claims
 
 - 分からないまま：Roomba（CIC、ホスト名 `iRobot-<BLID>` だけ）、Somfy（`ESP_1E7654`）、Gosund と Globe（`ESP_…`）、Amcrest（`AMC017CB_892FAB`、mDNS は `IPC_DM368`）、Canary（`C100F1615229`）。
 
+### Eufy のアプリの映像（2026-11-16）
+
+- CIC の Eufy HomeBase 2 が外のアプリへ送った映像と音声を、PPPP と XZYH の形で分けて読んだ（`scripts/claims/sweep/eufy_p2p.py`）。音声（AAC）は 1,252 フレームすべて平文で、80 秒分を復号できた。映像（H.265、2560×1920）で暗号化されうるのは、鍵つきの 75 フレームの先頭 128 バイトだけ（多くても 0.21%）。
+- 「Data during transmission is encrypted.」（Privacy Commitment、2021-09-25）の判定を、一致から食い違いの候補（T1a）に直した。前の判定はエントロピーだけが根拠だった。
+- 詳しくは [blog-level.md](blog-level.md)。
+
 ## 限界
 
 - 値は記録していないので、値の一致は、機器が LAN で名乗った値と MAC とだけ比べている。
 - TLS の握手は、接続の先頭が TLS のものだけを読む。STARTTLS（XMPP など）のあとの握手は数えていない（2026-11-15 に分かった。影響は Samsung のカメラ、Withings Aura、HP ENVY）。
 - TCP は順序をそろえるが、欠けた区間は埋めない。HTTP の本文は 32 KB まで。
+- TLS 以外の独自の通信は、エントロピーで暗号化を推定した。圧縮した音声や映像もエントロピーは高いので、映像を送る機器では中身の形まで見る必要がある（2026-11-16、Eufy で分かった。同じ根拠の判定はほかに 18 行）。
 - UNSW 2018 の正常な日の 27 本と、IoT-23 の正常な 3 シナリオは、2026-11-11 に加えた（上）。IoT-23 の README には「Stratosphere Lab の許可が要る」とあるが、Zenodo の記録は CC BY 4.0。
 - 先行研究の検索は製品ごとに 3〜5 回。読めなかった資料は prior-ids.tsv の notes に未確認と書いた。分類は人がまだ確かめていない。
 

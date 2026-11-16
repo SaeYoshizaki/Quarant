@@ -71,6 +71,8 @@
 
 2026-11-15：強い候補を 1 つの報告にまとめた（[report-2026-11-15.md](report-2026-11-15.md)。根拠の通信、公式文書の原文、似た資料、別の読み、足りない根拠）。書く途中で、洗い出しが STARTTLS のあとの TLS を読んでいないことが分かった。Samsung のカメラの XMPP（tcp/5222）では、サーバーが AES-256 を選んでいた（SNH-P6410BN、SNH-V6410PN）。claims.tsv、sweep-results.md、prior-claims.tsv を直した。次は `expose.py` で STARTTLS を扱い、洗い出しをやり直す（影響は Samsung のカメラ、Withings Aura、HP ENVY の接続）。
 
+2026-11-16：教授の方針（ブログ程度で、論文になっていないものは入れてよい）を受けて、[blog-level.md](blog-level.md) にまとめた。新しく Eufy（CIC）を確かめた：アプリの映像は音声が平文、映像も先頭 128 バイトのほかは平文で、「Data during transmission is encrypted.」と合わない。報道（2022）はウェブポータルの映像だけを、論文（WOOT 2024）はアプリの映像を暗号化ありとしている。エントロピーだけで「暗号化」とした判定がほかに 18 行あり、Deakin の Ring（映像）を同じ方法で確かめるのが次。
+
 ## 4. 判断待ち（利用者が戻ったときにまとめて聞く）
 
 - アプリストアの説明を公式文書に含めるか。[method.md](method.md) では見ないことにしているが、製造者が書いた文書でもある。決まるまでは、集めて別に記録する。
@@ -109,6 +111,7 @@
   - SimCam：中国語版の SimHome のポリシー（本文は 2021-09-06 の版、アーカイブは 2022-06-25）を、収録期間の文書として使うか。App Store の「5MP snapshot」付きの通知の説明を比べる対象にするか。別の機種（Ango）のクラウド保存の売り物を文脈に使うか。
   - Nest Cam（CIC 2021）は TLS 1.0 だけだった（RFC 8996 で廃止された後）。Nest の FAQ（2022-01-31）の「fully encrypted using the state-of-the-art security tools」と比べて、文言の上での食い違いとするか。今は一致。
   - 取り出した画像・映像・音声（`~/datasets/claims/dig/`）を、報告や論文に載せてよいか。人や実験室が写っている（公開データセットの中身）。
+- Eufy（2026-11-16、[blog-level.md](blog-level.md)）：候補に入れるか。取り出した音声（80 秒、`~/datasets/claims/dig/eufy/`）を見せてよいか。Deakin の Ring を同じ方法で確かめるか。
 
 （作業中に判断が要るものが出たら、ここに書き足す。）
 
