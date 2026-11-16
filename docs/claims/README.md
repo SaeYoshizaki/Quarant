@@ -22,6 +22,7 @@
 | [review-sweep.md](review-sweep.md) | 人が確かめる表：4 つのデータセットの食い違いの候補を 1 行ずつ（引用、版、観測の根拠、確認の欄） |
 | [compare-sweep.md](compare-sweep.md) | 公式文書と通信の食い違い：UNSW 2016、UNSW-IoTraffic、CIC IoT 2022、Deakin 2023 の文書を集めて比べた結果（候補、文書に主張がない重い問題、見えないもの） |
 | [report-2026-11-15.md](report-2026-11-15.md) | 強い候補の報告（2026-11-15）：根拠の通信、公式文書の原文、似た資料、別の読み、足りない根拠、判断が要ること |
+| [prior-aes256.md](prior-aes256.md) | 「AES 256」の候補（C）の先行研究を機器ごとに（2026-11-16）：IoTLS、SoK、Wannigama、IoTLS 2.0、Akgul ほかの本文 |
 | [blog-level.md](blog-level.md) | 論文になく、ブログや報道にだけある食い違い（2026-11-16）：Eufy のアプリの映像と音声がほぼ平文、候補 A〜E の先行資料の種類、エントロピーだけの判定の訂正 |
 | [sweep-results.md](sweep-results.md) | 5 つのデータセットの自動の洗い出し（識別子、認証情報、ファームウェア、TLS）と、先行研究での振り分け。表は [sweep/](sweep/) |
 | [sweep-handoff.md](sweep-handoff.md) | 洗い出しの引き継ぎ：目的、手順、守ること、判断待ち、はまりどころ |
