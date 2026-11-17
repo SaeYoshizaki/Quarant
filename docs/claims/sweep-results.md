@@ -428,9 +428,9 @@ SNH-P6410BN の公式文書を探した（集めた 11 行は `~/datasets/claims
 
 ### Roomba の接続先（2026-11-17）
 
-- CIC の Roomba の 34 回の TLS は、どれも iRobot のクラウドのサービスへの接続だった。TLS 1.3 の 20 回は `disc-prod`、`unauth1`、`unauth3` の `.prod.iot.irobotapi.com`（SNI）。TLS 1.2 の 13 回は `a2uowfjvhio0fa.iot.us-east-1.amazonaws.com`（Amazon の IoT サービス。Roomba は iRobot が発行した自分の証明書で認証）。1 回は `s3.amazonaws.com`。アドレスはすべて Amazon。
+- CIC の Roomba の 34 回の TLS のうち 33 回は、iRobot のクラウドへの接続だった（残り 1 回は Amazon S3 で、どの保存先かは見えない）。TLS 1.3 の 20 回は `disc-prod`、`unauth1`、`unauth3` の `.prod.iot.irobotapi.com`（SNI）。TLS 1.2 の 13 回は `a2uowfjvhio0fa.iot.us-east-1.amazonaws.com`（Amazon の IoT サービス。Roomba は iRobot が発行した自分の証明書で認証）。1 回は `s3.amazonaws.com`。アドレスはすべて Amazon。
 - 34 回とも、Roomba は `TLS_AES_256_GCM_SHA384` を 1 番目に出し、サーバーが AES-128 を選んだ。
-- 「Currently, we use AES 256-bit encryption and TLS v1.2」（送信中のデータについての FAQ）と比べる接続は、iRobot のクラウドとの通信で、文書の範囲に入る。暗号を iRobot が設定できたか（Amazon の設備）は未確認。
+- 「Currently, we use AES 256-bit encryption and TLS v1.2」は FAQ「How is data secure while in transit?」の答え。「both in transit and at rest」は別の問い（How do we handle your data?）の答えで、保存の問い（How is data stored at rest?）の答えに AES-256 はない（Wayback 2021-12-06 で確認）。比べる接続は iRobot のクラウドとの通信で、文書の範囲に入る。暗号を iRobot が設定できたか（Amazon の設備）は未確認。
 - TLS 1.2 の接続では、Roomba の証明書（名前 `iRobot-C42FEC28DC28463AA57A5A91FDB2ED52`）が暗号化されずに見える。
 
 ### Eufy のアプリの映像（2026-11-16）
