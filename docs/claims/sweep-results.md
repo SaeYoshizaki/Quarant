@@ -426,6 +426,13 @@ SNH-P6410BN の公式文書を探した（集めた 11 行は `~/datasets/claims
 
 - 分からないまま：Roomba（CIC、ホスト名 `iRobot-<BLID>` だけ）、Somfy（`ESP_1E7654`）、Gosund と Globe（`ESP_…`）、Amcrest（`AMC017CB_892FAB`、mDNS は `IPC_DM368`）、Canary（`C100F1615229`）。
 
+### Roomba の接続先（2026-11-17）
+
+- CIC の Roomba の 34 回の TLS は、どれも iRobot のクラウドのサービスへの接続だった。TLS 1.3 の 20 回は `disc-prod`、`unauth1`、`unauth3` の `.prod.iot.irobotapi.com`（SNI）。TLS 1.2 の 13 回は `a2uowfjvhio0fa.iot.us-east-1.amazonaws.com`（Amazon の IoT サービス。Roomba は iRobot が発行した自分の証明書で認証）。1 回は `s3.amazonaws.com`。アドレスはすべて Amazon。
+- 34 回とも、Roomba は `TLS_AES_256_GCM_SHA384` を 1 番目に出し、サーバーが AES-128 を選んだ。
+- 「Currently, we use AES 256-bit encryption and TLS v1.2」（送信中のデータについての FAQ）と比べる接続は、iRobot のクラウドとの通信で、文書の範囲に入る。暗号を iRobot が設定できたか（Amazon の設備）は未確認。
+- TLS 1.2 の接続では、Roomba の証明書（名前 `iRobot-C42FEC28DC28463AA57A5A91FDB2ED52`）が暗号化されずに見える。
+
 ### Eufy のアプリの映像（2026-11-16）
 
 - CIC の Eufy HomeBase 2 が外のアプリへ送った映像と音声を、PPPP と XZYH の形で分けて読んだ（`scripts/claims/sweep/eufy_p2p.py`）。音声（AAC）は 1,252 フレームすべて平文で、80 秒分を復号できた。映像（H.265、2560×1920）で暗号化されうるのは、鍵つきの 75 フレームの先頭 128 バイトだけ（多くても 0.21%）。
