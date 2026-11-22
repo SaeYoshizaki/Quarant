@@ -3,11 +3,11 @@
 # UNSW 2018: the benign daily captures of the SOSR 2019 data (iotanalytics.unsw.edu.au/attack-data.html), 27 days.
 # CIC IoT 2022: the 6-Attacks captures are left out (devices under attack).
 # IoT-23: the three benign honeypot scenarios (4-1 Hue, 5-1 Echo Dot, 7-1 Somfy), from mcfp.felk.cvut.cz.
-# usage: run_all.sh [dataset...]   (default: all five)
+# usage: [SWEEP_OUT=<dir>] run_all.sh [dataset...]   (default: all five)
 set -u
 cd "$(dirname "$0")/../../.."
 R=~/datasets/raw
-OUT=~/datasets/claims/sweep
+OUT=${SWEEP_OUT:-~/datasets/claims/sweep}
 # the external disk is the bottleneck; more readers at once make it seek
 export SWEEP_PROCS=${SWEEP_PROCS:-3}
 sources() {

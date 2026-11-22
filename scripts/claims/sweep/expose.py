@@ -23,11 +23,13 @@ Records (one JSON object per line, "r" is the record type):
           payload to a public address
   tls     one TLS handshake: versions and suites offered, version and suite chosen,
           first server certificate (key type and size, signature hash, self-signed,
-          expired at capture time, issuer)
+          expired at capture time, issuer); "starttls" is true when the handshake
+          followed a STARTTLS command (XMPP, SMTP, IMAP, POP3, FTP AUTH TLS)
   dl      an HTTP response from a public address to the device with a body of
           1 MB or more, or a binary content type
   flow    per device, peer kind (lan or public), protocol, server port and payload
-          kind: number of flows and payload bytes
+          kind: number of flows and payload bytes (kind "starttls": plaintext opening,
+          then TLS)
 Frame numbers count every packet of the capture file from 1, as Wireshark does.
 TCP payloads are put in order by sequence number, so duplicated packets
 (YourThings holds every packet twice) and retransmissions are dropped.
@@ -74,6 +76,10 @@ FORM_KEY = re.compile(rb"[A-Za-z0-9_.\-\[\]]{1,60}")
 EMAIL = re.compile(rb"[A-Za-z0-9._%+\-]{1,64}@[A-Za-z0-9.\-]{1,190}\.[A-Za-z]{2,24}")
 BINARY_TYPES = ("application/octet-stream", "application/x-binary", "application/binary", "application/x-gzip",
                 "application/gzip", "application/zip", "application/x-tar", "application/vnd.android")
+# a command that switches a plaintext connection to TLS, and the handshake records that follow it
+STARTTLS = re.compile(rb"<starttls[\s/>]|(?:^|\n)(?:[A-Za-z0-9.]{1,20} )?(?:STARTTLS|STLS|AUTH TLS)\r?\n", re.I)
+TLS_CH = re.compile(rb"\x16\x03[\x00-\x04][\x00-\x40].\x01", re.S)
+TLS_SH = re.compile(rb"\x16\x03[\x00-\x04][\x00-\x40].\x02", re.S)
 
 
 def load_key():
@@ -747,12 +753,29 @@ def kind_of(b, proto, port):
     return "high-entropy" if ent / math.log2(min(len(s), 256)) >= 0.9 else "binary"
 
 
+def starttls(up, down):
+    """Where the TLS handshake starts in each direction after a STARTTLS command, or None."""
+    m = STARTTLS.search(up, 0, 8192)
+    if not m:
+        return None
+    c = TLS_CH.search(up, m.end())
+    if not c:
+        return None
+    s = TLS_SH.search(down)
+    return c.start(), s.start() if s else len(down)
+
+
 def finish(u, f):
     (cip, cport, cdev), (sip, sport, sdev) = f["c"], f["s"]
     up, down = bytes(f["buf"][0]), bytes(f["buf"][1])
     kind = kind_of(up or down, f["proto"], sport)
     if kind in ("none",) and not (up or down):
         return
+    st = None
+    if f["proto"] == "tcp" and kind not in ("tls", "dtls", "http", "mqtt", "ssh"):
+        st = starttls(up, down)
+        if st:
+            kind = "starttls"
     for dev, peer_ip, role in ((cdev, sip, "client"), (sdev, cip, "server")):
         if not dev:
             continue
@@ -761,13 +784,14 @@ def finish(u, f):
         c[0] += 1
         c[1] += f["bytes"]
     # TLS handshakes (device as client or server)
-    if kind == "tls":
-        rec = {}
-        for t, body, _ in tls_records(up):
+    if kind in ("tls", "starttls"):
+        rec = {"starttls": True} if st else {}
+        tup, tdown = (up[st[0]:], down[st[1]:]) if st else (up, down)
+        for t, body, _ in tls_records(tup):
             if t == 1:
                 rec.update(client_hello(body) or {})
                 break
-        for t, body, partial in tls_records(down):
+        for t, body, partial in tls_records(tdown):
             if t == 2:
                 rec.update(server_hello(body) or {})
             elif t == 11 and not partial:
@@ -786,7 +810,7 @@ def finish(u, f):
                     u.add("tls", key, {"dev": dev, "role": role, "peer": ipstr(peer_ip),
                                        "peer_public": public(peer_ip), "port": sport, **rec}, f["frame"][0] or f["frame"][1])
     # plaintext content sent by the device to a public address
-    if cdev and public(sip) and kind in ("http", "mqtt", "text"):
+    if cdev and public(sip) and kind in ("http", "mqtt", "text", "starttls"):
         out = []
         if kind == "http":
             for msg in http_messages(up):
@@ -794,7 +818,8 @@ def finish(u, f):
         elif kind == "mqtt":
             mqtt_fields(up, {"method": None, "host": None, "path": None}, out)
         else:
-            words(up, "text", {"method": None, "host": None, "path": None}, out)
+            # after STARTTLS only the opening before the handshake is plaintext
+            words(up[:st[0]] if st else up, "text", {"method": None, "host": None, "path": None}, out)
         for key, v, ctx in out:
             u.field(cdev, f, ipstr(sip), sport, kind, key, v, ctx, f["frame"][0])
     # downloads from a public address to the device over HTTP
