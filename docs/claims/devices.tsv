@@ -202,7 +202,7 @@ deakin	Echo Show 8	74:d4:23:32:a2:d7	Amazon	Echo Show 8	Echo Show 8	dataset labe
 deakin	GALAXY Watch5 Pro	6e:fe:2f:5a:d7:7e	Samsung	Galaxy Watch5 Pro	Galaxy Watch5 Pro	dataset label	wearable	
 deakin	Ring Video Doorbell	90:48:6c:08:da:8a	Ring	Video Doorbell			doorbell	
 pms	US1 PhillipsBridge	ec:b5:fa:99:ac:15	Philips	Hue Bridge	BSB002	upnp modelNumber BSB002 (modelName Philips hue bridge 2015); lan_models.py 2026-11-22	hub	US1 bench (US1-Capture1, US1-Capture2, US1-Home); Hue Smart Bulb and Hue Smart Plug behind it over Zigbee
-pms	US1 TPLink	ac:84:c6:20:fe:4b	TP-Link	Kasa Smart Wi-Fi Plug	HS110	dhcp hostname HS110; lan_models.py 2026-11-22	plug	US1 bench
+pms	US1 TPLink	ac:84:c6:20:fe:4b	TP-Link	Smart Plug	HS110	dhcp hostname HS110; lan_models.py 2026-11-22	plug	US1 bench
 pms	US1 EchoDot5	44:3d:54:be:12:3c	Amazon	Echo Dot (5th gen)	Echo Dot (5th gen)	dataset document index (PrivacyPolicyDataset README D01-D26)	voice-assistant	US1 bench
 pms	US1 Govee	60:74:f4:1b:24:16	Govee	GoveeLife Smart Electric Kettle		dataset document index (PrivacyPolicyDataset README D01-D26)	appliance	US1 bench
 pms	US1 Litokam	90:31:4b:71:b2:7b	Litokam	2K Indoor Security Camera		dataset document index (PrivacyPolicyDataset README D01-D26)	camera	US1 bench
@@ -217,16 +217,16 @@ pms	US2 MetaQuest1	2c:26:17:56:c7:22	Meta	Quest (1st gen)	Quest	dataset document
 pms	US2 MetaQuest2	80:f3:ef:f7:f7:c1	Meta	Quest 2	Quest 2	dataset document index (PrivacyPolicyDataset README D01-D26)	xr-headset	US2 bench
 pms	US2 Roborock	b0:4a:39:24:bb:a6	Roborock	S7	S7	dataset document index (PrivacyPolicyDataset README D01-D26)	appliance	US2 bench
 pms	FR PhilipsBridge	ec:b5:fa:80:80:f4	Philips	Hue Bridge	BSB002	upnp modelNumber BSB002 (modelName Philips hue bridge 2015); lan_models.py 2026-11-22	hub	FR bench (FR-Capture2); Hue Go, Hue Smart Bulb and Hue Smart Plug behind it over Zigbee
-pms	FR TPLink (Capture1)	1c:3b:f3:8d:29:4a	TP-Link	Kasa Smart Wi-Fi Plug	HS110	dhcp hostname HS110; lan_models.py 2026-11-22	plug	FR bench, FR-Capture1
-pms	FR TPLink (Capture2)	1c:3b:f3:8d:26:da	TP-Link	Kasa Smart Wi-Fi Plug	HS110	dhcp hostname HS110; lan_models.py 2026-11-22	plug	FR bench, FR-Capture2; another unit of the same model (the first failed, devices.txt)
+pms	FR TPLink (Capture1)	1c:3b:f3:8d:29:4a	TP-Link	Smart Plug	HS110	dhcp hostname HS110; lan_models.py 2026-11-22	plug	FR bench, FR-Capture1
+pms	FR TPLink (Capture2)	1c:3b:f3:8d:26:da	TP-Link	Smart Plug	HS110	dhcp hostname HS110; lan_models.py 2026-11-22	plug	FR bench, FR-Capture2; another unit of the same model (the first failed, devices.txt)
 pms	FR EchoDot3	fc:49:2d:34:98:28	Amazon	Echo Dot (3rd gen)	Echo Dot (3rd gen)	dataset document index (PrivacyPolicyDataset README D01-D26)	voice-assistant	FR bench
 pms	FR NestMini	20:df:b9:3b:00:90	Google	Nest Mini	Nest Mini	dhcp hostname Google-Home-Mini; lan_models.py 2026-11-22	voice-assistant	FR bench
-pms	FR NestThermostat	64:16:66:be:44:9c	Google	Nest Learning Thermostat (3rd gen)	Learning Thermostat (3rd gen)	dataset document index (PrivacyPolicyDataset README D01-D26)	appliance	FR bench
+pms	FR NestThermostat	64:16:66:be:44:9c	Nest (Google)	Thermostat	Learning Thermostat (3rd gen)	dataset document index (PrivacyPolicyDataset README D01-D26)	appliance	FR bench
 pms	FR GoogleHome	a4:77:33:df:c2:4d	Google	Google Home	Google Home	dhcp hostname Google-Home; lan_models.py 2026-11-22	voice-assistant	FR bench
 pms	FR EchoShow5	40:a2:db:2c:8a:68	Amazon	Echo Show 5	Echo Show 5	dataset document index (PrivacyPolicyDataset README D01-D26)	voice-assistant	FR bench
-pms	FR NestCamera	64:16:66:4a:65:71	Google	Nest Cam (1st gen)	Nest Cam (1st gen)	dataset document index (PrivacyPolicyDataset README D01-D26)	camera	FR bench
-pms	FR TPLinkLight	50:c7:bf:5e:a8:48	TP-Link	Kasa Smart Bulb	LB120	dhcp hostname LB120; lan_models.py 2026-11-22	bulb	FR bench
+pms	FR NestCamera	64:16:66:4a:65:71	Nest (Google)	Nest Cam	Nest Cam (1st gen)	dataset document index (PrivacyPolicyDataset README D01-D26)	camera	FR bench
+pms	FR TPLinkLight	50:c7:bf:5e:a8:48	TP-Link	Smart Wi-Fi LED Bulb	LB120	dhcp hostname LB120; lan_models.py 2026-11-22	bulb	FR bench
 pms	FR MaxcioSmartStrip (Capture1)	f4:cf:a2:0c:41:f6	Maxcio	Smart Power Strip		dataset document index (PrivacyPolicyDataset README D01-D26)	plug	FR bench, FR-Capture1
 pms	FR MaxcioSmartStrip (Capture2)	f4:cf:a2:0c:40:1c	Maxcio	Smart Power Strip		dataset document index (PrivacyPolicyDataset README D01-D26)	plug	FR bench, FR-Capture2; another unit of the same model (devices.txt)
 pms	FR SonyTV	64:ff:0a:88:af:4a	Sony	BRAVIA TV	KD-43XH8096	upnp friendlyName SONY KD-43XH8096 (modelName BRAVIA 4K UR3); lan_models.py 2026-11-22	tv-streaming	FR bench
-pms	FR DLink	b0:c5:54:4a:30:b0	D-Link	Wi-Fi Camera	DCS-8300LH	dhcp hostname and mdns txt model DCS-8300LH; lan_models.py 2026-11-22	camera	FR bench
+pms	FR DLink	b0:c5:54:4a:30:b0	D-Link	DCS-8300LH	DCS-8300LH	dhcp hostname and mdns txt model DCS-8300LH; lan_models.py 2026-11-22	camera	FR bench

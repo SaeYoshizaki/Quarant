@@ -9,11 +9,12 @@ import csv
 import json
 import sys
 
-ORDER = ["unsw2016", "iotraffic", "yourthings", "unsw2018", "iot23", "cic2022", "deakin"]
+ORDER = ["unsw2016", "iotraffic", "yourthings", "unsw2018", "iot23", "cic2022", "deakin", "pms"]
 YEAR = {"unsw2016": "2016", "iotraffic": "2016-17", "yourthings": "2018", "unsw2018": "2018",
-        "iot23": "2018-19", "cic2022": "2021", "deakin": "2023-24"}
+        "iot23": "2018-19", "cic2022": "2021", "deakin": "2023-24", "pms": "2023-24"}
 NAME = {"unsw2016": "UNSW 2016", "iotraffic": "UNSW-IoTraffic", "yourthings": "YourThings", "unsw2018": "UNSW 2018",
-        "iot23": "IoT-23", "cic2022": "CIC IoT 2022", "deakin": "Deakin"}
+        "iot23": "IoT-23", "cic2022": "CIC IoT 2022", "deakin": "Deakin",
+        "pms": "Passive-Mode-Study"}
 
 
 def main():

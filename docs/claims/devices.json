@@ -2827,6 +2827,412 @@
    "runs_seen": 21,
    "first_seen": "2023-07-25",
    "last_seen": "2023-09-06"
+  },
+  {
+   "dataset": "pms",
+   "label": "US1 PhillipsBridge",
+   "mac": "ec:b5:fa:99:ac:15",
+   "vendor": "Philips",
+   "product": "Hue Bridge",
+   "model": "BSB002",
+   "model_basis": "upnp modelNumber BSB002 (modelName Philips hue bridge 2015); lan_models.py 2026-11-22",
+   "category": "hub",
+   "note": "US1 bench (US1-Capture1, US1-Capture2, US1-Home); Hue Smart Bulb and Hue Smart Plug behind it over Zigbee",
+   "runs_seen": 3,
+   "first_seen": "2023-11-01",
+   "last_seen": "2024-09-16"
+  },
+  {
+   "dataset": "pms",
+   "label": "US1 TPLink",
+   "mac": "ac:84:c6:20:fe:4b",
+   "vendor": "TP-Link",
+   "product": "Smart Plug",
+   "model": "HS110",
+   "model_basis": "dhcp hostname HS110; lan_models.py 2026-11-22",
+   "category": "plug",
+   "note": "US1 bench",
+   "runs_seen": 3,
+   "first_seen": "2023-11-01",
+   "last_seen": "2024-09-16"
+  },
+  {
+   "dataset": "pms",
+   "label": "US1 EchoDot5",
+   "mac": "44:3d:54:be:12:3c",
+   "vendor": "Amazon",
+   "product": "Echo Dot (5th gen)",
+   "model": "Echo Dot (5th gen)",
+   "model_basis": "dataset document index (PrivacyPolicyDataset README D01-D26)",
+   "category": "voice-assistant",
+   "note": "US1 bench",
+   "runs_seen": 3,
+   "first_seen": "2023-11-01",
+   "last_seen": "2024-09-16"
+  },
+  {
+   "dataset": "pms",
+   "label": "US1 Govee",
+   "mac": "60:74:f4:1b:24:16",
+   "vendor": "Govee",
+   "product": "GoveeLife Smart Electric Kettle",
+   "model": "",
+   "model_basis": "dataset document index (PrivacyPolicyDataset README D01-D26)",
+   "category": "appliance",
+   "note": "US1 bench",
+   "runs_seen": 3,
+   "first_seen": "2023-11-01",
+   "last_seen": "2024-09-16"
+  },
+  {
+   "dataset": "pms",
+   "label": "US1 Litokam",
+   "mac": "90:31:4b:71:b2:7b",
+   "vendor": "Litokam",
+   "product": "2K Indoor Security Camera",
+   "model": "",
+   "model_basis": "dataset document index (PrivacyPolicyDataset README D01-D26)",
+   "category": "camera",
+   "note": "US1 bench",
+   "runs_seen": 3,
+   "first_seen": "2023-11-01",
+   "last_seen": "2024-09-16"
+  },
+  {
+   "dataset": "pms",
+   "label": "US1 Netvue",
+   "mac": "90:31:4b:71:8e:b6",
+   "vendor": "Netvue",
+   "product": "Orb Mini Indoor Camera",
+   "model": "Orb Mini",
+   "model_basis": "dataset document index (PrivacyPolicyDataset README D01-D26)",
+   "category": "camera",
+   "note": "US1 bench",
+   "runs_seen": 3,
+   "first_seen": "2023-11-01",
+   "last_seen": "2024-09-16"
+  },
+  {
+   "dataset": "pms",
+   "label": "US1 MetaquestPro",
+   "mac": "80:f3:ef:fa:70:af",
+   "vendor": "Meta",
+   "product": "Quest Pro",
+   "model": "Quest Pro",
+   "model_basis": "dataset document index (PrivacyPolicyDataset README D01-D26)",
+   "category": "xr-headset",
+   "note": "US1 bench (US1-Capture2, US1-Home)",
+   "runs_seen": 1,
+   "first_seen": "2024-05-01",
+   "last_seen": "2024-05-09"
+  },
+  {
+   "dataset": "pms",
+   "label": "US1 AmazonLight",
+   "mac": "64:b7:08:a9:2b:20",
+   "vendor": "Amazon",
+   "product": "Basics Smart Light Bulb",
+   "model": "",
+   "model_basis": "paper Table II (Badolato et al. PerCom 2025)",
+   "category": "bulb",
+   "note": "US1 bench; paired with the Echo Dot 5",
+   "runs_seen": 3,
+   "first_seen": "2023-11-01",
+   "last_seen": "2024-09-16"
+  },
+  {
+   "dataset": "pms",
+   "label": "US1 DreamGlassAir",
+   "mac": "c0:84:7d:2e:9c:86",
+   "vendor": "Dreamworldvision",
+   "product": "DreamGlass Air",
+   "model": "DreamGlass Air",
+   "model_basis": "dataset document index (PrivacyPolicyDataset README D01-D26)",
+   "category": "xr-headset",
+   "note": "US1 bench (US1-Capture2, US1-Home)",
+   "runs_seen": 4,
+   "first_seen": "2023-10-19",
+   "last_seen": "2024-09-16"
+  },
+  {
+   "dataset": "pms",
+   "label": "US1 GoogleNestMini",
+   "mac": "d4:f5:47:82:0e:c6",
+   "vendor": "Google",
+   "product": "Nest Mini",
+   "model": "Nest Mini",
+   "model_basis": "dhcp hostname Google-Nest-Mini; lan_models.py 2026-11-22",
+   "category": "voice-assistant",
+   "note": "US1 bench (US1-Capture2, US1-Home)",
+   "runs_seen": 2,
+   "first_seen": "2024-05-01",
+   "last_seen": "2024-09-16"
+  },
+  {
+   "dataset": "pms",
+   "label": "US2 MagicLeap",
+   "mac": "60:4b:aa:01:46:62",
+   "vendor": "Magic Leap",
+   "product": "Magic Leap 1",
+   "model": "Magic Leap 1",
+   "model_basis": "dataset document index (PrivacyPolicyDataset README D01-D26)",
+   "category": "xr-headset",
+   "note": "US2 bench",
+   "runs_seen": 1,
+   "first_seen": "2023-10-19",
+   "last_seen": "2023-10-27"
+  },
+  {
+   "dataset": "pms",
+   "label": "US2 HoloLens2",
+   "mac": "a0:85:fc:2f:7d:a0",
+   "vendor": "Microsoft",
+   "product": "HoloLens 2",
+   "model": "HoloLens 2",
+   "model_basis": "mdns txt model=HoloLens 2; lan_models.py 2026-11-22",
+   "category": "xr-headset",
+   "note": "US2 bench",
+   "runs_seen": 1,
+   "first_seen": "2023-10-19",
+   "last_seen": "2023-10-27"
+  },
+  {
+   "dataset": "pms",
+   "label": "US2 MetaQuest1",
+   "mac": "2c:26:17:56:c7:22",
+   "vendor": "Meta",
+   "product": "Quest (1st gen)",
+   "model": "Quest",
+   "model_basis": "dataset document index (PrivacyPolicyDataset README D01-D26)",
+   "category": "xr-headset",
+   "note": "US2 bench",
+   "runs_seen": 1,
+   "first_seen": "2023-10-19",
+   "last_seen": "2023-10-27"
+  },
+  {
+   "dataset": "pms",
+   "label": "US2 MetaQuest2",
+   "mac": "80:f3:ef:f7:f7:c1",
+   "vendor": "Meta",
+   "product": "Quest 2",
+   "model": "Quest 2",
+   "model_basis": "dataset document index (PrivacyPolicyDataset README D01-D26)",
+   "category": "xr-headset",
+   "note": "US2 bench",
+   "runs_seen": 1,
+   "first_seen": "2023-10-19",
+   "last_seen": "2023-10-27"
+  },
+  {
+   "dataset": "pms",
+   "label": "US2 Roborock",
+   "mac": "b0:4a:39:24:bb:a6",
+   "vendor": "Roborock",
+   "product": "S7",
+   "model": "S7",
+   "model_basis": "dataset document index (PrivacyPolicyDataset README D01-D26)",
+   "category": "appliance",
+   "note": "US2 bench",
+   "runs_seen": 1,
+   "first_seen": "2023-11-02",
+   "last_seen": "2023-11-16"
+  },
+  {
+   "dataset": "pms",
+   "label": "FR PhilipsBridge",
+   "mac": "ec:b5:fa:80:80:f4",
+   "vendor": "Philips",
+   "product": "Hue Bridge",
+   "model": "BSB002",
+   "model_basis": "upnp modelNumber BSB002 (modelName Philips hue bridge 2015); lan_models.py 2026-11-22",
+   "category": "hub",
+   "note": "FR bench (FR-Capture2); Hue Go, Hue Smart Bulb and Hue Smart Plug behind it over Zigbee",
+   "runs_seen": 1,
+   "first_seen": "2024-05-03",
+   "last_seen": "2024-05-07"
+  },
+  {
+   "dataset": "pms",
+   "label": "FR TPLink (Capture1)",
+   "mac": "1c:3b:f3:8d:29:4a",
+   "vendor": "TP-Link",
+   "product": "Smart Plug",
+   "model": "HS110",
+   "model_basis": "dhcp hostname HS110; lan_models.py 2026-11-22",
+   "category": "plug",
+   "note": "FR bench, FR-Capture1",
+   "runs_seen": 1,
+   "first_seen": "2023-11-24",
+   "last_seen": "2023-11-27"
+  },
+  {
+   "dataset": "pms",
+   "label": "FR TPLink (Capture2)",
+   "mac": "1c:3b:f3:8d:26:da",
+   "vendor": "TP-Link",
+   "product": "Smart Plug",
+   "model": "HS110",
+   "model_basis": "dhcp hostname HS110; lan_models.py 2026-11-22",
+   "category": "plug",
+   "note": "FR bench, FR-Capture2; another unit of the same model (the first failed, devices.txt)",
+   "runs_seen": 1,
+   "first_seen": "2024-05-03",
+   "last_seen": "2024-05-07"
+  },
+  {
+   "dataset": "pms",
+   "label": "FR EchoDot3",
+   "mac": "fc:49:2d:34:98:28",
+   "vendor": "Amazon",
+   "product": "Echo Dot (3rd gen)",
+   "model": "Echo Dot (3rd gen)",
+   "model_basis": "dataset document index (PrivacyPolicyDataset README D01-D26)",
+   "category": "voice-assistant",
+   "note": "FR bench",
+   "runs_seen": 2,
+   "first_seen": "2023-11-24",
+   "last_seen": "2024-05-07"
+  },
+  {
+   "dataset": "pms",
+   "label": "FR NestMini",
+   "mac": "20:df:b9:3b:00:90",
+   "vendor": "Google",
+   "product": "Nest Mini",
+   "model": "Nest Mini",
+   "model_basis": "dhcp hostname Google-Home-Mini; lan_models.py 2026-11-22",
+   "category": "voice-assistant",
+   "note": "FR bench",
+   "runs_seen": 2,
+   "first_seen": "2023-11-24",
+   "last_seen": "2024-05-07"
+  },
+  {
+   "dataset": "pms",
+   "label": "FR NestThermostat",
+   "mac": "64:16:66:be:44:9c",
+   "vendor": "Nest (Google)",
+   "product": "Thermostat",
+   "model": "Learning Thermostat (3rd gen)",
+   "model_basis": "dataset document index (PrivacyPolicyDataset README D01-D26)",
+   "category": "appliance",
+   "note": "FR bench",
+   "runs_seen": 2,
+   "first_seen": "2023-11-24",
+   "last_seen": "2024-05-07"
+  },
+  {
+   "dataset": "pms",
+   "label": "FR GoogleHome",
+   "mac": "a4:77:33:df:c2:4d",
+   "vendor": "Google",
+   "product": "Google Home",
+   "model": "Google Home",
+   "model_basis": "dhcp hostname Google-Home; lan_models.py 2026-11-22",
+   "category": "voice-assistant",
+   "note": "FR bench",
+   "runs_seen": 2,
+   "first_seen": "2023-11-24",
+   "last_seen": "2024-05-07"
+  },
+  {
+   "dataset": "pms",
+   "label": "FR EchoShow5",
+   "mac": "40:a2:db:2c:8a:68",
+   "vendor": "Amazon",
+   "product": "Echo Show 5",
+   "model": "Echo Show 5",
+   "model_basis": "dataset document index (PrivacyPolicyDataset README D01-D26)",
+   "category": "voice-assistant",
+   "note": "FR bench",
+   "runs_seen": 2,
+   "first_seen": "2023-11-24",
+   "last_seen": "2024-05-07"
+  },
+  {
+   "dataset": "pms",
+   "label": "FR NestCamera",
+   "mac": "64:16:66:4a:65:71",
+   "vendor": "Nest (Google)",
+   "product": "Nest Cam",
+   "model": "Nest Cam (1st gen)",
+   "model_basis": "dataset document index (PrivacyPolicyDataset README D01-D26)",
+   "category": "camera",
+   "note": "FR bench",
+   "runs_seen": 2,
+   "first_seen": "2023-11-24",
+   "last_seen": "2024-05-07"
+  },
+  {
+   "dataset": "pms",
+   "label": "FR TPLinkLight",
+   "mac": "50:c7:bf:5e:a8:48",
+   "vendor": "TP-Link",
+   "product": "Smart Wi-Fi LED Bulb",
+   "model": "LB120",
+   "model_basis": "dhcp hostname LB120; lan_models.py 2026-11-22",
+   "category": "bulb",
+   "note": "FR bench",
+   "runs_seen": 2,
+   "first_seen": "2023-11-24",
+   "last_seen": "2024-05-07"
+  },
+  {
+   "dataset": "pms",
+   "label": "FR MaxcioSmartStrip (Capture1)",
+   "mac": "f4:cf:a2:0c:41:f6",
+   "vendor": "Maxcio",
+   "product": "Smart Power Strip",
+   "model": "",
+   "model_basis": "dataset document index (PrivacyPolicyDataset README D01-D26)",
+   "category": "plug",
+   "note": "FR bench, FR-Capture1",
+   "runs_seen": 1,
+   "first_seen": "2023-11-24",
+   "last_seen": "2023-11-27"
+  },
+  {
+   "dataset": "pms",
+   "label": "FR MaxcioSmartStrip (Capture2)",
+   "mac": "f4:cf:a2:0c:40:1c",
+   "vendor": "Maxcio",
+   "product": "Smart Power Strip",
+   "model": "",
+   "model_basis": "dataset document index (PrivacyPolicyDataset README D01-D26)",
+   "category": "plug",
+   "note": "FR bench, FR-Capture2; another unit of the same model (devices.txt)",
+   "runs_seen": 1,
+   "first_seen": "2024-05-03",
+   "last_seen": "2024-05-07"
+  },
+  {
+   "dataset": "pms",
+   "label": "FR SonyTV",
+   "mac": "64:ff:0a:88:af:4a",
+   "vendor": "Sony",
+   "product": "BRAVIA TV",
+   "model": "KD-43XH8096",
+   "model_basis": "upnp friendlyName SONY KD-43XH8096 (modelName BRAVIA 4K UR3); lan_models.py 2026-11-22",
+   "category": "tv-streaming",
+   "note": "FR bench",
+   "runs_seen": 2,
+   "first_seen": "2023-11-24",
+   "last_seen": "2024-05-07"
+  },
+  {
+   "dataset": "pms",
+   "label": "FR DLink",
+   "mac": "b0:c5:54:4a:30:b0",
+   "vendor": "D-Link",
+   "product": "DCS-8300LH",
+   "model": "DCS-8300LH",
+   "model_basis": "dhcp hostname and mdns txt model DCS-8300LH; lan_models.py 2026-11-22",
+   "category": "camera",
+   "note": "FR bench",
+   "runs_seen": 2,
+   "first_seen": "2023-11-24",
+   "last_seen": "2024-05-07"
   }
  ],
  "products": [
@@ -4064,6 +4470,11 @@
      "first_seen": "2021-09-23",
      "last_seen": "2021-12-24",
      "units": 1
+    },
+    "pms": {
+     "first_seen": "2023-11-01",
+     "last_seen": "2024-09-16",
+     "units": 2
     }
    }
   },
@@ -4681,6 +5092,343 @@
     "unsw2018": {
      "first_seen": "2018-10-10",
      "last_seen": "2018-10-29",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "TP-Link",
+   "product": "Smart Plug",
+   "category": "plug",
+   "models": [
+    "HS110"
+   ],
+   "datasets": {
+    "pms": {
+     "first_seen": "2023-11-01",
+     "last_seen": "2024-09-16",
+     "units": 3
+    }
+   }
+  },
+  {
+   "vendor": "Amazon",
+   "product": "Echo Dot (5th gen)",
+   "category": "voice-assistant",
+   "models": [
+    "Echo Dot (5th gen)"
+   ],
+   "datasets": {
+    "pms": {
+     "first_seen": "2023-11-01",
+     "last_seen": "2024-09-16",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Govee",
+   "product": "GoveeLife Smart Electric Kettle",
+   "category": "appliance",
+   "models": [],
+   "datasets": {
+    "pms": {
+     "first_seen": "2023-11-01",
+     "last_seen": "2024-09-16",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Litokam",
+   "product": "2K Indoor Security Camera",
+   "category": "camera",
+   "models": [],
+   "datasets": {
+    "pms": {
+     "first_seen": "2023-11-01",
+     "last_seen": "2024-09-16",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Netvue",
+   "product": "Orb Mini Indoor Camera",
+   "category": "camera",
+   "models": [
+    "Orb Mini"
+   ],
+   "datasets": {
+    "pms": {
+     "first_seen": "2023-11-01",
+     "last_seen": "2024-09-16",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Meta",
+   "product": "Quest Pro",
+   "category": "xr-headset",
+   "models": [
+    "Quest Pro"
+   ],
+   "datasets": {
+    "pms": {
+     "first_seen": "2024-05-01",
+     "last_seen": "2024-05-09",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Amazon",
+   "product": "Basics Smart Light Bulb",
+   "category": "bulb",
+   "models": [],
+   "datasets": {
+    "pms": {
+     "first_seen": "2023-11-01",
+     "last_seen": "2024-09-16",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Dreamworldvision",
+   "product": "DreamGlass Air",
+   "category": "xr-headset",
+   "models": [
+    "DreamGlass Air"
+   ],
+   "datasets": {
+    "pms": {
+     "first_seen": "2023-10-19",
+     "last_seen": "2024-09-16",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Google",
+   "product": "Nest Mini",
+   "category": "voice-assistant",
+   "models": [
+    "Nest Mini"
+   ],
+   "datasets": {
+    "pms": {
+     "first_seen": "2023-11-24",
+     "last_seen": "2024-09-16",
+     "units": 2
+    }
+   }
+  },
+  {
+   "vendor": "Magic Leap",
+   "product": "Magic Leap 1",
+   "category": "xr-headset",
+   "models": [
+    "Magic Leap 1"
+   ],
+   "datasets": {
+    "pms": {
+     "first_seen": "2023-10-19",
+     "last_seen": "2023-10-27",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Microsoft",
+   "product": "HoloLens 2",
+   "category": "xr-headset",
+   "models": [
+    "HoloLens 2"
+   ],
+   "datasets": {
+    "pms": {
+     "first_seen": "2023-10-19",
+     "last_seen": "2023-10-27",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Meta",
+   "product": "Quest (1st gen)",
+   "category": "xr-headset",
+   "models": [
+    "Quest"
+   ],
+   "datasets": {
+    "pms": {
+     "first_seen": "2023-10-19",
+     "last_seen": "2023-10-27",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Meta",
+   "product": "Quest 2",
+   "category": "xr-headset",
+   "models": [
+    "Quest 2"
+   ],
+   "datasets": {
+    "pms": {
+     "first_seen": "2023-10-19",
+     "last_seen": "2023-10-27",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Roborock",
+   "product": "S7",
+   "category": "appliance",
+   "models": [
+    "S7"
+   ],
+   "datasets": {
+    "pms": {
+     "first_seen": "2023-11-02",
+     "last_seen": "2023-11-16",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Amazon",
+   "product": "Echo Dot (3rd gen)",
+   "category": "voice-assistant",
+   "models": [
+    "Echo Dot (3rd gen)"
+   ],
+   "datasets": {
+    "pms": {
+     "first_seen": "2023-11-24",
+     "last_seen": "2024-05-07",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Nest (Google)",
+   "product": "Thermostat",
+   "category": "appliance",
+   "models": [
+    "Learning Thermostat (3rd gen)"
+   ],
+   "datasets": {
+    "pms": {
+     "first_seen": "2023-11-24",
+     "last_seen": "2024-05-07",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Google",
+   "product": "Google Home",
+   "category": "voice-assistant",
+   "models": [
+    "Google Home"
+   ],
+   "datasets": {
+    "pms": {
+     "first_seen": "2023-11-24",
+     "last_seen": "2024-05-07",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Amazon",
+   "product": "Echo Show 5",
+   "category": "voice-assistant",
+   "models": [
+    "Echo Show 5"
+   ],
+   "datasets": {
+    "pms": {
+     "first_seen": "2023-11-24",
+     "last_seen": "2024-05-07",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Nest (Google)",
+   "product": "Nest Cam",
+   "category": "camera",
+   "models": [
+    "Nest Cam (1st gen)"
+   ],
+   "datasets": {
+    "pms": {
+     "first_seen": "2023-11-24",
+     "last_seen": "2024-05-07",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "TP-Link",
+   "product": "Smart Wi-Fi LED Bulb",
+   "category": "bulb",
+   "models": [
+    "LB120"
+   ],
+   "datasets": {
+    "pms": {
+     "first_seen": "2023-11-24",
+     "last_seen": "2024-05-07",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "Maxcio",
+   "product": "Smart Power Strip",
+   "category": "plug",
+   "models": [],
+   "datasets": {
+    "pms": {
+     "first_seen": "2023-11-24",
+     "last_seen": "2024-05-07",
+     "units": 2
+    }
+   }
+  },
+  {
+   "vendor": "Sony",
+   "product": "BRAVIA TV",
+   "category": "tv-streaming",
+   "models": [
+    "KD-43XH8096"
+   ],
+   "datasets": {
+    "pms": {
+     "first_seen": "2023-11-24",
+     "last_seen": "2024-05-07",
+     "units": 1
+    }
+   }
+  },
+  {
+   "vendor": "D-Link",
+   "product": "DCS-8300LH",
+   "category": "camera",
+   "models": [
+    "DCS-8300LH"
+   ],
+   "datasets": {
+    "pms": {
+     "first_seen": "2023-11-24",
+     "last_seen": "2024-05-07",
      "units": 1
     }
    }
