@@ -77,6 +77,8 @@
 
 ## 4. 判断待ち（利用者が戻ったときにまとめて聞く）
 
+答えやすい形の一覧（おすすめつき）：[decisions-pending.md](decisions-pending.md)（2026-11-22）。
+
 - Passive-Mode-Study（2026-11-22、[pms.md](pms.md)）：
   - データの利用条件が書かれていない（コードは GPL v3）。論文に使ってよいか、著者に聞くか。
   - DreamGlass Air は機器の文書が見つからない（製造者のサイトは通販のポリシーだけ）。「文書なし」の重い問題として扱ってよいか。
@@ -120,8 +122,8 @@
   - SimCam：中国語版の SimHome のポリシー（本文は 2021-09-06 の版、アーカイブは 2022-06-25）を、収録期間の文書として使うか。App Store の「5MP snapshot」付きの通知の説明を比べる対象にするか。別の機種（Ango）のクラウド保存の売り物を文脈に使うか。
   - Nest Cam（CIC 2021）は TLS 1.0 だけだった（RFC 8996 で廃止された後）。Nest の FAQ（2022-01-31）の「fully encrypted using the state-of-the-art security tools」と比べて、文言の上での食い違いとするか。今は一致。
   - 取り出した画像・映像・音声（`~/datasets/claims/dig/`）を、報告や論文に載せてよいか。人や実験室が写っている（公開データセットの中身）。
-- Withings Home（2026-11-16、[prior-aes256.md](prior-aes256.md)）：SoK（S&P 2019）は xmpp.withings.net:5222 への平文の認証を書くが、こちらの記録に Withings Home の 5222 の通信がない。外付けディスクがつながったら YourThings で確かめる（平文の XMPP か、STARTTLS のあとの TLS か）。
-- Eufy（2026-11-16、[blog-level.md](blog-level.md)）：候補に入れるか。取り出した音声（80 秒、`~/datasets/claims/dig/eufy/`）を見せてよいか。Deakin の Ring を同じ方法で確かめるか。
+- ~~Withings Home の XMPP~~：済み（2026-11-22。STARTTLS のあと TLS で、平文の認証は見えない。sweep-results.md）。
+- Eufy（2026-11-16、[blog-level.md](blog-level.md)）：候補に入れるか。取り出した音声（80 秒、`~/datasets/claims/dig/eufy/`）を見せてよいか。（Deakin の Ring は 2026-11-22 に RTP の中身で確かめた：SRTP）
 
 （作業中に判断が要るものが出たら、ここに書き足す。）
 
