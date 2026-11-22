@@ -471,6 +471,39 @@ SNH-P6410BN の公式文書を探した（集めた 11 行は `~/datasets/claims
   - 判定：一致のまま。18 行すべての根拠を「エントロピーからの推定」から「Weave の見出しで暗号化の種類 1」と「RTP の中身」に変えた。
 - **Ring Video Doorbell（Deakin）**：`scripts/claims/sweep/rtp_check.py` で、公開のアドレスへの UDP を RTP として読み、中身の先頭のバイトを見た。`2023-09-06.pcap`（高エントロピーの UDP がいちばん多い日）の 7 本の流れ（例：13.211.218.184:27989、10,622 パケット、最初のフレーム 1009188）はすべて RTP 版 2（PT 110 と 101、ほかに RTCP）。先頭のバイトの禁止ビットが立つ割合は 48.6〜51.6% で、NAL の種類も 0〜31 にばらけている。平文の H.264 ならほぼ 0% になるので、**中身は暗号化されている（SRTP とみられる）**。判定：一致のまま、根拠を変えた。Eufy（CIC）とは逆の結果。
 
+## 本文の上限と TCP の欠け、送り先の名前（2026-11-22）
+
+`expose.py` に、本文を読む上限の指定（`SWEEP_CAP`）、TCP の欠けがあった接続と上限で切れた接続の数（flow の `gaps`、`cut`）、送り先の名前（`dest`：TLS の SNI、HTTP の Host、機器自身の DNS の答え）を加え、上限を 32 KB から 256 KB に上げて洗い出し直した（`~/datasets/claims/sweep-v3/`）。上限を変えないときの出力が前と同じになることを、Passive-Mode-Study の US1-Capture1（1,079 件）で確かめた。
+
+**上限による見落とし（A4）**：report.py の製品ごとの表を 32 KB（sweep-v2）と 256 KB（sweep-v3）で比べた。
+
+| データ | 表の行（32 KB → 256 KB） | 新しく出た行 | 平文の接続のうち TCP の欠けあり | 256 KB でも切れた平文の接続 |
+|---|---|---|---|---|
+| Passive-Mode-Study | 同じ | 0 | 4 / 15,711（0.03%） | 6 |
+| CIC IoT 2022 | 同じ | 0 | 22 / 61,871（0.04%） | 24 |
+| UNSW-IoTraffic | 同じ | 0 | 47 / 55,727（0.08%） | 169 |
+| UNSW 2016 | 同じ | 0 | 21 / 23,921（0.09%） | 82 |
+| IoT-23 | 同じ | 0 | 18 / 211（8.5%） | 0 |
+| UNSW 2018 | 同じ | 0 | 4 / 7,771（0.05%） | 67 |
+| Deakin | 同じ | 0 | 0 / 16,885 | 3 |
+
+- 上限を 8 倍にしても、新しく見つかった平文の値はなかった。数が変わったのは Invoxia Triby の文字の通信だけで、どれも減った（平文の文字から値を 1 接続 200 個までしか拾わないので、本文が長くなると MAC がその外に出る。見落としが増えたのではなく数え方の副作用）。
+- TCP の欠けがある平文の接続はわずか。IoT-23 だけ 8.5% と多いが、接続が 211 本の小さな収録。
+- YourThings は洗い出しの途中（未）。
+
+**第三者の送り先（A5）**：`scripts/claims/sweep/dests.py` で、製品ごとの送り先の名前を Disconnect の追跡者の一覧（`~/datasets/claims/thirdparty/disconnect-services.json`、2026-11-22 取得、4,821 ドメイン）と照らした。一覧に載る会社のうち、製造者自身の会社（Echo・Ring・Sonos の Alexa → Amazon、Quest → Meta、Google の機器 → Google、Samsung のモニター → Samsung の広告）を除くと、次のとおり。
+
+| 製品（データ） | 第三者の送り先 | 文書 |
+|---|---|---|
+| DreamGlass Air（Passive-Mode-Study） | `graph.facebook.com`（Meta、20 接続）、`data.flurry.com`（Yahoo の Flurry、5 接続）。ほかに一覧にない hpplay（乐播）と Tencent の bugly | 機器の文書なし（[pms.md](pms.md)） |
+| LG webOS TV（CIC） | Google の広告（`pagead2.googlesyndication.com`、`googleads.g.doubleclick.net` など）、`media.bidr.io`（Comcast の広告） | 集めた文書に第三者への送信の主張なし |
+| 製造者不明の Smart Board（CIC） | Mixpanel、`graph.facebook.com`、Flurry、Crashlytics | 製造者不明で文書なし |
+| August Doorbell Cam（IoTraffic、UNSW 2018） | PubNub（一覧では解析。August のメッセージの配信の会社） | — |
+
+- 新しい食い違いの候補は出なかった。「第三者に渡さない」の主張は、どれも会社の中の扱いの話で、上の製品には当てはまらない。
+- Disconnect は `a2z.com`（Amazon の機器の設備）をまとめて広告に分類しているので、一覧の分類だけで広告とは言えない。一覧にない中国の SDK（hpplay、Tencent）は、名前を見て人が確かめる必要がある。
+- YourThings は洗い出しの途中（未）。
+
 ## 限界
 
 - 値は記録していないので、値の一致は、機器が LAN で名乗った値と MAC とだけ比べている。
