@@ -75,6 +75,8 @@
 
 2026-11-22：STARTTLS への対応と洗い出しのやり直し（`~/datasets/claims/sweep-v2/`）、エントロピーだけの判定の確かめ直し（Nest Protect は Weave の見出し、Ring は RTP の中身）、Withings Home の XMPP（認証は TLS の中）を済ませた（[sweep-results.md](sweep-results.md) の最後の 2 節、E18）。8 つ目のデータセットとして Passive-Mode-Study を加えた（[pms.md](pms.md)）。残り：YourThings の Nest Protect と Nest Guard を `weave_check.py` で確かめる。sweep-v2 で report.py と longitudinal.md を作り直す（平文の割合が XMPP の分だけ下がる）。Passive-Mode-Study のほかの製造者の 2023〜24 年の文書。
 
+2026-11-22（2）：年ごとの表を sweep-v2 と新データセットで作り直した。Passive-Mode-Study のほかの製造者（Amazon、TP-Link、Google、Microsoft、Meta、Magic Leap、D-Link、Sony、Philips）の文書を集めた（pms.md）。上限 256 KB と送り先の名前で洗い出し直し（`~/datasets/claims/sweep-v3/`、E19）、Belkin NetCam HD の記録の送信に SSID などが平文で入っていたのが分かった。判断待ちはおすすめつきの一覧（[decisions-pending.md](decisions-pending.md)）にした。残り：A6（読めない文書、地域版。決まってから）、判断待ちへの返事。
+
 ## 4. 判断待ち（利用者が戻ったときにまとめて聞く）
 
 答えやすい形の一覧（おすすめつき）：[decisions-pending.md](decisions-pending.md)（2026-11-22）。

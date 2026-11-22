@@ -1199,3 +1199,10 @@ python3 scripts/accuracy/compare_misses.py docs/assessment/evidence-map.json ~/d
 - **エントロピーだけの判定（18 行）**：Nest Protect の tcp/11095 は Weave の見出しを読み（`weave_check.py`）、鍵を決める手続きのほかはすべて暗号化の種類 1（AES-128-CTR）だった（IoTraffic 656 接続、UNSW 2018 4 接続。区切りが最初から最後まで続くことで形を確かめた）。Deakin の Ring の UDP は RTP で、中身の先頭のビットがランダム（禁止ビット 48.6〜51.6%）なので SRTP とみられる（`rtp_check.py`）。18 行すべての根拠を変えた（判定は一致のまま）。YourThings の Nest Guard は、Weave のノード ID に MAC がそのまま入っていた。
 - **Passive-Mode-Study**：3 つの zip（13.5 GB）を落とし、29 台を devices.tsv に足して洗い出した。強い観測：Govee のケトルがファームウェアと MAC を含む機器 ID を平文の HTTP で扱う。DreamGlass Air が MAC・シリアル番号・Android ID を第三者の SDK に平文で送る。Netvue のカメラが UPnP でルーターのポートを開ける。Roborock S7 の MQTT が TLS 1.0。文書は Govee、Dreamworldvision、Netvue、Roborock を集め、Govee は文言の上で食い違い、Netvue は一致、ほかは文書に主張なし。結果は [claims/pms.md](claims/pms.md)。
 - **限界**：Passive-Mode-Study のデータの利用条件は未確認。ほかの製造者の 2023〜24 年の文書は未。
+
+## E19：本文の上限、TCP の欠け、送り先の名前、年ごとの表（2026-11-22）
+
+- **目的**：残りの穴（A4：本文を 32 KB で切ったことと TCP の欠けによる見落とし、A5：第三者への送り先）を確かめる。年ごとの表を新しいデータセットを入れて作り直す。
+- **方法**：`expose.py` に上限の指定（`SWEEP_CAP`）、欠けと切れの数、送り先の名前（SNI、Host、機器の DNS の答え）を加え、上限 256 KB で 8 つのデータセットを `~/datasets/claims/sweep-v3/` に洗い出し直した。上限を変えないときの出力が前と同じことを確かめた。送り先は `dests.py` で Disconnect の追跡者の一覧と照らした。
+- **結果**：上限を 8 倍にして新しく出た値は 1 件だけで、Belkin NetCam HD（YourThings）の記録の送信に家の Wi-Fi の SSID、ルーターの MAC、LAN の機器の一覧が平文で入っていた。TCP の欠けのある平文の接続は 0〜0.09%（IoT-23 8.5%、YourThings 2.76%）。第三者の追跡の送り先は、DreamGlass Air（Facebook、Flurry）、LG TV（Google の広告）、YourThings の TV（20 社以上）などで、比べられる主張はなく、新しい食い違いの候補はない。年ごとの表（longitudinal.md）は 36 製品で、XMPP の握手と新データセットの 13 行が入った。
+- **限界**：Disconnect の一覧は Amazon の機器の設備（a2z.com）も広告に分類するなど広く、一覧にない中国の SDK は人が確かめる必要がある。YourThings の第三者への送信の主張は集めていない。
