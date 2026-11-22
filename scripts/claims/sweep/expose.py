@@ -29,7 +29,13 @@ Records (one JSON object per line, "r" is the record type):
           1 MB or more, or a binary content type
   flow    per device, peer kind (lan or public), protocol, server port and payload
           kind: number of flows and payload bytes (kind "starttls": plaintext opening,
-          then TLS)
+          then TLS), the flows with a gap in a TCP direction ("gaps") and the flows
+          whose kept payload reached the cap in a direction ("cut")
+  dest    per device and public server the device connected to: the server's name
+          ("how": sni from the TLS ClientHello, host from the HTTP Host header, dns
+          from the device's own DNS answers, ip when none), protocol, port and payload
+          kind: number of flows and payload bytes
+The payload kept per direction of a flow is 32 KB unless SWEEP_CAP (bytes) says otherwise.
 Frame numbers count every packet of the capture file from 1, as Wireshark does.
 TCP payloads are put in order by sequence number, so duplicated packets
 (YourThings holds every packet twice) and retransmissions are dropped.
@@ -60,7 +66,7 @@ from cryptography.hazmat.primitives.asymmetric import dsa, ec, ed448, ed25519, r
 warnings.filterwarnings("ignore", module="cryptography")
 warnings.filterwarnings("ignore", message=".*serial number.*")
 KEYFILE = Path.home() / "datasets/claims/sweep/.key"
-CAP = 32768            # payload bytes kept per direction of a flow
+CAP = int(os.environ.get("SWEEP_CAP", "32768"))   # payload bytes kept per direction of a flow
 IDLE = {"tcp": 300, "udp": 60}
 MIN_TOKEN = 8
 TOKEN = re.compile(rb"[A-Za-z0-9]{8,}")
@@ -294,6 +300,22 @@ def client_hello(b):
             "ch_weak": sorted(flags), "ch_fs": fs_offered, "sni": 0 in e}
 
 
+def sni_name(b):
+    """The server name in a ClientHello body, or None."""
+    try:
+        i = 34
+        i += 1 + b[i]
+        i += 2 + struct.unpack("!H", b[i:i + 2])[0]
+        i += 1 + b[i]
+        sn = exts(b, i).get(0)
+        if sn and len(sn) > 5 and sn[2] == 0:
+            n = struct.unpack("!H", sn[3:5])[0]
+            return sn[5:5 + n].decode("ascii", "replace").lower()[:120]
+    except (IndexError, struct.error):
+        pass
+    return None
+
+
 def server_hello(b):
     try:
         ver = struct.unpack("!H", b[0:2])[0]
@@ -521,6 +543,46 @@ def dns_names(b):
     return out
 
 
+def dns_answers(b):
+    """(question name, address bytes) for the A and AAAA answers of a DNS response."""
+    out = []
+    try:
+        if not b[2] & 0x80:
+            return out
+        qd, an = struct.unpack("!HH", b[4:8])
+        i, labels = 12, []
+        for k in range(qd):
+            lab, i = dns_name(b, i)
+            if k == 0:
+                labels = lab
+            i += 4
+        q = b".".join(labels).decode("ascii", "replace").lower()[:120]
+        for _ in range(an):
+            _, i = dns_name(b, i)
+            t, _, _, rl = struct.unpack("!HHIH", b[i:i + 10])
+            rd = b[i + 10:i + 10 + rl]
+            if (t == 1 and rl == 4) or (t == 28 and rl == 16):
+                out.append((q, rd))
+            i += 10 + rl
+    except (IndexError, struct.error):
+        pass
+    return out
+
+
+def dns_name(b, i, depth=0):
+    labels = []
+    while i < len(b) and depth < 20:
+        n = b[i]
+        if n == 0:
+            return labels, i + 1
+        if n & 0xC0 == 0xC0:
+            sub, _ = dns_name(b, ((n & 0x3F) << 8) | b[i + 1], depth + 1)
+            return labels + sub, i + 2
+        labels.append(b[i + 1:i + 1 + n])
+        i += 1 + n
+    return labels, i
+
+
 def dhcp_ids(b):
     out = []
     if len(b) < 240 or b[236:240] != b"\x63\x82\x53\x63":
@@ -565,7 +627,9 @@ class Unit:
         self.recs = []
         self.agg = {}
         self.flows = {}
-        self.flowsum = collections.defaultdict(lambda: [0, 0])
+        self.flowsum = collections.defaultdict(lambda: [0, 0, 0, 0])   # flows, bytes, with a gap, cut
+        self.destsum = {}
+        self.dns = collections.defaultdict(dict)   # device -> address -> name it looked up
         self.seen_ident = set()
 
     def add(self, kind, key, rec, frame):
@@ -652,9 +716,12 @@ def scan(stream, name, macs, out_path):
     with open(out_path, "w") as o:
         for rec in u.agg.values():
             o.write(json.dumps(rec) + "\n")
-        for (dev, peer, proto, port, kind), (c, b) in sorted(u.flowsum.items()):
+        for (dev, peer, proto, port, kind), (c, b, gaps, cut) in sorted(u.flowsum.items()):
             o.write(json.dumps({"r": "flow", "dev": dev, "peer": peer, "proto": proto, "port": port, "kind": kind,
-                                "flows": c, "bytes": b, "file": name}) + "\n")
+                                "flows": c, "bytes": b, "gaps": gaps, "cut": cut, "file": name}) + "\n")
+        for (dev, server, how, proto, port, kind), (c, b, frame) in sorted(u.destsum.items()):
+            o.write(json.dumps({"r": "dest", "dev": dev, "name": server, "how": how, "proto": proto, "port": port,
+                                "kind": kind, "flows": c, "bytes": b, "frame": frame, "file": name}) + "\n")
         o.write(json.dumps({"r": "file", "file": name, "packets": n}) + "\n")
     return name, n
 
@@ -675,6 +742,10 @@ def handle(u, ts, n, sdev, ddev, src, dst, proto, sp, dp, seq, flags, pl):
                     u.ident(sdev, k, v, n)
                 elif k != "mdns_name":
                     u.ident(sdev, k, v, n)
+    # the device's own DNS answers, to name the servers it then connects to
+    if ddev and proto == "udp" and sp == 53 and len(pl) > 12:
+        for q, addr in dns_answers(pl):
+            u.dns[ddev][addr] = q
     key = (proto, src, sp, dst, dp)
     rkey = (proto, dst, dp, src, sp)
     f = u.flows.get(key)
@@ -709,6 +780,8 @@ def handle(u, ts, n, sdev, ddev, src, dst, proto, sp, dp, seq, flags, pl):
             if over >= len(pl):
                 return
             pl, seq = pl[over:], nx
+        elif nx is not None and seq != nx:
+            f["gap"] = True                     # bytes missing before this segment: kept as if adjacent
         f["nxt"][d] = (seq + len(pl)) & 0xFFFFFFFF
     elif not pl:
         return
@@ -716,6 +789,8 @@ def handle(u, ts, n, sdev, ddev, src, dst, proto, sp, dp, seq, flags, pl):
     if f["frame"][d] is None:
         f["frame"][d] = n
     b = f["buf"][d]
+    if len(b) + len(pl) > CAP:
+        f["cut"] = True
     if len(b) < CAP:
         b += pl[:CAP - len(b)]
     # the device's MAC in any packet it sends to a public address outside TLS and DTLS
@@ -783,6 +858,27 @@ def finish(u, f):
         c = u.flowsum[(dev, peer, f["proto"], sport, kind)]
         c[0] += 1
         c[1] += f["bytes"]
+        c[2] += 1 if f.get("gap") else 0
+        c[3] += 1 if f.get("cut") else 0
+    # the public server a device connected to, by name
+    if cdev and public(sip):
+        server, how = None, "ip"
+        if kind in ("tls", "starttls"):
+            for t, body, _ in tls_records(up[st[0]:] if st else up):
+                if t == 1:
+                    server = sni_name(body)
+                    break
+            how = "sni" if server else how
+        elif kind == "http":
+            m = re.search(rb"(?im)^host:[ \t]*([^\r\n: ]+)", up[:4096])
+            if m:
+                server, how = m.group(1).decode("latin-1").lower()[:120], "host"
+        if not server and sip in u.dns.get(cdev, {}):
+            server, how = u.dns[cdev][sip], "dns"
+        d = u.destsum.setdefault((cdev, server or ipstr(sip), how, f["proto"], sport, kind),
+                                 [0, 0, f["frame"][0] or f["frame"][1]])
+        d[0] += 1
+        d[1] += f["bytes"]
     # TLS handshakes (device as client or server)
     if kind in ("tls", "starttls"):
         rec = {"starttls": True} if st else {}
