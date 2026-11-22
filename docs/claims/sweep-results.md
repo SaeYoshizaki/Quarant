@@ -486,10 +486,13 @@ SNH-P6410BN の公式文書を探した（集めた 11 行は `~/datasets/claims
 | IoT-23 | 同じ | 0 | 18 / 211（8.5%） | 0 |
 | UNSW 2018 | 同じ | 0 | 4 / 7,771（0.05%） | 67 |
 | Deakin | 同じ | 0 | 0 / 16,885 | 3 |
+| YourThings | 1 行増えた | 1 | 2,633 / 95,525（2.76%） | 83 |
 
 - 上限を 8 倍にしても、新しく見つかった平文の値はなかった。数が変わったのは Invoxia Triby の文字の通信だけで、どれも減った（平文の文字から値を 1 接続 200 個までしか拾わないので、本文が長くなると MAC がその外に出る。見落としが増えたのではなく数え方の副作用）。
-- TCP の欠けがある平文の接続はわずか。IoT-23 だけ 8.5% と多いが、接続が 211 本の小さな収録。
-- YourThings は洗い出しの途中（未）。
+- TCP の欠けがある平文の接続はわずか。IoT-23 は 8.5%（接続 211 本の小さな収録）、YourThings は 2.76% とほかより多い。
+- **新しく出た 1 行：Belkin NetCam HD（YourThings）が、機器の記録（syslog、46 KB）を平文の HTTP でクラウドに上げていた**。`PUT devices.xbcs.net:8899/ToolService/log/uploadWdLogFile/C0562753096C`（`eth1-20180321.1920.1521678000` フレーム 99605、TCP ストリーム 398、2018-03-21 19:22 UTC ごろ、宛先 184.73.191.189）。本文は起動からの syslog 482 行で、**家の Wi-Fi の SSID（`APSSID = super-duper-secret`）**、パスワードの長さ（`len = 27, PASSWD = xxxxxx`。値は伏せてある）、ルーターの MAC（`Remote MAC: 0001C0187F9B`）、カメラの MAC、LAN のほかの機器の IP と UPnP の UUID（192.168.0.12、.14、.26、.33 など）、動体検知や FTP の設定の変更、タイムゾーン（America/New_York）、ファームウェアの版（WeMo_NetCam_WW_2.00.10684.PVT）が入っている。32 KB で切っていたので、これまでの洗い出しではパスの MAC しか見えていなかった。
+  - 同じ送信先への記録の送信は、Belkin のほかの機器（WeMo Switch、Motion Sensor、Crock-Pot。UNSW 2016、IoTraffic、UNSW 2018、YourThings）にもあるが、確かめた WeMo Switch（IoTraffic `BelkinWemoSwitch_ec1a5979f489.pcap` フレーム 94061）の記録は電波の強さとルーターとのつながりだけで、SSID はない。IoTraffic の NetCam（ファームウェア 2.00.5498、2017 年、8 回）の記録も短く、SSID はない。SSID が入っていたのは、YourThings の NetCam が起動したときの 1 回だけ。
+  - 文書：YourThings で集めた Belkin NetCam HD の文書に、通信の暗号化の主張はない（claims.tsv）。食い違いではなく「文書に主張がない重い問題」。先行資料：検索 1 回（`Belkin WeMo NetCam uploadWdLogFile log upload plaintext SSID xbcs.net`）で、このログの送信を書いた資料は見つからなかった（NetCam の別の脆弱性の報告はある）。
 
 **第三者の送り先（A5）**：`scripts/claims/sweep/dests.py` で、製品ごとの送り先の名前を Disconnect の追跡者の一覧（`~/datasets/claims/thirdparty/disconnect-services.json`、2026-11-22 取得、4,821 ドメイン）と照らした。一覧に載る会社のうち、製造者自身の会社（Echo・Ring・Sonos の Alexa → Amazon、Quest → Meta、Google の機器 → Google、Samsung のモニター → Samsung の広告）を除くと、次のとおり。
 
@@ -502,7 +505,7 @@ SNH-P6410BN の公式文書を探した（集めた 11 行は `~/datasets/claims
 
 - 新しい食い違いの候補は出なかった。「第三者に渡さない」の主張は、どれも会社の中の扱いの話で、上の製品には当てはまらない。
 - Disconnect は `a2z.com`（Amazon の機器の設備）をまとめて広告に分類しているので、一覧の分類だけで広告とは言えない。一覧にない中国の SDK（hpplay、Tencent）は、名前を見て人が確かめる必要がある。
-- YourThings は洗い出しの途中（未）。
+- **YourThings**：TV が多くの広告・解析の会社に接続していた。Samsung Smart TV は 20 社以上（Google の広告、Facebook、Adobe、Nielsen、comScore、LiveRamp、The Trade Desk など）、Roku 4 と TCL の Roku TV は Google の広告（`pubads.g.doubleclick.net`、`tpc.googlesyndication.com`）、NVIDIA Shield は `ssl.google-analytics.com`、Fire TV は Amazon の広告（`amazon-adsystem.com`）。YourThings の文書は暗号化の主張に絞って集めたので（D34）、第三者への送信の主張は記録していない。TV の追跡は先行研究で知られている（Roku と Fire TV については Mohajeri Moghaddam ほか、ACM CCS 2019。本文は未確認）。ほかは Logitech Harmony と Piper の PubNub。
 
 ## 限界
 
