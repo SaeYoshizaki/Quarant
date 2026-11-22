@@ -23,6 +23,7 @@ SOURCES = {
                 "cic-iot-2022/4-Scenarios", "cic-iot-2022/2021_11_02_Active.pcap"],
     "deakin": ["deakin-iot/pcapFull"],
     "iot23": ["iot-23-benign"],
+    "pms": ["passive-mode-2025/Percom116Dataset", "passive-mode-2025/ExtendedPaperDataset"],
 }
 KINDS = ("upnp", "mdns_name", "mdns_txt", "dhcp_hostname", "dhcp")
 UPNP = ("modelName", "modelNumber", "modelDescription", "friendlyName", "manufacturer")

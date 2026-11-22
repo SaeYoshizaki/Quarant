@@ -3,6 +3,7 @@
 # UNSW 2018: the benign daily captures of the SOSR 2019 data (iotanalytics.unsw.edu.au/attack-data.html), 27 days.
 # CIC IoT 2022: the 6-Attacks captures are left out (devices under attack).
 # IoT-23: the three benign honeypot scenarios (4-1 Hue, 5-1 Echo Dot, 7-1 Somfy), from mcfp.felk.cvut.cz.
+# Passive-Mode-Study (PerCom 2025): the main captures and the extended idle/aligned captures.
 # usage: [SWEEP_OUT=<dir>] run_all.sh [dataset...]   (default: all five)
 set -u
 cd "$(dirname "$0")/../../.."
@@ -19,6 +20,7 @@ sources() {
     deakin) echo $R/deakin-iot/pcapFull ;;
     unsw2018) echo $R/unsw-iot-2018/benign ;;
     iot23) echo $R/iot-23-benign ;;
+    pms) echo $R/passive-mode-2025/Percom116Dataset $R/passive-mode-2025/ExtendedPaperDataset ;;
   esac
 }
 for ds in ${@:-yourthings cic2022 deakin iotraffic unsw2016}; do

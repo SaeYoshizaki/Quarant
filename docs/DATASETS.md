@@ -129,6 +129,17 @@
   - CIC は「データセットと論文の両方」を引用する。
   - IoT-23 は CC BY に従ってクレジットを表示する。
 
+### Passive-Mode-Study（PerCom 2025）
+
+- **引用**：C. Badolato ほか, "Your Smart Home Exchanged 3M Messages: Defining and Analyzing Smart Device Passive Mode", IEEE PerCom 2025, doi:10.1109/PerCom64205.2025.00024
+- **URL**：https://github.com/DAMSlabUMBC/Passive-Mode-Study（PCAP は `datasets.csv` の Google Drive）
+- **利用条件**：GPL v3 はコードのもの。データのライセンスは書いていない（未確認）。CITATION.cff で引用を求めている。
+- **形式**：収録ごとに 1 つの PCAP（Ethernet、長さの上限なし）と `devices.txt`（機器名と MAC）。`Percom116Dataset.zip`（13.1 GB）、`ExtendedPaperDataset.zip`（144 MB、機器ごとに絞った idle と passive）、`PrivacyPolicyDataset.zip`（267 MB、著者が集めた 26 機器の文書）。
+- **収録**：米国 2 か所（US1、US2）とフランス（FR）の実験台、2023-10〜2024-09。32 台（スマートスピーカー、カメラ、電球、プラグ、VR・AR、テレビ、ロボット掃除機、ケトル）。機器は受け身のモードで、操作はない。
+- **置き場所**：`~/datasets/raw/passive-mode-2025/`（2026-11-22 取得）。
+- **検証できること**：2023〜24 年の機器の TLS、平文の中身、送り先。これまでのデータセットと同じ機器（Hue、TP-Link、Echo、Nest、Google Home、D-Link）の年をまたいだ比較。EU 版の文書との比較（FR）。
+- **限界**：操作がないので、映像や音声の送信は見えない。結果は [claims/pms.md](claims/pms.md)。
+
 ## 取得と評価の状況（2026-10-17）
 
 | データセット | 取得したもの | 評価 |
