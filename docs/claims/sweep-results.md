@@ -456,7 +456,7 @@ SNH-P6410BN の公式文書を探した（集めた 11 行は `~/datasets/claims
 
 - **Samsung の 3DES の時期**：3DES は 2016-09-24（UNSW 2016）から 2016-10-21（IoTraffic フレーム 1173960）まで。それより後（IoTraffic フレーム 1288982 以降、UNSW 2018、Deakin）は AES-256 だけ。サーバーの設定が 2016 年 10 月の終わりに変わったとみられる（推定）。3DES の弱さ（Sweet32、Bhargavan と Leurent、ACM CCS 2016、2016-08 公表）が知られた後も 2 か月ほど選ばれていた。
 - **これまでの数の直し**：Samsung、Withings Aura、HP ENVY の XMPP は、これまで「高エントロピー」や「文字」として数えていた。平文の割合（longitudinal.md など）は、この分だけ下がる（作り直しは YourThings の洗い出しの後）。
-- **Withings Home（YourThings）**：Zeek の記録（`~/datasets/claims/flows-yt/`）では、収録中に始まった XMPP の接続 11 本がすべて STARTTLS で TLS 1.2・AES-256-GCM（10 本は前方秘匿性なし）。残りは前日から続く接続の途中か、応答のない SYN。生のパケットでも、2018-04-10 の接続（`eth1-20180410.0045.1523339100`）は、ストリームの開始（フレーム 27620）、サーバーの機能の提示（27690。STARTTLS と SASL PLAIN）、`<starttls/>`（27714）、`<proceed/>`（27804）、握手（27828）の順で、**認証は TLS の中**だった。SoK（Alrawi ほか、S&P 2019）が書く「平文の XMPP 認証」は、このデータでは見えない。サーバーは TLS を必須にせず、PLAIN を TLS の前から示していた（途中で STARTTLS を消されると平文に落ちうる。推定。能動的には確かめていない）。
+- **Withings Home（YourThings）**：Zeek の記録（`~/datasets/claims/flows-yt/`）では、収録中に始まった XMPP の接続 12 本がすべて STARTTLS で TLS 1.2・AES-256-GCM（11 本は前方秘匿性なし。sweep-v2 も 12 回で一致）。残りは前日から続く接続の途中か、応答のない SYN。生のパケットでも、2018-04-10 の接続（`eth1-20180410.0045.1523339100`）は、ストリームの開始（フレーム 27620）、サーバーの機能の提示（27690。STARTTLS と SASL PLAIN）、`<starttls/>`（27714）、`<proceed/>`（27804）、握手（27828）の順で、**認証は TLS の中**だった。SoK（Alrawi ほか、S&P 2019）が書く「平文の XMPP 認証」は、このデータでは見えない。サーバーは TLS を必須にせず、PLAIN を TLS の前から示していた（途中で STARTTLS を消されると平文に落ちうる。推定。能動的には確かめていない）。
 
 ## エントロピーだけの判定の確かめ直し（2026-11-22）
 
