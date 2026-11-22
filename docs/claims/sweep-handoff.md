@@ -73,7 +73,16 @@
 
 2026-11-16：教授の方針（ブログ程度で、論文になっていないものは入れてよい）を受けて、[blog-level.md](blog-level.md) にまとめた。新しく Eufy（CIC）を確かめた：アプリの映像は音声が平文、映像も先頭 128 バイトのほかは平文で、「Data during transmission is encrypted.」と合わない。報道（2022）はウェブポータルの映像だけを、論文（WOOT 2024）はアプリの映像を暗号化ありとしている。エントロピーだけで「暗号化」とした判定がほかに 18 行あり、Deakin の Ring（映像）を同じ方法で確かめるのが次。
 
+2026-11-22：STARTTLS への対応と洗い出しのやり直し（`~/datasets/claims/sweep-v2/`）、エントロピーだけの判定の確かめ直し（Nest Protect は Weave の見出し、Ring は RTP の中身）、Withings Home の XMPP（認証は TLS の中）を済ませた（[sweep-results.md](sweep-results.md) の最後の 2 節、E18）。8 つ目のデータセットとして Passive-Mode-Study を加えた（[pms.md](pms.md)）。残り：YourThings の Nest Protect と Nest Guard を `weave_check.py` で確かめる。sweep-v2 で report.py と longitudinal.md を作り直す（平文の割合が XMPP の分だけ下がる）。Passive-Mode-Study のほかの製造者の 2023〜24 年の文書。
+
 ## 4. 判断待ち（利用者が戻ったときにまとめて聞く）
+
+- Passive-Mode-Study（2026-11-22、[pms.md](pms.md)）：
+  - データの利用条件が書かれていない（コードは GPL v3）。論文に使ってよいか、著者に聞くか。
+  - DreamGlass Air は機器の文書が見つからない（製造者のサイトは通販のポリシーだけ）。「文書なし」の重い問題として扱ってよいか。
+  - Netvue のポート転送（UPnP）と Roborock の TLS 1.0 は、文書に主張がない。食い違いの一覧とは別に「重い問題」として載せるか。
+  - Govee の「state-of-the-art data security tools」を、文言の上での食い違いとして数えるか。
+  - 著者の文書集（PrivacyPolicyDataset）を、比べる文書の出どころに使うか。今は手がかりにだけ使い、引用は Wayback の版から取った。
 
 - アプリストアの説明を公式文書に含めるか。[method.md](method.md) では見ないことにしているが、製造者が書いた文書でもある。決まるまでは、集めて別に記録する。
 - 分類（先行研究の区分）の、人による確認。

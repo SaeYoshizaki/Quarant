@@ -1191,3 +1191,11 @@ python3 scripts/accuracy/compare_misses.py docs/assessment/evidence-map.json ~/d
 - **IoT-23 の追加（同じ日）**：正常な 3 シナリオ（Hue、Echo Dot、Somfy、約 510 MB）を落として洗い出しにかけた（候補は 194 件・85 製品に）。Hue と Echo は UNSW 2018 で集めた 2018 年の文書を当て、Somfy の文書はエージェント 1 組で集めた（claims.tsv は 2,756 行に）。新しい候補は Somfy の弱い 1 件（セットのページの「AES 256」に対し、ゲートウェイの TLS は AES-128 で前方秘匿性なし）。Hue は 2018-10 も SSO トークンを平文で送っていた。
 - **道具の誤りと直したこと**：(1) Deakin の Linux cooked の形式で、`expose.py` がサーバーからの通信をすべて捨てていた。機器の IP で結びつけるように直して Deakin をやり直し、TLS の候補が 4 件増えた。(2) 候補を選ぶ規則が、ファームウェアの取得をパスだけで見ていて、WeMo、Lutron、Echo などの HTTP での更新を落としていた。(3) `verify.py` が Host ヘッダーの `:80` で Hue の要求を取りこぼしていた。(4) zsh が変数の中のパスを分けず、確認の 1 回目が全件「ファイルなし」になった。どれも結論の前に直した。
 - **限界**：機種が分からない製品は共通の文書だけで判定した。文書の多くは米国版。主張の読み方（SimCam、D-Link、Awair、Triby、Nest Mini の報告）と先行研究の区分は、人がまだ確かめていない。
+
+## E18：STARTTLS、エントロピーの判定の確かめ直し、8 つ目のデータセット（2026-11-22）
+
+- **目的**：残っていた穴を埋める（STARTTLS のあとの TLS、エントロピーだけの判定、Withings Home の XMPP）。利用者の依頼で、Passive-Mode-Study（PerCom 2025）を加える。
+- **STARTTLS**：`expose.py` が XMPP・SMTP・IMAP・POP3・FTP の STARTTLS のあとの握手を読むようにし、7 つのデータセットを `~/datasets/claims/sweep-v2/` に洗い出し直した。Withings Aura と Samsung SmartCam（IoTraffic）で tshark と数・暗号・フレームが一致した。新しく分かったこと：Samsung の XMPP のサーバーは 2016-09-24〜10-21 に 3DES を選んでいた（UNSW 2016 では 12 回中 9 回）。HP ENVY の XMPP のサーバーは、プリンターが TLS 1.2 を出しているのに TLS 1.0 を選んだ。Withings Home（YourThings）は認証を TLS の中で行っていた（SoK の「平文の XMPP 認証」は見えない）。
+- **エントロピーだけの判定（18 行）**：Nest Protect の tcp/11095 は Weave の見出しを読み（`weave_check.py`）、鍵を決める手続きのほかはすべて暗号化の種類 1（AES-128-CTR）だった（IoTraffic 656 接続、UNSW 2018 4 接続。区切りが最初から最後まで続くことで形を確かめた）。Deakin の Ring の UDP は RTP で、中身の先頭のビットがランダム（禁止ビット 48.6〜51.6%）なので SRTP とみられる（`rtp_check.py`）。11 行の根拠を変えた（判定は一致のまま）。YourThings の Nest の 7 行は未。
+- **Passive-Mode-Study**：3 つの zip（13.5 GB）を落とし、29 台を devices.tsv に足して洗い出した。強い観測：Govee のケトルがファームウェアと MAC を含む機器 ID を平文の HTTP で扱う。DreamGlass Air が MAC・シリアル番号・Android ID を第三者の SDK に平文で送る。Netvue のカメラが UPnP でルーターのポートを開ける。Roborock S7 の MQTT が TLS 1.0。文書は Govee、Dreamworldvision、Netvue、Roborock を集め、Govee は文言の上で食い違い、Netvue は一致、ほかは文書に主張なし。結果は [claims/pms.md](claims/pms.md)。
+- **限界**：Passive-Mode-Study のデータの利用条件は未確認。ほかの製造者の 2023〜24 年の文書は未。
