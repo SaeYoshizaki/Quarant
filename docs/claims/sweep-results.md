@@ -439,12 +439,42 @@ SNH-P6410BN の公式文書を探した（集めた 11 行は `~/datasets/claims
 - 「Data during transmission is encrypted.」（Privacy Commitment、2021-09-25）の判定を、一致から食い違いの候補（T1a）に直した。前の判定はエントロピーだけが根拠だった。
 - 詳しくは [blog-level.md](blog-level.md)。
 
+## STARTTLS のあとの TLS（2026-11-22）
+
+`expose.py` が、STARTTLS（XMPP の `<starttls/>`、SMTP・IMAP の STARTTLS、POP3 の STLS、FTP の AUTH TLS）のあとの握手を読むようにした。tls の記録に `"starttls": true`、通信の種類に `starttls`（平文の始まりのあと TLS）を付ける。平文の値として読むのは、握手の前の部分だけ。7 つのデータセットを `~/datasets/claims/sweep-v2/` に洗い出し直した（YourThings は作業中）。
+
+確かめ方：Withings Aura（IoTraffic `WithingsSleepSensor_0024e42028c6.pcap`）で、tshark の ServerHello と数（32）、暗号（0x009d）、最初のフレーム（102193、相手 89.30.121.21）が一致した。Samsung SmartCam（IoTraffic `SamsungCamera_00166cab6b88.pcap`）も 89 回、うち 3DES 5 回で一致した。
+
+| 機器（データ） | 接続 | 握手 | サーバーが選んだもの | 例 |
+|---|---|---|---|---|
+| Samsung SmartCam SNH-P6410BN（UNSW 2016） | XMPP tcp/5222 | 12 | TLS 1.0。**3DES（TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA）9**、AES-256 3 | `16-09-24.pcap` フレーム 166773（3DES、52.8.89.254） |
+| 同（UNSW-IoTraffic） | 同 | 89 | TLS 1.0。AES-256 84、3DES 5 | フレーム 147193（3DES、54.67.41.98、2016-10-03）。11-15 に手で数えた値と同じ |
+| 同（UNSW 2018） | 同 | 22 | TLS 1.0。すべて AES-256 | `18-05-28.pcap` フレーム 1139742 |
+| Samsung SNH-V6410PN（Deakin） | 同 | 17 | TLS 1.2。すべて AES-256-GCM | 11-15 の報告と同じ |
+| Withings Aura（UNSW 2016・IoTraffic） | XMPP tcp/5222 | 12・32 | TLS 1.2、すべて TLS_RSA_WITH_AES_256_GCM_SHA384（前方秘匿性なし） | `16-09-28.pcap` フレーム 222818 |
+| HP ENVY（UNSW 2016・IoTraffic・UNSW 2018） | XMPP tcp/5222、5223、80 | 3・8・15 | **TLS 1.0**、TLS_DHE_RSA_WITH_AES_128_CBC_SHA。プリンターは TLS 1.2 まで出しているので、サーバーが 1.0 に下げている | IoTraffic `HPPrinter_705a0fe49bc0.pcap` フレーム 93249 |
+
+- **Samsung の 3DES の時期**：3DES は 2016-09-24（UNSW 2016）から 2016-10-21（IoTraffic フレーム 1173960）まで。それより後（IoTraffic フレーム 1288982 以降、UNSW 2018、Deakin）は AES-256 だけ。サーバーの設定が 2016 年 10 月の終わりに変わったとみられる（推定）。3DES の弱さ（Sweet32、Bhargavan と Leurent、ACM CCS 2016、2016-08 公表）が知られた後も 2 か月ほど選ばれていた。
+- **これまでの数の直し**：Samsung、Withings Aura、HP ENVY の XMPP は、これまで「高エントロピー」や「文字」として数えていた。平文の割合（longitudinal.md など）は、この分だけ下がる（作り直しは YourThings の洗い出しの後）。
+- **Withings Home（YourThings）**：Zeek の記録（`~/datasets/claims/flows-yt/`）では、収録中に始まった XMPP の接続 11 本がすべて STARTTLS で TLS 1.2・AES-256-GCM（10 本は前方秘匿性なし）。残りは前日から続く接続の途中か、応答のない SYN。生のパケットでも、2018-04-10 の接続（`eth1-20180410.0045.1523339100`）は、ストリームの開始（フレーム 27620）、サーバーの機能の提示（27690。STARTTLS と SASL PLAIN）、`<starttls/>`（27714）、`<proceed/>`（27804）、握手（27828）の順で、**認証は TLS の中**だった。SoK（Alrawi ほか、S&P 2019）が書く「平文の XMPP 認証」は、このデータでは見えない。サーバーは TLS を必須にせず、PLAIN を TLS の前から示していた（途中で STARTTLS を消されると平文に落ちうる。推定。能動的には確かめていない）。
+
+## エントロピーだけの判定の確かめ直し（2026-11-22）
+
+エントロピーだけで「暗号化」とした 18 行（Nest Protect 12、Nest Guard 3、Deakin の Ring 3）を、通信の形で確かめ直した。
+
+- **Nest Protect（tcp/11095）**：`scripts/claims/sweep/weave_check.py` で、Nest の Weave（openweave-core の形）の見出しを読んだ。TCP の接続ごとに、長さ 2 バイトの区切りで、最初のバイトから最後まで途切れずにメッセージが続くことを確かめてから数えた。
+  - UNSW-IoTraffic（`NestProtectSmokeAlarm_18b43025bee4.pcap`）：接続 656 本の上りと下りがすべて区切れた。暗号化の種類 0（なし）のメッセージは上り 1,310・下り 657 で、プロファイルは 4（セキュリティ。セッションを作る手続き）が 1,966、0 が 1。ほかの上り 9,236・下り 9,236 は**すべて種類 1（AES-128-CTR と HMAC-SHA-1）**。最初の暗号化された接続の SYN はフレーム 13（相手 54.243.39.221）。
+  - UNSW 2018（`18-06-18.pcap`）：4 本。種類 0 は上り 8・下り 4 でプロファイル 4 だけ。ほかの 56・56 は種類 1（SYN フレーム 1630459、52.203.100.159）。
+  - 平文で見えるもの：機器の Weave のノード ID `18B4300000273BF5`（すべてのメッセージの見出し）と、サービス側の ID `18B43002000000xx`。
+  - 判定：一致のまま。根拠を「エントロピーからの推定」から「Weave の見出しで暗号化の種類 1」に変えた。YourThings の Nest Protect と Nest Guard は、洗い出しの後に同じ道具で確かめる（未）。
+- **Ring Video Doorbell（Deakin）**：`scripts/claims/sweep/rtp_check.py` で、公開のアドレスへの UDP を RTP として読み、中身の先頭のバイトを見た。`2023-09-06.pcap`（高エントロピーの UDP がいちばん多い日）の 7 本の流れ（例：13.211.218.184:27989、10,622 パケット、最初のフレーム 1009188）はすべて RTP 版 2（PT 110 と 101、ほかに RTCP）。先頭のバイトの禁止ビットが立つ割合は 48.6〜51.6% で、NAL の種類も 0〜31 にばらけている。平文の H.264 ならほぼ 0% になるので、**中身は暗号化されている（SRTP とみられる）**。判定：一致のまま、根拠を変えた。Eufy（CIC）とは逆の結果。
+
 ## 限界
 
 - 値は記録していないので、値の一致は、機器が LAN で名乗った値と MAC とだけ比べている。
-- TLS の握手は、接続の先頭が TLS のものだけを読む。STARTTLS（XMPP など）のあとの握手は数えていない（2026-11-15 に分かった。影響は Samsung のカメラ、Withings Aura、HP ENVY）。
+- TLS の握手は、接続の先頭が TLS のものと、STARTTLS のあとのもの（2026-11-22 から）を読む。ほかの方法で途中から TLS に切り替わる独自の通信は読まない。
 - TCP は順序をそろえるが、欠けた区間は埋めない。HTTP の本文は 32 KB まで。
-- TLS 以外の独自の通信は、エントロピーで暗号化を推定した。圧縮した音声や映像もエントロピーは高いので、映像を送る機器では中身の形まで見る必要がある（2026-11-16、Eufy で分かった。同じ根拠の判定はほかに 18 行）。
+- TLS 以外の独自の通信は、エントロピーで暗号化を推定した。圧縮した音声や映像もエントロピーは高いので、映像を送る機器では中身の形まで見る必要がある（2026-11-16、Eufy で分かった）。同じ根拠の 18 行のうち、Nest Protect（IoTraffic、UNSW 2018）と Ring（Deakin）は 2026-11-22 に形で確かめた（上）。YourThings の Nest Protect と Nest Guard は未。
 - UNSW 2018 の正常な日の 27 本と、IoT-23 の正常な 3 シナリオは、2026-11-11 に加えた（上）。IoT-23 の README には「Stratosphere Lab の許可が要る」とあるが、Zenodo の記録は CC BY 4.0。
 - 先行研究の検索は製品ごとに 3〜5 回。読めなかった資料は prior-ids.tsv の notes に未確認と書いた。分類は人がまだ確かめていない。
 
