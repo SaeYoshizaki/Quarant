@@ -507,6 +507,19 @@ SNH-P6410BN の公式文書を探した（集めた 11 行は `~/datasets/claims
 - Disconnect は `a2z.com`（Amazon の機器の設備）をまとめて広告に分類しているので、一覧の分類だけで広告とは言えない。一覧にない中国の SDK（hpplay、Tencent）は、名前を見て人が確かめる必要がある。
 - **YourThings**：TV が多くの広告・解析の会社に接続していた。Samsung Smart TV は 20 社以上（Google の広告、Facebook、Adobe、Nielsen、comScore、LiveRamp、The Trade Desk など）、Roku 4 と TCL の Roku TV は Google の広告（`pubads.g.doubleclick.net`、`tpc.googlesyndication.com`）、NVIDIA Shield は `ssl.google-analytics.com`、Fire TV は Amazon の広告（`amazon-adsystem.com`）。YourThings の文書は暗号化の主張に絞って集めたので（D34）、第三者への送信の主張は記録していない。TV の追跡は先行研究で知られている（Roku と Fire TV については Mohajeri Moghaddam ほか、ACM CCS 2019。本文は未確認）。ほかは Logitech Harmony と Piper の PubNub。
 
+## 平文の欄の名前で探し直す（2026-11-23）
+
+洗い出しの記録（sweep-v3）の、平文の HTTP などの欄の名前（ssid、pass、lat、token、serial、idfa など）と、MAC・メールの印で、8 つのデータセットを探し直した。新しく確かめたもの：
+
+| 製品（データ） | 観測 | 判定 |
+|---|---|---|
+| VeraLite（YourThings） | 13 日で 470 回、自分のログを平文の FTP で `82.77.228.112:21`（名乗り `mios-logs-service`、`MiOS LTD LOG SERVER 6`）に上げる。ユーザー名とパスワードは共通の値とみられる。`eth1-20180320.0840.1521553200` の 1 回分（21 ファイル、フレーム 25007〜43251）を組み立てた：`MiOSRestApi.log`（STOR フレーム 29838）に**ハードウェアキー（HWKey）**が 4 回、relay・device・account の 3 つのサーバーの**セッションキー（MMSSession）**、`cmh-ra.log` と `sysinfo.log` に relay のセッションキー。ほかに LAN の機器へのログイン試し（`http://192.168.0.30/check_user.cgi?user=test&pwd=test` など）、遠隔接続の SSH の設定（鍵のファイルの場所とポート）。値は quarant-results | **食い違いの候補（T1a、新）**：Vera の wiki の「username and an MD5 hash … along with the serial number and hardware key, are sent to the remote access server using the https: (SSL encryption) protocol」（2016-10-13 保存、本文は 2011 年の編集）。機器自身は HTTPS で送っているが、同じキーがログの中に入って平文で出ている。claims.tsv の 563、565 行。先に書いた資料：ログを FTP で上げることはフォーラムの投稿にある（ezlo community、「Capturing Vera logs to my own FTP server instead of Vera」）。キーとセッションが入ることを書いた資料は見つからず |
+| Belkin の WeMo と NetCam（UNSW 2016、IoTraffic、UNSW 2018） | どのデータでも、ログを平文の HTTP で `devices.xbcs.net:8899/ToolService/log/uploadWdLogFile/<MAC>` に上げる。中身は電波の強さ、再起動、LAN の Belkin 機器の UUID（シリアル番号入り）、ルーターの MAC、LAN の IP。**SSID は入っていない**（NetCam の版は 2.00.5498。SSID が入っていたのは YourThings の 2.00.10684 だけ） | 主張なし（Belkin のポリシーは「どの機器が家のネットワークにつながっているか」を集めると書く。一致） |
+| Amazon Echo（IoTraffic） | TuneIn（`opml.radiotime.com/Tune.ashx`）への平文の GET に `latlon=47.628933,-122.34318`（`AmazonEcho_44650d56ccd3.pcap` フレーム 3450200、2016-12-02） | 緯度経度はシアトル（Amazon の本社のあたり）で、UNSW の場所ではない。利用者の位置ではないとみて、外した |
+| Netvue（Passive-Mode-Study の拡張） | `udp/8555` の文字は `sync38600923-` のような時刻合わせだけ | 問題なし |
+
+Roborock：「all communication with your robot is protected by industry-standard encryption, including TLS protocol」の文は、`privacy-new` と trust center のページ（保存は 2026 年から）にしかない。収録（2023-11）のころの S7 の製品ページ（2023-09-25）とソフトウェアのセキュリティ方針（2023-12-07、本文は保存されていない）に主張はない。収録の 2 年以上後の文書なので、比べない。
+
 ## 限界
 
 - 値は記録していないので、値の一致は、機器が LAN で名乗った値と MAC とだけ比べている。

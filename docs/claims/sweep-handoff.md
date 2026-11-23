@@ -77,6 +77,8 @@
 
 2026-11-22（2）：年ごとの表を sweep-v2 と新データセットで作り直した。Passive-Mode-Study のほかの製造者（Amazon、TP-Link、Google、Microsoft、Meta、Magic Leap、D-Link、Sony、Philips）の文書を集めた（pms.md）。上限 256 KB と送り先の名前で洗い出し直し（`~/datasets/claims/sweep-v3/`、E19）、Belkin NetCam HD の記録の送信に SSID などが平文で入っていたのが分かった。判断待ちはおすすめつきの一覧（[decisions-pending.md](decisions-pending.md)）にした。残り：A6（読めない文書、地域版。決まってから）、判断待ちへの返事。
 
+2026-11-23：利用者が自分で判定するための一覧を作った（[judge-2026-11-23.md](judge-2026-11-23.md)、24 件と参考の表）。平文の欄の名前で 8 つのデータセットを探し直し、VeraLite のログの平文の FTP にハードウェアキーとセッションキーが入っていたのを見つけた（新しい候補、[sweep-results.md](sweep-results.md) の「平文の欄の名前で探し直す」）。確かめたのは 1 回分だけで、ほかの回はディスクをつないで確かめる。
+
 ## 4. 判断待ち（利用者が戻ったときにまとめて聞く）
 
 答えやすい形の一覧（おすすめつき）：[decisions-pending.md](decisions-pending.md)（2026-11-22）。
