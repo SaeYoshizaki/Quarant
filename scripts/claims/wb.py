@@ -2,7 +2,7 @@
 """Wayback Machine helper (rate-limited, one request at least every 5 s across processes).
 
   wb.py cdx <url pattern> [from] [to] [mime]   list archived captures (mime: text/html default, any)
-  wb.py fetch <timestamp> <url> <name>         save the raw capture under ~/datasets/claims/snapshots/
+  wb.py fetch <timestamp> <url> <name>         save the raw capture under $CLAIMS_DIR/snapshots/ (default ~/datasets/claims)
                                                as <name>-<timestamp>.txt (first line SOURCE <archive url>);
                                                HTML is turned into text, PDF via pdftotext, JSON kept as is
 """
@@ -19,9 +19,10 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 
-LOCK = Path.home() / "datasets/claims/jobs/wb.lock"
+BASE = Path(os.environ.get("CLAIMS_DIR", Path.home() / "datasets/claims"))   # CLAIMS_DIR when the disk is away
+LOCK = BASE / "jobs/wb.lock"
 LOCK.parent.mkdir(parents=True, exist_ok=True)
-SNAP = Path.home() / "datasets/claims/snapshots"
+SNAP = BASE / "snapshots"
 
 
 def get(url):

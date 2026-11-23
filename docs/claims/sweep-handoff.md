@@ -79,6 +79,8 @@
 
 2026-11-23：利用者が自分で判定するための一覧を作った（[judge-2026-11-23.md](judge-2026-11-23.md)、24 件と参考の表）。平文の欄の名前で 8 つのデータセットを探し直し、VeraLite のログの平文の FTP にハードウェアキーとセッションキーが入っていたのを見つけた（新しい候補、[sweep-results.md](sweep-results.md) の「平文の欄の名前で探し直す」）。確かめたのは 1 回分だけで、ほかの回はディスクをつないで確かめる。
 
+2026-11-23（2）：24 件を利用者の調査の手順（6 つの区分、最も限定的な読み方、収録時点の文書）でやり直した（[reinvestigation/README.md](reinvestigation/README.md)）。外付けディスクがないので、UNSW 2018（27 日）、YourThings（5 日）、Deakin（4 日）、Passive-Mode-Study、UNSW 2016（20 日）を Mac に取り直し、機器ごとに切り出した（`~/qlocal/`、`scripts/claims/fetch/fetchfilter.py`、`scripts/claims/sweep/profile.py`）。CIC、UNSW-IoTraffic、IoT-23 は取り直していない（利用者の判断）。明確な矛盾は Sonos と Canary、条件付きは SmartCam、SimCam、Eufy。
+
 ## 4. 判断待ち（利用者が戻ったときにまとめて聞く）
 
 答えやすい形の一覧（おすすめつき）：[decisions-pending.md](decisions-pending.md)（2026-11-22）。
