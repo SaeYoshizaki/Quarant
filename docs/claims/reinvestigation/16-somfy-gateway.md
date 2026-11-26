@@ -2,7 +2,7 @@
 
 [一覧に戻る](README.md)
 
-**今回はパケットを取り直していない**（IoT-23 の配布元 mcfp.felk.cvut.cz が応答せず、Zenodo には全体 21.5 GB のアーカイブしかないため）。観測は前回の記録（[sweep-results.md](../sweep-results.md) の IoT-23 の節、[compare-sweep.md](../compare-sweep.md)）による。
+**2026-11-26 に外付けディスクの IoT-23（7-1、Somfy-01〜06）で確かめ直した**（下の「確かめ直し」の節）。表の観測は前回の記録と同じ結果だった。
 
 ## 不足している情報（分析の前に）
 
@@ -73,3 +73,7 @@
 ## 前回との違い
 
 - 前回は「弱い候補（T2）」。新しい決まり（最も限定的な読み方）で「公式文書に記載なし」にした。
+
+## 確かめ直し（2026-11-26）
+
+- **確認**：6 日で `somfykeys.opendoors.net`（18.195.134.106、35.157.240.102）の 443 番へ TLS の接続が 9 本（上り 44.8 MB、下り 95.4 MB）。握手が見えた 4 回は TLS 1.2 の `TLS_RSA_WITH_AES_128_CBC_SHA256`。機器の提示は 8 種の RSA の暗号（1 番目は `TLS_RSA_WITH_AES_256_CBC_SHA256`）と再交渉の印（SCSV）。証明書は `*.opendoors.net`（Go Daddy G2、2018-05-16〜2019-09-05、名前は一致）。平文は `0.europe.pool.ntp.org` への NTP だけ。最初の ClientHello は `Somfy-01/2019-07-03-15-15-47-first_start_somfy_gateway.pcap` 2019-07-03 13:25:04.800862。判定は変わらない。

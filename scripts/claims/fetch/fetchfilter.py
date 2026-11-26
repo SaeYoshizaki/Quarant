@@ -26,7 +26,10 @@ import zipfile
 
 UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_0) research-download"
 SLOW = ["--speed-limit", "20000", "--speed-time", "90"]   # give up on a stalled connection (then resume)
-TMP = os.path.expanduser("~/qlocal/tmp")
+TMP = os.path.expanduser(os.environ.get("FETCH_TMP", "~/qlocal/tmp"))
+
+
+os.makedirs(TMP, exist_ok=True)
 
 
 def curl(url):

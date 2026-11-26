@@ -2,7 +2,7 @@
 
 [一覧に戻る](README.md)
 
-**今回はパケットを取り直していない**（CIC IoT 2022 は利用者の判断で外した）。観測は前回の記録（[compare-sweep.md](../compare-sweep.md)、claims.tsv 1465〜1482 行）による。
+**2026-11-26 に外付けディスクの CIC IoT 2022 で確かめ直した**（対象の 8 台の通信を切り出して `profile.py` で調べた。下の「確かめ直し」の節）。表の観測は前回（2026-11-02〜16）の記録と同じ結果だった。
 
 ## 不足している情報（分析の前に）
 
@@ -70,3 +70,7 @@
 
 - **断定できる**（前回の確認による）：選ばれた暗号がすべて AES-128 だったこと。
 - **断定できない**：文書の AES-256 が通信のことか。
+
+## 確かめ直し（2026-11-26）
+
+- **確認**：握手は 34 回で、すべて AES-128-GCM。内訳は TLS 1.3 の `disc-prod.iot.irobotapi.com`（10）、`unauth1`・`unauth3.prod.iot.irobotapi.com`（6、4）と、TLS 1.2 の AWS IoT（`a2uowfjvhio0fa.iot.us-east-1.amazonaws.com`、13）、`s3.amazonaws.com`（1）。平文の HTTP はない。判定は変わらない。

@@ -2,7 +2,7 @@
 
 [一覧に戻る](README.md)
 
-UNSW 2016（2016-09-22〜10-11、20 日）を今回取り直して調べた。UNSW-IoTraffic は取り直していない（利用者の判断、前回の記録）。
+UNSW 2016（2016-09-22〜10-11、20 日）を 2026-11-23 に取り直して調べた。UNSW-IoTraffic は 2026-11-26 に外付けディスクで確かめ直した（下）。
 
 ## 不足している情報（分析の前に）
 
@@ -49,9 +49,9 @@ UNSW 2016（2016-09-22〜10-11、20 日）を今回取り直して調べた。UN
 | T8 | そのほか | `esdk-ffl.spotify.com` へ平文の HTTP、`*.invoxia.pool.ntp.org` へ平文の NTP | 記載なし | 公式文書に記載なし | `16-10-06.pcap` 2016-10-06 06:48:36.614103 ほか | — | 高 | |
 | T9 | 間接的な識別子 | IP アドレス、機器の設定（版、ロケール `en-AU`）を送る | 「We may also collect data that identify you indirectly such as … your IP address …」 | 一致 | T4、T5 | 文書 A | 中 | |
 
-## UNSW-IoTraffic の分（前回の記録、取り直していない）
+## UNSW-IoTraffic の分（2026-11-26 に確かめ直した）
 
-- airable への平文の要求が 7 回（MAC と Basic 認証つき）、SIP の 5228 番の文字の通信に MAC、更新の確認に MAC（[compare-sweep.md](../compare-sweep.md)）。文書 B（2017-02-11）の同じ文と比べて、判定は上の T4 と同じ（公式文書に記載なし）。
+- 2016-09-30〜2017-04-07（92 日、UNSW 2016 と一部重なる）。airable への平文の `/authentication?device=<MAC>…` が 7 回（6 日）、Basic 認証つきの番組の要求が 21 回。`sip.invoxia.com` の 5228 番への平文の SIP（48 日）、`developer.invoxia.com` の更新の確認（MAC つき）、`ws.invoxia.io` への TLS 1.2（3,667 回、AES-256-GCM）。最初の airable の要求は `TribySpeaker_18B79E022044.pcap` 2016-10-06 06:48:26.657421。前回の記録と同じ。文書 B（2017-02-11）の同じ文と比べて、判定は T4 と同じ（公式文書に記載なし）。
 
 ## 1. 明確な矛盾
 

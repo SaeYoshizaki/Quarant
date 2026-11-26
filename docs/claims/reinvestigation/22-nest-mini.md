@@ -2,7 +2,7 @@
 
 [一覧に戻る](README.md)
 
-**今回はパケットを取り直していない**（CIC IoT 2022 は利用者の判断で外した）。観測は前回の記録（[compare-sweep.md](../compare-sweep.md)、claims.tsv 1439〜1461 行）による。Passive-Mode-Study にも Nest Mini がいる（[pms.md](../pms.md)。今回の 24 件には入っていない）。
+**2026-11-26 に外付けディスクの CIC IoT 2022 で確かめ直した**（対象の 8 台の通信を切り出して `profile.py` で調べた。下の「確かめ直し」の節）。表の観測は前回（2026-11-02〜16）の記録と同じ結果だった。
 
 ## 不足している情報（分析の前に）
 
@@ -73,3 +73,7 @@
 ## 前回との違い
 
 - 前回は「文言の上での食い違い（T1b）」。新しい決まり（収録後の文書は参考に分ける）で「判断不能」にした。
+
+## 確かめ直し（2026-11-26）
+
+- **確認**：平文は中身のない接続確認だけ。`HEAD http://connectivitycheck.gstatic.com/generate_204` が 24,702 回（47 日）、`HEAD http://clients1.google.com/generate_204` が 31 回。最初は `1-Power/…/nestminiPOWER_1.pcap` 2021-09-23 12:29:04.304846。TLS はすべて 1.3（AES-128-GCM）。判定は変わらない。

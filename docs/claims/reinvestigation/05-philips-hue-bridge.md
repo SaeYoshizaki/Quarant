@@ -2,7 +2,7 @@
 
 [一覧に戻る](README.md)
 
-- UNSW-IoTraffic と CIC IoT 2022 は**取り直していない**（利用者の判断）。観測は前回の記録（[compare-sweep.md](../compare-sweep.md)、[report-2026-11-15.md](../report-2026-11-15.md) の E）による。
+- UNSW-IoTraffic と CIC IoT 2022 は、2026-11-23 には前回の記録（[compare-sweep.md](../compare-sweep.md)、[report-2026-11-15.md](../report-2026-11-15.md) の E）で判定し、2026-11-26 に外付けディスクで確かめ直した（下の「確かめ直し」）。
 - Passive-Mode-Study（2023-24）は今回取り直して調べた（ただし比べる主張がない）。
 
 ## 不足している情報（分析の前に）
@@ -12,7 +12,7 @@
 
 ## 調査対象と前提条件
 
-| 項目 | UNSW-IoTraffic（前回） | CIC IoT 2022（前回） | Passive-Mode-Study（今回） |
+| 項目 | UNSW-IoTraffic | CIC IoT 2022 | Passive-Mode-Study |
 |---|---|---|---|
 | 型番 | BSB002（UPnP） | BSB002 | BSB002（UPnP） |
 | MAC | 00:17:88:2b:9a:25 | 00:17:88:60:d6:4f | US1 ec:b5:fa:99:ac:15、FR ec:b5:fa:80:80:f4 |
@@ -41,7 +41,7 @@
 | H1 | IoTraffic | ブリッジの通信の 70%（36.5 MB）が平文の HTTP。`dcp.cpp.philips.com:80` への POST の `Authorization: CBAuth`（ブリッジ ID と SSO トークン、4,810 回）、`bridge.meethue.com:80/queue/getmessage` の `auth`（8,370 回）。TLS は 4.7% | 「transfers data securely (using SSL)」 | 公式文書に記載なし | `PhilipsHue_0017882b9a25.pcap` フレーム 1586〜3925289（前回） | 文書 A | 中 | 文はすべての送信を SSL にするとは言っていない（最も限定的な読み方。TLS の通信も 4.7% ある）。ブリッジの通信全体と広く読めば矛盾。平文の本文は別に暗号化されているとみられ（推測）、見出しのトークンと ID が平文 |
 | H2 | IoTraffic | 同上 | 「will encrypt some data, such as your MAC address when it is stored」 | 観測不能 | — | 文書 A | — | 保存時の話 |
 | H3 | CIC | 送り先は Philips／Signify のホストだけ | 「connects to the internet … via a dedicated cloud」 | 一致 | CIC の Hue の全ファイル（前回） | 文書 B | 中 | |
-| H4 | CIC | 通信の 27% が平文の HTTP：`diagnostics.meethue.com/v2/diagnostics/report?…&sso=<トークン>`（4,760 回）、`dcp.dc1.philips.com:80` の CBAuth（1,017 回） | 「Hue only connects to the internet securely」 | 公式文書に記載なし | `1-Power/…/philipshuePOWER_1.pcap` フレーム 133〜207 ほか（前回） | 文書 B | 中 | 「securely」を「すべて暗号化」と読むのは拡大解釈なので、とらない |
+| H4 | CIC | 通信の 27% が平文の HTTP：`diagnostics.meethue.com/v2/diagnostics/report?…&sso=<トークン>`（246 回）、`dcp.dc1.philips.com:80` の CBAuth（682 回） | 「Hue only connects to the internet securely」 | 公式文書に記載なし | `1-Power/…/philipshuePOWER_1.pcap` フレーム 133〜207 ほか（前回） | 文書 B | 中 | 「securely」を「すべて暗号化」と読むのは拡大解釈なので、とらない |
 | H5 | Passive-Mode-Study | `POST http://diagnostics.meethue.com/v2/diagnostics/report` を平文で（US1 15 回、FR 4 回）。問い合わせに `sso`、`auth`、`i`、`report_type`、本文は 16 進。User-Agent は `ureq/2.6.2`。`sso` は米国とフランスの別の個体で同じ値（前回の確認） | 記載なし（文書 C に該当する文がない） | 公式文書に記載なし | `US1-Capture1.pcap` 2023-11-02 01:40:42.455373、`FR-Capture2.pcap` 2024-05-03 23:30:01.467811（元のフレーム 574436） | 文書 C | 高 | 値は quarant-results |
 | H6 | Passive-Mode-Study | ほかは TLS：`diag.meethue.com`・`data.meethue.com`（TLS 1.2、ECDHE、AES-128-GCM）、`ws.meethue.com`・`mqtt-us-01.iot.meethue.com`・`mqtt.2030.ltsapis.goog`（TLS 1.3、ChaCha20）、`otau.meethue.com`（更新、TLS 1.2） | 記載なし | 公式文書に記載なし | `US1-Capture1.pcap` 2023-11-01 23:20:34.481744 ほか | — | 高 | |
 | H7 | Passive-Mode-Study | ファームウェアが 1.60.0 から 1.64.0 に上がった（SSDP の名乗り）。更新の取得は `otau.meethue.com` への TLS（中身は見えない） | 記載なし | 公式文書に記載なし | `US1-Capture2.pcap` 2024-05-02 16:07:58.431355（otau の ClientHello） | — | 中 | |
@@ -80,3 +80,10 @@
 
 - CIC の分（H4）は、前回「食い違いの候補（T1a）」。新しい決まりで「公式文書に記載なし」にした。
 - Passive-Mode-Study でファームウェアの版（1.60.0〜1.64.0）を新しく特定した。
+
+## 確かめ直し（2026-11-26）
+
+- **UNSW-IoTraffic**（`PhilipsHue_0017882b9a25.pcap`、2016-11-14〜2017-04-13、83 日）：平文の HTTP で、`dcp.cpp.philips.com:80/DcpRequestHandler/index.ashx` への POST（`Authorization: CBAuth Type="SSO", Client="001788fffe2b9a25", …`、4,254 回、75 日）、`www.ecdinterface.philips.com:80` への POST（CBAuth、569 回）、`/queue/getmessage` への POST（`auth`、`i`、`sso` つき。`bridge.meethue.com` と同じ IP の 130.211.93.93 へ合わせて 8,368 回）、`diagnostics.meethue.com:80/bridges/ws/error`・`/stats`（2,222 回）。最初は 2016-11-14 13:37:16.632781（dcp）。TLS は `wsp.meethue.com` などに少しだけ。前回の記録（CBAuth 4,810 回、getmessage 8,370 回）とほぼ同じ。
+- **CIC IoT 2022**（攻撃の収録を除く全ファイル、2021-09-23〜12-24 の 48 日）：平文の HTTP で、`dcp.dc1.philips.com:80` への POST（CBAuth、682 回、46 日）、`diagnostics.meethue.com/v2/diagnostics/report`（`sso`、`auth`、`i` つき、246 回、9 日）、`www.ecdinterface.philips.com:80`（21 回）。TLS は `diag`・`data.meethue.com`（TLS 1.2、AES-128-GCM）、`ws.meethue.com`・`mqtt.2030.ltsapis.goog`（TLS 1.3）、`time.meethue.com`（TLS 1.0、3 回）。最初は `1-Power/…/philipshuePOWER_1.pcap` 2021-09-23 11:32:54。
+- 前回の記録の回数（diagnostics 4,760 回、CBAuth 1,017 回）は誤り。4,760 は要求の数ではなく、記録した項目の数（本文 3,776 と、問い合わせの名前 4 つ × 246 回）を足したもの。1,017 の出どころは確かめられなかった。攻撃の収録（6-Attacks）のブリッジの通信には、どちらの要求もなかった（0 回）。H4 の回数を 246 回と 682 回に直した。
+- 判定は変わらない。

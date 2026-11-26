@@ -2,7 +2,7 @@
 
 [一覧に戻る](README.md)
 
-**今回はパケットを取り直していない**（CIC IoT 2022 は利用者の判断で外した）。観測は前回の記録（[compare-sweep.md](../compare-sweep.md)、claims.tsv 1685〜1695 行）による。
+**2026-11-26 に外付けディスクの CIC IoT 2022 で確かめ直した**（対象の 8 台の通信を切り出して `profile.py` で調べた。下の「確かめ直し」の節）。表の観測は前回（2026-11-02〜16）の記録と同じ結果だった。
 
 ## 不足している情報（分析の前に）
 
@@ -67,3 +67,7 @@
 ## 前回との違い
 
 - 前回は「文言の上での食い違い（T1b）」。新しい決まり（最も限定的な読み方）で「公式文書に記載なし」にした。
+
+## 確かめ直し（2026-11-26）
+
+- **確認**：ポート 80 で `GET http://st.rings.solutions/online/check.html`（9 回、7 日、User-Agent は Go の HTTP クライアント）と、`/status/check.html`（3 回、User-Agent は curl）。最初は `1-Power/…/ringbasestationPOWER_1.pcap` 2021-09-29 12:36:16.828096。ほかはすべて TLS（主な送り先 `prdw-hub-us`、`prd-hapi-us.prd.rings.solutions` は TLS 1.2 の AES-128-GCM）。判定は変わらない。
