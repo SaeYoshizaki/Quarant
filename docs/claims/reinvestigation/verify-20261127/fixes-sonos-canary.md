@@ -69,6 +69,37 @@
 
 **判定への意味**：直ったかは分からない。公式の FAQ は 2025-10 も同じ言い切りで、サーバーは平文に答える。確かめるには、今の Canary Pro の通信を自分の機器で取る必要がある。
 
+## ファームウェアの本体と更新の履歴（2026-11-27 の追加の調べ）
+
+ファームの本体がウェブで取れるか、更新の履歴が分かるかを、GitHub、公式のヘルプ（Chrome で今のサイトを読んだ）、Wayback で調べた。本体は落としていない（場所と大きさだけ。ダウンロードと解析は利用者に聞いてから）。
+
+### Sonos：本体は取れる。版の履歴もそろう
+
+- **公式の配布元**：`update-firmware.sonos.com`（CloudFront）。新しい版は今も HTTP でも HTTPS でも取れる（2025 年の版で確かめた。上の「サーバー」）。
+- **第三者の保管庫**：[BookCatKid/sonos-firmware-archive](https://github.com/BookCatKid/sonos-firmware-archive)（2026-08 開始、2026-11-27 も更新中）。`data/catalog.json`（2026-11-27 に取得、外付けディスクの `~/datasets/claims/verify5-20261127/fwhist/catalogs/sonos-catalog.json`）に、更新ファイル 1,504 件の出どころ、大きさ、SHA-256、GitHub Releases の写しがある。機種の番号は、PLAY:1 が 8（「Fenway family」）、Sonos One（第 2 世代）が 26。
+  - **PLAY:1（8）**：39 件の記録、うち 33 件は本体が保存されている。版（表示の版）：28.1（5.2）、**34.16-37101（7.1）**、47.2（9.3）＊、55.1（11.0）、57.5〜57.23（11.2.6〜11.16.2、S1 の系統）、62.1（13.0）、64.3（13.2）、65.1（13.3）、66.4（13.4）、67.1（14.4）、73.0（15.5）、76.2（15.11）、80.1（16.3、16.3.3）、81.1（16.4.2、16.4.4）、82.2（16.5）、82.3-60160（16.5.1）、86.1（17.2.1）、86.8（17.2.6）、86.10（17.2.7）、**86.11-82170（27.3、2026-11-03 の今の版）**。＊は公式の配布元から消えたもの。2025-08 から PLAY:1 は 86.x の旧製品の系統に分かれたので、90.0 以降の通常の系統の版は PLAY:1 用には配られていない（記録はあるが配布元にない）。
+  - **Sonos One（26）**：33 件、うち 32 件が保存。CIC の収録で見た 64.3-19080、65.1-21040、66.4-23090 もある。今の版は 98.0-82170（27.3）。
+  - **データとの照合**：YourThings の PLAY:1 が 2018-03-20 に平文で取得した 34.16 の大きさ（8,306,684 バイト）は、保管庫の `34.16-37101-1-8.upd` の大きさと一致する。YourThings で見た 33.15、41.3、42.2 は保管庫にない。
+  - 更新ファイルは暗号化されている（AV-TEST 2019、保管庫の説明）。保管庫は一部の鍵の回収と復号の手順も公開しているが、ここでは扱わない。
+- **更新の履歴**：
+  - 公式の[リリースノート](https://support.sonos.com/en/article/release-notes-sonos-system-updates)は 2024-10（81.1）〜2026-11（27.398.0 と旧製品の 86.11）。それより古いもの（support.sonos.com の記事 3521、2019〜2022 年の保存がある）は、JavaScript で描くページで、Wayback の保存を Chrome で開いても中身が出なかった（未確認）。
+  - 上の版の一覧と第三者の観測を合わせると、**更新の確認が TLS になったのは 42.2（8.5、2018-04）より後、AV-TEST の試験（2019-04、アプリ 10.0）より前**。その間の版の通信は見ていない。
+  - 公式の告知のどれにも、更新の確認・取得を HTTPS にしたという記載はない（上）。
+
+### Canary：本体は公開されていない。版の番号は 9.x まで分かる
+
+- **本体**：公開の場所は見つからなかった。GitHub のコードの検索（`canaryis.com` で 119 件、`device-ota.prod.canaryis.com`、`o.canaryis.com`）は、Home Assistant の連携、MUD のファイル、本研究のリポジトリ、DNS の研究の付録だけ。FCC の届け出（FCC ID 2ACDL-C100）は中の写真だけ。2015 年の試験記事（CSO Online）は SD カードから入れる偽のファームを試したとあるが、本体の配布ではない。機器は更新を `o.canaryis.com`（`device-ota.prod.canaryis.com`）から TLS で受ける（2018 年のデータ）ので、外から取れないとみられる（推測）。
+- **公式の版の告知**：Canary Community に 4.0.0（2018-06 ごろ）、5.0.0・5.1.1（2019-10-29）、5.2.0（2020-04-16）、5.3.0（2020-11-05）の告知がある（上の表）。それより後の版ごとの告知は、今のヘルプ（Chrome で検索。Announcements は 5 件で、ファームの告知はない）にも Wayback にも見つからなかった。
+- **今のヘルプの記事に出てくる版**（2026-11-27 に Chrome で読んだ）：
+  - 「How do I remove and deactivate a Canary?」：機器の版 7.0.0 以上。
+  - 「What are Smart Detections?」：7.2.0 以上。
+  - 「How do I set up masks?」：Canary Pro・Flex・View とも機器の版 9.0.0 以上、アプリ 9.1.0 以上。
+  - 「How does Two-way Talk work?」と「Continuous Video Recording FAQ」（作成は約 5 か月前）：機器の版 9.0.0 以上。
+  - 「What firmware version is my device using?」：Canary は時々、新しいセキュリティの更新や機能の更新でファームを自動で更新する、とする。
+  - つまり **Canary Pro のファームは 2020 年の 5.3.0 の後も 9.x まで更新が続いている**。ただし版ごとの変更の内容は公開されていない。
+- **今の公式の文**：「Canary Pro FAQ」は**今日（2026-11-27）も**「All communication between your Canary device, the Canary Cloud, and your smartphone is encrypted over TLS/SSL (HTTPS).」を載せている（Chrome で今のサイトを読んで確かめた）。
+- **2026 年の第三者の観測**：GitHub の Dicklesworthstone/franken_surveillance_system（所有者が許した機器の検査の記録、2026-10）に、Canary の機器（MAC 7C:70:BC:5D:4C:09、機種と版は書かれていない）の DNS（`i.canaryis.com` → `ingress-k8s-prod-edge.canaryis.com`）と SNI（`o.`、`v.canaryis.com`）がある。機器はほとんど眠っていて、`h.canaryis.com` や TCP 80 の記載はない。平文の時刻合わせが続くかどうかの材料にはならない。
+
 ## 未確認
 
 - Sonos：2026 年の平文の取得の URL に製造番号などが付くか。毎日の `update.upm` と `timezones.xml` が今も平文か（2021 年のデータでは平文）。
