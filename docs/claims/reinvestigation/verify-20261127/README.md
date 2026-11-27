@@ -24,7 +24,22 @@
 
 **その後直ったか**（Sonos と Canary、[fixes-sonos-canary.md](fixes-sonos-canary.md)）：Sonos は、更新の確認（2019 年ごろ）と使用データ（2018 年）は TLS になったが、ファームの取得は 2026-11 の更新でも平文の HTTP（第三者の観測）で、今のプライバシーの声明（2026-09）と食い違う。Canary は直ったか分からない（2019 年以降の機器の観測がない）。公式の FAQ は 2025-10 も「すべて TLS」で、時刻合わせのサーバーは今も平文に答える。
 
-**ファームウェアの深掘り**（Sonos、[firmware-analysis-2026-11-27.md](firmware-analysis-2026-11-27.md)）：PLAY:1 の今の版（86.11、2026-11-03）を落として展開した。root FS（デーモン anacapad）は暗号化されておらず読めた。Ghidra で、更新 URL を作る関数が今も製造番号・Sonos ID・household ID を埋め込むこと、時刻帯 URL が http の直書きであることを確定した。食い違いの仕組みは今のファームにも残る（平文かの最終確認は実機の収録が要る）。暗号化された区画と 2018 年版は、公開の復号手法はあるが目的に不要・研究の線を越えるので開けていない。
+**ファームウェアの深掘り**（Sonos、[firmware-analysis-2026-11-27.md](firmware-analysis-2026-11-27.md)）：PLAY:1 の今の版（86.11、2026-11-03）を落として展開した。root FS（デーモン anacapad）は暗号化されておらず読めた。Ghidra で、更新 URL を作る関数が今も製造番号・Sonos ID・household ID を埋め込むこと、時刻帯 URL が http の直書きであることを確定した。食い違いの仕組みは今のファームにも残る（平文かの最終確認は実機の収録が要る）。暗号化された区画と 2018 年版は、公開の復号手法はあるが目的に不要・研究の線を越えるので開けていない。脆弱性（コマンドインジェクション等）も見たが、デバッグ用 Web の ping 等は許可リスト＋CSRF＋ゲートで守られていて見つからなかった（4b 節）。
+
+### 教授が確定とした 6 件の「その後直ったか」（2026-11-27）
+
+教授が食い違いと確定した 6 件（SimCam 1S、iRobot Roomba、eufy HomeBase 2、Philips Hue Bridge、Samsung SmartCam SNH-V6410PN、Sonos）について、ファーム・APK・パッチ履歴・今の公式文書を調べた。手順は [fixes-procedure.md](fixes-procedure.md)。
+
+| 機器 | ファーム／APK の入手 | 直ったか | 報告 |
+|---|---|---|---|
+| **Sonos** PLAY:1/One | ファーム取得・展開・Ghidra 済み（平文の root FS） | 更新確認・使用データは TLS 化。ファーム取得は今も平文。仕組みは今の版に残る | [fixes-sonos-canary.md](fixes-sonos-canary.md)、[firmware-analysis](firmware-analysis-2026-11-27.md) |
+| **SimCam 1S** | **APK 逆コンパイル＋ファーム本体（平文 gzip）展開済み** | **直っていない**。公式が今も配る版 V20200720 の中で luuka.fun は全部平文、S3 バケット・public-read を直書き。バケット＝Simshine 側が確定し、条件付きの矛盾が強まった | [fixes-simcam.md](fixes-simcam.md) |
+| **eufy** HomeBase 2 | ファーム非公開・APK は Cloudflare で未取得。公開実装 bropat＋論文 WOOT 2024 で確認 | **直っていない**（アプリ P2P 経路）。最新コードでも P フレーム・音声は平文。2023 の E2EE 化はウェブ経路だけ。公式の言い回しは後退 | [fixes-eufy.md](fixes-eufy.md) |
+| **iRobot** Roomba | ファーム非公開・APK 未取得。公開ライブラリ dorita980＋第三者解析で確認 | ロボットの TLS は今も AES-128。公式は今も「AES-256 and TLS 1.2」。AES-256 を保存時と読めば矛盾なし（弱い所見） | [fixes-irobot.md](fixes-irobot.md) |
+| **Hue** Bridge v2 | ファーム取得したが暗号化（復号に実機の鍵が要る、SSTIC 2026） | 確定できず（続く可能性が高い）。診断の平文の口は今も生きている。今の公式文書はブリッジの送信時暗号化を明記せず＝弱い | [fixes-hue.md](fixes-hue.md) |
+| **Samsung** SNH-V6410PN | ファーム・APK とも入手不可（配布終了） | 版では直されず、**サービスごと終了**（アプリ 2024-07、サーバー 2025-01 ごろ）。今の公式ポリシー（2026-03）は今も「暗号化通信」と言い切る | [fixes-samsung-v6410pn.md](fixes-samsung-v6410pn.md) |
+
+要点：**SimCam と Sonos はファーム本体で裏が取れた**（どちらも直っていない）。eufy は公開実装＋論文で裏づけ（直っていない）。Samsung は「版で直さず EOL」。Hue と iRobot は弱め（公式文書が言い切っていない／保存時と読める）。どれも「実機の今の通信を 1 回取ると確定が盤石」。
 
 ## 前の記録と違うところ
 
