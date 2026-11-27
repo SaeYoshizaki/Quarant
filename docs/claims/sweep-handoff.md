@@ -2,7 +2,11 @@
 
 次の会話はここから始める。利用者は、この作業を終わるまで任せている（2026-11-11）。これまでの結果は [sweep-results.md](sweep-results.md)、決めたことは [../DECISIONS.md](../DECISIONS.md) の D41、記録は [../EXPERIMENTS.md](../EXPERIMENTS.md) の E16。
 
-## 0. 最新の状況（2026-11-27）
+## 0. 最新の状況（2026-11-27 の夕方）
+
+**論文の方針（2026-11-27、利用者）**：弱い候補を大量に集めるより、公式の発表とはっきり矛盾するものを 2 件ほど固めて論文にする。調べるのは「公式の発表と矛盾しているか」だけで、セキュリティの強さは評価しない。
+
+**強い 5 件の確かめ直し**（前の報告と判定を見ずに組み立て直した）：[reinvestigation/verify-20261127/README.md](reinvestigation/verify-20261127/README.md)。論文の中心に使えるのは **Sonos**（明確な矛盾、2018 と 2021）と **Canary の UNSW 2018**（明確な矛盾）。SimCam と Eufy は条件付きのまま。SmartCam は「記載なし」に、Canary の IoTraffic の分は「条件付き」に下げた。作業ファイルは外付けディスクの `~/datasets/claims/verify5-20261127/`、値は quarant-results の `claims/verify-20261127.md`。判断待ちは下の 4 の先頭。
 
 24 件の調べ直しは完了し、**利用者が読むまとめ**は [reinvestigation/README.md](reinvestigation/README.md)（結果の表と各報告）。その後の追加調査：
 
@@ -50,7 +54,7 @@
 
 - 伏せない。ツールの出力と利用者への報告に、値をそのまま出す。
 - 識別子（MAC、シリアル番号、機器 ID）は、このリポジトリの文書に書いてよい。
-- 認証情報（パスワード、トークン、セッション ID、アクセスキー ID、署名）は、非公開のリポジトリ `SaeYoshizaki/quarant-results` の `claims/` にだけ書く。手元は `~/Desktop/quarant-results`（`claims/` だけを取り出してある。書く前に pull する）。
+- 認証情報（パスワード、トークン、セッション ID、アクセスキー ID、署名）は、非公開のリポジトリ `SaeYoshizaki/quarant-results` の `claims/` にだけ書く。手元は `~/Desktop/research/quarant-results`（`claims/` だけを取り出してある。書く前に pull する）。
 - 洗い出しの記録には値がない（鍵付きのハッシュだけ）。値は根拠のフレームを tshark で開いて読む（`scripts/claims/sweep/verify.py`）。
 
 ### 進め方
@@ -98,11 +102,16 @@
 
 2026-11-26（3）：取れたファームと最新の公式文書を照合した（[reinvestigation/firmware-vs-docs-2026-11-26.md](reinvestigation/firmware-vs-docs-2026-11-26.md)）。形式がはっきり食い違うのは Sonos だけ（2026-09 の声明「データは送信時に TLS で保護」に対し、シリアル・ID・利用状況・ファームが平文 HTTP）。候補：Triby のサポート記事「encrypted protocols」（未読）。Hue・HomePod・D-Link は、最新文書が送信の方式を明記していないので「宣言と違う形式」には当たらない。
 
+2026-11-27（2）：利用者の方針で、強い 5 件だけを確かめ直した（エージェント 5 体、1 体 1 製品、前の報告を読ませない。手順は [reinvestigation/verify-20261127/procedure.md](reinvestigation/verify-20261127/procedure.md)）。データは外付けディスクから Mac の作業用フォルダに機器ごとに写してから使った（同時に読むと詰まるため）。結果は 0 節と [reinvestigation/verify-20261127/README.md](reinvestigation/verify-20261127/README.md)。
+
 2026-11-27：取れた 5 台のファームを Ghidra／オフラインで踏み込んで解析（同ファイルの C 節）。暗号・署名は破っていない。Hue（.fw2 は `BSB002` ヘッダ＋高エントロピー）と D-Link V2（.bin 先頭 `Salted__`＝OpenSSL 暗号）は暗号化→復号せず。Triby（.pup）は暗号ではなく xz-squashfs だが、`.pup` が独自に分割（split）していて完全展開には容器の解析が要る→保留。xz ストリーム 884 個を個別に展開しルート FS の約 22 MB を復元＝PJSIP（TLS/SIPS 対応）・Alexa・`developer.invoxia.com`。ただし `sip.invoxia.com`・5228・`airable.io` は復元範囲になく、最新ファームで平文が続くかは未確認。結論は変わらず「確かめるには実機の収録が要る」。
 
 ## 4. 判断待ち（利用者が戻ったときにまとめて聞く）
 
 答えやすい形の一覧（おすすめつき）：[decisions-pending.md](decisions-pending.md)（2026-11-22）。
+
+- **Eufy の「footage」の読み方（2026-11-27）**：eufy 自身が「Live-stream and record footage」と書く（eufyCam 2 のページ、2020-12）。同じ会社の言葉づかいで「footage」をライブまで含めて読めば、ライブ視聴の平文は条件なしの明確な矛盾になる。最も限定的な読み方の決まりを変えるかどうか。
+- **未了（2026-11-27）**：SmartCam の判定の根拠にした Kaspersky の公表（Securelist、2018-03-12）を全文で読む（今は WebFetch の要約だけ）。YourThings の Canary の平文の HEAD 158 回（2026-11-07 の Zeek の記録）を tshark で確かめ直す（IEEE S&P 2019 の SoK の「完全に暗号化」と食い違う材料）。
 
 - **Invoxia のサポート記事（未読）**：`https://support.invoxia.com/hc/en-150/articles/4405494832017--Data-Protection-and-Security` が「encrypted protocols」と書いているか確かめたい（書いてあれば Triby の平文 SIP/RTP と食い違う候補）。ライブは 403、Wayback と直接 curl はこのセッションの sandbox が拒否、ブラウザ拡張（Claude in Chrome）も未接続。読むには、拡張をつなぐ（claude.ai/chrome）か、利用者が本文を貼るか、Bash の許可ルールを足す。
 - **最新ファームで平文が直ったかの確定（未了）**：オフラインでは 4 台が暗号化／独自形式で判定不能。確定には最新ファームの実機の通信を取るか、Triby の `.pup` 容器を解いて完全展開＋Ghidra が要る。

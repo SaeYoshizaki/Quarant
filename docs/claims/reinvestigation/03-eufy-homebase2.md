@@ -83,3 +83,7 @@
 - **確認**：`scripts/claims/sweep/eufy_p2p.py` で 4 本をもう一度読み、前回と同じ結果。音声（AAC）はすべて平文（WANWATCH_1 で 215 フレーム、WANRECORDING_2 で 505、_3 で 531）、映像で暗号化されうるのは最大 0.11〜0.25%。送り先も同じ（3.16.202.62:11197、54.219.251.168:11392、35.162.187.157:11159）。
 - **新しく見えたこと**（「公式文書に記載なし」）：待機中も、Amazon の 3 つのアドレスの UDP 32100 番へ約 63 秒おきの通信（46 日、各約 1.9 万回）と、`p2p-vir-*`、`pushproxy-usa4`、`mediaserver-usa3.eufylife.com` の UDP 8006 番への通信。中身は読めない。アプリのサーバー `security-app.eufylife.com` は TLS 1.2（AES-128-GCM、255 回）。
 - 判定は変わらない。
+
+## 確かめ直し（2026-11-27）
+
+前の報告を見ずに組み立て直した結果（[verify-20261127/eufy.md](verify-20261127/eufy.md)）、判定は**条件付きの矛盾**のまま。ドアベルの製品ページ（「AES data encryption ensures your footage is kept private on transmission」、米国 2021-07・10、カナダ 2021-12）を新しく比べる文書に加えた。今の公式記事（日付なし）は手動の録画をスマホに保存すると書き、条件 E2 は満たされない方に傾く。「footage」の読み方は判断待ち（verify-20261127/README.md）。
