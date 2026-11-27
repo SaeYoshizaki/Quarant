@@ -2,6 +2,17 @@
 
 次の会話はここから始める。利用者は、この作業を終わるまで任せている（2026-11-11）。これまでの結果は [sweep-results.md](sweep-results.md)、決めたことは [../DECISIONS.md](../DECISIONS.md) の D41、記録は [../EXPERIMENTS.md](../EXPERIMENTS.md) の E16。
 
+## 0. 最新の状況（2026-11-27）
+
+24 件の調べ直しは完了し、**利用者が読むまとめ**は [reinvestigation/README.md](reinvestigation/README.md)（結果の表と各報告）。その後の追加調査：
+
+- **外付けディスクで未確認だった分を確かめ直した**（2026-11-26）：CIC・UNSW-IoTraffic・IoT-23・YourThings 04-15。判定は変わらず。前回の記録の誤り（Hue の回数、報告 15 の根拠ファイル名）を直した。切り出し＝`~/datasets/claims/recheck-20261126/`。
+- **問題のある機器の最新ファームを調べた**：ネットで取れるか＝[reinvestigation/firmware-2026-11-26.md](reinvestigation/firmware-2026-11-26.md)。最新の公式文書との形式の照合と Ghidra／オフライン解析＝[reinvestigation/firmware-vs-docs-2026-11-26.md](reinvestigation/firmware-vs-docs-2026-11-26.md)。
+- **新しい所見**：Sonos の 2026-09 の声明は「データは送信時に TLS で保護」と言い切るが、観測はシリアル・ID・利用状況・ファームが平文 HTTP（最新文書に対する形式の矛盾）。
+- **今の手詰まり**：取れた 5 台のファームは 4 台が暗号化／独自形式で、オフラインでは平文が直ったか判定できない（実機の収録が要る）。Triby だけ一部復元。Invoxia のサポート記事は未読（下の 4）。
+
+詳しい経緯は下の 3、判断待ちは下の 4。
+
 ## 1. 目的（2026-11-11 に利用者と確認）
 
 **企業の公式文書に書いてあることと、実際の通信が違うところを探す。** 通信を見て分かる範囲の食い違いなら、何でも対象にする。
@@ -81,9 +92,20 @@
 
 2026-11-23（2）：24 件を利用者の調査の手順（6 つの区分、最も限定的な読み方、収録時点の文書）でやり直した（[reinvestigation/README.md](reinvestigation/README.md)）。外付けディスクがないので、UNSW 2018（27 日）、YourThings（5 日）、Deakin（4 日）、Passive-Mode-Study、UNSW 2016（20 日）を Mac に取り直し、機器ごとに切り出した（`~/qlocal/`、`scripts/claims/fetch/fetchfilter.py`、`scripts/claims/sweep/profile.py`）。CIC、UNSW-IoTraffic、IoT-23 は取り直していない（利用者の判断）。明確な矛盾は Sonos と Canary、条件付きは SmartCam、SimCam、Eufy。
 
+2026-11-26：外付けディスクをつないだ。`~/qlocal/`（約13 GB）を HDD の `qlocal-20261123/` に同期（チェックサム差 0）して消した。2026-11-23 に取り直していなかった分を確かめ直した：CIC IoT 2022（8 台）、UNSW-IoTraffic（Awair・Hue・Triby・Canary・SmartCam）、IoT-23（Somfy）、YourThings 04-15 の全体（TP-Link 2 台）。判定はどれも変わらず。前回の記録の誤りを 2 つ直した：Hue の CIC の回数（4,760→246、1,017→682。項目の数を数えていた）、報告 15 の IoTraffic の根拠のファイル名（Belkin のファイル→SmartCam 自身のファイル）。新しく、TP-Link のプラグの LAN の応答に設置場所の緯度・経度（値は quarant-results）。切り出し＝`~/datasets/claims/recheck-20261126/`。
+
+2026-11-26（2）：問題のある機器の最新ファームが取れるか、更新の記録に修正の記載があるかを調べた（[reinvestigation/firmware-2026-11-26.md](reinvestigation/firmware-2026-11-26.md)）。取れたのは Hue・Sonos・HomePod・Triby・DCS-8300LH V2。修正の記載があったのは SmartCam の CVE-2018-6295 だけ（版番号なし）。Sonos・Triby・TP-Link・Govee は、機器が使ったファームの URL が今も平文 HTTP で取れる。
+
+2026-11-26（3）：取れたファームと最新の公式文書を照合した（[reinvestigation/firmware-vs-docs-2026-11-26.md](reinvestigation/firmware-vs-docs-2026-11-26.md)）。形式がはっきり食い違うのは Sonos だけ（2026-09 の声明「データは送信時に TLS で保護」に対し、シリアル・ID・利用状況・ファームが平文 HTTP）。候補：Triby のサポート記事「encrypted protocols」（未読）。Hue・HomePod・D-Link は、最新文書が送信の方式を明記していないので「宣言と違う形式」には当たらない。
+
+2026-11-27：取れた 5 台のファームを Ghidra／オフラインで踏み込んで解析（同ファイルの C 節）。暗号・署名は破っていない。Hue（.fw2 は `BSB002` ヘッダ＋高エントロピー）と D-Link V2（.bin 先頭 `Salted__`＝OpenSSL 暗号）は暗号化→復号せず。Triby（.pup）は暗号ではなく xz-squashfs だが、`.pup` が独自に分割（split）していて完全展開には容器の解析が要る→保留。xz ストリーム 884 個を個別に展開しルート FS の約 22 MB を復元＝PJSIP（TLS/SIPS 対応）・Alexa・`developer.invoxia.com`。ただし `sip.invoxia.com`・5228・`airable.io` は復元範囲になく、最新ファームで平文が続くかは未確認。結論は変わらず「確かめるには実機の収録が要る」。
+
 ## 4. 判断待ち（利用者が戻ったときにまとめて聞く）
 
 答えやすい形の一覧（おすすめつき）：[decisions-pending.md](decisions-pending.md)（2026-11-22）。
+
+- **Invoxia のサポート記事（未読）**：`https://support.invoxia.com/hc/en-150/articles/4405494832017--Data-Protection-and-Security` が「encrypted protocols」と書いているか確かめたい（書いてあれば Triby の平文 SIP/RTP と食い違う候補）。ライブは 403、Wayback と直接 curl はこのセッションの sandbox が拒否、ブラウザ拡張（Claude in Chrome）も未接続。読むには、拡張をつなぐ（claude.ai/chrome）か、利用者が本文を貼るか、Bash の許可ルールを足す。
+- **最新ファームで平文が直ったかの確定（未了）**：オフラインでは 4 台が暗号化／独自形式で判定不能。確定には最新ファームの実機の通信を取るか、Triby の `.pup` 容器を解いて完全展開＋Ghidra が要る。
 
 - Passive-Mode-Study（2026-11-22、[pms.md](pms.md)）：
   - データの利用条件が書かれていない（コードは GPL v3）。論文に使ってよいか、著者に聞くか。
