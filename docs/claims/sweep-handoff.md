@@ -8,6 +8,8 @@
 
 **強い 5 件の確かめ直し**（前の報告と判定を見ずに組み立て直した）：[reinvestigation/verify-20261127/README.md](reinvestigation/verify-20261127/README.md)。論文の中心に使えるのは **Sonos**（明確な矛盾、2018 と 2021）と **Canary の UNSW 2018**（明確な矛盾）。SimCam と Eufy は条件付きのまま。SmartCam は「記載なし」に、Canary の IoTraffic の分は「条件付き」に下げた。作業ファイルは外付けディスクの `~/datasets/claims/verify5-20261127/`、値は quarant-results の `claims/verify-20261127.md`。判断待ちは下の 4 の先頭。
 
+**その後直ったか**（Sonos と Canary、[reinvestigation/verify-20261127/fixes-sonos-canary.md](reinvestigation/verify-20261127/fixes-sonos-canary.md)）：Sonos は更新の確認と使用データは TLS になったが、ファームの取得は 2026-11 の更新でも平文（第三者の観測）。Canary は不明（公式の FAQ は 2025-10 も「すべて TLS」、時刻合わせのサーバーは今も平文に答える）。**次（2026-11-27、利用者の依頼）**：ファームウェアの本体がウェブで取れるか（場所、版、日付）と、パッチ・更新の履歴を、Chrome（Claude in Chrome、2026-11-27 から使える）と検索で調べる。解析とダウンロードはまだしない（ダウンロードは利用者に聞いてから）。作業ファイルは外付けディスクの `~/datasets/claims/verify5-20261127/fwhist/`。
+
 24 件の調べ直しは完了し、**利用者が読むまとめ**は [reinvestigation/README.md](reinvestigation/README.md)（結果の表と各報告）。その後の追加調査：
 
 - **外付けディスクで未確認だった分を確かめ直した**（2026-11-26）：CIC・UNSW-IoTraffic・IoT-23・YourThings 04-15。判定は変わらず。前回の記録の誤り（Hue の回数、報告 15 の根拠ファイル名）を直した。切り出し＝`~/datasets/claims/recheck-20261126/`。
