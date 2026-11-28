@@ -41,6 +41,15 @@
 
 要点：**SimCam と Sonos はファーム本体で裏が取れた**（どちらも直っていない）。eufy は公開実装＋論文で裏づけ（直っていない）。Samsung は「版で直さず EOL」。Hue と iRobot は弱め（公式文書が言い切っていない／保存時と読める）。どれも「実機の今の通信を 1 回取ると確定が盤石」。
 
+### 同じ会社の断定主張 × 複数機種（2026-11-28）
+
+6 件のうち「今も断定形の公式ポリシーを持ち、別機種のファームが取れる」会社について、製品ラインに広げた。
+
+- **Simshine（SimCam の会社）**（[fixes-simshine-family.md](fixes-simshine-family.md)）：公式サイトから **7 機種のファーム本体を取得・展開**（Alloy 1S、初代 SimCam、初代 Alloy、Baby、Baby Pro、Ango、Ango Pro。平文の標準フォーマットで、復号なし）。**少なくとも 6 機種で SimCam 1S と同一の作り**を確認：`luuka.fun` の送信先が全部平文 http、同じ AWS S3 バケット `elasticbeanstalk-us-east-2-793503604989` へ `public-read`、ファーム内蔵のハードコード AWS 鍵（値は非記載）、Aliyun OSS（simtoo）、TUTK/Kalay P2P。キーの書式も同設計（SimCam=`SimCam/<id>/…`、**Baby=`BabyCam/<id>/<種別>/<時刻>.jpg`＝ベビーモニターが赤ちゃんの画像を同じ公開読み取り S3 へ**）。送信先はどれもファーム固定。**2022 年版（Baby Pro、Ango Pro）も 2020 年版と同一＝時間でも直っていない**。Simshine の公式主張（SimCam FAQ「データに触れない／完全ローカル処理」、ベビーモニターの公式 PR「端末内でローカルに保存・処理／secured P2P」）と、製品ライン全体で体系的に食い違う。→ **「1 社の断定 × 製品ライン全体の矛盾」として束ねられる**（SimCam 単体より強い）。
+  - 残り：ドアベル 2 機種（Ango/Ango Pro）の rootfs は lzop/jffs2 で、環境にツールがなく完全展開は保留（バケット・AWS 鍵・TUTK は確認済み、public-read/http の literal は未展開＝未確認）。バケットの公開状態の実確認は全機種で未実施（条件(i) の成立で判定は足りる）。
+- **Hanwha（Samsung SmartCam の会社）**：会社・ウェブ全体のポリシーが今も「暗号化通信で送る」と断定。該当機種はデータセット内に 3 つ（SNH-V6410PN・SNH-P6410BN・Samsung Pan/Tilt）あり、どれも平文の `event.stw`（シリアル番号つき）を送っていた（報告 04・01・15）。ただし**ファームは配布終了で取得不可**。→「1 社ポリシー × 複数機種」は通信で束ねられるが、ファーム本体では裏取りできない。
+- **iRobot・Sonos**：iRobot は他機種もファーム取得不可（暗号化 OTA）。Sonos は他機種のファームも保管庫にあるが、共通のデーモン anacapad なので PLAY:1／One の 2 機種で既に製品横断を示せている。
+
 ## 前の記録と違うところ
 
 - **Canary 2016-17 を条件付きに下げた**：「All communication … is encrypted over TLS/SSL (HTTPS)」の FAQ は、2016-08-22 と 2018-08-18 の保存しかなく、収録の期間（2016-11〜2017-03）に載っていたか確かめられない。前は前後が同じ文なので有効とみなしていた。「当時も同じだったとは推定しない」の決まりに合わせた。
