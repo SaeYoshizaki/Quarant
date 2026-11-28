@@ -112,3 +112,17 @@
 - 今の Canary 機が平文 htpdate を今も送るか（2019 年以降の第三者の機器観測は無し。franken の機は lease を取れずクラウド未到達）。
 - 今の公式 FAQ 本文（live は 403。下敷きの Wayback 2025-10-18 保存に依拠）。
 - vfirmware.net（DNS 解決せず、未確認）。
+
+## 親による自分での APK 検証（9.3.0、2026-11-28）
+
+第三者解析に頼らず、**自分で APK を取得・展開して確かめた**。Claude in Chrome で APKMirror から bundle（`is.yranac.canary_9.3.0-205940_4arch`、`.apkm` 92.8 MB）を取得（`~/Downloads/`）→ base.apk（94 MB）を展開 → dex を `strings`、`network_security_config.xml` を apktool で復号。
+
+- **Canary 自身の送り先はすべて https**：dex 文字列は `https://api.canaryis.com`、`https://api.canaryis.com/o`、`https://api.canaryis.com/o/thirdparty/safetrek/redirect`、`https://canary.zendesk.com`。**canaryis.com への平文 http は 1 つも無い**。
+- dex 全体の scheme：`https://` 291、`http://` 86。ただし平文 http はすべて**第三者**：AppLovin（広告 SDK、`*.applovin.com`、`appl.vn`）、Snowplow（`iglucentral.com` のスキーマ）、XML 名前空間（`ns.adobe.com`、`dashif.org`）、`instagram.com/caughtbycanary`（会社の Instagram リンク）、`play.google.com` など。**Canary の機器・クラウド通信の平文は無い**（広告・解析の平文は FAQ の対象外だが、第三者トラッカーとして別途記録可）。
+- **時刻合わせ（htpdate / h.canaryis.com）はアプリに無い**：canaryis.com は `api.` だけ。→ 平文の時刻合わせは**機器（ファーム）側だけ**、を自分でも確認。
+- **証明書 pinning（訂正あり）**：`res/xml/network_security_config.xml` は **空**（`<network-security-config />`。宣言的 pinning・pin-set 無し）。ただし dex には OkHttp の `CertificatePinner`（45）・`setCertificatePinner`（3）・`HostnameVerifier`（47）の参照が**ある**。一方、ハードコードの `sha256/<base64>` の pin 文字列は**見つからない**。
+  - → **実効的な pinning は無い可能性が高い**（宣言的設定が空＋pin 文字列が無い）が、`setCertificatePinner` の呼び出し箇所を jadx で読まないと断定はできない（未検証）。
+  - 第三者報告の「CertificatePinner 無し」は不正確：**クラス・呼び出しの参照は存在する**。正しくは「network_security_config は空／ハードコードの pin 文字列は無い」。pinning 無しを所見にするなら、呼び出し箇所の逐語確認が要る。
+- ダウンロードした `.apkm` は `~/Downloads/`（92.8 MB、私が取得）と `dl-canary/`（展開物）にある。実行していない（unzip/strings/apktool のみ）。
+
+**結論（自己検証後）**：現行アプリ（9.3.0）は Canary の通信をすべて https で行い、平文の時刻合わせはアプリに無い＝**平文 htpdate は機器ファーム側だけ**（自己検証で確定）。pinning 無しは「宣言的設定が空・pin 文字列が無い」までで、断定には呼び出し箇所の確認が要る（保留）。
