@@ -123,3 +123,16 @@
 - **言えること**：バケットは今も存在し、**匿名の列挙（ListBucket）は許していない**。
 - **言えないこと**：個々の `public-read` オブジェクトが匿名で取れるか。403 vs 404 が見るのは ListBucket の権限で、オブジェクト単位の公開読み取り（GetObject の public-read）ではない。Block Public Access がオン（指定が無視される）でも、個々の public-read だけ有効で一覧だけ不可でも、同じ 403 になる。区別には実オブジェクトの取得が要り、privacy の線でしていない。AWS は 2023 以降、新規バケットで Block Public Access を既定オンにしているので、今は指定が無視されている可能性もある（推測）。
 - **残る判定**：条件(i)（バケット＝Simshine 側）は成立（ファーム・アプリ）。public-read の**指定**は確定（ファーム・アプリのコード）。public-read の**実効**は未検証（privacy）。「we never have access to your data」との食い違いは、送り先が会社のバケットである時点で成立し、画像の公開読み取りの実効の有無には依存しない。
+
+## 補足：解析したのは現行ファーム（V20200720 が今の最新）＋完全版 .pba（2026-11-28）
+
+「収録時と同じ V20200720 を見ただけで、今の版は見ていないのでは」という疑問に答えて確かめた。
+
+- **V20200720 は現行（＝最後の）最新ファーム**：
+  - 配布元 `https://www.simshine.ai/images/simcam1s/update.tgz`（と完全版 `update.tgz.pba`）の **Last-Modified は 2021-12-09**。サーバー上で約 5 年間更新されていない。
+  - SimCam 1S は 2020 年の製品で、アプリ（SimHome）は版を自前で持たず、サーバーの更新チェック（`getNewVersion`）から取得する作り（逆コンパイルで確認：`g/t/a/e/b0.java` ほか）。2021 年の収録でも `getNewVersion` は `1.20200720.tgz`（V20200720）を返していた。
+  - → 製品はその後 新しいファームを出していない。**解析した V20200720 ＝ 現行ファーム**。メモの「収録時と同じ版」は「新しい版が出ていない」の意味。
+- **完全版 `update.tgz.pba`（58 MB、平文 gzip、展開 約 80 MB）も展開**（`~/datasets/claims/verify5-20261127/fwhist/simcam-fw/pba/`）：
+  - 構成：`bst_release.bin`（ブート）、`bld_release.bin`（ブートローダ）、`cv25m_pinenut.dts.dtb`（デバイスツリー、Ambarella CV25）、`Image`（Linux カーネル 7 MB）、`ubifs`（root FS、UBI image 72 MB）。
+  - 食い違いに関わるデーモン `simcam_debug`（luuka.fun の平文 http、S3 バケット、public-read）は `/opt/app` パーティション＝すでに完全解析した `update.tgz`（app.tgz）側にある。完全版でも同じで、矛盾なし。ベース OS（カーネル・ブートローダ）は食い違いには無関係。
+  - UBIFS の完全展開には ubireader が要る（未インストール）。関係する部分はアプリ側で解析済みのため未展開。必要ならベース OS まで広げられる。
